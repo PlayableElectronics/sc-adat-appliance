@@ -1,66 +1,58 @@
 # Studer Dyaxis controller conversion
 
-This folder is the working dossier for converting the Dyaxis control surface
-into a useful modern MIDI/OSC/HID controller. The original hardware and ROMs
-must be treated as preservation material: photograph, label and dump before
-modifying or desoldering anything.
+This folder is the working dossier for preserving the Dyaxis control surface
+and adapting it as a modern MIDI/OSC/HID controller for the SuperCollider ADAT
+appliance. Original hardware, firmware, ROMs, programmable logic, connectors
+and harnesses are preservation material.
 
 ## Confirmed from the owner's unit
 
-The surface powers up and functions, but waits for the original computer
-software to answer. It has ADB ports, two RS-485 connections, a VFD, knobs,
-buttons, motorised sliders, a trackball and a keyboard. The owner reports three
-microcontroller boards. An RPi 400 is available as a dedicated lab computer.
+The surface powers up and operates when the original computer-side software
+responds; otherwise it waits for the host. It contains a VFD, knobs/encoders,
+buttons, motorised faders, trackball, keyboard and multiple intelligent boards.
+The rear panel has two serial ports described by the owner as RS-422; their
+transceivers, pinout and exact electrical implementation remain to be verified.
 
-This makes a staged protocol bridge realistic: the original electronics can be
-kept intact while an RPi/MCU/FPGA subsystem emulates the host and translates
-events to USB MIDI, OSC and HID.
+At least two boards use Philips P80C552-5 8051-family processors. The main edit
+panel CPU board also contains a Z85230-family dual serial controller and an
+XC3030-family FPGA. See `KNOWN_FACTS.md` and the photo findings for evidence
+and confidence levels.
 
-## Working hypothesis
+## Working ADB subsystem
 
-The surface is a Dyaxis II / MultiDesk-family controller rather than an audio
-processor. Period descriptions identify a dedicated edit controller with a
-transport section, scrub/shuttle wheel, edit buttons, a mixer panel, and a
-computer keyboard/trackball interface. A 1994 description reports eight
-faders arranged as two banks of four, four assignable knobs/shaft encoders,
-fourteen soft switches, transport controls, and a standard Kensington
-trackball connected through ADB. The QWERTY keyboard is also described as a
-standard ADB device connected to the Macintosh. These details are strong
-leads, but the exact unit variant still needs confirmation from photographs
-and PCB markings.
+The ADB keyboard and Kensington trackball already work through the current
+classic Arduino Nano-compatible ATmega328P/CH340 bridge running at 5 V and
+16 MHz. The bridge exposes an event stream through USB serial; the Linux
+translator creates standard keyboard and mouse devices with `uinput`.
+
+Keep this subsystem intact and portable. Its next deployment target is the
+Debian development system and, later, the read-only Buildroot appliance—not a
+specific Raspberry Pi host.
+
+Relevant files:
+
+- `arduino/ADBHostProbe/ADBHostProbe.ino`
+- `bridge/adb_mouse_bridge.py`
+- `bridge/dyaxis-adb-mouse.service`
+- `ADB_BRIDGE_STATUS.md`
+- `ADB_BRINGUP.md`
 
 ## Conversion target
 
-The safest architecture is a reversible inline replacement:
-
 1. Preserve the original controller electronics and connectors.
-2. Identify which board owns each input/output group.
-3. Add a new low-voltage controller (RP2040, STM32, FPGA or similar) on an
-   adapter harness, initially listening passively; use the RPi 400 for host
-   emulation, logging, configuration and OSC/network services.
-4. Translate controls to MIDI 2.0/1.0, OSC and optional USB HID.
-5. Add a configuration layer for DAW transport, faders, encoders, scrub,
-   keyboard shortcuts, mouse/trackball and custom OSC destinations.
+2. Preserve and analyse every socketed ROM before protocol experiments.
+3. Identify the roles and links of the intelligent boards.
+4. Passively inspect the external serial interfaces using proper differential
+   receivers.
+5. Emulate the original host protocol from Linux.
+6. Translate the complete surface bidirectionally to OSC, with optional
+   MIDI/HID compatibility.
+7. Map the eight faders as three banks across the 24 ADAT mixer channels and
+   use the remaining controls for routing, buses, monitoring, looping and
+   effects.
 
-Do not connect an unknown board to a modern USB or MIDI interface until power
-rails and signal levels are measured.
-
-## Immediate evidence needed from the owner
-
-- Front, rear, top and every PCB, photographed square-on with a ruler.
-- Exact model/serial/part numbers and all connector labels.
-- Both sides of every board, including silk-screen reference designators.
-- Close-ups of every microcontroller, ROM/EPROM, PAL/GAL, UART, oscillator,
-  connector driver and power regulator.
-- Cable photos before disconnecting anything; mark every cable and pin 1.
-- EPROM dumps with chip labels, device type, read voltage and programmer used.
-- Resistance-to-ground and powered rail measurements before probing signals.
-- Logic-analyser captures during power-up and while pressing one control at a
-  time, with the original controller connected if possible.
+The ADB USB-serial bridge is a proven independent subsystem. Main-surface
+RS-422 host emulation is a separate, unfinished layer.
 
 See `REVERSE_ENGINEERING_PLAN.md` for the staged procedure and
 `SOURCES.md` for the research trail.
-
-For the first practical subsystem test, see `ADB_BRINGUP.md`. The recommended
-split is a 5 V-safe MCU as the ADB host and the RPi 400 as the logger/translator;
-do not connect ADB DATA directly to Pi GPIO.

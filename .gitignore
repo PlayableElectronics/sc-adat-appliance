@@ -3,6 +3,8 @@
 /dl/
 /ccache/
 /hardware-baseline-*.txt
+__pycache__/
+*.py[cod]
 *.img
 *.iso
 *.squashfs

@@ -1,3 +1,0 @@
-#!/bin/sh
-# Patchbox JACK configuration for applications fixed at 44.1 kHz (Dronage).
-exec /usr/bin/jackd -t 2000 -R -P 95 -d alsa -d hw:ADAT -r 44100 -p 1024 -n 2 -X seq -s -S

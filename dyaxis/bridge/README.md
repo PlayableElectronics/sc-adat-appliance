@@ -1,47 +1,48 @@
-# Dyaxis ADB input bridge
+# Dyaxis ADB USB-serial input bridge
 
-This bridge turns the Kensington ADB trackball and keyboard connected to the
-Uno into normal Linux input devices on the dedicated `patchbox` Raspberry Pi.
+This bridge turns the Dyaxis ADB keyboard and Kensington trackball into normal
+Linux input devices. The current bridge is a classic Arduino Nano-compatible
+ATmega328P/CH340 board running at 5 V and 16 MHz. It polls the shared ADB bus
+and emits packets through USB serial. The Python translator reads that stream
+and creates Linux `uinput` keyboard and mouse devices.
 
-## Installed service
+Do not substitute a 3.3 V Nano or Nano Every without adapting the electrical
+interface and the firmware's AVR-specific assumptions.
 
-The service is installed and enabled as:
+This subsystem is independent of the unfinished Dyaxis main-surface/RS-422
+protocol work and must be preserved for the Debian development system and the
+eventual Buildroot appliance.
 
-```text
-dyaxis-adb-mouse.service
-```
+## Components
 
-It reads the Uno's `ADBHostProbe` stream on `/dev/ttyUSB0` and creates these
-uinput devices:
+- Arduino Nano firmware: `../arduino/ADBHostProbe/ADBHostProbe.ino`
+- Linux translator: `adb_mouse_bridge.py`
+- systemd unit: `dyaxis-adb-mouse.service`
+- Default serial device: `/dev/ttyUSB0`
+- Python dependencies: `pyserial` and `evdev`
+- Kernel facility: `uinput`
+
+The translator creates:
 
 ```text
 Studer Dyaxis Kensington ADB Trackball
 Studer Dyaxis ADB Keyboard
 ```
 
-It runs as root
-so it can open `/dev/uinput` on the stock Raspberry Pi OS image, and systemd
-restarts it if the USB serial adapter is unplugged or reset.
+The systemd service runs as root so it can open `/dev/uinput`, and restarts
+when the serial bridge is temporarily unavailable.
 
-Useful commands on `patchbox`:
+Useful checks:
 
 ```sh
 systemctl status dyaxis-adb-mouse
 journalctl -u dyaxis-adb-mouse -f
 ```
 
-The Uno polls the conventional ADB mouse address 3 and keyboard address 2.
-Keyboard register-0 events are decoded into Linux key events; Caps Lock,
-Num Lock, and Scroll Lock state is taken from Linux LED output events and sent
-back to keyboard register 2. On service startup the bridge seeds those LEDs
-from the Pi's existing input LED state, so a restart does not invent a new
-Caps Lock state. The dedicated controller startup policy forces Caps Lock off
-and Num Lock on, making the Apple numeric keypad produce digits immediately.
-The mouse remains a separate device, so keyboard and trackball can share the
-same ADB bus without changing the mouse path.
+The Nano polls conventional ADB keyboard address 2 and mouse/trackball address
+3. Keyboard register-0 events become Linux key events. Linux lock state is sent
+back to the keyboard LEDs. Trackball packets use active-low button bits and
+signed seven-bit relative axes.
 
-The packet interpretation follows the Linux ADB HID driver: button bits are
-active-low, and the two seven-bit signed values are the X/Y relative motion.
-
-For the complete tested state, wiring, flash procedure, resolved bugs and next
-checks, see `../ADB_BRIDGE_STATUS.md`.
+For tested wiring, protocol details, flashing procedure and the historical
+Patchbox deployment state, see `../ADB_BRIDGE_STATUS.md`.

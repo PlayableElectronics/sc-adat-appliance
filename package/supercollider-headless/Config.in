@@ -1,0 +1,8 @@
+config BR2_PACKAGE_SUPERCOLLIDER_HEADLESS
+	bool "supercollider-headless"
+	depends on BR2_INSTALL_LIBSTDCPP
+	help
+	  Headless SuperCollider components for the ADAT appliance.
+
+	  This package is intentionally not selectable until its version,
+	  dependencies, build options, and hashes have been validated.

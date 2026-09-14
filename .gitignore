@@ -1,0 +1,9 @@
+/.buildroot/
+/output/
+/dl/
+/ccache/
+/hardware-baseline-*.txt
+*.img
+*.iso
+*.squashfs
+*.wav

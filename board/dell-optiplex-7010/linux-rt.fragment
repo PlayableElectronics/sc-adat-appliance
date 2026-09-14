@@ -1,0 +1,15 @@
+# Hardware-independent real-time and audio requirements.
+# Validate every resulting symbol with scripts/check-rt-capabilities.
+CONFIG_PREEMPT_RT=y
+CONFIG_HZ_1000=y
+CONFIG_HIGH_RES_TIMERS=y
+CONFIG_SOUND=y
+CONFIG_SND=y
+CONFIG_SND_PCM=y
+CONFIG_SND_RME9652=y
+CONFIG_PROC_FS=y
+CONFIG_SYSFS=y
+CONFIG_TMPFS=y
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_INET=y

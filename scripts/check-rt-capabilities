@@ -1,0 +1,39 @@
+#!/bin/sh
+set -eu
+failures=0
+
+check_config() {
+    symbol=$1
+    expected=$2
+    if test -r /proc/config.gz; then
+        value=$(zcat /proc/config.gz 2>/dev/null | sed -n "s/^$symbol=//p" | head -n 1)
+    elif test -r "/boot/config-$(uname -r)"; then
+        value=$(sed -n "s/^$symbol=//p" "/boot/config-$(uname -r)" | head -n 1)
+    else
+        printf 'UNKNOWN %-30s kernel configuration unavailable\n' "$symbol"
+        return
+    fi
+    if test "$value" = "$expected"; then
+        printf 'OK      %-30s %s\n' "$symbol" "$value"
+    else
+        printf 'FAIL    %-30s expected %s, got %s\n' "$symbol" "$expected" "$value"
+        failures=$((failures + 1))
+    fi
+}
+
+printf 'kernel=%s\n' "$(uname -r)"
+test ! -r /sys/kernel/realtime || printf 'sysfs_realtime=%s\n' "$(cat /sys/kernel/realtime)"
+check_config CONFIG_PREEMPT_RT y
+check_config CONFIG_HZ_1000 y
+check_config CONFIG_HIGH_RES_TIMERS y
+check_config CONFIG_SND_RME9652 y
+
+for tool in chrt cyclictest; do
+    if command -v "$tool" >/dev/null 2>&1; then
+        printf 'OK      %-30s available\n' "$tool"
+    else
+        printf 'UNKNOWN %-30s unavailable\n' "$tool"
+    fi
+done
+
+test "$failures" -eq 0

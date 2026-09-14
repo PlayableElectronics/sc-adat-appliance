@@ -6,8 +6,8 @@
 - Make a board map: board name, assembly/revision, CPU, ROMs, PALs, FPGA,
   clocks and connectors.
 - Label both ends of every ribbon cable before disconnecting anything.
-- Record which boards are connected to ADB, RS-485, VFD, faders, keyboard and
-  trackball.
+- Record which boards are connected to ADB, RS-422, NETWORK, VFD, faders,
+  keyboard and trackball.
 - Keep the original photos and notes immutable; work from copies.
 
 ## Identify devices without removing them
@@ -26,7 +26,8 @@
   XC3030 using a multimeter continuity function.
 - Identify shared buses and chip-select lines; do not inject signals.
 - Find ground and +5 V pins from board planes and connector wiring.
-- Identify RS-485 transceiver ICs and trace their A/B pairs to connectors.
+- Identify RS-422 transceiver ICs and trace their differential pairs to SERIAL 1/2.
+- Trace the NETWORK connector separately; do not assume Ethernet from its shape.
 - Check for termination resistors and selectable bias networks.
 
 ## Passive powered measurements
@@ -45,8 +46,8 @@
 
 - A CSV table of connector pin number, wire colour, destination and observed
   idle voltage.
-- A signal glossary: `CPU board`, `fader board`, `FPGA board`, `ADB`, `RS485-A`,
-  `RS485-B`, `VFD`, `MOTOR`, `KEYBOARD`, `TRACKBALL`.
+- A signal glossary: `CPU board`, `fader board`, `FPGA board`, `ADB`, `RS422-SERIAL-1`,
+  `RS422-SERIAL-2`, `NETWORK`, `VFD`, `MOTOR`, `KEYBOARD`, `TRACKBALL`.
 - Logic-analyser files with sample rate, voltage threshold, probe location and
   exact physical action recorded in the filename.
 - A power-up video showing the VFD, LEDs and motor-fader behaviour.
@@ -54,7 +55,7 @@
 ## Do not do yet
 
 - Do not remove or rewrite an EPROM/PAL.
-- Do not connect the RPi 400 GPIO directly to ADB, RS-485 or the ROM bus.
+- Do not connect the RPi 400 GPIO directly to ADB, RS-422, NETWORK or the ROM bus.
 - Do not unplug boards while powered.
 - Do not assume the two ROMs are interchangeable or that either one is the
   FPGA bitstream source.

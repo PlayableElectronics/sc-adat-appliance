@@ -8,10 +8,12 @@
 | The reviewed surface has four assignable knobs/shaft encoders and fourteen soft switches. | High for the reviewed MultiMix variant | Mix 1994 |
 | A Kensington trackball and QWERTY keyboard use ADB in the described system. | High for the reviewed MultiMix variant | Mix 1994 |
 | The user's surface operates normally when its computer host software responds. | High | User test |
-| The user's surface has ADB ports and two RS-485 connections. | High | User inspection |
+| The rear panel has two ADB ports, two ports explicitly labelled `(RS422) SERIAL 1/2`, a `METER POWER +5V (2A MAX.)` connector and a separate `NETWORK` connector. | High | Rear-panel photo 2865 |
 | The surface includes a VFD, knobs, buttons, motorised faders, trackball and keyboard. | High | User inspection |
-| The user's exact surface contains three MCU boards. | User observation; board roles not independently verified | Awaiting photographs |
-| An RPi 400 is available for this project. | High | Existing lab inventory/context |
+| The user's exact surface contains three MCU boards. | User observation; individual photographed boards support a distributed-controller design | Photos 2665-2699 |
+| The working ADB keyboard/trackball bridge uses a classic Arduino Nano-compatible ATmega328P/CH340 at 5 V and 16 MHz, connected by USB serial to Linux. | High | Working implementation and capture |
+| The connector board is labelled Studer Editech Multi-Desk I/O Panel, assembly 41.005.440.20. | High | Photos 2867, 2868 |
+| The function and electrical protocol of the separately labelled NETWORK port are unknown; Ethernet is not yet established. | High that the port exists; protocol unknown | Photos 2865-2868 |
 | Main board is labelled Dyaxis II Console Edit Panel CPU Board, assembly 41.005.430.01, Aug 1993. | High | Photo 2676 |
 | At least two boards use Philips P80C552-5 8051-family MCUs. | High | Photos 2671, 2676 |
 | Multiple boards share the same P80C552 CPU family and socketed program EPROMs. | High | New close-ups; user confirmation |

@@ -15,9 +15,13 @@
    bench supply where practical.
 3. Determine whether the three boards share a backplane bus or use point-to-
    point serial links.
-4. Look first for ADB electrical levels, RS-422 line drivers, UARTs, and
-   multiplexed switch/fader scanning. Do not assume every DB connector is
-   RS-422.
+4. Trace the two ports explicitly labelled RS-422 to their line drivers and
+   the Z85230-family serial controller where applicable.
+5. Trace the separately labelled NETWORK connector independently. Identify its
+   interface chips, magnetics/filters, pinout and signalling before calling it
+   Ethernet or attaching modern network equipment.
+6. Establish which external interface carried the original host protocol and
+   which ports were intended for external machine control.
 
 ## Phase 2 — firmware preservation
 
@@ -31,7 +35,8 @@
 ## Phase 3 — passive protocol capture
 
 1. Capture boot traffic with the original host/controller arrangement if the
-   unit can still be operated safely.
+   unit can still be operated safely, covering NETWORK and both RS-422 ports
+   with electrically appropriate passive receivers.
 2. Trigger on one button, encoder, fader, jog movement and LED/display event
    at a time.
 3. Capture both directions: controller-to-host input and host-to-controller
@@ -55,6 +60,7 @@ first target:
 
 - Never write to an original EPROM.
 - Use a current-limited supply during first power tests.
-- Use differential probes or proper RS-422 receivers for balanced serial lines.
+- Use differential probes or proper RS-422 receivers for the labelled serial lines.
+- Treat NETWORK as an unknown interface until its circuitry is identified.
 - Keep a raw, immutable dump and a lab notebook entry for every experiment.
 - Preserve original harnesses and make adapter cables with keyed labels.

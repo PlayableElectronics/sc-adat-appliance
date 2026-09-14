@@ -3,7 +3,8 @@
 The photo set currently includes `photo/2665.jpg` through `photo/2676.jpg` and
 new close-ups `photo/2684.jpg` through `photo/2699.jpg`.
 
-`photo/2677.jpg` is a close-up of the FPGA.
+`photo/2677.jpg` is a close-up of the FPGA. Rear-I/O photographs are stored as
+`photo/io/2865.jpg`, `2867.jpg`, and `2868.jpg`.
 
 ## High-confidence identifications
 
@@ -66,10 +67,10 @@ new close-ups `photo/2684.jpg` through `photo/2699.jpg`.
 2. Treat every P80C552 board as an independent intelligent node until the
    inter-board bus is mapped.
 3. Investigate the Z85230 section as a possible dual-channel serial link,
-   without assuming it is RS-485 until the line drivers are identified.
+   while correlating it with the two rear ports explicitly labelled RS-422.
 4. Use the 12 MHz and 3.672 MHz clocks as capture/disassembly timing clues.
 5. Photograph the connector pin fields and trace the CPU-board J1/J2 signals
-   to the ADB/RS-485 connectors.
+   to the ADB, RS-422 and NETWORK connectors.
 6. Photograph the main-board FPGA square-on and record its complete marking,
    package and any nearby configuration PROM or clock.
 
@@ -82,3 +83,22 @@ new close-ups `photo/2684.jpg` through `photo/2699.jpg`.
   address decoding or FPGA/CPU glue logic.
 - These parts form a likely FPGA configuration/boot cluster, but the exact
   ROM-to-FPGA relationship remains to be established by tracing and capture.
+
+## Rear I/O and connector-board findings — 2026-09-14
+
+- `photo/io/2865.jpg` clearly shows two 4-pin ADB connectors, a connector
+  labelled `METER POWER +5V (2A MAX.)`, two circular connectors explicitly
+  labelled `(RS422) SERIAL 1` and `(RS422) SERIAL 2`, and a separate
+  connector labelled `NETWORK`.
+- `photo/io/2867.jpg` identifies the PCB as **STUDER EDITECH MULTI-DESK I/O
+  PANEL**, assembly **41.005.440.20**, made in the USA.
+- `photo/io/2867.jpg` and `2868.jpg` show Dale
+  `MDRC-1600-500G` resistor/capacitor termination networks, Tokin modules,
+  the meter-power fuse and the rear connectors.
+- The NETWORK connector is physically confirmed, but its electrical standard
+  and protocol are not. Do not describe it as Ethernet until the connected
+  controller circuitry and pinout establish that.
+- The two labelled RS-422 ports may be machine-control ports rather than the
+  main host link. The original host path could instead use NETWORK. This is a
+  hypothesis to test through continuity mapping, firmware analysis and passive
+  capture.

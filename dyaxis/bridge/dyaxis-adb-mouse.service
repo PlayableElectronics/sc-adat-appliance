@@ -1,0 +1,15 @@
+[Unit]
+Description=Studer Dyaxis ADB trackball to Linux mouse bridge
+After=dev-ttyUSB0.device
+Wants=dev-ttyUSB0.device
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/sbin/dyaxis-adb-mouse.py
+Restart=always
+RestartSec=2
+User=root
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

@@ -15,11 +15,10 @@ Build and control it from the repository root:
 ./scripts/sc-audio stop
 ```
 
-The default fallback is JACK non-realtime mode with memory locking disabled
-because this host currently returns `ENOMEM` from `mlock(2)` even for root.
-The Compose file still carries `IPC_LOCK`, `SYS_NICE`, realtime ulimits, and a
-256 MiB `/dev/shm`. After the host execution policy permits memory locking,
-run with `JACK_REALTIME=1` to exercise JACK realtime mode.
+Realtime JACK is the default. The Compose file carries `IPC_LOCK`, `SYS_NICE`,
+unlimited memlock, `rtprio=95`, and a 256 MiB `/dev/shm`. For a deliberate
+diagnostic comparison, run with `JACK_REALTIME=0`; this is not the validated
+audio mode.
 
 The image uses a digest-pinned Debian 13 base and the Debian packages
 `jackd2`, `jack-example-tools`, `supercollider-server`, `alsa-utils`, and

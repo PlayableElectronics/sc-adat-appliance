@@ -20,7 +20,7 @@ services:
       memlock: -1
     environment:
       JACK_NO_AUDIO_RESERVATION: "1"
-      # The current host denies mlock(2) even to root. Set to 1 after the
-      # host's outer execution policy permits memory locking.
-      JACK_REALTIME: "${JACK_REALTIME:-0}"
+      # Realtime is the verified default. Set JACK_REALTIME=0 for a deliberate
+      # non-realtime diagnostic run without changing the Compose file.
+      JACK_REALTIME: "${JACK_REALTIME:-1}"
     stop_grace_period: 5s

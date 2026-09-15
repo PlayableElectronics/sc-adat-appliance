@@ -1,0 +1,26 @@
+services:
+  sc-audio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sc-adat-sc-development:debian13
+    container_name: sc-adat-sc-audio
+    init: true
+    network_mode: host
+    shm_size: 256m
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - "${AUDIO_GID:-29}"
+    cap_add:
+      - IPC_LOCK
+      - SYS_NICE
+    ulimits:
+      rtprio: 95
+      memlock: -1
+    environment:
+      JACK_NO_AUDIO_RESERVATION: "1"
+      # The current host denies mlock(2) even to root. Set to 1 after the
+      # host's outer execution policy permits memory locking.
+      JACK_REALTIME: "${JACK_REALTIME:-0}"
+    stop_grace_period: 5s

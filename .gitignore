@@ -9,3 +9,4 @@ __pycache__/
 *.iso
 *.squashfs
 *.wav
+.local/sc-audio-reports/

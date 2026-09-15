@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+
+case "${1:-}" in
+  build)  exec sh -c "$COMPOSE build" ;;
+  start)  exec sh -c "$COMPOSE up -d" ;;
+  stop)   exec sh -c "$COMPOSE down" ;;
+  status) exec sh -c "$COMPOSE ps" ;;
+  logs)   exec sh -c "$COMPOSE exec -T sc-audio sh -c 'cat /var/log/jack.log; printf \"--- scsynth ---\\n\"; cat /var/log/scsynth.log'" ;;
+  shell)  exec sh -c "$COMPOSE exec sc-audio sh" ;;
+  test)   exec "$ROOT/scripts/test-sc-audio" ;;
+  *)
+    echo "usage: $0 {build|start|stop|status|logs|shell|test}" >&2
+    exit 2
+    ;;
+esac

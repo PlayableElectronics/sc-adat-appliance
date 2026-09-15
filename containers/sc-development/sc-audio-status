@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+printf '%s\n' '--- processes ---'
+ps -eo pid,ppid,cls,rtprio,pri,ni,stat,comm,args | grep -E '[j]ackd|[s]csynth' || true
+printf '%s\n' '--- JACK status ---'
+jack_lsp -p
+printf '%s\n' '--- JACK xrun/error lines ---'
+grep -iE 'xrun|error|fail' /var/log/jack.log /var/log/scsynth.log || true

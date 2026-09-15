@@ -1,0 +1,53 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+REPORT_DIR="${SC_AUDIO_REPORT_DIR:-$ROOT/.local/sc-audio-reports}"
+mkdir -p "$REPORT_DIR"
+report="$REPORT_DIR/$(date -u +%Y%m%dT%H%M%SZ)-idle.txt"
+exec >"$report" 2>&1
+
+echo "SC audio idle validation: $(date -u --iso-8601=seconds)"
+echo '--- host identity ---'
+uname -a
+grep -E 'snd_rme9652|Digi9652|02:02.0' /proc/interrupts /proc/asound/cards /proc/asound/card*/id 2>/dev/null || true
+grep -E 'snd_rme9652|02:02.0' /proc/interrupts /proc/irq/*/smp_affinity_list 2>/dev/null || true
+
+echo '--- compose state ---'
+sh -c "$COMPOSE ps"
+echo '--- initial container status ---'
+sh -c "$COMPOSE exec -T sc-audio /usr/local/bin/sc-audio-status"
+
+echo '--- 60-second silent idle test ---'
+xruns_before=$(sh -c "$COMPOSE exec -T sc-audio sh -c 'grep -ciE \"xrun|process error\" /var/log/jack.log || true'")
+echo "xruns_before=$xruns_before"
+start=$(date +%s)
+sleep 60
+end=$(date +%s)
+echo "elapsed_seconds=$((end-start))"
+
+echo '--- final container status ---'
+sh -c "$COMPOSE ps"
+sh -c "$COMPOSE exec -T sc-audio /usr/local/bin/sc-audio-status"
+echo '--- logs ---'
+sh -c "$COMPOSE logs --no-color"
+
+test "$((end-start))" -ge 60
+sh -c "$COMPOSE exec -T sc-audio sh -c 'test -n \"\$(pgrep -xo jackd)\" && test -n \"\$(pgrep -xo scsynth)\"'"
+xruns_after=$(sh -c "$COMPOSE exec -T sc-audio sh -c 'grep -ciE \"xrun|process error\" /var/log/jack.log || true'")
+echo "xruns_after=$xruns_after"
+test "$xruns_after" -eq "$xruns_before"
+if sh -c "$COMPOSE exec -T sc-audio sh -c 'grep -iE \"error|fail\" /var/log/scsynth.log'"; then
+  echo 'scsynth log contains an error' >&2
+  exit 1
+fi
+ports=$(sh -c "$COMPOSE exec -T sc-audio jack_lsp")
+capture_count=$(printf '%s\n' "$ports" | grep -c '^system:capture_[0-9][0-9]*$' || true)
+playback_count=$(printf '%s\n' "$ports" | grep -c '^system:playback_[0-9][0-9]*$' || true)
+sc_count=$(printf '%s\n' "$ports" | grep -c '^jack:\(in\|out\)_[0-9][0-9]*$' || true)
+echo "capture_ports=$capture_count playback_ports=$playback_count scsynth_ports=$sc_count"
+test "$capture_count" -eq 26
+test "$playback_count" -eq 26
+test "$sc_count" -eq 52
+echo "PASS report=$report"

@@ -116,28 +116,33 @@ Initial validation target:
 
 Normal writable installation used for:
 
-- Codex;
-- Git and repository work;
-- native SuperCollider development;
-- Buildroot builds;
-- hardware inspection;
+- Codex and Git;
+- Docker Engine and container orchestration;
+- hardware inspection and direct-device diagnostics;
 - latency and DSP benchmarking;
 - GRUB management;
 - appliance deployment and recovery.
 
-Debian does not need to be read-only.
+Compiler suites, MCU/FPGA SDKs and Buildroot host dependencies belong in
+purpose-built containers. Native binaries may be staged on Debian for direct
+DIGI9652 or USB validation, but Debian is not the authoritative release build
+environment and does not need to be read-only.
 
 ### Buildroot appliance
 
-Minimal read-only performance system containing only the validated components
-needed for networking, remote administration, the RME card, SuperCollider, and
-supervision.
+Minimal read-only performance system produced in full by the authoritative
+Buildroot container. It contains only the validated components needed for
+networking, remote administration, the RME card, SuperCollider, Dyaxis control
+and supervision. GRUB boots it natively; Docker is neither installed nor
+running in the appliance.
 
 Do not include a graphical desktop, Qt IDE, PipeWire, PulseAudio, Bluetooth, or
 Wi-Fi unless a later measured requirement justifies one.
 
-Use tmpfs for transient writes. Persistent configuration, SynthDefs, and
-approved recordings belong on a separate data filesystem.
+The intended root runs primarily from RAM using a validated initramfs and/or
+copied read-only SquashFS design. Use tmpfs for transient writes. Persistent
+configuration, calibration, SynthDefs, loops and approved recordings belong on
+the separate data filesystem.
 
 ## Boot and storage plan
 
@@ -201,9 +206,11 @@ Debian and keep the performance image minimal.
    facts.
 7. Confirm `snd-rme9652`, ALSA devices, clock state, and every ADAT bank.
 8. Establish Debian audio and latency baselines at 48 kHz/128 samples.
-9. Test native headless SuperCollider.
-10. Only then pin Buildroot, Linux, and SuperCollider versions and complete the
-    Buildroot package.
+9. Validate a headless SuperCollider build and direct DIGI9652 operation.
+10. Establish the container mount/output contract and build the pinned
+    Buildroot builder image.
+11. Use that container to build the complete RAM-root appliance release.
+12. Only then deploy a candidate to an inactive slot and add its GRUB test entry.
 
 ## Current unknowns
 

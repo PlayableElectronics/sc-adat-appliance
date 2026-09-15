@@ -5,9 +5,10 @@ with an original RME DIGI9652 (Project Hammerfall) PCI interface.
 
 ## Goal
 
-Use a writable Debian installation for development, hardware validation, Codex,
-Git, and Buildroot builds. Boot a separate immutable Buildroot system for
-low-latency performance.
+Use writable Debian as a lean development, diagnostic and recovery host. Docker
+provides reproducible toolchains; its authoritative Buildroot container builds
+the complete SuperCollider appliance OS. GRUB boots that immutable system
+natively for low-latency performance, primarily from RAM.
 
 The appliance is controlled over wired Ethernet using OSC, initially from a
 monome norns. Audio is carried by the DIGI9652 over up to three ADAT banks.
@@ -47,6 +48,7 @@ recovery testing.
 
 ## Repository layout
 
+- `containers/` — pinned build environments; Buildroot is the release factory
 - `board/dell-optiplex-7010/` — board configuration and root filesystem overlay
 - `package/supercollider-headless/` — Buildroot package integration
 - `configs/` — reproducible Buildroot defconfigs
@@ -54,8 +56,10 @@ recovery testing.
 - `scripts/` — build, deployment, hardware, audio, and latency tooling
 - `docs/` — architecture, storage, routing, deployment, and measurements
 
-Buildroot itself is not vendored. A supported release will be pinned after the
-host baseline is captured and the SuperCollider dependency set is validated.
+Buildroot itself is not vendored. A supported release and its Docker builder
+will be pinned after the host baseline is captured and the SuperCollider
+dependency set is validated. Docker is a Debian build-time facility only; the
+appliance image contains no Docker daemon.
 
 ## Safety rules
 

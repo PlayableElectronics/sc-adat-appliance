@@ -75,24 +75,52 @@ pinned Buildroot container
 versioned release bundle in /artifacts
     |
     v
-host-side validation and checksum verification
+fast Debian staging against real audio hardware
     |
     v
-inactive appliance slot + GRUB entry
+one-shot GRUB boot of exact candidate bundle from Debian storage
     |
     v
-test boot, audio validation, promotion to known-good
+inactive appliance slot deployment
+    |
+    v
+slot boot, audio validation, promotion to known-good
 ```
 
 The release bundle should contain the kernel, RAM-root image, optional
 read-only rootfs, manifest, checksums and a generated GRUB entry fragment.
 Building an artifact never grants permission to deploy it.
 
+## Pre-release execution
+
+A release must be runnable before it is written to an appliance slot.
+
+### Fast Debian staging
+
+Run the freshly built scsynth/supernova, plugins and control code against the
+real DIGI9652 from a versioned staging directory. This is for rapid iteration
+and validates userspace behaviour with the hardware. It uses the Debian kernel
+and libraries unless an isolated target-root runner is implemented, so it
+cannot validate the final kernel or complete root filesystem.
+
+### Exact candidate boot
+
+Create a temporary, non-default GRUB entry that loads the exact candidate
+kernel and initramfs/RAM-root bundle from ordinary files on the Debian
+filesystem or boot filesystem. This executes the same immutable release that
+would be deployed to slot A or B, while leaving both slots untouched.
+
+A successful candidate boot must demonstrate that the root is RAM-backed or
+read-only as designed, the data partition is mounted deliberately, the RME
+driver and clocking work, scsynth starts, and Debian remains recoverable.
+Deployment must reuse the already-tested bundle and verify matching hashes.
+
 ## Boot model
 
 GRUB provides:
 
 - Debian development/recovery;
+- SC-ADAT candidate (temporary, non-default, from Debian files);
 - SC-ADAT slot A;
 - SC-ADAT slot B.
 
@@ -111,8 +139,11 @@ partition table, firmware boot mode and current installation.
 4. Baseline latency and xrun measurements recorded.
 5. Headless SuperCollider build validated.
 6. Buildroot container produces the release reproducibly.
-7. Release manifest and checksums match the deployed candidate.
-8. Candidate boots without altering Debian or the known-good slot.
+7. Userspace passes fast Debian staging against the DIGI9652.
+8. Exact candidate bundle boots through a temporary non-default GRUB entry
+   without writing either appliance slot.
 9. Candidate runs from the intended read-only/RAM-backed root.
 10. Candidate passes audio, control, Dyaxis and recovery tests.
-11. Only then may it be promoted or selected by default.
+11. Release manifest and hashes still match before inactive-slot deployment.
+12. The deployed slot reproduces the candidate result.
+13. Only then may it be promoted or selected by default.

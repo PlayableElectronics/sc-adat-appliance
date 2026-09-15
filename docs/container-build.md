@@ -64,6 +64,15 @@ For quick hardware experiments, Debian may execute a staged native binary
 against ALSA. Record that binary's provenance. Success there is a development
 gate, not proof that the Buildroot image works.
 
+Before any A/B slot write, stage the complete bundle as ordinary files on
+Debian and generate a temporary, non-default GRUB entry. Booting that entry
+must load the exact Buildroot kernel and RAM-root image. This is the release
+gate that tests the final OS without “burning” it into a slot.
+
+The staged userspace and GRUB candidate must carry the release ID and hashes
+from the same manifest. Never rebuild between candidate validation and slot
+deployment; deploy the exact tested bytes.
+
 ## Deployment boundary
 
 The container never writes partitions or edits the live GRUB configuration.
@@ -72,10 +81,12 @@ Host-side deployment tooling must:
 1. resolve the active root, candidate slot and known-good slot;
 2. display devices, filesystems and UUIDs;
 3. verify the release manifest and checksums;
-4. require explicit user approval before destructive writes;
-5. write only the inactive slot;
-6. add or update a non-default GRUB test entry;
-7. retain a working Debian and known-good boot path.
+4. provide a non-destructive temporary candidate-boot operation;
+5. verify that the exact bundle passed candidate-boot tests;
+6. require explicit user approval before destructive writes;
+7. write only the inactive slot;
+8. add or update a non-default GRUB slot entry;
+9. retain a working Debian and known-good boot path.
 
 ## Version policy
 

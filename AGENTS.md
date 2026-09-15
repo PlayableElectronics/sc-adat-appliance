@@ -18,6 +18,14 @@ Work toward a reproducible, measured audio appliance.
 - Do not install a compiler or project toolchain directly on Debian when it
   belongs in a project container. Host packages are limited to Docker, Git,
   Codex, GRUB/storage tools, hardware diagnostics and deployment necessities.
+- Before writing an appliance slot, support two pre-release gates:
+  1. a fast Debian staging run of the produced scsynth/plugins against the real
+     DIGI9652;
+  2. a one-shot GRUB boot of the exact candidate kernel and RAM-root bundle
+     directly from files stored on Debian.
+- The one-shot candidate entry must not become the default and must not require
+  writing either appliance slot. Passing Debian staging does not substitute for
+  passing the exact candidate boot.
 - Hardware validation may run a staged native binary on Debian when direct
   access to the DIGI9652, real-time scheduling or USB devices is required.
   That exception does not make Debian the release environment.

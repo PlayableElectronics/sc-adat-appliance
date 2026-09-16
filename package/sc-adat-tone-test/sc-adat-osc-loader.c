@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 static unsigned char *cursor; static size_t remaining;
+static const char validate_types[] = ",siiisfsf";
 static void put32(uint32_t v) { if (remaining < 4) exit(2); *cursor++=v>>24; *cursor++=v>>16; *cursor++=v>>8; *cursor++=v; remaining-=4; }
 static void oscstr(const char *s) { size_t n=strlen(s), z=(n+4)&~3; if (remaining<z) exit(2); memcpy(cursor,s,n); memset(cursor+n,0,z-n); cursor+=z; remaining-=z; }
 static void oscint(int32_t v) { put32((uint32_t)v); }
@@ -41,6 +42,12 @@ static int send_wait(int fd, struct sockaddr_in *target, unsigned char *msg, siz
 static int send_only(int fd, struct sockaddr_in *target, unsigned char *msg, size_t n) {
   return sendto(fd,msg,n,0,(struct sockaddr *)target,sizeof *target)==(ssize_t)n ? 0 : 1;
 }
+static void dump_packet(const unsigned char *msg, size_t n) {
+  const char *path=getenv("SC_ADAT_OSC_DUMP");
+  if (!path) return;
+  FILE *f=fopen(path,"wb"); if (!f) return;
+  (void)fwrite(msg,1,n,f); fclose(f);
+}
 static int load_one(int fd, struct sockaddr_in *target, const char *path) {
   FILE *f=fopen(path,"rb"); unsigned char data[131072], msg[140000]; size_t n, pos;
   if (!f) return 1; n=fread(data,1,sizeof data,f); int bad=ferror(f); fclose(f); if (!n || bad) return 1;
@@ -56,9 +63,9 @@ int main(int argc, char **argv) {
   else if (!strcmp(argv[1],"sync")) { rc=send_sync(fd,&target); if (!rc) puts("/synced"); }
   else if (!strcmp(argv[1],"validate")) {
     unsigned char msg[256]; const char *args[]={"sc_adat_tone24","19000","0","0","level","-120","gate","1"};
-    packet(msg,sizeof msg,"/s_new",",siiisfsf");
-    for (int i=0; i<8; i++) { char t=",siiisfsi"[i+1]; if(t=='s') oscstr(args[i]); else if(t=='i') oscint(atoi(args[i])); else { uint32_t bits; float v=(float)atof(args[i]); memcpy(&bits,&v,4); put32(bits); } }
-    size_t n=(size_t)(cursor-msg); rc=send_only(fd,&target,msg,n); if (!rc) rc=send_sync(fd,&target); if (!rc) { packet(msg,sizeof msg,"/n_free",",i"); oscint(19000); n=(size_t)(cursor-msg); rc=send_only(fd,&target,msg,n); } if (!rc) puts("VALID");
+    packet(msg,sizeof msg,"/s_new",validate_types);
+    for (int i=0; i<8; i++) { char t=validate_types[i+1]; if(t=='s') oscstr(args[i]); else if(t=='i') oscint(atoi(args[i])); else { uint32_t bits; float v=(float)atof(args[i]); memcpy(&bits,&v,4); put32(bits); } }
+    size_t n=(size_t)(cursor-msg); dump_packet(msg,n); rc=send_only(fd,&target,msg,n); if (!rc) rc=send_sync(fd,&target); if (!rc) { packet(msg,sizeof msg,"/n_free",",i"); oscint(19000); n=(size_t)(cursor-msg); rc=send_only(fd,&target,msg,n); } if (!rc) puts("VALID");
   }
   else if (!strcmp(argv[1],"activate")) { rc=send_sync(fd,&target); if (!rc) puts("ACTIVATED"); }
   else rc=2;

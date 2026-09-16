@@ -18,6 +18,14 @@ Connect three known-good optical cables from DIGI9652 ADAT outputs 1–3 to
 three powered, clock-compatible optical receivers. Do not connect or monitor
 the S/PDIF outputs 25–26 for this test.
 
+Hardware inventory and historical acceptance evidence: this installed original
+DIGI9652 has its main bracket only. JACK/ALSA 1–8 (ADAT1) were audibly
+confirmed PASS, and 9–16 (ADAT2) were audibly confirmed PASS. The separate
+ADAT3 expansion bracket is not installed, so 17–24 are supported by the card
+and driver and are software-path tested only. Outputs 25–26 are S/PDIF and
+were not part of the ADAT acceptance test. No document or report should treat
+all 24 ADAT outputs as physically confirmed on this hardware.
+
 The tones never start automatically. After a successful boot, use:
 
 ```text

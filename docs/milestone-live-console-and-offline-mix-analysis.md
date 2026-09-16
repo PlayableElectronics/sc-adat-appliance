@@ -178,7 +178,9 @@ it.
 
 ## Implementation sequence
 
-1. Prove the compiled-payload path and physical 24-output tone/xrun test.
+1. Prove the compiled-payload path and the tone/xrun test; physical evidence
+   is limited to ADAT1 and ADAT2 on the installed main bracket, with ADAT3
+   remaining software-path-only until its expansion bracket exists.
 2. Implement a stable 24-channel pass-through mixer with metering and safe
    bypass.
 3. Add dry multitrack recording, recoverable session metadata, and markers.

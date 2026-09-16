@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+t=$(mktemp -d); trap 'rm -rf "$t"' EXIT
+set +e
+sh -c "$COMPOSE run --rm --no-deps --entrypoint sh -v '$t:/packet' -e SC_ADAT_OSC_DUMP=/packet/valid.packet sc-audio -c '/usr/bin/sc-adat-osc-loader validate'" >/dev/null 2>&1
+set -e
+test -s "$t/valid.packet"
+sh -c "$COMPOSE run --rm --no-deps --entrypoint sh -v '$t:/packet' sc-audio -c 'gcc -O2 /workspace/scripts/test-osc-packet.c -o /tmp/test-osc-packet && /tmp/test-osc-packet /packet/valid.packet'"
+cp "$t/valid.packet" "$t/old.packet"
+printf i | dd of="$t/old.packet" bs=1 seek=16 conv=notrunc 2>/dev/null
+if sh -c "$COMPOSE run --rm --no-deps --entrypoint sh -v '$t:/packet' sc-audio -c 'gcc -O2 /workspace/scripts/test-osc-packet.c -o /tmp/test-osc-packet && /tmp/test-osc-packet /packet/old.packet'" >/dev/null 2>&1; then
+  echo 'old malformed OSC packet was accepted' >&2; exit 1
+fi
+echo 'PASS malformed OSC typetag rejected'

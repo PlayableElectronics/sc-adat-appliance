@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+port=$((57200 + ($$ % 100)))
+sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'jackd -d dummy -r 48000 -p 128 >/tmp/jack.log 2>&1 & j=\$!; scsynth -u $port -a 4096 -i 0 -o 26 >/tmp/scsynth.log 2>&1 & p=\$!; trap \"kill \$p \$j 2>/dev/null || true\" EXIT; sleep 2; if SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc start -36; then exit 1; fi; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_tone24.scsyndef /payload-out/synthdefs/sc_adat_scan.scsyndef; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc start -36; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc release 1000; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc free 1000; if SC_ADAT_OSC_PORT=$port SC_ADAT_TONE_TARGET=-1 /usr/bin/sc-adat-tone-osc start -36; then exit 1; fi; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc scan 7 500 -36; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc release 2000; SC_ADAT_OSC_PORT=$port /usr/bin/sc-adat-tone-osc free 2000'"
+missing=$((port + 1))
+if timeout 6 sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'SC_ADAT_OSC_PORT=$missing /usr/bin/sc-adat-tone-osc start -36'"; then
+  echo 'missing scsynth accepted node creation' >&2; exit 1
+fi
+echo 'PASS exact target utility node /n_go acknowledgement, /fail and timeout handling'

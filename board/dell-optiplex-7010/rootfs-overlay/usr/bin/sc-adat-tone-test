@@ -20,6 +20,14 @@ connect_ports() {
   for f in $FREQS; do jack_lsp -c "jack:out_$n" 2>/dev/null | grep -Fq "system:playback_$n" || return 1; n=$((n+1)); done
   ! jack_lsp -c 2>/dev/null | grep -E 'jack:out_(25|26).*system:playback_(25|26)' >/dev/null 2>&1
 }
+load_def() {
+  tries=0
+  while test "$tries" -lt 5; do
+    /usr/bin/sc-adat-osc-loader load "$DEF" && return 0
+    tries=$((tries + 1)); sleep .2
+  done
+  return 1
+}
 cleanup() { test -r "$RUN/node" && /usr/bin/sc-adat-tone-osc free "$(cat "$RUN/node")" >/dev/null 2>&1 || true; rm -f "$RUN/node"; }
 release() { test -r "$RUN/node" && /usr/bin/sc-adat-tone-osc release "$(cat "$RUN/node")" >/dev/null 2>&1 || true; sleep 1; }
 fade_in() { i=1; while test "$i" -le 5; do /usr/bin/sc-adat-tone-osc set "$(cat "$RUN/node")" level "$(awk "BEGIN {print -90 + ($level + 90) * $i / 5}")"; sleep .05; i=$((i+1)); done; }
@@ -57,8 +65,12 @@ case "${1:-}" in
   test ! -e "$RUN/state" || { echo 'tone test already active' >&2; exit 1; }
   rm -f "$RUN/node"; : >"$LOG"; mkdir -p "$RUN"; before=$(xrun_count); date -u '+start=%Y-%m-%dT%H:%M:%SZ' >>"$LOG"; printf 'mode=%s duration=%s level=%s\n' "$mode" "$duration" "$level" >>"$LOG"
   { cat /run/jack-ports 2>/dev/null || true; ps -eLo pid,tid,cls,rtprio,pri,stat,comm,args 2>/dev/null || true; } >>"$LOG"
-  connect_ports || { echo 'JACK output connection validation failed' >&2; exit 1; }
-  /usr/bin/sc-adat-osc-loader load "$DEF" || { echo 'SynthDef load failed' >&2; exit 1; }
+  tries=0
+  while ! connect_ports; do
+    tries=$((tries + 1)); test "$tries" -lt 10 || { echo 'JACK output connection validation failed' >&2; exit 1; }
+    sleep .2
+  done
+  load_def || { echo 'SynthDef load failed' >&2; exit 1; }
   printf '%s\n' "$before" >"$RUN/before"; printf '%s\n' "$level" >"$RUN/level"; printf '%s\n' "$duration" >"$RUN/duration"; printf '%s\n' "$mode" >"$RUN/mode"; printf '%s\n' "$(( $(date +%s) + duration ))" >"$RUN/deadline"; touch "$RUN/state"
   nohup "$0" --worker "$(( $(date +%s) ))" "$duration" "$level" "$mode" </dev/null >>"$LOG" 2>&1 & echo $! >"$RUN/controller"; echo 'tone test started';;
 scan)
@@ -78,7 +90,12 @@ scan)
     grep '^ADAT' "$LOG" | sed -n "$((seen + 1)),${lines}p" || true
   fi
   test ! -e "$RUN/state";;
-stop) release; cleanup; rm -f "$RUN/state" "$RUN/controller"; echo 'tone test stopped';;
+stop)
+  if test -r "$RUN/controller"; then
+    kill "$(cat "$RUN/controller")" 2>/dev/null || true
+    rm -f "$RUN/controller"
+  fi
+  release; cleanup; rm -f "$RUN/state"; echo 'tone test stopped';;
 status)
   if test -e "$RUN/state"; then now=$(date +%s); remain=$(( $(cat "$RUN/deadline") - now )); test "$remain" -ge 0 || remain=0; echo "active mode=$(cat "$RUN/mode") remaining=${remain}s level=$(cat "$RUN/level") dBFS xrun_delta=$(( $(xrun_count) - $(cat "$RUN/before") ))"; else echo 'inactive'; fi;;
 --worker) shift; worker "$@";;

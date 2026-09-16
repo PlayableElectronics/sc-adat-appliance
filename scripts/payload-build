@@ -5,7 +5,15 @@ OUT=${SC_ADAT_PAYLOAD_OUT:-$ROOT/.local/payload-build}
 COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
 VERSION=${SC_ADAT_PAYLOAD_VERSION:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}
 SC_VERSION=${SC_ADAT_VERSION:-3.13.0}; PROTOCOL=1
-rm -rf "$OUT"; mkdir -p "$OUT/synthdefs" "$OUT/config" "$OUT/scripts"
+# Keep the output directory inode stable: the Debian audio container bind-mounts
+# it as /payload-out, and replacing the directory would leave that container
+# attached to a stale empty inode until it is restarted.
+if test -d "$OUT"; then
+  find "$OUT" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+else
+  mkdir -p "$OUT"
+fi
+mkdir -p "$OUT/synthdefs" "$OUT/config" "$OUT/scripts"
 sh -c "$COMPOSE run --rm --no-deps --entrypoint env sc-audio QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/compile.scd" >"$OUT/sclang.log" 2>&1
 for f in sc_adat_tone24.scsyndef sc_adat_scan.scsyndef; do
   test -s "$OUT/$f" || { echo "missing or empty SynthDef: $f" >&2; exit 1; }; mv "$OUT/$f" "$OUT/synthdefs/$f"

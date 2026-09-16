@@ -1,230 +1,359 @@
 # Project context
 
-## Intent
+Last updated: 2026-09-16
 
-Build a low-cost, reliable, network-controlled SuperCollider instrument around
-hardware already owned. The target is not a general desktop workstation. It is
-a headless synthesis appliance with deterministic boot, low scheduling jitter,
-multichannel ADAT, remote development, and a recoverable update path.
+This is the canonical high-level handoff for humans and coding agents. Focused
+contracts in the other documents remain authoritative for their own areas.
+When facts conflict, prefer verified current hardware evidence and the most
+recent focused decision record.
 
-The project also serves as an embedded-Linux learning platform: Debian is the
-workshop, while Buildroot produces the sealed instrument.
+## Working principle
 
-## Target computer
+This project must save the operator's time. Coding agents should complete
+bounded milestones autonomously, inspect the repository and machine before
+acting, run every software-testable check, diagnose failures, preserve unrelated
+work, commit and push cleanly, and request only unavoidable physical listening,
+cabling, reboot, or musical decisions. Do not turn routine diagnosis into a long
+series of commands for the operator to type.
 
-A used Dell OptiPlex 7010 is on its way.
+## Purpose
 
-Expected configuration:
+Build a reliable, network-controlled SuperCollider live mixer and sound
+appliance from owned hardware. It is deliberately not a desktop DAW, an
+autonomous mixing system, or a replacement for the sound design and effects in
+the connected instruments.
 
-- Intel Core i7-3770S, four cores and eight threads, up to 3.9 GHz
-- 16 GB DDR3
-- SSD
-- original conventional PCI slot
-- NVIDIA GeForce GT 730 currently installed
+The appliance supports a three-person live setup, deterministic per-song mixes,
+dry recording and virtual soundcheck, shared vocal effects, later offline mix
+analysis, and eventually the Studer Dyaxis II control surface.
 
-Planned physical changes:
+## Verified computer and audio hardware
 
-- remove the GT 730;
-- use Intel integrated graphics only for installation and diagnostics;
-- remove the separate HDD and use the SSD alone;
-- install the RME DIGI9652 in its native PCI slot.
+Target computer:
 
-Nothing about the received machine is considered verified until Debian records
-the actual CPU, RAM, firmware mode, storage, PCI topology, thermals, network
-interface, and RME detection.
+- Dell OptiPlex 7010 Desktop;
+- Intel Core i7-3770S, four physical cores/eight logical threads;
+- 16 GiB RAM;
+- 240 GB-class SSD;
+- UEFI boot;
+- conventional PCI slot;
+- Debian 13 development/recovery installation.
 
-## Audio hardware already available
+Primary interface:
 
-### RME DIGI9652
+- original RME Project Hammerfall DIGI9652, PCI ID `10ee:3fc4`;
+- Linux driver `snd_rme9652`;
+- ALSA name `Digi9652`, device `hw:CARD=Digi9652,DEV=0`;
+- JACK baseline: 48 kHz, 128 frames, two periods, realtime priority 70;
+- ALSA/JACK exposes 26 capture and 26 playback channels;
+- only the main bracket is installed: ADAT1 and ADAT2 provide 16 physical
+  optical inputs and outputs;
+- the ADAT3 expansion bracket is absent;
+- channels 17-24 are software-visible but not physically present;
+- channels 25-26 are S/PDIF;
+- all 16 physically present ADAT output channels were previously confirmed.
 
-This is the original Project Hammerfall DIGI9652, not the later HDSP 9652.
+Other available hardware:
 
-- conventional PCI
-- three ADAT optical inputs
-- three ADAT optical outputs
-- up to 24 channels each direction at 44.1/48 kHz
-- Linux driver: `snd-rme9652`
-- do not use `snd-hdsp`, `hdspconf`, or HDSP-specific assumptions without
-  independently proving they apply
+- miniDSP MCHStreamer for portable development or another node;
+- Audient iD44 for analogue I/O, microphones and monitoring;
+- Studer Dyaxis II controller with motorized faders, encoders, buttons and
+  heavy wheel;
+- Dyaxis ADB keyboard/trackball already bridged through an Arduino Nano to USB
+  serial;
+- two rear RS-422 ports and network hardware remain future reverse-engineering
+  work;
+- firmware EPROM dumping is planned.
 
-This is intended to be the permanent interface for the appliance.
+Never describe this installation as a 24-channel physical interface unless the
+ADAT3 expansion hardware is added and verified. Keep the software data model
+24-channel-capable, but validate active physical mappings strictly as 1-16.
 
-### miniDSP MCHStreamer
+## Operating-system architecture
 
-Available as a class-compliant USB multichannel/ADAT interface. Keep it free for
-portable development, newer computers without legacy PCI, comparison testing,
-or a second synthesis node. It is not required by the primary appliance.
+### Debian workshop
 
-### Audient iD44
-
-Available for analogue recording, microphones, instruments, monitoring, and
-studio routing. It should not be consumed merely as the primary appliance's
-ADAT adapter when the DIGI9652 is available.
-
-### ADAT development hardware
-
-Available AL1402G decoder and AL1401AG encoder chips support a longer-term FPGA
-ADAT routing/matrix project. The current appliance must remain useful without
-waiting for that router.
-
-## Control architecture
-
-A monome norns Shield on Raspberry Pi is intended as a tactile controller,
-sequencer, display, MIDI/grid integration point, and musical clock source.
-
-The initial boundary is explicit:
-
-- norns Lua handles keys, encoders, screen, grid, clocks, patterns, and user
-  interaction;
-- the Dell handles synthesis and audio;
-- control travels over wired Ethernet as OSC;
-- ADAT carries audio from the Dell;
-- do not initially replace or deeply modify norns' local
-  matron/crone/sclang/scsynth relationship;
-- implement the remote synth as a purpose-built OSC service.
-
-Wi-Fi may be used for development, but wired Ethernet is preferred for
-performance control.
-
-## SuperCollider model
-
-Build both `scsynth` and `supernova` initially.
-
-Ordinary `scsynth` does not automatically distribute one large synthesis graph
-over all CPU cores. Compare:
-
-- a single `scsynth`;
-- multiple independent server processes where useful;
-- `supernova` with deliberately separated parallel groups.
-
-Relevant intended workloads include modal and inharmonic banks, FM synthesis,
-physical modelling, resonators, granular processing, reverbs, analysis, and
-multichannel routing. Start with measured, deterministic workloads before
-porting experimental instruments.
-
-Initial validation target:
-
-- 48 kHz;
-- 128-sample buffer;
-- 24-channel routing;
-- no xruns during the defined interference test;
-- test 64 samples only after the baseline is stable.
-
-## Operating systems
-
-### Debian
-
-Normal writable installation used for:
+Writable Debian is the development, build, hardware-test and recovery system.
+It owns:
 
 - Codex and Git;
-- Docker Engine and container orchestration;
-- hardware inspection and direct-device diagnostics;
-- latency and DSP benchmarking;
-- GRUB management;
-- appliance deployment and recovery.
+- Docker Engine and Compose;
+- direct access to the DIGI9652;
+- SuperCollider development through pinned containers;
+- Buildroot builds;
+- payload compilation, testing and promotion;
+- filesystem, GRUB and recovery operations.
 
-Compiler suites, MCU/FPGA SDKs and Buildroot host dependencies belong in
-purpose-built containers. Native binaries may be staged on Debian for direct
-DIGI9652 or USB validation, but Debian is not the authoritative release build
-environment and does not need to be read-only.
+Toolchains belong in purpose-specific containers rather than being installed
+indiscriminately on Debian.
 
 ### Buildroot appliance
 
-Minimal read-only performance system produced in full by the authoritative
-Buildroot container. It contains only the validated components needed for
-networking, remote administration, the RME card, SuperCollider, Dyaxis control
-and supervision. GRUB boots it natively; Docker is neither installed nor
-running in the appliance.
+The performance system is a minimal native Buildroot Linux image booted by
+GRUB, without Docker. Its verified baseline includes:
 
-Do not include a graphical desktop, Qt IDE, PipeWire, PulseAudio, Bluetooth, or
-Wi-Fi unless a later measured requirement justifies one.
+- Linux 6.12.107 with `CONFIG_PREEMPT_RT=y`;
+- high-resolution timers and 1000 Hz kernel tick;
+- built-in `snd_rme9652`;
+- JACK2 and `scsynth`;
+- networking and bounded boot diagnostics;
+- physical recovery console and development SSH;
+- immutable initramfs root unpacked into RAM;
+- transient runtime/log state;
+- validated compiled-payload loading.
 
-The intended root runs primarily from RAM using a validated initramfs and/or
-copied read-only SquashFS design. Use tmpfs for transient writes. Persistent
-configuration, calibration, SynthDefs, loops and approved recordings belong on
-the separate data filesystem.
+The Buildroot root is ephemeral and effectively read-only. Reboot restores the
+image state. Persistent musical payloads live outside the root image.
 
-## Boot and storage plan
+Debian remains the saved GRUB fallback. Candidate boots use a one-shot GRUB
+entry so failed appliance boots return to Debian.
 
-The SSD is expected to contain:
+## Storage and payload ownership
 
-- EFI/GRUB or a legacy-BIOS equivalent, determined after inspection;
-- writable Debian;
-- separate shared data;
-- immutable Buildroot slot A;
-- immutable Buildroot slot B.
+The SSD currently contains:
 
-A/B invariants:
+- writable Debian root and EFI boot files;
+- `/dev/sda3`, a 96 GiB ext4 filesystem labelled `SC_ADAT_DATA`;
+- approximately 34 GiB trailing unallocated space.
 
-- write only the inactive slot;
-- never overwrite the running slot;
-- never overwrite the last-known-good slot;
-- Debian remains selectable for rescue;
-- Debian remains the default until an appliance candidate passes validation;
-- use filesystem UUIDs in persistent boot configuration;
-- do not finalize sizes or commands before inspecting the real SSD and firmware
-  mode.
+The data partition is mounted:
 
-## Real-time policy
+- read-write at `/data` in Debian;
+- read-only at `/data` in Buildroot.
 
-Linux 6.12 or newer contains the mainline PREEMPT_RT infrastructure for x86, but
-the selected kernel must explicitly enable `CONFIG_PREEMPT_RT=y`.
+Compiled releases use immutable versioned directories with
+`current -> previous -> factory` validation and fallback. Debian compiles
+authoritative `.scd` sources with pinned `sclang`, tests the resulting
+SynthDefs against `scsynth`, and promotes only compiled payload artifacts.
+Buildroot validates and consumes those artifacts; it never compiles source.
 
-PREEMPT_RT is intended to reduce worst-case scheduling latency and xruns. It
-does not increase raw DSP throughput.
+A separate disk is planned for multitrack recordings. Do not consume the
+persistent payload partition as the long-term recording volume.
 
-Begin with conservative configuration. Defer CPU isolation, tick isolation,
-forced IRQ affinity, disabled C-states, unlimited RT runtime, and similar
-tuning until baseline measurements demonstrate a need. Make one change at a
-time and retain comparable results.
+Normal SuperCollider code iteration must not require rebuilding Buildroot.
+Rebuild the OS only when the kernel, drivers, JACK, SuperCollider runtime,
+base services, or immutable factory payload changes.
 
-## SuperCollider integration research
+## Proven native appliance baseline
 
-Two useful upstream/community components were identified:
+The physical Buildroot candidate has booted successfully on the Dell with:
 
-- `sc-designer`: a lightweight agent skill for SuperCollider sound design;
-- `supercollider-pilot`: agent skills plus an MCP server capable of managing a
-  persistent sclang session, executing files, rendering audio, capturing logs,
-  and recovery.
+- PREEMPT_RT;
+- Digi9652 detected;
+- JACK at 48 kHz / 128 frames / two periods / RT priority 70;
+- 26 capture and 26 playback JACK ports;
+- `scsynth` ready;
+- shared data partition mounted read-only;
+- validated payload activation;
+- zero startup xruns;
+- usable network and recovery console.
 
-There was no comparably complete ready-made norns Lua skill. A project-specific
-norns development skill may later cover the norns API, OSC protocol, script
-layout, deployment, logs, and safe restart workflow.
+QEMU tests cover structural boot and deterministic payload cases: valid current,
+previous fallback, factory fallback and missing-data factory fallback. QEMU
+cannot replace the physical RME/optical test.
 
-Do not add either component blindly to the appliance. Evaluate it first under
-Debian and keep the performance image minimal.
+## Current mixer milestone
 
-## First session on the Dell
+Commit `90107bf` introduced the first Debian/Docker production mixer:
 
-1. Inspect the physical machine and remove the GT 730.
-2. Install the DIGI9652.
-3. Install a normal writable Debian system without repartitioning for the final
-   A/B design prematurely.
-4. Clone this repository and let Codex read `AGENTS.md`.
-5. Run `scripts/collect-hardware-baseline`.
-6. Review the report for sensitive identifiers before committing selected
-   facts.
-7. Confirm `snd-rme9652`, ALSA devices, clock state, and every ADAT bank.
-8. Establish Debian audio and latency baselines at 48 kHz/128 samples.
-9. Validate a headless SuperCollider build and direct DIGI9652 operation.
-10. Establish the container mount/output contract and build the pinned
-    Buildroot builder image.
-11. Use that container to build the complete RAM-root appliance release.
-12. Only then deploy a candidate to an inactive slot and add its GRUB test entry.
+- 16 active one-to-one input/output paths;
+- explicit groups: drums, bass, instruments, vocals and FX returns;
+- neutral unity scene;
+- smoothed controls;
+- bounded gains and protection;
+- bypass;
+- OSC set/query policy;
+- bounded meters;
+- 24-channel-capable data model with strict active-channel validation;
+- dummy-JACK and physical DIGI9652 topology tests;
+- `./lab mixer build|start|status|test|stop`.
 
-## Current unknowns
+The physical topology test proved 16 routes in each direction and left channels
+17-26 disconnected. A 30-second silent test produced zero xruns/errors/clipping
+and measured approximately 148 MiB RSS and 2.8% reported process CPU.
 
-- actual SSD model, capacity, health, and current partition table;
-- UEFI versus legacy BIOS installation;
-- precise motherboard and BIOS revision;
-- exact PCI IRQ routing with the DIGI9652 installed;
-- actual RME card revision and clock behaviour;
-- stable ALSA device naming and channel ordering;
-- stable buffer size under representative DSP and network load;
-- whether `scsynth`, `supernova`, or multiple servers best fit the intended
-  instruments;
-- final Buildroot and kernel release;
-- final SuperCollider dependency set and headless build flags;
-- final A/B partition sizes and GRUB workflow.
+This does not yet prove real sample flow. The remaining physical milestone is
+an end-to-end low-level signal test through all 16 inputs and outputs.
 
-Resolve these with evidence from the target rather than assumptions.
+## Current clock and signal-flow investigation
+
+Latest verified RME state:
+
+- Sync Mode: Master;
+- ADAT2 input: Lock Sync;
+- ADAT1 input: No Lock;
+- ADAT3 input: No Lock and physically unavailable.
+
+ADAT2 Lock Sync proves that the RME is generating clock, the connected rack
+receives it, and a synchronized optical stream returns on ADAT2. It proves
+clock, not audible sample flow. ADAT1 currently has no valid return stream and
+inputs 1-8 must not be treated as operational until that is resolved.
+
+The immediate software priority is to stop relying on topology alone and add
+bounded, self-cleaning diagnostics:
+
+- `./lab mixer meters`: compact live peak/RMS for 16 inputs and 16 outputs,
+  plus xruns;
+- `./lab mixer tone --channel N`: safe default -30 dBFS, one output only,
+  five-second automatic stop, channels 1-16 only;
+- bounded input probe reporting which physical inputs contain samples;
+- automated verification of actual non-zero samples, mixer buses and output
+  mapping;
+- inspection for zero/one-based channel or bus-offset errors.
+
+Test output channel 9 first because it belongs to the clock-verified ADAT2 bank.
+
+Clock management should become a canonical hardware-layer interface:
+
+- `./lab audio clock status`;
+- `./lab audio clock set master`;
+- `./lab audio clock set autosync --source adat1|adat2`;
+- `./lab audio clock set wordclock`.
+
+Address the card by stable ALSA name, never assumed card number. Lock states are
+read-only observations; commands set Sync Mode and Preferred Sync Source.
+Status must distinguish No Lock, Lock and Lock Sync, include JACK rate, and
+produce a concise health conclusion. The declared current default is internal
+master at 48 kHz. Apply and verify it before JACK starts. Debian implementation
+comes first; document the future Buildroot integration point without rebuilding
+Buildroot during this diagnostic milestone.
+
+## Mixer product scope
+
+Initial live roles are approximately:
+
+| Physical inputs | Working role |
+| --- | --- |
+| 1-8 | synthesizers, modular instruments and samplers |
+| 9-16 | drum machine and percussion |
+
+Vocals, vocal effects, spare returns and room/talkback require additional
+physical I/O or revised allocation until ADAT3 exists.
+
+Groups are first-class musical objects: drums, bass, instruments, vocals and FX
+returns. Membership is explicit per song. Bass may originate from different
+hardware in different songs; the system never classifies or rearranges it.
+
+Live processing is intentionally restrained:
+
+- trim, polarity, HPF, mute, solo and level;
+- practical corrective EQ;
+- dynamics only where deliberately configured;
+- broad group EQ/level/gentle compression;
+- a small number of shared vocal delay/reverb sends;
+- monitor buses;
+- dry recording, markers, scenes and virtual soundcheck.
+
+The appliance must never perform automatic EQ, source recognition, gain riding,
+adaptive compression, automatic routing, live spectral correction, autotuning,
+or unapproved analysis-driven changes.
+
+Offline Debian analysis may later identify masking, mud, rumble, harshness,
+peaks, level inconsistency and intelligibility problems. It produces evidence,
+bounded proposals and loudness-matched A/B renders. Human approval is required
+before any setting becomes a live scene. Prefer group-level corrections first,
+then individual channels, and only then subtle frequency-selective sidechain
+processing when justified. Avoid audible ducking and pumping.
+
+## Control and automation architecture
+
+The agreed decision is recorded in
+`docs/sc-adat-control-architecture-decision.md`.
+
+Responsibilities:
+
+- `scsynth`: realtime audio graph, sample-accurate application, smoothing and
+  metering;
+- headless `sclang`: authoritative mixer state, OSC API, validation, scenes,
+  song markers, transport, automation, MIDI and scheduled bundles;
+- Open Stage Control: replaceable browser control surface only;
+- future Dyaxis: physical surface using the same logical control contract.
+
+Do not build a separate generic OSC sequencer. Use SuperCollider's native
+`TempoClock`, `SystemClock`, `Routine`, `Task`, Patterns, `OSCdef`,
+`MIDIdef` and timestamped OSC bundles. Use DSP-side ramps instead of streams
+of intermediate control messages.
+
+A scene is a deterministic baseline. A timeline is an explicit validated set
+of events and ramps. Automation must be visibly armed. Manual movement suspends
+automation for that parameter until the next marker or explicit re-enable.
+Stopping automation never stops audio. Invalid automation leaves the current
+static mix untouched. No adaptive live decisions are allowed.
+
+Develop the control engine in the existing Debian SuperCollider container.
+Once stable, evaluate adding headless `sclang` to Buildroot without the IDE or
+Qt GUI components.
+
+## First virtual control surface
+
+Use Open Stage Control in a separate pinned, unprivileged, headless container:
+
+- no `/dev/snd`;
+- no JACK;
+- no realtime capabilities;
+- no authoritative state;
+- layout stored in Git;
+- read-only layout mount;
+- browser clients on Mac/tablet/phone;
+- runs on Dell Debian during development;
+- runs on an external Docker host, initially the Mac, while Dell boots
+  Buildroot.
+
+Initial pages:
+
+1. overview: groups, master, scene and health;
+2. channels 1-8;
+3. channels 9-16;
+4. groups;
+5. system/clock/payload/xruns.
+
+Meter traffic should be bounded and droppable, initially approximately 10-20
+Hz. Commands and state confirmations are immediate. The OSC namespace must be
+surface-independent so Open Stage Control, norns and Dyaxis can coexist.
+
+## CPU strategy
+
+The current `scsynth` DSP graph is effectively single-threaded, although
+JACK, `sclang`, networking and system work use other cores. Keep
+`scsynth` as the stable baseline and collect average/peak DSP load, per-thread
+CPU and xruns under the real maximum mixer workload.
+
+SuperCollider's `supernova` is the measured multicore upgrade path. If actual
+peak DSP load leaves insufficient headroom, compare a deliberately staged
+`ParGroup` graph: independent channel strips in parallel, independent group
+processors in parallel, then ordered master/output stages. Do not switch merely
+because the CPU has multiple cores.
+
+## Development order from here
+
+1. Prove actual sample flow, terminal meters and safe per-output tone.
+2. Add deterministic RME clock status/set commands and boot-time verification.
+3. Complete the real 16-input/16-output physical test.
+4. Replace the temporary Python-authoritative mixer policy with the agreed
+   headless `sclang` authoritative control model without regressing DSP.
+5. Add the separate Open Stage Control container and bidirectional surface.
+6. Stabilize scenes, markers and native SuperCollider automation.
+7. Add dry multitrack recording to the separate recording disk.
+8. Add monitor buses and shared vocal sends.
+9. Add virtual soundcheck.
+10. Add offline advisory analysis and A/B review.
+11. Integrate norns and later reverse-engineer/map Dyaxis.
+12. Evaluate supernova only from measured need.
+
+Do not rebuild or stage Buildroot while completing Debian-only control,
+metering and clock diagnostics unless a proven immutable-runtime dependency
+requires it and the deployment gate is explicitly approved.
+
+## Safety and release invariants
+
+- Preserve Debian as the recoverable saved boot target.
+- Building artifacts never grants permission to stage, alter GRUB or reboot.
+- Stage only validated byte-identical artifacts.
+- Never overwrite the running or last-known-good appliance state.
+- Keep the live audio path deterministic when control, analysis or recording
+  components fail.
+- Invalid payloads/scenes/configuration must fall back safely.
+- Generate no loud or multi-output test signal by default.
+- Physical tests require bounded duration and automatic cleanup.
+- Keep machine identifiers, private keys and generated local diagnostics out of
+  Git.

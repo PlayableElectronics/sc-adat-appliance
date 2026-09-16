@@ -6,7 +6,7 @@ COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.ya
 
 case "${1:-}" in
   build)  exec sh -c "$COMPOSE build" ;;
-  start)  exec sh -c "$COMPOSE up -d" ;;
+  start)  "$ROOT/scripts/audio-clock" apply; exec sh -c "$COMPOSE up -d" ;;
   stop)   exec sh -c "$COMPOSE down" ;;
   status) exec sh -c "$COMPOSE ps" ;;
   logs)   exec sh -c "$COMPOSE exec -T sc-audio sh -c 'cat /var/log/jack.log; printf \"--- scsynth ---\\n\"; cat /var/log/scsynth.log'" ;;

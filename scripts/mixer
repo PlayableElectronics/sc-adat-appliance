@@ -4,9 +4,13 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
 case "${1:-}" in
   build) "$ROOT/scripts/payload-build"; sh -c "$COMPOSE build sc-audio" ;;
-  start) sh -c "$COMPOSE up -d sc-audio sc-mixer" ;;
+  start) "$ROOT/scripts/audio-clock" apply; sh -c "$COMPOSE up -d sc-audio sc-mixer"; ready=0; for retry in $(seq 1 100); do if sh -c "$COMPOSE exec -T sc-mixer python3 /workspace/mixer/mixerctl.py meters --listen 57120" >/dev/null 2>&1; then ready=1; break; fi; sleep 0.1; done; test "$ready" -eq 1 || { echo 'mixer did not become ready' >&2; exit 1; } ;;
+  clock) shift; exec "$ROOT/scripts/audio-clock" "$@" ;;
   status) sh -c "$COMPOSE ps sc-audio sc-mixer" ;;
   test) exec "$ROOT/scripts/test-mixer" ;;
+  meters) sh -c "$COMPOSE exec -T sc-mixer python3 /workspace/mixer/mixerctl.py meters --listen 57120"; sh -c "$COMPOSE exec -T sc-audio sh -c 'count=0; test -f /var/log/jack.log && count=\$(grep -icE \"xrun|underrun|overrun\" /var/log/jack.log || true); echo xruns_logged: \$count'" ;;
+  inputs) sh -c "$COMPOSE exec -T sc-mixer python3 /workspace/mixer/mixerctl.py probe --listen 57120 --duration 5" ;;
+  tone) test "${2:-}" = --channel && test "${3:-}" != "" && test "$#" -eq 3 || { echo 'Usage: mixer tone --channel N' >&2; exit 2; }; channel=$3; case "$channel" in 1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16) ;; *) echo 'tone channel must be 1..16' >&2; exit 2 ;; esac; output=$((26 + channel - 1)); echo "tone: -30 dBFS sine, no input route, scsynth output bus $output -> jack:out_$channel -> system:playback_$channel (5 seconds)"; sh -c "$COMPOSE exec -T sc-audio sh -c 'set -eu; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_scan.scsyndef; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync; python3 /workspace/mixer/mixerctl.py tone --output $output --duration 5 --port 57110'" ;;
   stop) sh -c "$COMPOSE stop sc-mixer sc-audio" ;;
-  *) echo 'Usage: mixer {build|start|status|test|stop}' >&2; exit 2 ;;
+  *) echo 'Usage: mixer {build|start|status|clock|meters|inputs|tone|test|stop}' >&2; exit 2 ;;
 esac

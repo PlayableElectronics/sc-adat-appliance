@@ -4,6 +4,7 @@ import argparse, math, os, signal, socket, struct, sys, time
 
 GROUPS = ("drums", "bass", "instruments", "vocals", "fx_returns")
 FIELDS = ("name", "input", "output", "group", "trim_db", "mute", "polarity", "hpf", "hpf_hz")
+METER_WIDTH = 16 + 16 + 5 + 5 + 16 + 16
 
 def osc_string(value):
     raw = value.encode() + b"\0"; return raw + b"\0" * ((4 - len(raw) % 4) % 4)
@@ -77,6 +78,7 @@ def controls(values, channels):
     return result
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
+def db(value): return -120.0 if value <= 1e-9 else 20.0 * math.log10(min(1.0, max(1e-9, value)))
 def start_node(sock, port, controls_list):
     args=["sc_adat_mixer", 3000, 0, 0]; types=",siii"; vals=args
     for name,value in controls_list: types += "sf"; vals += [name, value]
@@ -95,7 +97,7 @@ def start_node(sock, port, controls_list):
 def apply(config, port=57110):
     values, channels=read_config(config); sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); start_node(sock, port, controls(values, channels)); time.sleep(.15); return values, channels
 def serve(config, listen=57120, sc_port=57110, start=True):
-    values, channels=read_config(config); sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial)
+    values, channels=read_config(config); sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH
     if start: start_node(sock, sc_port, initial)
     def shutdown(_signum, _frame):
         try:
@@ -107,7 +109,13 @@ def serve(config, listen=57120, sc_port=57110, start=True):
     meters=0
     while True:
         data, address=sock.recvfrom(65535); path, types, vals=parse_packet(data)
-        if path == "/mixer/set" and len(vals) == 2:
+        if path == "/mixer/meter":
+            numeric=[float(x) for x in vals if isinstance(x, (int, float)) and math.isfinite(float(x))]
+            if len(numeric) >= METER_WIDTH: meter_values=numeric[-METER_WIDTH:]
+            meters += 1
+        elif path == "/mixer/meters":
+            send_to(sock, address, packet("/mixer/meters", "," + "f" * METER_WIDTH, meter_values))
+        elif path == "/mixer/set" and len(vals) == 2:
             key, value=vals; allowed={name for name,_ in controls(values, channels)}
             if key not in allowed:
                 send_to(sock, address, packet("/mixer/error", ",s", ["invalid parameter"])); continue
@@ -119,13 +127,50 @@ def serve(config, listen=57120, sc_port=57110, start=True):
             key=str(vals[0]) if vals else "master"
             if key not in state: send_to(sock, address, packet("/mixer/error", ",s", ["invalid parameter"]))
             else: send_to(sock, address, packet("/mixer/state", ",sf", [key, state[key]]))
-        elif path == "/mixer/meter": meters += 1
+def get_meters(port=57120):
+    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.settimeout(2); send(sock, port, packet("/mixer/meters", ","))
+    path, _, values=parse_packet(sock.recv(65535))
+    if path != "/mixer/meters" or len(values) != METER_WIDTH: raise RuntimeError("meter stream unavailable")
+    return [float(x) for x in values]
+def print_meters(port=57120):
+    values=get_meters(port)
+    print("inputs  peak/rms dBFS")
+    for i in range(16): print(f"I{i+1:02d} {db(values[i]):7.1f}/{db(values[16+i]):7.1f}", end="  " if i % 2 == 0 else "\n")
+    print("groups  peak/rms dBFS")
+    for i,name in enumerate(GROUPS): print(f"{name:<11} {db(values[32+i]):7.1f}/{db(values[37+i]):7.1f}")
+    print("outputs peak/rms dBFS")
+    for i in range(16): print(f"O{i+1:02d} {db(values[42+i]):7.1f}/{db(values[58+i]):7.1f}", end="  " if i % 2 == 0 else "\n")
+def print_probe(port=57120, duration=5):
+    duration=max(1, min(30, int(duration))); maximum=[0.0] * 16; deadline=time.time() + duration
+    while time.time() < deadline:
+        values=get_meters(port)
+        for i in range(16): maximum[i]=max(maximum[i], values[i])
+        time.sleep(0.5)
+    print(f"input probe: {duration}s, signal threshold -80.0 dBFS")
+    for i,value in enumerate(maximum): print(f"I{i+1:02d} {'SIGNAL' if db(value) > -80 else 'silence':7s} peak={db(value):7.1f} dBFS")
+def tone(output, duration=5, port=57110):
+    if not 26 <= output <= 41: raise ValueError("tone output bus must be 26..41")
+    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    node=3100
+    # sc_adat_scan is deliberately used directly on a hardware-output bus;
+    # it never reads an input or enters the mixer node.
+    types=",siiisisfsfsi"
+    values=["sc_adat_scan", node, 0, 0, "output", output, "freq", 440.0, "level", -30.0, "gate", 1]
+    send(sock, port, packet("/s_new", types, values))
+    try:
+        time.sleep(max(1, min(5, int(duration))) - 0.5)
+    finally:
+        send(sock, port, packet("/n_set", ",isi", [node, "gate", 0]))
+        time.sleep(0.5)
 def main():
-    parser=argparse.ArgumentParser(); parser.add_argument("action", choices=("validate", "apply", "serve")); parser.add_argument("config"); parser.add_argument("--port", type=int, default=57110); parser.add_argument("--listen", type=int, default=57120); parser.add_argument("--no-node", action="store_true")
+    parser=argparse.ArgumentParser(); parser.add_argument("action", choices=("validate", "apply", "serve", "meters", "probe", "tone")); parser.add_argument("config", nargs="?"); parser.add_argument("--port", type=int, default=57110); parser.add_argument("--listen", type=int, default=57120); parser.add_argument("--duration", type=int, default=5); parser.add_argument("--output", type=int); parser.add_argument("--no-node", action="store_true")
     args=parser.parse_args()
     try:
         if args.action == "validate": values, channels=read_config(args.config); print(f"valid mixer config: {len(channels)} channels, inputs/outputs 1..16, capacity 24")
         elif args.action == "apply": apply(args.config, args.port); print("mixer node 3000 applied")
+        elif args.action == "meters": print_meters(args.listen)
+        elif args.action == "probe": print_probe(args.listen, args.duration)
+        elif args.action == "tone": tone(args.output, args.duration, args.port)
         else: serve(args.config, args.listen, args.port, not args.no_node)
     except (OSError, ValueError, OverflowError) as exc: print(f"mixerctl: {exc}", file=sys.stderr); return 1
     return 0

@@ -69,6 +69,13 @@ The first production mixer milestone is Debian/Docker-only:
 It activates only 16 confirmed ADAT channels and keeps a 24-channel data-model
 capacity. It does not change Buildroot, partitions, GRUB, or `/boot`.
 
+RME clock ownership is in the Debian audio-hardware layer, not mixer DSP.
+`audio/clock.conf` declares the current `Digi9652` intent (`master`, 48 kHz),
+and `scripts/audio-clock apply` is run before JACK. The later Buildroot
+integration point is the audio init service after stable card detection and
+before `jackd`; it will use a native equivalent of that apply/readback step.
+That Buildroot integration is deliberately not part of this change.
+
 ## SC-ADAT payload ownership
 
 The Dell has one active boot mode at a time. While Debian is booted, Codex,

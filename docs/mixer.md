@@ -31,6 +31,15 @@ The controller listens on UDP 57120 for `/mixer/set` and `/mixer/get`, forwards
 validated changes to scsynth on UDP 57110, and reports `/mixer/ok`,
 `/mixer/error`, and `/mixer/state`.
 
+Clock ownership belongs to the Debian audio-hardware layer. `./lab audio clock
+status|set ...` addresses ALSA by the stable `Digi9652` name, and `./lab mixer
+clock ...` is only a compatibility delegation. The declarative default is
+`audio/clock.conf` (`mode=master`, `sample_rate=48000`); Debian applies and
+verifies it before JACK starts. The later Buildroot integration point is the
+audio init service immediately after Digi9652 detection and before `jackd`,
+using a native equivalent of `scripts/audio-clock apply`; Buildroot is not
+changed by this milestone.
+
 Implemented now: transparent 16-channel routing, explicit groups, versioned
 neutral configuration, smoothed controls, bypass, protection, OSC control and
 query, meters, payload compilation, load/sync checks, and Docker dummy-JACK

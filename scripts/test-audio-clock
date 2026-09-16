@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+python3 - <<'PY'
+import importlib.util
+spec=importlib.util.spec_from_file_location('clock', 'audio/clock.py'); m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+for raw, expected in [('No Lock','No Lock'),('Lock','Lock but not Sync'),('No Lock Sync','No Lock'),('Lock Sync','Lock Sync')]:
+    got=m.parse_control("; Item #0 'No Lock'\n; Item #1 'Lock'\n; Item #2 'No Lock Sync'\n; Item #3 'Lock Sync'\n: values=" + str(['No Lock','Lock','No Lock Sync','Lock Sync'].index(raw)))
+    assert m.STATE_NAMES[got['raw']] == expected
+assert m.control('Sync Mode')['raw'] in ('Master','AutoSync','Word Clock')
+assert m.control('ADAT1 Sync Check')['raw'] in m.STATE_NAMES
+assert m.control('ADAT2 Sync Check')['raw'] in m.STATE_NAMES
+assert m.control('ADAT3 Sync Check')['raw'] in m.STATE_NAMES
+print('PASS mocked ALSA enum parser and physical Digi9652 readback')
+PY

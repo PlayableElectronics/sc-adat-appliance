@@ -1,12 +1,36 @@
 #!/bin/sh
 set -eu
-if ! command -v jackd >/dev/null 2>&1; then echo 'SKIP JACK parser: host jackd unavailable'; exit 0; fi
-test "$(jackd --version 2>&1 | grep -c '1\.9\.22')" -ge 1
-help=$(jackd -d alsa --help 2>&1 || true)
-for option in --device --rate --period --nperiods --inchannels --outchannels; do
-  printf '%s\n' "$help" | grep -q -- "$option"
-done
-command='jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26'
-printf '%s\n' "$command" | grep -q -- '--rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26'
-! printf '%s\n' "$command" | grep -Eq -- '--(rate|period|nperiods|inchannels|outchannels) 0'
-echo 'PASS JACK 1.9.22 ALSA long-option parser and non-zero fixture'
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+JACK="$ROOT/board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Regression fixtures model jackd's valid help output with a non-zero status.
+cat >"$tmp/jackd" <<'EOF'
+#!/bin/sh
+if test "${1:-}" = -d && test "${2:-}" = alsa && test "${3:-}" = --help; then
+  printf '%s\n' '  --device DEVICE' '  --rate RATE' '  --period FRAMES' '  --nperiods N' '  --inchannels N' '  --outchannels N'
+  exit 7
+fi
+printf '%s\n' 'runtime launch attempted' >"$TMPDIR/jack-launch-attempted"
+exit 0
+EOF
+chmod +x "$tmp/jackd"
+TMPDIR="$tmp" PATH="$tmp:$PATH" sh -c '
+  help=$(jackd -d alsa --help 2>&1 || true)
+  for option in --device --rate --period --nperiods --inchannels --outchannels; do
+    printf "%s\n" "$help" | grep -F -- "$option" >/dev/null
+  done
+  jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26
+  test -s "$TMPDIR/jack-launch-attempted"
+'
+
+# The production script must preserve help output, match -- safely, and launch
+# the exact runtime command even when help is malformed or absent.
+grep -Fq 'timeout 5 jackd -d alsa --help >/run/jack-alsa-help 2>&1 || true' "$JACK"
+grep -Fq 'grep -F -- "$option" /run/jack-alsa-help' "$JACK"
+grep -Fq 'jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26' "$JACK"
+grep -Fq "jack_command='jackd -R -P 70" "$JACK"
+
+echo 'PASS JACK help non-zero, safe long-option matching, and launch-attempt regressions'

@@ -3,8 +3,9 @@ set -u
 case "$1" in
   start)
     rm -f /run/scsynth-ready /run/scsynth-input-ports /run/scsynth-output-ports
-    if test ! -e /run/jack-ready; then /usr/bin/sc-adat-progress 'scsynth status: FAIL (JACK unavailable)'; exit 0; fi
+    mkdir -p /var/log
     : > /var/log/scsynth.log
+    if test ! -e /run/jack-ready; then /usr/bin/sc-adat-progress 'scsynth status: SKIP (JACK unavailable)'; exit 0; fi
     timeout 20 scsynth -u 57110 -a 4096 -b 4096 -m 262144 -w 1024 -i 26 -o 26 -z 128 -H jack -R 0 >/var/log/scsynth.log 2>&1 &
     echo $! >/run/scsynth.pid
     i=0

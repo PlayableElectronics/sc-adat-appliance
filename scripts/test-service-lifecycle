@@ -8,4 +8,11 @@ grep -q 'rm -f /run/scsynth-ready' board/dell-optiplex-7010/rootfs-overlay/etc/i
 grep -q 'kill -0' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack
 grep -q 'kill -0' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S50scsynth
 grep -q 'FINAL RESULT:' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
+grep -q 'scsynth status: SKIP (JACK unavailable)' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S50scsynth
+grep -q 'JACK unavailable' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
+grep -q 'rm -f /run/jack-ready' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack
+grep -q 'help-missing:' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack
+grep -q 'USB HID kernel support/configuration:' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
+grep -q '/sys/class/input/\*/name' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
+grep -q 'PTY allocation:' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
 echo 'PASS service timeout, stale-marker and live-process guards'

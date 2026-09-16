@@ -55,6 +55,7 @@ case "$1" in
       touch /run/network-ready /run/dhcp-ready
       /usr/bin/sc-adat-progress "assigned IPv4 address: $found"
     else
+      wait "$dhcpcd_pid" 2>/dev/null || true
       /usr/bin/sc-adat-progress "DHCP timeout after ${NETWORK_TIMEOUT}s"
       /usr/bin/sc-adat-console-log --tail /var/log/dhcpcd.log 'DHCP failure log'
     fi

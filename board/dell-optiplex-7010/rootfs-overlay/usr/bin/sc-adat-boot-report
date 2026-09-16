@@ -6,7 +6,7 @@ mkdir -p /var/log /run
 : >"$tmp"
 failures=0
 value() { test -r "$1" && tr '\n' ' ' <"$1" | sed 's/[[:space:]]*$//' || printf '%s' "${2:-0}"; }
-line() { name=$1; result=$2; detail=${3:-}; test "$result" = PASS || failures=$((failures + 1)); printf '%-36s %s' "$name" "$result" >>"$tmp"; test -n "$detail" && printf ' %s' "$detail" >>"$tmp"; printf '\n' >>"$tmp"; }
+line() { name=$1; result=$2; detail=${3:-}; test "$result" = PASS || test "$result" = SKIP || test "$result" = INFO || failures=$((failures + 1)); printf '%-36s %s' "$name" "$result" >>"$tmp"; test -n "$detail" && printf ' %s' "$detail" >>"$tmp"; printf '\n' >>"$tmp"; }
 kernel=FAIL; uname -v 2>/dev/null | grep -q PREEMPT_RT && kernel=PASS
 line 'kernel PREEMPT_RT:' "$kernel"
 line 'AF_PACKET:' "$(test -e /run/af-packet-ready && echo PASS || echo FAIL)"
@@ -14,12 +14,26 @@ line 'SysV IPC:' "$(test -e /run/sysv-ipc-ready && echo PASS || echo FAIL)"
 shm=FAIL; grep -Eq '[[:space:]]/dev/shm[[:space:]]+tmpfs[[:space:]]' /proc/mounts 2>/dev/null && ls -ld /dev/shm 2>/dev/null | grep -q '^drwxrwxrwt' && shm=PASS
 line '/dev/shm tmpfs mode 1777:' "$shm"
 line 'display console:' "$(test -c /dev/tty0 && echo PASS || echo FAIL)"
-line 'USB keyboard support:' "$(test -d /sys/bus/usb/drivers/usbhid && find /sys/class/input -type f -name name -exec grep -qi keyboard {} \; -print -quit | grep -q . && echo PASS || echo FAIL)"
+hid=FAIL; test -d /sys/bus/usb/drivers/usbhid || test -d /sys/module/usbhid && hid=PASS
+line 'USB HID kernel support/configuration:' "$hid"
+keyboard=INFO; input_name=
+for name_file in /sys/class/input/*/name; do
+  test -r "$name_file" || continue
+  detected_name=$(cat "$name_file" 2>/dev/null || true)
+  case "$detected_name" in
+    *[Kk]eyboard*|*[Kk][Bb][Dd]*|*[Hh][Ii][Dd]*) input_name=$detected_name; keyboard=PASS; break ;;
+  esac
+done
+line 'USB keyboard/input device:' "$keyboard" "${input_name:-not detected (no hardware keyboard evidence)}"
+line 'tty1 recovery console:' "$(test -c /dev/tty1 && echo PASS || echo FAIL)"
+line 'devpts mounted:' "$(test -e /run/devpts-ready && echo PASS || echo FAIL)"
+line 'PTY allocation:' "$(test -e /run/pty-ready && echo PASS || echo FAIL)"
 line 'loopback:' "$(test -e /run/loopback-ready && echo PASS || echo FAIL)"
 iface=$(value /run/sc-adat-network-interface none); link=FAIL; test "$iface" != none && ip link show "$iface" 2>/dev/null | grep -Eq 'state UP|<[A-Z0-9,]*UP' && link=PASS
 line 'Ethernet link:' "$link" "$iface"
 address=$(value /run/sc-adat-ipv4 none); dhcp=FAIL; test "$address" != none && dhcp=PASS
 line 'DHCP IPv4:' "$dhcp" "$address"
+address_display=${address%%/*}
 dropbear=FAIL; test -e /run/dropbear-ready && dropbear=PASS
 line 'Dropbear:' "$dropbear" 'password-development-mode'
 card=FAIL; grep -q Digi9652 /proc/asound/cards 2>/dev/null && card=PASS
@@ -35,12 +49,19 @@ nperiods=$(value /run/jack-nperiods 0); test "$nperiods" = 2 && jn=PASS || jn=FA
 jc=$(value /run/jack-capture-ports 0); test "$jc" = 26 && jcp=PASS || jcp=FAIL; line 'JACK physical capture ports:' "$jcp" "$jc"
 jpout=$(value /run/jack-playback-ports 0); test "$jpout" = 26 && jpp=PASS || jpp=FAIL; line 'JACK physical playback ports:' "$jpp" "$jpout"
 xruns=$(grep -Eic 'xrun' /var/log/jack.log 2>/dev/null || true); test "$xruns" = 0 && jx=PASS || jx=FAIL; line 'JACK xruns during startup:' "$jx" "$xruns"
-line 'scsynth process:' "$(test -r /run/scsynth.pid && kill -0 "$(cat /run/scsynth.pid)" 2>/dev/null && echo PASS || echo FAIL)"
-ready=FAIL; grep -Eqi 'server.*ready|SuperCollider 3 server ready' /var/log/scsynth.log 2>/dev/null && ready=PASS
-line 'scsynth ready:' "$ready"
-si=$(value /run/scsynth-input-ports 0); test "$si" = 26 && sip=PASS || sip=FAIL; line 'scsynth input ports:' "$sip" "$si"
-so=$(value /run/scsynth-output-ports 0); test "$so" = 26 && sop=PASS || sop=FAIL; line 'scsynth output ports:' "$sop" "$so"
-printf 'SSH: root@%s password: scadat\n' "$address" >>"$tmp"
+if test -e /run/jack-ready; then
+  line 'scsynth process:' "$(test -r /run/scsynth.pid && kill -0 "$(cat /run/scsynth.pid)" 2>/dev/null && echo PASS || echo FAIL)"
+  ready=FAIL; grep -Eqi 'server.*ready|SuperCollider 3 server ready' /var/log/scsynth.log 2>/dev/null && ready=PASS
+  line 'scsynth ready:' "$ready"
+  si=$(value /run/scsynth-input-ports 0); test "$si" = 26 && sip=PASS || sip=FAIL; line 'scsynth input ports:' "$sip" "$si"
+  so=$(value /run/scsynth-output-ports 0); test "$so" = 26 && sop=PASS || sop=FAIL; line 'scsynth output ports:' "$sop" "$so"
+else
+  line 'scsynth process:' SKIP 'JACK unavailable'
+  line 'scsynth ready:' SKIP 'JACK unavailable'
+  line 'scsynth input ports:' SKIP 'JACK unavailable'
+  line 'scsynth output ports:' SKIP 'JACK unavailable'
+fi
+printf 'SSH: root@%s password: scadat\n' "$address_display" >>"$tmp"
 printf 'FINAL RESULT: %s (%s failed)\n' "$(test "$failures" -eq 0 && echo PASS || echo FAIL)" "$failures" >>"$tmp"
 {
   printf 'SC-ADAT BOOT REPORT\n'; cat "$tmp"

@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+PTS="$ROOT/board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S04pts"
+INITTAB="$ROOT/board/dell-optiplex-7010/rootfs-overlay/etc/inittab"
+test -x "$PTS"
+grep -Fq 'mount -t devpts -o gid=5,mode=620,ptmxmode=666' "$INITTAB"
+grep -Fq 'sc-adat-kernel-probes --pty' "$PTS"
+grep -Fq 'CONFIG_UNIX98_PTYS' "$PTS"
+
+# Host-side allocation proves the test mechanism itself; the target-side probe
+# is run by S04pts before Dropbear.
+test -c /dev/ptmx
+if command -v script >/dev/null 2>&1; then
+  script -qec 'test -t 0 -a -t 1 && echo PTY-OPEN' /dev/null | grep -q PTY-OPEN
+else
+  echo 'SKIP local PTY allocation: util-linux script unavailable'
+fi
+
+if test -n "${SC_ADAT_TARGET:-}"; then
+  command -v ssh >/dev/null 2>&1
+  command -v sshpass >/dev/null 2>&1 || { echo 'SKIP SSH password test: sshpass unavailable'; exit 0; }
+  SSHPASS=scadat sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"$SC_ADAT_TARGET" 'true'
+  SSHPASS=scadat sshpass -e ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"$SC_ADAT_TARGET" 'test -t 0 -a -t 1'
+else
+  echo 'SKIP target SSH probes: set SC_ADAT_TARGET for password/noninteractive and PTY SSH checks'
+fi
+echo 'PASS devpts/PTTY configuration and SSH test harness'

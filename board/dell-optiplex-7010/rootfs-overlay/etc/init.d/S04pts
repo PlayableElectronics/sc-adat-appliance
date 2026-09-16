@@ -1,0 +1,25 @@
+#!/bin/sh
+set -u
+
+case "${1:-}" in
+  start)
+    rm -f /run/devpts-ready /run/pty-ready
+    mkdir -p /dev/pts
+    if ! grep -Eq '[[:space:]]/dev/pts[[:space:]]+devpts[[:space:]]' /proc/mounts 2>/dev/null; then
+      mount -t devpts -o gid=5,mode=620,ptmxmode=666 devpts /dev/pts 2>/var/log/devpts.log || true
+    fi
+    if grep -Eq '[[:space:]]/dev/pts[[:space:]]+devpts[[:space:]]' /proc/mounts 2>/dev/null && test -e /dev/ptmx; then
+      touch /run/devpts-ready
+      if /usr/bin/sc-adat-kernel-probes --pty >/var/log/pty-probe.log 2>&1; then
+        touch /run/pty-ready
+        /usr/bin/sc-adat-progress 'devpts/PTTY: PASS (CONFIG_UNIX98_PTYS and allocation)'
+      else
+        /usr/bin/sc-adat-progress 'devpts/PTTY: FAIL (allocation probe)'
+      fi
+    else
+      /usr/bin/sc-adat-progress 'devpts/PTTY: FAIL (mount or /dev/ptmx)'
+    fi
+    ;;
+  stop) : ;;
+  *) exit 2 ;;
+esac

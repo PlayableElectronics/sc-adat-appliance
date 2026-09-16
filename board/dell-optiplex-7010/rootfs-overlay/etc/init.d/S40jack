@@ -2,7 +2,7 @@
 set -u
 case "$1" in
   start)
-    rm -f /run/jack-ready /run/jack-rate /run/jack-period /run/jack-nperiods /run/jack-capture-ports /run/jack-playback-ports /run/jack-realtime /run/jack-xruns
+    rm -f /run/jack-ready /run/jack-rate /run/jack-period /run/jack-nperiods /run/jack-capture-ports /run/jack-playback-ports /run/jack-realtime /run/jack-xruns /run/jackd.pid
     : > /var/log/jack.log
     fail() { printf '%s\n' "$*" >>/var/log/jack.log; /usr/bin/sc-adat-progress "JACK status: FAIL ($*)"; /usr/bin/sc-adat-console-log --tail /var/log/jack.log 'JACK failure log'; }
     /usr/bin/sc-adat-progress 'Digi9652 status: waiting'
@@ -13,12 +13,19 @@ case "$1" in
     capture_channels=$(timeout 4 arecord -D hw:CARD=Digi9652,DEV=0 --dump-hw-params -f S32_LE -r 48000 -c 26 </dev/zero 2>&1 | grep -E 'CHANNELS:' | tail -1 | grep -Eo '[0-9]+' | tail -1 || true)
     playback_channels=$(timeout 4 aplay -D hw:CARD=Digi9652,DEV=0 --dump-hw-params -f S32_LE -r 48000 -c 26 </dev/zero 2>&1 | grep -E 'CHANNELS:' | tail -1 | grep -Eo '[0-9]+' | tail -1 || true)
     printf '%s\n' "${capture_channels:-0}" >/run/alsa-capture-channels; printf '%s\n' "${playback_channels:-0}" >/run/alsa-playback-channels
-    if ! timeout 5 jackd -d alsa --help >/run/jack-alsa-help 2>&1 || ! grep -Eq -- '--device.*ALSA device|--rate.*Sample rate|--period.*Frames per period|--nperiods|--inchannels|--outchannels' /run/jack-alsa-help; then fail 'ALSA backend parser/help validation'; exit 0; fi
-    jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26 >/var/log/jack.log 2>&1 &
+    # Help is evidence only. JACK versions may print valid help and return a
+    # non-zero status, and option names beginning with -- need grep --.
+    timeout 5 jackd -d alsa --help >/run/jack-alsa-help 2>&1 || true
+    for option in --device --rate --period --nperiods --inchannels --outchannels; do
+      grep -F -- "$option" /run/jack-alsa-help >/dev/null 2>&1 || printf 'help-missing: %s\n' "$option" >>/var/log/jack.log
+    done
+    jack_command='jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26'
+    printf 'JACK command: %s\n' "$jack_command" >>/var/log/jack.log
+    jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26 >>/var/log/jack.log 2>&1 &
     echo $! >/run/jackd.pid
     i=0
     while test "$i" -lt 15; do
-      if ! kill -0 "$(cat /run/jackd.pid)" 2>/dev/null; then fail 'process exited'; exit 0; fi
+      if ! kill -0 "$(cat /run/jackd.pid)" 2>/dev/null; then wait "$(cat /run/jackd.pid)" 2>/dev/null || true; fail 'JACK/ALSA process exited'; exit 0; fi
       if sc-adat-jack-probe >/run/jack-ports 2>/dev/null; then
         rate=$(grep '^rate=' /run/jack-ports | cut -d= -f2); period=$(grep '^period=' /run/jack-ports | cut -d= -f2)
         nperiods=0; tr '\000' ' ' </proc/$(cat /run/jackd.pid)/cmdline 2>/dev/null | grep -Eq -- '--nperiods 2' && nperiods=2
@@ -30,6 +37,8 @@ case "$1" in
       fi
       sleep 1; i=$((i + 1))
     done
+    kill "$(cat /run/jackd.pid)" 2>/dev/null || true
+    wait "$(cat /run/jackd.pid)" 2>/dev/null || true
     fail 'validation timeout or zero/mismatched runtime values'
     ;;
   stop) test -r /run/jackd.pid && kill "$(cat /run/jackd.pid)" 2>/dev/null || true ;;

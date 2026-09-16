@@ -2,6 +2,7 @@
 set -u
 
 NETWORK_TIMEOUT=12
+DHCPCD_PID_FILE=/run/sc-adat-dhcpcd.pid
 iface=
 
 select_iface() {
@@ -30,7 +31,9 @@ case "$1" in
     /usr/bin/sc-adat-progress "network interface selected: $iface"
     ip link set dev "$iface" up 2>/run/network/error.log || true
     /usr/bin/sc-adat-progress 'DHCP waiting'
-    dhcpcd -B -t "$NETWORK_TIMEOUT" "$iface" >/var/log/dhcpcd.log 2>&1 || true
+    dhcpcd "$iface" >/var/log/dhcpcd.log 2>&1 &
+    dhcpcd_pid=$!
+    printf '%s\n' "$dhcpcd_pid" > "$DHCPCD_PID_FILE"
     found=
     i=0
     while test "$i" -lt "$NETWORK_TIMEOUT"; do
@@ -46,6 +49,11 @@ case "$1" in
       /usr/bin/sc-adat-progress "DHCP timeout after ${NETWORK_TIMEOUT}s"
     fi
     ;;
-  stop) test -r /var/run/dhcpcd/pid && kill "$(cat /var/run/dhcpcd/pid)" 2>/dev/null || true ;;
+  stop)
+    if test -r "$DHCPCD_PID_FILE"; then
+      kill "$(cat "$DHCPCD_PID_FILE")" 2>/dev/null || true
+      rm -f "$DHCPCD_PID_FILE"
+    fi
+    ;;
   *) echo "Usage: $0 {start|stop}" >&2; exit 2 ;;
 esac

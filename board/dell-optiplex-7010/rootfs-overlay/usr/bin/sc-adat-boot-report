@@ -79,6 +79,21 @@ printf 'FINAL RESULT: %s (%s failed)\n' "$(test "$failures" -eq 0 && echo PASS |
   printf '\n-- scsynth.log --\n'; tail -80 /var/log/scsynth.log 2>&1 || true
   printf '\n-- boot-diagnostics.log --\n'; tail -80 /var/log/boot-diagnostics.log 2>&1 || true
 } >"$log" 2>&1
-cat "$log" > /dev/tty0 2>/dev/null || true
-cat "$log" > /dev/ttyS0 2>/dev/null || true
+ip_display=${address_display:-unknown}
+if test "$failures" -eq 0; then
+  {
+    printf 'SC-ADAT READY\nIP: %s\nDigi9652: 26 in / 26 out\n' "$ip_display"
+    printf 'JACK: %s Hz / %s frames / %s periods / RT 70\n' "$rate" "$period" "$nperiods"
+    printf 'scsynth: ready\nxruns: %s\nSSH: ssh root@%s\n' "$xruns" "$ip_display"
+    printf 'Test: sc-adat-tone-test start\nStop: sc-adat-tone-test stop\nFull report: sc-adat-report\n'
+  } >/run/sc-adat-operational-screen
+else
+  {
+    printf 'SC-ADAT BOOT VALIDATION FAILED\nFailed checks:\n'
+    awk '$2 == "FAIL" {print "- " $1}' "$tmp"
+    printf 'Full report: %s\n' "$log"
+  } >/run/sc-adat-operational-screen
+fi
+cat /run/sc-adat-operational-screen > /dev/tty0 2>/dev/null || true
+cat /run/sc-adat-operational-screen > /dev/ttyS0 2>/dev/null || true
 exit 0

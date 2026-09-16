@@ -1,0 +1,68 @@
+#!/bin/sh
+set -u
+RUN=/run/sc-adat-tone-test
+LOG=/var/log/sc-adat-tone-test.log
+DEF=/usr/share/sc-adat/sc-adat-tone.scsyndef
+FREQS='200 250 300 350 400 450 500 550 600 650 700 750 800 850 900 950 1000 1050 1100 1150 1200 1250 1300 1350'
+mkdir -p /run /var/log
+xrun_count() { grep -ciE 'xrun|process error' /var/log/jack.log 2>/dev/null || echo 0; }
+alive() { test -r "$1" && kill -0 "$(cat "$1")" 2>/dev/null; }
+connect_ports() {
+  n=1
+  for f in $FREQS; do
+    if ! jack_lsp -c "jack:out_$n" 2>/dev/null | grep -Fq "system:playback_$n"; then
+      jack_connect "jack:out_$n" "system:playback_$n" >>"$LOG" 2>&1 || return 1
+    fi
+    n=$((n+1))
+  done
+  n=1
+  for f in $FREQS; do jack_lsp -c "jack:out_$n" 2>/dev/null | grep -Fq "system:playback_$n" || return 1; n=$((n+1)); done
+  ! jack_lsp -c 2>/dev/null | grep -E 'jack:out_(25|26).*system:playback_(25|26)' >/dev/null 2>&1
+}
+cleanup() { test -r "$RUN/node" && /usr/bin/sc-adat-tone-osc free "$(cat "$RUN/node")" >/dev/null 2>&1 || true; rm -f "$RUN/node"; }
+release() { test -r "$RUN/node" && /usr/bin/sc-adat-tone-osc release "$(cat "$RUN/node")" >/dev/null 2>&1 || true; sleep 1; }
+fade_in() { i=1; while test "$i" -le 5; do /usr/bin/sc-adat-tone-osc set "$(cat "$RUN/node")" level "$(awk "BEGIN {print -90 + ($level + 90) * $i / 5}")"; sleep .05; i=$((i+1)); done; }
+finish() {
+  end=$(date +%s); after=$(xrun_count); delta=$((after-before)); ja=FAIL; sa=FAIL
+  alive /run/jackd.pid && ja=PASS; alive /run/scsynth.pid && sa=PASS
+  result=PASS; test "$delta" -eq 0 && test "$ja" = PASS && test "$sa" = PASS || result=FAIL
+  { printf 'completion=%s\nduration=%ss\nrequested level=%s dBFS\ncompleted channels=%s\nJACK xruns before=%s\nJACK xruns after=%s\nxrun delta=%s\nJACK alive %s\nscsynth alive %s\nRESULT %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$((end-start))" "$level" "$completed" "$before" "$after" "$delta" "$ja" "$sa" "$result"; } >>"$LOG"
+  release; cleanup; rm -f "$RUN/state" "$RUN/controller"; echo "duration=$((end-start))s level=$level dBFS completed=$completed xruns=$delta RESULT=$result"
+}
+worker() {
+  start=$1; duration=$2; level=$3; mode=$4; completed=0; before=$(cat "$RUN/before");
+  trap 'finish; exit 0' TERM INT
+  if test "$mode" = scan; then
+    i=1; for f in $FREQS; do
+      echo "ADAT$(( (i-1)/8 + 1 )) channel $(( (i-1)%8 + 1 )) / JACK output $i / ${f} Hz"
+      /usr/bin/sc-adat-tone-osc scan "$i" "$level"; echo "$i" >"$RUN/node"; sleep 1; cleanup; completed=$i; i=$((i+1)); done
+  else
+    /usr/bin/sc-adat-tone-osc start -90; echo 1000 >"$RUN/node"; fade_in
+    while test $(( $(date +%s) - start )) -lt "$duration"; do
+      alive /run/jackd.pid && alive /run/scsynth.pid || { echo 'watchdog: JACK/scsynth died' >>"$LOG"; break; }
+      completed=24; sleep 1
+    done
+  fi
+  finish
+}
+case "${1:-}" in
+  start)
+  duration=${2:-60}; level=${3:--36}; mode=${4:-simultaneous}
+  test "$duration" -ge 1 2>/dev/null || { echo 'duration must be positive' >&2; exit 2; }
+  awk "BEGIN { exit !($level <= -18) }" || { echo 'level must be -18 dBFS or lower' >&2; exit 2; }
+  test -e /run/sc-adat-self-test-passed && test -e /run/jack-ready && test -e /run/scsynth-ready || { echo 'boot/audio self-test has not passed' >&2; exit 1; }
+  test ! -e "$RUN/state" || { echo 'tone test already active' >&2; exit 1; }
+  rm -f "$RUN/node"; : >"$LOG"; mkdir -p "$RUN"; before=$(xrun_count); date -u '+start=%Y-%m-%dT%H:%M:%SZ' >>"$LOG"; printf 'mode=%s duration=%s level=%s\n' "$mode" "$duration" "$level" >>"$LOG"
+  { cat /run/jack-ports 2>/dev/null || true; ps -eLo pid,tid,cls,rtprio,pri,stat,comm,args 2>/dev/null || true; } >>"$LOG"
+  connect_ports || { echo 'JACK output connection validation failed' >&2; exit 1; }
+  /usr/bin/sc-adat-tone-osc load "$DEF" || { echo 'SynthDef load failed' >&2; exit 1; }
+  printf '%s\n' "$before" >"$RUN/before"; printf '%s\n' "$level" >"$RUN/level"; printf '%s\n' "$duration" >"$RUN/duration"; printf '%s\n' "$mode" >"$RUN/mode"; printf '%s\n' "$(( $(date +%s) + duration ))" >"$RUN/deadline"; touch "$RUN/state"
+  nohup "$0" --worker "$(( $(date +%s) ))" "$duration" "$level" "$mode" </dev/null >>"$LOG" 2>&1 & echo $! >"$RUN/controller"; echo 'tone test started';;
+scan)
+  exec "$0" start 24 -36 scan;;
+stop) release; cleanup; rm -f "$RUN/state" "$RUN/controller"; echo 'tone test stopped';;
+status)
+  if test -e "$RUN/state"; then now=$(date +%s); remain=$(( $(cat "$RUN/deadline") - now )); test "$remain" -ge 0 || remain=0; echo "active mode=$(cat "$RUN/mode") remaining=${remain}s level=$(cat "$RUN/level") dBFS xrun_delta=$(( $(xrun_count) - $(cat "$RUN/before") ))"; else echo 'inactive'; fi;;
+--worker) shift; worker "$@";;
+*) echo 'Usage: sc-adat-tone-test start [duration-seconds] [level-dbfs] | stop | status | scan' >&2; exit 2;;
+esac

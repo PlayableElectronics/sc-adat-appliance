@@ -1,0 +1,6 @@
+config BR2_PACKAGE_SC_ADAT_TONE_TEST
+    bool "SC-ADAT tone test"
+    depends on BR2_PACKAGE_JACK2
+    depends on BR2_PACKAGE_SUPERCOLLIDER_HEADLESS
+    help
+      Native headless 24-channel ADAT test controller and OSC sender.

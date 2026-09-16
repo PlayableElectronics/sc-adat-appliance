@@ -10,7 +10,11 @@ case "${1:-start}" in
     check test -e /run/jack-ready
     check test -e /run/scsynth-ready
     printf 'cmdline: '; cat /proc/cmdline >>"$log"; cat /proc/asound/cards >>"$log" 2>/dev/null || true; ps >>"$log" 2>&1 || true
-    test "$failures" -eq 0 && summary='final PASS summary' || summary="final FAIL summary ($failures failed)"
+    if test "$failures" -eq 0; then
+      summary='final PASS summary'; touch /run/sc-adat-self-test-passed
+    else
+      summary="final FAIL summary ($failures failed)"; rm -f /run/sc-adat-self-test-passed
+    fi
     printf '%s\n' "$summary" >>"$log"; /usr/bin/sc-adat-progress "$summary"
     ;;
   stop) : ;;

@@ -1,0 +1,4 @@
+#!/bin/sh
+set -u
+test -r /var/log/sc-adat-boot-report.log || { echo 'SC-ADAT boot report is not available'; exit 1; }
+exec less /var/log/sc-adat-boot-report.log 2>/dev/null || exec cat /var/log/sc-adat-boot-report.log

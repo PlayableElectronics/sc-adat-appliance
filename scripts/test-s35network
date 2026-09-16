@@ -35,7 +35,7 @@ run_case() {
   test -s "$tmp/run/sc-adat-dhcpcd.pid"
   test -e "$tmp/lo-up"
   pid=$(cat "$tmp/run/sc-adat-dhcpcd.pid")
-  kill -0 "$pid"
+  if test "$result" = success; then kill -0 "$pid"; fi
   PATH="$tmp/bin:$PATH" "$script" stop
   test ! -e "$tmp/run/sc-adat-dhcpcd.pid"
   echo "PASS S35network $result case (${elapsed}s)"

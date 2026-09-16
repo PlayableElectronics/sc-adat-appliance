@@ -32,10 +32,12 @@ monome norns. Audio is carried by the DIGI9652 over up to three ADAT banks.
 - immutable Buildroot slot A
 - immutable Buildroot slot B
 
-The exact partition table and deployment commands will be written only after
-the installed SSD and firmware boot mode have been inspected. Debian remains
-the default boot target until an appliance image passes hardware, audio, and
-recovery testing.
+The installed system SSD has a dedicated 96 GiB GPT partition labelled
+`SC_ADAT_DATA`, mounted at `/data` by Debian and reserved for the shared
+compiled-payload contract. Buildroot mounts it read-only by label (or its
+recorded UUID), with the remaining SSD space left unallocated. Debian remains
+the saved/default boot target; an appliance candidate is selected only with a
+one-shot GRUB entry after its gates pass.
 
 ## Initial audio targets
 
@@ -68,14 +70,19 @@ image contains no Docker daemon.
 ./lab audio test
 ./lab build candidate
 ./lab verify candidate
+./lab payload build
+./lab payload test
+sudo ./lab payload promote --data-root /data/sc-adat
+sudo ./lab payload verify --data-root /data/sc-adat
 ./lab stage candidate --dry-run
 ./lab boot candidate --dry-run
 ./lab status
 ```
 
-Build and verification run unprivileged. Stage and boot are dry-run-only in
-this milestone and print their exact proposed files, destinations, GRUB entry,
-and one-shot `grub-reboot` commands. Future `./lab slots status`,
+Payload build and verification run unprivileged. Promotion writes only the
+shared data filesystem. Candidate staging and one-shot GRUB selection are
+separate guarded operations; neither changes an existing partition or reboots.
+Future `./lab slots status`,
 `./lab slots promote <slot>`, and `./lab rollback` are reserved but not
 implemented.
 

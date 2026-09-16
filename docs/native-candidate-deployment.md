@@ -1,8 +1,9 @@
 # Native candidate deployment gate
 
 The first candidate is a kernel plus initramfs loaded from Debian's existing
-filesystem. Build and verification do not require root. No command in this
-document has been run by the candidate build.
+filesystem. Build and verification do not require root. The shared
+`SC_ADAT_DATA` filesystem is installed separately at `/data` and is not part
+of the candidate image.
 
 ## Exact proposed files
 

@@ -15,19 +15,17 @@ boot Debian
 ./lab payload build             # pinned sclang; compiled bundle
 ./lab payload test              # real compile/load/NRT checks
 ./lab payload inspect
-sudo ./lab payload promote --data-root /mnt/sc-adat
+sudo ./lab payload promote --data-root /data/sc-adat
 one-shot boot Buildroot
 ```
 
-The consumer and stable OSC loader are implemented and tested against
-temporary roots and the Docker scsynth, but Buildroot is not yet rebuilt and
-has not yet mounted a real data filesystem in this task. The eventual
-Buildroot boot service will never compile `.scd`: it will mount `/data`, verify
-`current`, load compiled SynthDefs through `/usr/bin/sc-adat-osc-loader`, and
-fall back to `previous` and then the immutable factory payload. Payload files
-are immutable after promotion. `current` and `previous` are relative symlinks
-replaced with temporary symlinks and `mv`; no Buildroot, GRUB or reboot command
-is called by payload build/test/promote.
+The Buildroot boot service never compiles `.scd`: it discovers the filesystem
+by the `SC_ADAT_DATA` label, mounts `/data` read-only, verifies `current`,
+loads compiled SynthDefs through `/usr/bin/sc-adat-osc-loader`, and falls back
+to `previous` and then the immutable factory payload. Payload files are
+immutable after promotion. `current` and `previous` are relative symlinks
+replaced with temporary symlinks and `mv`; `sessions/` is writable reserved
+space and is excluded from release validation.
 
 The fixture contract is:
 
@@ -36,14 +34,17 @@ The fixture contract is:
 /data/sc-adat/{current,previous}
 ```
 
-The future partition is labelled `SC_ADAT_DATA`, ext4, mounted at `/data`, and
-only `/data/sc-adat` is owned by this project. It should be a few GiB, leaving
-the remaining SSD unallocated for future use. Debian will mount it by label or
-UUID in its reviewed mount configuration; Buildroot will use the same label or
-UUID and never `/dev/sdX` enumeration. Backup must copy complete versioned
-releases and both symlinks, verify `manifest.sha256` after restore, and keep at
-least one known-good release before deleting old versions. This task creates
-or formats no partition.
+The shared partition is `SC_ADAT_DATA`, ext4, mounted at `/data`; only
+`/data/sc-adat` is owned by this project. Debian mounts it read-write by UUID;
+Buildroot discovers the label and mounts it read-only. Backup must copy
+complete versioned releases and both symlinks, verify `manifest.sha256` after
+restore, and keep at least one known-good release before deleting old versions.
+The installed partition is 96 GiB and leaves the remaining SSD space
+unallocated. Its Debian fstab entry is UUID-based with `nofail` and a bounded
+device timeout. `sessions/` remains writable for future recordings and is
+never included in release manifests. Buildroot does not run fsck automatically
+and continues with the immutable factory payload when the filesystem is absent,
+unmountable or invalid.
 
 The full Buildroot rebuild gate applies only to kernel, drivers, JACK/scsynth,
 libc/toolchain, base utilities, and boot/mount/network/recovery infrastructure.

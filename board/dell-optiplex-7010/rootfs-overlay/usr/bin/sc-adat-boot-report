@@ -38,6 +38,9 @@ dropbear=FAIL; test -e /run/dropbear-ready && dropbear=PASS
 line 'Dropbear:' "$dropbear" 'password-development-mode'
 card=FAIL; grep -q Digi9652 /proc/asound/cards 2>/dev/null && card=PASS
 line 'Digi9652:' "$card"
+line 'data filesystem discovered:' "$(test -e /run/sc-adat-data-discovered && echo PASS || echo SKIP)"
+line 'data filesystem read-only:' "$(test -e /run/sc-adat-data-mounted && echo PASS || echo SKIP)"
+line 'payload activated:' "$(test -e /run/sc-adat-payload-activated && echo PASS || echo FAIL)" "$(test -r /run/sc-adat/payload-version && cat /run/sc-adat/payload-version || echo factory-or-unavailable)"
 capture=$(value /run/alsa-capture-channels 0); test "$capture" = 26 && ac=PASS || ac=FAIL; line 'ALSA capture channels:' "$ac" "$capture"
 playback=$(value /run/alsa-playback-channels 0); test "$playback" = 26 && ap=PASS || ap=FAIL; line 'ALSA playback channels:' "$ap" "$playback"
 line 'JACK process:' "$(test -r /run/jackd.pid && kill -0 "$(cat /run/jackd.pid)" 2>/dev/null && echo PASS || echo FAIL)"
@@ -74,6 +77,7 @@ printf 'FINAL RESULT: %s (%s failed)\n' "$(test "$failures" -eq 0 && echo PASS |
   printf '$ sc-adat-jack-probe\n'; sc-adat-jack-probe 2>&1 || true
   printf '$ jackd -d alsa --help\n'; cat /run/jack-alsa-help 2>&1 || true
   printf '\nFAILURE LOG TAILS\n-- kernel-probes.log --\n'; tail -40 /var/log/kernel-probes.log 2>&1 || true
+  printf '\n-- sc-adat-payload.log --\n'; cat /var/log/sc-adat-payload.log 2>&1 || true
   printf '\n-- dhcpcd.log --\n'; tail -40 /var/log/dhcpcd.log 2>&1 || true
   printf '\n-- jack.log --\n'; tail -80 /var/log/jack.log 2>&1 || true
   printf '\n-- scsynth.log --\n'; tail -80 /var/log/scsynth.log 2>&1 || true

@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+M="$ROOT/board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S55data-payload"
+F="$ROOT/payload/runtime/payload-consumer"
+sh -n "$M" "$F"
+grep -Fq 'blkid -L SC_ADAT_DATA' "$M"
+grep -Fq 'mount -o ro,nosuid,nodev,noexec,noatime' "$M"
+! grep -Eq '/dev/(sd|nvme|vd)[a-z]' "$M"
+! grep -Eq '(^|[[:space:]])fsck([[:space:]]|$)' "$M"
+grep -Fq 'SC_ADAT_NO_SWITCH=1' "$M" "$F"
+grep -Fq 'SC_ADAT_DATA' "$ROOT/docs/payload-workflow.md"
+t=$(mktemp -d); trap 'chmod -R u+w "$t" 2>/dev/null || true; rm -rf "$t"' EXIT
+mkdir -p "$t/releases/1/synthdefs" "$t/releases/1/config" "$t/releases/1/scripts" "$t/sessions"
+printf 'SCgf sc_adat_tone24\n' >"$t/releases/1/synthdefs/sc_adat_tone24.scsyndef"
+printf 'SCgf sc_adat_scan\n' >"$t/releases/1/synthdefs/sc_adat_scan.scsyndef"
+printf '1\n' >"$t/releases/1/VERSION"
+printf '{"protocol_version":1,"synthdefs":["sc_adat_tone24","sc_adat_scan"]}\n' >"$t/releases/1/metadata.json"
+printf 'protocol_version=1\n' >"$t/releases/1/config/payload.conf"
+printf '#!/bin/sh\n' >"$t/releases/1/scripts/payload-consumer"; chmod 555 "$t/releases/1/scripts/payload-consumer"
+(cd "$t/releases/1" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$t/releases/1/manifest.sha256"
+chmod 444 "$t/releases/1"/VERSION "$t/releases/1"/metadata.json "$t/releases/1"/manifest.sha256 "$t/releases/1"/config/payload.conf "$t/releases/1"/synthdefs/*.scsyndef
+chmod 555 "$t/releases/1"/config "$t/releases/1"/synthdefs "$t/releases/1"/scripts "$t/releases/1"
+ln -s releases/1 "$t/current"
+SC_ADAT_OWNER="$(id -u)" "$F" "$t" verify
+test -d "$t/sessions"
+test "$(find "$t/releases/1" -name '*.scd' | wc -l)" -eq 0
+echo 'PASS data label/UUID mount contract, read-only policy and sessions exclusion fixture'

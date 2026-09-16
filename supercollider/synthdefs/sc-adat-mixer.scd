@@ -1,6 +1,6 @@
 // DSP only. Configuration and OSC policy are implemented by mixerctl.py.
 SynthDef(\sc_adat_mixer, {
-  var inputs = In.ar(0, 16);
+  var inputs = In.ar(26, 16);
   var trim = Array.fill(16, { |i| NamedControl.kr(("trim" ++ i).asSymbol, 1) });
   var mute = Array.fill(16, { |i| NamedControl.kr(("mute" ++ i).asSymbol, 0) });
   var polarity = Array.fill(16, { |i| NamedControl.kr(("polarity" ++ i).asSymbol, 1) });
@@ -10,7 +10,7 @@ SynthDef(\sc_adat_mixer, {
   var groupLevel = Array.fill(5, { |g| NamedControl.kr(("groupLevel" ++ g).asSymbol, 1) });
   var master = NamedControl.kr(\master, 1);
   var bypass = NamedControl.kr(\bypass, 0);
-  var channels, grouped, outputs, hardwareOutputs;
+  var channels, grouped, outputs;
   trim = trim.collect { |x| Lag.kr(x.clip(0.0001, 4), 0.03) };
   mute = mute.collect { |x| Lag.kr(x.clip(0, 1), 0.03) };
   polarity = polarity.collect { |x| Lag.kr(x.clip(-1, 1), 0.03) };
@@ -28,11 +28,7 @@ SynthDef(\sc_adat_mixer, {
   outputs = grouped;
   outputs = SelectX.ar(bypass, [outputs * master, inputs]);
   outputs = outputs.collect { |sig| Limiter.ar(sig.clip2(4), 0.99, 0.01) };
-  Out.ar(26, outputs);
-  // Hardware playback buses begin after the 26 input buses. Reading this bus
-  // here makes meters include any explicitly-generated diagnostic tone while
-  // preserving the no-input/feedback guarantee of that tone path.
-  hardwareOutputs = In.ar(26, 16);
+  Out.ar(0, outputs);
   SendReply.kr(Impulse.kr(10), "/mixer/meter",
     channels.collect { |x| Amplitude.kr(x, 0.01, 0.1) }
     ++ channels.collect { |x| Lag.kr(A2K.kr(x.squared), 0.1).sqrt }
@@ -40,7 +36,7 @@ SynthDef(\sc_adat_mixer, {
       .collect { |x| Amplitude.kr(x, 0.01, 0.1) }
     ++ [Mix(grouped[0..3]), grouped[4], Mix(grouped[5..8]), Mix(grouped[9..11]), Mix(grouped[12..15])]
       .collect { |x| Lag.kr(A2K.kr(x.squared), 0.1).sqrt }
-    ++ hardwareOutputs.collect { |x| Amplitude.kr(x, 0.01, 0.1) }
-    ++ hardwareOutputs.collect { |x| Lag.kr(A2K.kr(x.squared), 0.1).sqrt }
+    ++ outputs.collect { |x| Amplitude.kr(x, 0.01, 0.1) }
+    ++ outputs.collect { |x| Lag.kr(A2K.kr(x.squared), 0.1).sqrt }
   );
 }).writeDefFile("/payload-out");

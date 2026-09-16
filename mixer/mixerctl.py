@@ -149,7 +149,7 @@ def print_probe(port=57120, duration=5):
     print(f"input probe: {duration}s, signal threshold -80.0 dBFS")
     for i,value in enumerate(maximum): print(f"I{i+1:02d} {'SIGNAL' if db(value) > -80 else 'silence':7s} peak={db(value):7.1f} dBFS")
 def tone(output, duration=5, port=57110):
-    if not 26 <= output <= 41: raise ValueError("tone output bus must be 26..41")
+    if not 0 <= output <= 15: raise ValueError("tone output bus must be 0..15")
     sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     node=3100
     # sc_adat_scan is deliberately used directly on a hardware-output bus;

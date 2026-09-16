@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+RELEASE="${SC_ADAT_RELEASE_ID:-candidate-1}"
+ART="$ROOT/artifacts/sc-adat-$RELEASE"
+[[ "${1:-}" == --dry-run && $# -eq 1 ]] || { echo 'refusing stage: only --dry-run is implemented' >&2; exit 4; }
+cat <<EOF
+DRY RUN — no files will be copied.
+Source files:
+  $ART/kernel
+  $ART/initramfs
+  $ART/manifest
+  $ART/checksums.sha256
+Destination directory (Debian existing root filesystem):
+  /boot/sc-adat/$RELEASE/
+Proposed copies:
+  install -D -m 0644 $ART/kernel /boot/sc-adat/$RELEASE/kernel
+  install -D -m 0644 $ART/initramfs /boot/sc-adat/$RELEASE/initramfs
+  install -D -m 0644 $ART/manifest /boot/sc-adat/$RELEASE/manifest
+  install -D -m 0644 $ART/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
+No partition, block device, GRUB configuration, or boot variable is changed.
+EOF

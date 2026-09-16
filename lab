@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+readonly ROOT
+readonly EC_USAGE=2
+readonly EC_MISSING=3
+readonly EC_GATE=4
+
+usage() {
+  cat <<'EOF'
+Usage: ./lab <command> [options]
+
+Commands:
+  doctor [--json]                 Check host/tool/container prerequisites
+  audio <build|start|stop|status|logs|test>
+                                  Run the verified Docker JACK workflow
+  build candidate                 Build the native Buildroot RAM appliance
+  verify candidate                Verify candidate artifacts and checksums
+  stage candidate --dry-run       Show candidate files and destinations
+  boot candidate --dry-run        Show one-shot GRUB boot commands
+  status [--json]                 Show repository, container, and artifact state
+
+Reserved, intentionally unimplemented until a reviewed deployment design:
+  slots status | promote <slot>  rollback
+
+All deployment and boot operations require --dry-run in this milestone.
+Run './lab <command> --help' for command-specific help.
+EOF
+}
+
+die_usage() { echo "lab: $*" >&2; echo "Run './lab --help'." >&2; exit "$EC_USAGE"; }
+need_cmd() { command -v "$1" >/dev/null 2>&1 || { echo "missing: $1"; return 1; }; }
+
+doctor() {
+  local json=0 name ok=1
+  [[ "${1:-}" == --help ]] && { cat <<'EOF'; return 0;
+Usage: ./lab doctor [--json]
+Check minimal host, Docker, Buildroot, and audio prerequisites.
+EOF
+  }
+  [[ "${1:-}" == --json ]] && json=1
+  (( $# <= 1 )) || die_usage "doctor accepts only --json"
+  local -a checks=(bash docker git awk gzip sha256sum)
+  if (( json )); then
+    printf '{"checks":['
+    for name in "${checks[@]}"; do
+      if need_cmd "$name" >/dev/null 2>&1; then printf '{"name":"%s","ok":true},' "$name"; else printf '{"name":"%s","ok":false},' "$name"; ok=0; fi
+    done
+    printf '{"name":"audio-card","ok":%s},{"name":"buildroot-config","ok":%s}],"ok":%s}\n' \
+      "$(test -r /proc/asound/cards && echo true || echo false)" \
+      "$(test -r "$ROOT/configs/sc_adat_defconfig" && echo true || echo false)" \
+      "$(test "$ok" -eq 1 && echo true || echo false)"
+    return $((ok ? 0 : 1))
+  fi
+  echo '== lab doctor =='
+  for name in "${checks[@]}"; do
+    if need_cmd "$name" >/dev/null 2>&1; then echo "OK   $name"; else echo "FAIL $name"; ok=0; fi
+  done
+  if test -r /proc/asound/cards; then echo 'OK   /proc/asound/cards'; else echo 'WARN /proc/asound/cards unavailable (host audio checks skipped)'; fi
+  test -r "$ROOT/configs/sc_adat_defconfig" && echo 'OK   Buildroot defconfig' || { echo 'FAIL Buildroot defconfig'; ok=0; }
+  return $((ok ? 0 : 1))
+}
+
+audio() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
+Usage: ./lab audio <build|start|stop|status|logs|test>
+Delegates to scripts/sc-audio; test defaults to 600 seconds.
+EOF
+  }
+  local action=$1; shift
+  (( $# == 0 )) || die_usage "audio accepts one action"
+  case "$action" in
+    build|start|stop|status|logs|test) exec "$ROOT/scripts/sc-audio" "$action" ;;
+    *) die_usage "unknown audio action: $action" ;;
+  esac
+}
+
+candidate_help() {
+  cat <<'EOF'
+Usage: ./lab build candidate
+Build the pinned Buildroot candidate as an unprivileged Docker operation.
+EOF
+}
+
+build_cmd() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { candidate_help; return 0; }
+  [[ "$1" == candidate && $# -eq 1 ]] || die_usage "expected: build candidate"
+  exec docker compose -f "$ROOT/containers/buildroot/compose.yaml" run --rm buildroot
+}
+
+verify_cmd() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
+Usage: ./lab verify candidate
+Validate candidate artifact presence, formats, and checksums.
+EOF
+  }
+  [[ "$1" == candidate && $# -eq 1 ]] || die_usage "expected: verify candidate"
+  exec "$ROOT/scripts/validate-native-candidate"
+}
+
+stage_cmd() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
+Usage: ./lab stage candidate --dry-run
+Print exact candidate files/destinations. Copying is intentionally disabled.
+EOF
+  }
+  [[ "$1" == candidate && "${2:-}" == --dry-run && $# -eq 2 ]] || { echo 'stage is a dry-run-only gate: expected candidate --dry-run' >&2; exit "$EC_GATE"; }
+  exec "$ROOT/scripts/prepare-candidate-stage" --dry-run
+}
+
+boot_cmd() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
+Usage: ./lab boot candidate --dry-run
+Print exact one-shot GRUB entry and grub-reboot commands. Nothing executes.
+EOF
+  }
+  [[ "$1" == candidate && "${2:-}" == --dry-run && $# -eq 2 ]] || { echo 'boot is a dry-run-only gate: expected candidate --dry-run' >&2; exit "$EC_GATE"; }
+  exec "$ROOT/scripts/prepare-candidate-boot" --dry-run
+}
+
+status_cmd() {
+  local json=0
+  [[ "${1:-}" == --help ]] && { cat <<'EOF'; return 0;
+Usage: ./lab status [--json]
+Show Git, Docker audio, Buildroot output, and candidate artifact state.
+EOF
+  }
+  [[ "${1:-}" == --json ]] && json=1
+  (( $# <= 1 )) || die_usage "status accepts only --json"
+  local branch commit audio_state artifacts
+  branch=$(git -C "$ROOT" branch --show-current)
+  commit=$(git -C "$ROOT" rev-parse --short HEAD)
+  audio_state=$(docker compose -f "$ROOT/containers/sc-development/compose.yaml" ps --format '{{.State}}' 2>/dev/null || true)
+  artifacts=$(find "$ROOT/artifacts" -mindepth 1 -maxdepth 1 -type d -printf '%f ' 2>/dev/null || true)
+  if (( json )); then
+    printf '{"branch":"%s","commit":"%s","audio":"%s","artifacts":"%s"}\n' "$branch" "$commit" "$audio_state" "$artifacts"
+  else
+    printf 'branch: %s\ncommit: %s\naudio: %s\nartifacts: %s\n' "$branch" "$commit" "${audio_state:-not running}" "${artifacts:-none}"
+  fi
+}
+
+reserved() {
+  cat >&2 <<'EOF'
+lab: reserved interface; no slot promotion or rollback behavior is implemented.
+No disk, GRUB, boot-variable, or appliance-slot mutation is available here.
+EOF
+  exit "$EC_GATE"
+}
+
+main() {
+  [[ $# -gt 0 ]] || { usage; exit "$EC_USAGE"; }
+  case "$1" in
+    -h|--help|help) usage ;;
+    doctor) shift; doctor "$@" ;;
+    audio) shift; audio "$@" ;;
+    build) shift; build_cmd "$@" ;;
+    verify) shift; verify_cmd "$@" ;;
+    stage) shift; stage_cmd "$@" ;;
+    boot) shift; boot_cmd "$@" ;;
+    status) shift; status_cmd "$@" ;;
+    slots|rollback) reserved ;;
+    *) die_usage "unknown command: $1" ;;
+  esac
+}
+main "$@"

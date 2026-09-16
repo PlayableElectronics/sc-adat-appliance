@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+LAB="$ROOT/lab"
+test "$("$LAB" --help >/dev/null; echo $?)" -eq 0
+test "$("$LAB" doctor --help >/dev/null; echo $?)" -eq 0
+test "$("$LAB" audio --help >/dev/null; echo $?)" -eq 0
+test "$("$LAB" build --help >/dev/null; echo $?)" -eq 0
+test "$("$LAB" stage candidate --dry-run >/dev/null; echo $?)" -eq 0
+test "$("$LAB" boot candidate --dry-run >/dev/null; echo $?)" -eq 0
+if "$LAB" stage candidate >/dev/null 2>&1; then exit 1; else test "$?" -eq 4; fi
+if "$LAB" slots promote A >/dev/null 2>&1; then exit 1; else test "$?" -eq 4; fi
+echo 'PASS lab interface smoke tests'

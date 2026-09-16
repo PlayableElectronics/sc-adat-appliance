@@ -55,11 +55,29 @@ recovery testing.
 - `supercollider/` — startup code, SynthDefs, tests, and examples
 - `scripts/` — build, deployment, hardware, audio, and latency tooling
 - `docs/` — architecture, storage, routing, deployment, and measurements
+- `lab` — canonical human/agent command dispatcher
 
-Buildroot itself is not vendored. A supported release and its Docker builder
-will be pinned after the host baseline is captured and the SuperCollider
-dependency set is validated. Docker is a Debian build-time facility only; the
-appliance image contains no Docker daemon.
+Buildroot itself is not vendored. The pinned Docker builder is the only
+appliance toolchain; Docker is a Debian build-time facility and the appliance
+image contains no Docker daemon.
+
+## Canonical workflow
+
+```sh
+./lab doctor
+./lab audio test
+./lab build candidate
+./lab verify candidate
+./lab stage candidate --dry-run
+./lab boot candidate --dry-run
+./lab status
+```
+
+Build and verification run unprivileged. Stage and boot are dry-run-only in
+this milestone and print their exact proposed files, destinations, GRUB entry,
+and one-shot `grub-reboot` commands. Future `./lab slots status`,
+`./lab slots promote <slot>`, and `./lab rollback` are reserved but not
+implemented.
 
 ## Safety rules
 

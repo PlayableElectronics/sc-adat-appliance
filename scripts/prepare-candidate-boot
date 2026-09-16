@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+RELEASE="${SC_ADAT_RELEASE_ID:-candidate-1}"
+[[ "${1:-}" == --dry-run && $# -eq 1 ]] || { echo 'refusing boot: only --dry-run is implemented' >&2; exit 4; }
+cat <<EOF
+DRY RUN — no GRUB or boot variable command will execute.
+Proposed GRUB generator file: /etc/grub.d/42-sc-adat-candidate (exact entry from candidates/grub-entry.cfg.in)
+menuentry 'SC-ADAT $RELEASE (one-shot candidate)' {
+    insmod part_gpt
+    insmod ext2
+    search --no-floppy --file --set=root /boot/sc-adat/$RELEASE/kernel
+    linux /boot/sc-adat/$RELEASE/kernel console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
+    initrd /boot/sc-adat/$RELEASE/initramfs
+}
+Proposed privileged commands after explicit approval:
+  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/kernel /boot/sc-adat/$RELEASE/kernel
+  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/initramfs /boot/sc-adat/$RELEASE/initramfs
+  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/manifest /boot/sc-adat/$RELEASE/manifest
+  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
+  sudo install -D -m 0755 artifacts/sc-adat-$RELEASE/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+  sudo grub-reboot 'SC-ADAT $RELEASE (one-shot candidate)'
+  sudo reboot
+Rollback: before reboot, remove only the candidate entry/files; after a failed one-shot boot,
+Debian remains the persistent default because grub-reboot sets only the next boot.
+EOF

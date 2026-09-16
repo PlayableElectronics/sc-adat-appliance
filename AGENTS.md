@@ -47,3 +47,24 @@ Work toward a reproducible, measured audio appliance.
   them.
 - Pin Buildroot, Linux, SuperCollider and container base-image versions only
   after the target baseline and dependency tests justify the choices.
+
+## Canonical command interface
+
+Use `./lab` for repository workflows so human and agent operation share the
+same readable dispatcher:
+
+```sh
+./lab doctor
+./lab audio status
+./lab build candidate
+./lab verify candidate
+./lab stage candidate --dry-run
+./lab boot candidate --dry-run
+./lab status
+```
+
+`doctor` and `status` accept `--json`. Build and verify are unprivileged.
+Stage/boot require `--dry-run` and do not mutate files, GRUB, boot variables,
+partitions, or disks. Slot status/promote and rollback are reserved interface
+names only; do not add placeholder mutation behavior without a reviewed
+deployment design and an explicit approval gate.

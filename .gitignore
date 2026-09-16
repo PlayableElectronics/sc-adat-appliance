@@ -9,9 +9,7 @@ __pycache__/
 *.iso
 *.squashfs
 *.wav
-.local/sc-audio-reports/
-.local/buildroot-output/
-.local/buildroot-downloads/
+.local/
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage

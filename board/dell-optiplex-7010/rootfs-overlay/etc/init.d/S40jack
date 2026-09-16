@@ -19,16 +19,16 @@ case "$1" in
     for option in --device --rate --period --nperiods --inchannels --outchannels; do
       grep -F -- "$option" /run/jack-alsa-help >/dev/null 2>&1 || printf 'help-missing: %s\n' "$option" >>/var/log/jack.log
     done
-    jack_command='jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26'
+    jack_command='jackd -R -P70 -dalsa --device=hw:CARD=Digi9652,DEV=0 --rate=48000 --period=128 --nperiods=2 --inchannels=26 --outchannels=26'
     printf 'JACK command: %s\n' "$jack_command" >>/var/log/jack.log
-    jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26 >>/var/log/jack.log 2>&1 &
+    jackd -R -P70 -dalsa --device=hw:CARD=Digi9652,DEV=0 --rate=48000 --period=128 --nperiods=2 --inchannels=26 --outchannels=26 >>/var/log/jack.log 2>&1 &
     echo $! >/run/jackd.pid
     i=0
     while test "$i" -lt 15; do
       if ! kill -0 "$(cat /run/jackd.pid)" 2>/dev/null; then wait "$(cat /run/jackd.pid)" 2>/dev/null || true; fail 'JACK/ALSA process exited'; exit 0; fi
       if sc-adat-jack-probe >/run/jack-ports 2>/dev/null; then
         rate=$(grep '^rate=' /run/jack-ports | cut -d= -f2); period=$(grep '^period=' /run/jack-ports | cut -d= -f2)
-        nperiods=0; tr '\000' ' ' </proc/$(cat /run/jackd.pid)/cmdline 2>/dev/null | grep -Eq -- '--nperiods 2' && nperiods=2
+        nperiods=0; tr '\000' ' ' </proc/$(cat /run/jackd.pid)/cmdline 2>/dev/null | grep -Fq -- '--nperiods=2' && nperiods=2
         capture=$(grep -Ec '^PHYSICAL_CAPTURE ' /run/jack-ports || true); playback=$(grep -Ec '^PHYSICAL_PLAYBACK ' /run/jack-ports || true)
         printf '%s\n' "$rate" >/run/jack-rate; printf '%s\n' "$period" >/run/jack-period; printf '%s\n' "${nperiods:-0}" >/run/jack-nperiods; printf '%s\n' "$capture" >/run/jack-capture-ports; printf '%s\n' "$playback" >/run/jack-playback-ports
         if test "$rate" = 48000 && test "$period" = 128 && test "${nperiods:-0}" = 2 && test "$capture" = 26 && test "$playback" = 26 && ! grep -Eqi 'alsa.*(fail|error)|xrun' /var/log/jack.log; then

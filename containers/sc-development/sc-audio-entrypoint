@@ -2,7 +2,7 @@
 set -eu
 
 if [ "${JACK_REALTIME:-0}" = 1 ]; then
-  jack_mode='-R -P 70'
+  jack_mode='-R -P70'
 else
   # JACK otherwise attempts mlockall(2), which is denied by this host even
   # for root. The realtime path deliberately omits -m once the host permits
@@ -10,8 +10,8 @@ else
   jack_mode='-r -m'
 fi
 
-jackd $jack_mode -d alsa -d 'hw:CARD=Digi9652,DEV=0' \
-  -r 48000 -p 128 -n 2 -i 26 -o 26 > /var/log/jack.log 2>&1 &
+jackd $jack_mode -dalsa -d'hw:CARD=Digi9652,DEV=0' \
+  -r48000 -p128 -n2 -i26 -o26 > /var/log/jack.log 2>&1 &
 jack_pid=$!
 sc_pid=0
 

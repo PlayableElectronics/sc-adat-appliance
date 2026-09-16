@@ -3,10 +3,11 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 JACK="$ROOT/board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack"
+ART="$ROOT/artifacts/sc-adat-candidate-1"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-# Regression fixtures model jackd's valid help output with a non-zero status.
+# The help probe is kept as a shell-level regression for the startup script.
 cat >"$tmp/jackd" <<'EOF'
 #!/bin/sh
 if test "${1:-}" = -d && test "${2:-}" = alsa && test "${3:-}" = --help; then
@@ -22,15 +23,43 @@ TMPDIR="$tmp" PATH="$tmp:$PATH" sh -c '
   for option in --device --rate --period --nperiods --inchannels --outchannels; do
     printf "%s\n" "$help" | grep -F -- "$option" >/dev/null
   done
-  jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26
+  jackd -R -P70 -dalsa --device=hw:CARD=Digi9652,DEV=0 --rate=48000 --period=128 --nperiods=2 --inchannels=26 --outchannels=26
   test -s "$TMPDIR/jack-launch-attempted"
 '
 
-# The production script must preserve help output, match -- safely, and launch
-# the exact runtime command even when help is malformed or absent.
+# The production script must preserve help output, match -- safely, and use
+# attached values for every optional ALSA argument.
 grep -Fq 'timeout 5 jackd -d alsa --help >/run/jack-alsa-help 2>&1 || true' "$JACK"
 grep -Fq 'grep -F -- "$option" /run/jack-alsa-help' "$JACK"
-grep -Fq 'jackd -R -P 70 -d alsa --device hw:CARD=Digi9652,DEV=0 --rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26' "$JACK"
-grep -Fq "jack_command='jackd -R -P 70" "$JACK"
+grep -Fq 'jackd -R -P70 -dalsa --device=hw:CARD=Digi9652,DEV=0 --rate=48000 --period=128 --nperiods=2 --inchannels=26 --outchannels=26' "$JACK"
+grep -Fq "jack_command='jackd -R -P70" "$JACK"
 
-echo 'PASS JACK help non-zero, safe long-option matching, and launch-attempt regressions'
+# Execute the actual musl-built target jackd and ALSA driver parser from the
+# candidate initramfs.  No Debian/glibc jackd is accepted by this test.
+test -s "$ART/initramfs"
+command -v unshare >/dev/null 2>&1
+command -v timeout >/dev/null 2>&1
+target=$(mktemp -d)
+trap 'rm -rf "$tmp" "$target"' EXIT
+gzip -cd "$ART/initramfs" | (cd "$target" && cpio -idm --quiet --no-preserve-owner 2>/dev/null) || true
+test -x "$target/usr/bin/jackd"
+file "$target/usr/bin/jackd" | grep -Fq 'interpreter /lib/ld-musl-x86_64.so.1'
+test -f "$target/usr/lib/jack/jack_alsa.so"
+set +e
+timeout 8 unshare -Urnm sh -c '
+  /usr/bin/mount --bind "$1/lib" /lib
+  JACK_DRIVER_DIR="$1/usr/lib/jack" \
+  LD_LIBRARY_PATH="$1/usr/lib:$1/lib" \
+  ALSA_CONFIG_PATH="$1/usr/share/alsa/alsa.conf" \
+  "$1/usr/bin/jackd" -n jack-parser-regression -dalsa \
+    --device=hw:CARD=Digi9652,DEV=0 --rate=48000 --period=128 \
+    --nperiods=2 --inchannels=26 --outchannels=26
+' sh "$target" >"$tmp/actual-musl-jackd.log" 2>&1
+status=$?
+set -e
+test "$status" -ne 127
+grep -Fq 'jackdmp 1.9.22' "$tmp/actual-musl-jackd.log"
+serialized=$(grep -F 'creating alsa driver' "$tmp/actual-musl-jackd.log")
+printf '%s\n' "$serialized" | grep -Fq '|128|2|48000|26|26|'
+! printf '%s\n' "$serialized" | grep -Eq '\|0(\||$)'
+echo 'PASS musl JACK ALSA parser attached-value regression: period=128 nperiods=2 rate=48000 inchannels=26 outchannels=26'

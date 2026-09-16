@@ -30,8 +30,8 @@ grep -q 'DEVTMPFS_MOUNT=y' "$ART/kernel.config"
 grep -q "console=tty0 console=ttyS0,115200n8" "$ART/grub-entry.cfg"
 if command -v readelf >/dev/null 2>&1; then readelf -l "$tmp/init" "$tmp/bin/busybox" "$tmp/sbin/dhcpcd" "$tmp/usr/sbin/dropbear" | grep -q '/lib/ld-musl-x86_64.so.1'; fi
 for required in 'init started' 'hardware discovery' 'network interface selected' 'DHCP waiting' 'Dropbear status' 'Digi9652 status' '/dev/shm status: PASS' 'JACK status' 'scsynth status' 'SC-ADAT BOOT REPORT' 'FINAL RESULT:' 'password: scadat'; do grep -R -q "$required" "$tmp/usr/bin" "$tmp/etc/init.d"; done
-grep -Fq -- '--device hw:CARD=Digi9652,DEV=0' "$tmp/etc/init.d/S40jack"
-grep -Fq -- '--rate 48000 --period 128 --nperiods 2 --inchannels 26 --outchannels 26' "$tmp/etc/init.d/S40jack"
+grep -Fq -- '--device=hw:CARD=Digi9652,DEV=0' "$tmp/etc/init.d/S40jack"
+grep -Fq -- '--rate=48000 --period=128 --nperiods=2 --inchannels=26 --outchannels=26' "$tmp/etc/init.d/S40jack"
 grep -Fq 'jackd -d alsa --help' "$tmp/etc/init.d/S40jack"
 grep -Fq 'grep -F -- "$option"' "$tmp/etc/init.d/S40jack"
 grep -Fq 'sc-adat-jack-probe' "$tmp/etc/init.d/S40jack"

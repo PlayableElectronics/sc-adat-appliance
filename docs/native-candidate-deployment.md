@@ -14,6 +14,7 @@ artifacts/sc-adat-candidate-1/initramfs          -> /boot/sc-adat/candidate-1/in
 artifacts/sc-adat-candidate-1/kernel.config      -> /boot/sc-adat/candidate-1/kernel.config
 artifacts/sc-adat-candidate-1/manifest           -> /boot/sc-adat/candidate-1/manifest
 artifacts/sc-adat-candidate-1/checksums.sha256   -> /boot/sc-adat/candidate-1/checksums.sha256
+artifacts/sc-adat-candidate-1/grub-entry.cfg     -> /boot/sc-adat/candidate-1/grub-entry.cfg
 artifacts/sc-adat-candidate-1/grub-entry.cfg     -> /etc/grub.d/42-sc-adat-candidate
 ```
 
@@ -46,6 +47,7 @@ sudo install -D -m 0644 "$ART/initramfs" /boot/sc-adat/candidate-1/initramfs
 sudo install -D -m 0644 "$ART/kernel.config" /boot/sc-adat/candidate-1/kernel.config
 sudo install -D -m 0644 "$ART/manifest" /boot/sc-adat/candidate-1/manifest
 sudo install -D -m 0644 "$ART/checksums.sha256" /boot/sc-adat/candidate-1/checksums.sha256
+sudo install -D -m 0644 "$ART/grub-entry.cfg" /boot/sc-adat/candidate-1/grub-entry.cfg
 sudo install -D -m 0755 "$ART/grub-entry.cfg" /etc/grub.d/42-sc-adat-candidate
 sudo install -D -m 0644 /dev/stdin /etc/default/grub.d/90-sc-adat-candidate <<'EOF'
 GRUB_DEFAULT=saved
@@ -115,6 +117,44 @@ The kernel command line contains `console=tty0 console=ttyS0,115200n8`.
 `tty0` supplies visible boot diagnostics on the monitor; `ttyS0` is currently
 the interactive getty. The monitor is not claimed as shell recovery because
 `tty1` is not configured as a getty.
+
+## In-appliance self-test
+
+After JACK and scsynth start, `S60self-test` runs automatically. It writes the
+full evidence and concise result to `/var/log/sc-adat-self-test.log`, checking
+the RT kernel configuration, Digi9652 detection, JACK realtime scheduling,
+26 capture ports, 26 playback ports, 26 scsynth inputs, 26 scsynth outputs and
+scsynth readiness. The final line is written to both `tty0` and `ttyS0`:
+
+```text
+summary: PASS (0 failed)
+```
+
+After the candidate has booted, the exact commands are:
+
+```sh
+# From Debian, select the prepared candidate for one boot and reboot:
+sudo grub-reboot sc-adat-candidate-1
+sudo reboot
+
+# Determine the candidate DHCP address from the serial console, DHCP lease
+# table, or the boot diagnostics shown below, then connect:
+ssh -i .local/appliance/id_ed25519 root@<candidate-dhcp-address>
+
+# From the Debian host, retrieve the self-test and related logs:
+scp -i .local/appliance/id_ed25519 \
+  root@<candidate-dhcp-address>:/var/log/sc-adat-self-test.log \
+  root@<candidate-dhcp-address>:/var/log/boot-diagnostics.log \
+  root@<candidate-dhcp-address>:/var/log/jack.log \
+  root@<candidate-dhcp-address>:/var/log/scsynth.log .local/appliance/
+
+# If the candidate is running and must be selected again for a subsequent
+# controlled boot, use the same stable ID (this is not persistent defaulting):
+sudo grub-reboot sc-adat-candidate-1
+```
+
+The deployment gate itself sets `next_entry` and stops before reboot; it does
+not assume an agent remains connected across the reboot.
 
 ## SSH access
 

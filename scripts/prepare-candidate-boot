@@ -18,6 +18,7 @@ Proposed privileged commands after explicit approval:
   sudo install -D -m 0644 $ART/kernel.config /boot/sc-adat/$RELEASE/kernel.config
   sudo install -D -m 0644 $ART/manifest /boot/sc-adat/$RELEASE/manifest
   sudo install -D -m 0644 $ART/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
+  sudo install -D -m 0644 $ART/grub-entry.cfg /boot/sc-adat/$RELEASE/grub-entry.cfg
   sudo install -D -m 0755 $ART/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
   # Replace DEBIAN_STABLE_ID with the exact ID from the host preflight.
   sudo install -D -m 0644 /dev/stdin /etc/default/grub.d/90-sc-adat-candidate <<'GRUB_DEFAULTS'

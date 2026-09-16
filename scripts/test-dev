@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+tests='scripts/test-payload-contract scripts/test-payload-fixture scripts/test-service-lifecycle scripts/test-tone-test scripts/test-osc-packet scripts/test-tone-osc-real scripts/payload-test-real'
+for test_path in $tests; do
+  log=$(mktemp)
+  if "$ROOT/$test_path" >"$log" 2>&1; then
+    rm -f "$log"
+    echo "PASS $test_path"
+  else
+    echo "FAIL $test_path" >&2
+    tail -40 "$log" >&2
+    rm -f "$log"
+    exit 1
+  fi
+done
+echo 'PASS canonical Debian development test path'

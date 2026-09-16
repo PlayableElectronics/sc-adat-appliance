@@ -14,9 +14,11 @@ the captured `/var/log/sc-adat-boot-report.log` before optical testing.
 | ADAT2 | 9–16 | 600, 650, 700, 750, 800, 850, 900, 950 Hz |
 | ADAT3 | 17–24 | 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350 Hz |
 
-Connect three known-good optical cables from DIGI9652 ADAT outputs 1–3 to
-three powered, clock-compatible optical receivers. Do not connect or monitor
-the S/PDIF outputs 25–26 for this test.
+For this installed main-bracket-only DIGI9652, connect two known-good optical
+cables from ADAT outputs 1 and 2 to two powered, clock-compatible optical
+receivers. A third cable and receiver become applicable only after the ADAT3
+expansion bracket is installed. Do not connect or monitor the S/PDIF outputs
+25–26 for this test.
 
 Hardware inventory and historical acceptance evidence: this installed original
 DIGI9652 has its main bracket only. JACK/ALSA 1–8 (ADAT1) were audibly

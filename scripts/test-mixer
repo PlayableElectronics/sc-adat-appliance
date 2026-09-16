@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+OUT=${SC_ADAT_PAYLOAD_OUT:-$ROOT/.local/payload-build}
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+sh -n "$ROOT/scripts/mixer" "$ROOT/scripts/payload-build"
+python3 -m py_compile "$ROOT/mixer/mixerctl.py"
+"$ROOT/mixer/mixerctl.py" validate "$ROOT/payload/config/mixer.conf"
+sed 's/channel.16.output=16/channel.16.output=24/' "$ROOT/payload/config/mixer.conf" >"$tmp/bad.conf"
+if "$ROOT/mixer/mixerctl.py" validate "$tmp/bad.conf" >/dev/null 2>&1; then echo 'accepted physical channel above 16' >&2; exit 1; fi
+sed 's/master.level_db=0/master.level_db=nan/' "$ROOT/payload/config/mixer.conf" >"$tmp/nan.conf"
+if "$ROOT/mixer/mixerctl.py" validate "$tmp/nan.conf" >/dev/null 2>&1; then echo 'accepted non-finite config' >&2; exit 1; fi
+test "$(grep -Ec '^channel\.[0-9]+\.(input|output)=' "$ROOT/payload/config/mixer.conf")" -eq 32
+! grep -E '^channel\.[0-9]+\.(input|output)=([17-9]|1[7-9]|2[0-4])$' "$ROOT/payload/config/mixer.conf" >/dev/null
+grep -q 'In.ar(0, 16)' "$ROOT/supercollider/synthdefs/sc-adat-mixer.scd"
+"$ROOT/scripts/payload-build" >/dev/null
+test -s "$OUT/synthdefs/sc_adat_mixer.scsyndef"
+grep -aFq sc_adat_mixer "$OUT/synthdefs/sc_adat_mixer.scsyndef"
+sh -c "$COMPOSE run --rm --no-deps --entrypoint sh -v '$tmp:/mixer-test' sc-audio -c 'set -eu; jackd -d dummy -r 48000 -p 128 -n 2 >/tmp/mixer-jack.log 2>&1 & j=\$!; scsynth -u 57118 -a 4096 -i 26 -o 26 -z 128 -H jack >/tmp/mixer-sc.log 2>&1 & s=\$!; trap \"kill \$s \$j 2>/dev/null || true\" EXIT; sleep 2; SC_ADAT_OSC_PORT=57118 /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_mixer.scsyndef; SC_ADAT_OSC_PORT=57118 /usr/bin/sc-adat-osc-loader sync; python3 /workspace/mixer/mixerctl.py apply /workspace/payload/config/mixer.conf --port 57118; python3 /workspace/mixer/test_mixer.py'"
+echo 'PASS mixer syntax, deterministic config, 16-channel mapping, SynthDef compilation, dummy-JACK load/sync, neutral apply'

@@ -74,6 +74,10 @@ image contains no Docker daemon.
 ./lab payload test
 sudo ./lab payload promote --data-root /data/sc-adat
 sudo ./lab payload verify --data-root /data/sc-adat
+./lab mixer build
+./lab mixer start
+./lab mixer test
+./lab mixer stop
 ./lab stage candidate --dry-run
 ./lab boot candidate --dry-run
 ./lab status

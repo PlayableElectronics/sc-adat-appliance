@@ -19,6 +19,8 @@ Commands:
                                   Debian Docker development workflow
   payload <build|test|inspect|promote|status|rollback|verify> [options]
                                   Build/test/promote shared-data payloads
+  mixer <build|start|status|test|stop>
+                                  Transparent 16-channel Debian/Docker mixer
   build candidate                 Build the native Buildroot RAM appliance
   verify candidate                Verify candidate artifacts and checksums
   stage candidate --dry-run       Show candidate files and destinations
@@ -81,6 +83,7 @@ EOF
 }
 
 dev_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab dev {build|start|stop|status|logs|shell|test|tone-test|tone-scan|tone-stop}'; return 0; }; exec "$ROOT/scripts/sc-dev" "$@"; }
+mixer_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab mixer {build|start|status|test|stop}'; return 0; }; exec "$ROOT/scripts/mixer" "$@"; }
 payload_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab payload {build|test|inspect|promote|status|rollback|verify} [--data-root PATH]'; return 0; }; case "$1" in build) exec "$ROOT/scripts/payload-build";; test) exec "$ROOT/scripts/payload-test-real";; inspect) exec "$ROOT/scripts/payload-inspect";; promote|status|rollback|verify) exec "$ROOT/scripts/payload-promote" "$@";; *) die_usage "unknown payload action: $1";; esac; }
 
 candidate_help() {
@@ -162,6 +165,7 @@ main() {
     doctor) shift; doctor "$@" ;;
     audio) shift; audio "$@" ;;
     dev) shift; dev_cmd "$@" ;;
+    mixer) shift; mixer_cmd "$@" ;;
     payload) shift; payload_cmd "$@" ;;
     build) shift; build_cmd "$@" ;;
     verify) shift; verify_cmd "$@" ;;

@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+case "${1:-}" in
+  build) "$ROOT/scripts/payload-build"; sh -c "$COMPOSE build sc-audio" ;;
+  start) sh -c "$COMPOSE up -d sc-audio sc-mixer" ;;
+  status) sh -c "$COMPOSE ps sc-audio sc-mixer" ;;
+  test) exec "$ROOT/scripts/test-mixer" ;;
+  stop) sh -c "$COMPOSE stop sc-mixer sc-audio" ;;
+  *) echo 'Usage: mixer {build|start|status|test|stop}' >&2; exit 2 ;;
+esac

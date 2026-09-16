@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-tests='scripts/test-data-partition scripts/test-payload-contract scripts/test-payload-fixture scripts/test-service-lifecycle scripts/test-tone-test scripts/test-osc-packet scripts/test-tone-osc-real scripts/payload-test-real'
+tests='scripts/test-data-partition scripts/test-payload-contract scripts/test-payload-fixture scripts/test-service-lifecycle scripts/test-tone-test scripts/test-osc-packet scripts/test-tone-osc-real scripts/payload-test-real scripts/test-mixer'
 for test_path in $tests; do
   log=$(mktemp)
   if "$ROOT/$test_path" >"$log" 2>&1; then

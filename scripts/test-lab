@@ -6,6 +6,7 @@ LAB="$ROOT/lab"
 test "$("$LAB" --help >/dev/null; echo $?)" -eq 0
 test "$("$LAB" doctor --help >/dev/null; echo $?)" -eq 0
 test "$("$LAB" audio --help >/dev/null; echo $?)" -eq 0
+test "$("$LAB" mixer --help >/dev/null; echo $?)" -eq 0
 test "$("$LAB" build --help >/dev/null; echo $?)" -eq 0
 test "$("$LAB" stage candidate --dry-run >/dev/null; echo $?)" -eq 0
 test "$("$LAB" boot candidate --dry-run >/dev/null; echo $?)" -eq 0

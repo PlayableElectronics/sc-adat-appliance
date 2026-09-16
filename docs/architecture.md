@@ -63,6 +63,12 @@ implementation choice.
 norns / Dyaxis -- OSC/control --> scsynth appliance -- PCI --> DIGI9652 -- ADAT
 ```
 
+The first production mixer milestone is Debian/Docker-only:
+`mixer/mixerctl.py` owns configuration and OSC policy, while
+`supercollider/synthdefs/sc-adat-mixer.scd` is compiled by Debian `sclang`.
+It activates only 16 confirmed ADAT channels and keeps a 24-channel data-model
+capacity. It does not change Buildroot, partitions, GRUB, or `/boot`.
+
 ## SC-ADAT payload ownership
 
 The Dell has one active boot mode at a time. While Debian is booted, Codex,

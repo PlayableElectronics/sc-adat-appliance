@@ -20,6 +20,7 @@ RUN apt-get update \
         gcc \
         libc6-dev \
         util-linux \
+        python3 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY containers/sc-development/sc-audio-entrypoint /usr/local/bin/sc-audio-entrypoint

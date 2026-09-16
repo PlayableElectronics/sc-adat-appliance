@@ -1,0 +1,15 @@
+#!/bin/sh
+set -u
+
+case "$1" in
+  start)
+    if /usr/bin/sc-adat-kernel-probes >/var/log/kernel-probes.log 2>&1; then
+      /usr/bin/sc-adat-progress 'AF_PACKET socket: PASS'
+      /usr/bin/sc-adat-progress 'SysV semaphore creation: PASS'
+    else
+      /usr/bin/sc-adat-progress 'AF_PACKET/SysV kernel probes: FAIL'
+    fi
+    ;;
+  stop) : ;;
+  *) exit 2 ;;
+esac

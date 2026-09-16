@@ -21,6 +21,12 @@ case "$1" in
   start)
     mkdir -p /run/network /var/log
     /usr/bin/sc-adat-progress 'hardware discovery: network'
+    ip link set lo up 2>/run/network/error.log || true
+    if ip link show lo 2>/dev/null | grep -Eq '(^|[[:space:]])state UP([[:space:]]|$)|<[A-Z0-9,]*UP'; then
+      /usr/bin/sc-adat-progress 'loopback lo: UP'
+    else
+      /usr/bin/sc-adat-progress 'loopback lo: FAIL'
+    fi
     select_iface
     if test -z "$iface"; then
       /usr/bin/sc-adat-progress 'network interface selected: none'

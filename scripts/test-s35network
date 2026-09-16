@@ -8,10 +8,11 @@ trap 'rm -rf "$tmp"' EXIT
 
 mkdir -p "$tmp/bin" "$tmp/sys/class/net/eno1/device" "$tmp/sys/class/net/eno1"
 printf '1\n' > "$tmp/sys/class/net/eno1/type"
+mkdir -p "$tmp/sys/class/net/lo"
 
 printf '%s\n' '#!/bin/sh' 'exit 0' > "$tmp/progress"
 cp "$tmp/progress" "$tmp/console-log"
-printf '%s\n' '#!/bin/sh' 'if test "$1" = link; then exit 0; fi' 'if test "${NETWORK_TEST_RESULT:-fail}" = success; then printf "%s\\n" "1: eno1    inet 192.0.2.10/24"; fi' > "$tmp/bin/ip"
+printf '%s\n' '#!/bin/sh' 'if test "$1" = link && test "$2" = set && test "$3" = lo && test "$4" = up; then : > "$TMP_IP_LO_UP"; exit 0; fi' 'if test "$1" = link && test "$2" = show && test "$3" = lo; then test -e "$TMP_IP_LO_UP" && printf "%s\\n" "1: lo: <LOOPBACK,UP> mtu 65536 state UP"; exit 0; fi' 'if test "$1" = -4; then if test "${NETWORK_TEST_RESULT:-fail}" = success; then printf "%s\\n" "1: eno1    inet 192.0.2.10/24"; fi; fi' > "$tmp/bin/ip"
 printf '%s\n' '#!/bin/sh' 'trap "exit 0" TERM INT' 'while :; do sleep 1; done' > "$tmp/bin/dhcpcd"
 chmod 0755 "$tmp/progress" "$tmp/console-log" "$tmp/bin/ip" "$tmp/bin/dhcpcd"
 
@@ -28,10 +29,11 @@ sed -i \
 run_case() {
   result=$1
   start=$(date +%s)
-  NETWORK_TEST_RESULT=$result PATH="$tmp/bin:$PATH" timeout 14 "$script" start
+  TMP_IP_LO_UP="$tmp/lo-up" NETWORK_TEST_RESULT=$result PATH="$tmp/bin:$PATH" timeout 14 "$script" start
   elapsed=$(( $(date +%s) - start ))
   test "$elapsed" -le 13
   test -s "$tmp/run/sc-adat-dhcpcd.pid"
+  test -e "$tmp/lo-up"
   pid=$(cat "$tmp/run/sc-adat-dhcpcd.pid")
   kill -0 "$pid"
   PATH="$tmp/bin:$PATH" "$script" stop

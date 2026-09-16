@@ -1,0 +1,4 @@
+config BR2_PACKAGE_SC_ADAT_KERNEL_PROBES
+	bool "sc-adat-kernel-probes"
+	help
+	  Small runtime checks for kernel facilities required by the appliance.

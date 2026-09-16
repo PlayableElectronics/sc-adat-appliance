@@ -13,6 +13,10 @@ status=$?
 set -e
 grep -q 'init started' "$ART/qemu-boot.log"
 grep -q 'hardware discovery' "$ART/qemu-boot.log"
+grep -q 'AF_PACKET socket: PASS' "$ART/qemu-boot.log"
+grep -q 'SysV semaphore creation: PASS' "$ART/qemu-boot.log"
+grep -q 'loopback lo: UP' "$ART/qemu-boot.log"
+grep -q 'finished /etc/init.d/S35network' "$ART/qemu-boot.log"
 grep -q 'final FAIL summary' "$ART/qemu-boot.log"
 grep -Eq 'xhci|EHCI|USB' "$ART/qemu-boot.log"
 echo "PASS QEMU userspace/console/bounded-no-network boot (exit=$status): $ART/qemu-boot.log"

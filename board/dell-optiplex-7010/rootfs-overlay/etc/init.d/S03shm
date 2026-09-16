@@ -3,6 +3,7 @@ set -u
 
 case "$1" in
   start)
+    rm -f /run/dev-shm-ready
     is_tmpfs() { grep -Eq '[[:space:]]/dev/shm[[:space:]]+tmpfs[[:space:]]' /proc/mounts 2>/dev/null; }
     mkdir -p /dev/shm
     if ! is_tmpfs; then

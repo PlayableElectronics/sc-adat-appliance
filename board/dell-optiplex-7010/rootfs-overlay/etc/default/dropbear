@@ -1,1 +1,2 @@
-DROPBEAR_ARGS='-s'
+# Development-only policy: root/password login is intentionally enabled.
+DROPBEAR_ARGS=''

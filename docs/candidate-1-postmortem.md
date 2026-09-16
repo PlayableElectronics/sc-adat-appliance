@@ -22,31 +22,25 @@ may be the preferred `/dev/console`, so startup code does not rely on that
 device and writes progress explicitly to both tty0 and ttyS0.
 
 The initramfs now has an explicit `/sbin/init`, BusyBox/musl userspace,
-inittab mounts for proc/sys/devpts/tmpfs/run, tty1 and ttyS0 gettys, and
-explicit progress writes to `/dev/tty0` and `/dev/ttyS0`. tty1 is a physically
-accessible development recovery shell on tty1 only; the root password hash is
-locked and the shell has no password prompt. SSH does not accept passwords
-(`Dropbear -s`) and uses only the supplied root `authorized_keys`. No fixed or
-blank legacy password is restored.
+inittab mounts for proc/sys/devpts/tmpfs/run, tty1 and ttyS0 gettys, explicit
+progress writes to `/dev/tty0` and `/dev/ttyS0`, and one final automatic boot
+report at `/var/log/sc-adat-boot-report.log`. tty1 is the physically
+accessible recovery console. Dropbear root/password login uses the temporary
+`scadat` password as a clearly labeled development-only policy; no
+`authorized_keys` file is required.
 
 S35network selects the first physical, non-loopback Ethernet interface exposed
 through `/sys/class/net/*/device`, so it accepts eno1 or eth0 without assuming
 either name. It starts exactly one background dhcpcd and bounds address polling
 to 12 seconds. Failure continues to local diagnostics and audio startup.
-S40jack, S50scsynth, and S60self-test have bounded waits and readiness markers;
-the self-test does not run the audio checks until scsynth has published a JACK
-port.
+S40jack and S50scsynth have bounded waits, stale-marker removal, live-process
+checks, explicit JACK parser/runtime validation, and readiness markers. The
+final report runs after all services have either started or failed.
 
 ## Hardware gate procedure
 
-This work intentionally stops before deployment. The exact first candidate
-failure was recovered by selecting Debian through the GRUB one-shot recovery
-path; `saved_entry` remained Debian and `next_entry` was cleared. For the next
-candidate boot, record tty0 and ttyS0 output, observe the complete progress
-sequence, verify `eno1`/the selected interface and the RME card, then return to
-Debian if any required milestone is absent. If the machine is unresponsive,
-power-cycle only after waiting the bounded startup window; use the existing
-GRUB recovery selection, verify `next_entry` is empty and `saved_entry` still
-identifies Debian, then inspect the captured serial output. No second-boot
-hardware observation has been made in this postmortem because candidate-1 has
-not been staged or booted.
+The reviewed deployment helper now stages candidate-1, verifies byte-for-byte
+checksums, regenerates and checks GRUB, preserves Debian as `saved_entry`, and
+sets `next_entry=sc-adat-candidate-1` without rebooting. QEMU covers all
+software-testable paths; physical Digi9652/ALSA/JACK/scsynth readiness remains
+the hardware gate and is automatically reported on both consoles.

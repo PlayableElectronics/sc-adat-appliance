@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
 case "$1" in
-  start) if test -r /var/run/dropbear.pid && kill -0 "$(cat /var/run/dropbear.pid)" 2>/dev/null; then /usr/bin/sc-adat-progress 'Dropbear status: PASS (SSH keys only)'; else /usr/bin/sc-adat-progress 'Dropbear status: FAIL'; fi ;;
+  start) rm -f /run/dropbear-ready; if test -r /var/run/dropbear.pid && kill -0 "$(cat /var/run/dropbear.pid)" 2>/dev/null; then touch /run/dropbear-ready; /usr/bin/sc-adat-progress 'Dropbear status: PASS (password-development-mode)'; else /usr/bin/sc-adat-progress 'Dropbear status: FAIL'; fi ;;
   stop) : ;;
   *) exit 2 ;;
 esac

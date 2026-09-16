@@ -1,4 +1,5 @@
 menu "SC ADAT appliance packages"
 source "$BR2_EXTERNAL_SC_ADAT_APPLIANCE_PATH/package/supercollider-headless/Config.in"
 source "$BR2_EXTERNAL_SC_ADAT_APPLIANCE_PATH/package/sc-adat-kernel-probes/Config.in"
+source "$BR2_EXTERNAL_SC_ADAT_APPLIANCE_PATH/package/sc-adat-jack-probe/Config.in"
 endmenu

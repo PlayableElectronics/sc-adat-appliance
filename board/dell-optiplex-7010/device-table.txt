@@ -1,3 +1,2 @@
-# Keep the SSH key usable by root after the unprivileged container build.
-/root/.ssh                    d 0700 0 0 - - - -
-/root/.ssh/authorized_keys    f 0600 0 0 - - - -
+# Root/password SSH is a development-only Dropbear policy; no key file is
+# provisioned in the candidate image.

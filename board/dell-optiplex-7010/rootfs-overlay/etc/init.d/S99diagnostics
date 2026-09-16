@@ -12,6 +12,7 @@ case "$1" in
       ip -brief addr 2>/dev/null || true
       ps -eo pid,ppid,cls,rtprio,pri,ni,stat,comm,args
     } > /var/log/boot-diagnostics.log 2>&1
+    /usr/bin/sc-adat-boot-report
     ;;
   stop)
     {

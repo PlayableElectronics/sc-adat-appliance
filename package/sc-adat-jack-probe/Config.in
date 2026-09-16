@@ -1,0 +1,5 @@
+config BR2_PACKAGE_SC_ADAT_JACK_PROBE
+    bool "sc-adat JACK runtime probe"
+    depends on BR2_PACKAGE_JACK2
+    help
+      Small target-native probe for JACK rate, period and port topology.

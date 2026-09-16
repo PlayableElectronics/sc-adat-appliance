@@ -19,10 +19,12 @@ select_iface() {
 
 case "$1" in
   start)
+    rm -f /run/network-ready /run/loopback-ready /run/dhcp-ready /run/sc-adat-ipv4
     mkdir -p /run/network /var/log
     /usr/bin/sc-adat-progress 'hardware discovery: network'
     ip link set lo up 2>/run/network/error.log || true
     if ip link show lo 2>/dev/null | grep -Eq '(^|[[:space:]])state UP([[:space:]]|$)|<[A-Z0-9,]*UP'; then
+      touch /run/loopback-ready
       /usr/bin/sc-adat-progress 'loopback lo: UP'
     else
       /usr/bin/sc-adat-progress 'loopback lo: FAIL'
@@ -37,7 +39,7 @@ case "$1" in
     /usr/bin/sc-adat-progress "network interface selected: $iface"
     ip link set dev "$iface" up 2>/run/network/error.log || true
     /usr/bin/sc-adat-progress 'DHCP waiting'
-    dhcpcd "$iface" >/var/log/dhcpcd.log 2>&1 &
+    timeout "$NETWORK_TIMEOUT" dhcpcd "$iface" >/var/log/dhcpcd.log 2>&1 &
     dhcpcd_pid=$!
     printf '%s\n' "$dhcpcd_pid" > "$DHCPCD_PID_FILE"
     found=
@@ -50,6 +52,7 @@ case "$1" in
     done
     if test -n "${found:-}"; then
       printf '%s\n' "$found" > /run/sc-adat-ipv4
+      touch /run/network-ready /run/dhcp-ready
       /usr/bin/sc-adat-progress "assigned IPv4 address: $found"
     else
       /usr/bin/sc-adat-progress "DHCP timeout after ${NETWORK_TIMEOUT}s"

@@ -108,26 +108,41 @@ allow the one-shot selection to expire, then remove the candidate files and
 entry from Debian.
 
 Use `./lab stage candidate --dry-run` and `./lab boot candidate --dry-run` to
-print the current release-specific proposal. The commands intentionally stop
-at this deployment gate.
+print the current release-specific proposal. The reviewed apply path is
+`sudo ./candidates/deploy-grub-candidate.sh --apply`; it stages the exact
+candidate, regenerates and checks GRUB, preserves Debian as `saved_entry`, sets
+the candidate as `next_entry`, verifies deployed checksums, and does not reboot.
 
 ## Console diagnostics
 
 The kernel command line contains `console=tty0 console=ttyS0,115200n8`.
 `tty0` supplies visible boot diagnostics on the monitor. `tty1` is the
-physically accessible recovery console and starts a key-only shell; `ttyS0`
-also carries the serial getty and diagnostics. No password login is enabled.
+physically accessible recovery console and starts a shell after boot; `ttyS0`
+also carries the serial getty and diagnostics. The final report is printed on
+both `tty0` and `ttyS0` and remains above the recovery prompt. It is saved as
+`/var/log/sc-adat-boot-report.log`.
 
 ## In-appliance self-test
 
-After JACK and scsynth start, `S60self-test` runs automatically. It writes the
-full evidence and concise result to `/var/log/sc-adat-self-test.log`, checking
-the `/dev/shm` readiness probe, Digi9652 detection, JACK readiness, and
-scsynth readiness. The final result is written to both `tty0` and `ttyS0`:
+After every service has either started or failed, `S99diagnostics` runs the
+single automatic boot report. It checks kernel RT mode, AF_PACKET, SysV IPC,
+`/dev/shm`, display and USB input, loopback, Ethernet/DHCP, Dropbear policy,
+Digi9652/ALSA channels, JACK parser/runtime settings/realtime scheduling/
+physical ports/xruns, and scsynth liveness/readiness/ports. It includes exact
+commands, process scheduling data, JACK port names, ALSA cards, addresses and
+failure-log tails. Supporting logs are `/var/log/kernel-probes.log`,
+`/var/log/dhcpcd.log`, `/var/log/jack.log`, `/var/log/scsynth.log`, and
+`/var/log/boot-diagnostics.log`.
 
 ```text
-final PASS summary
+FINAL RESULT: PASS (0 failed)
 ```
+
+QEMU validates the kernel, initramfs, console, report ordering, bounded
+no-network boot, kernel probes, and failure-report path. QEMU cannot emulate
+the physical RME Digi9652, so Digi9652 detection, 26-channel ALSA parameters,
+JACK runtime topology/realtime thread, and scsynth 26-port readiness remain
+explicit hardware-only checks in the report.
 
 After the candidate has booted, the exact commands are:
 
@@ -138,11 +153,10 @@ sudo reboot
 
 # Determine the candidate DHCP address from the serial console, DHCP lease
 # table, or the boot diagnostics shown below, then connect:
-ssh -i .local/appliance/id_ed25519 root@<candidate-dhcp-address>
+ssh root@<candidate-dhcp-address>
 
-# From the Debian host, retrieve the self-test and related logs:
-scp -i .local/appliance/id_ed25519 \
-  root@<candidate-dhcp-address>:/var/log/sc-adat-self-test.log \
+# From the Debian host, retrieve the boot report and related logs:
+scp root@<candidate-dhcp-address>:/var/log/sc-adat-boot-report.log \
   root@<candidate-dhcp-address>:/var/log/boot-diagnostics.log \
   root@<candidate-dhcp-address>:/var/log/jack.log \
   root@<candidate-dhcp-address>:/var/log/scsynth.log .local/appliance/
@@ -152,28 +166,22 @@ scp -i .local/appliance/id_ed25519 \
 sudo grub-reboot sc-adat-candidate-1
 ```
 
-The deployment gate itself sets `next_entry` and stops before reboot; it does
-not assume an agent remains connected across the reboot.
+The deployment helper sets `next_entry` and stops before reboot; the remaining
+operator action is `sudo reboot` after reviewing the automatic report policy.
 
-## SSH access
+## SSH access (development-only policy)
 
-Password authentication is disabled at Dropbear compile time. Root access uses
-only the public key from the ignored local file
-`.local/appliance/authorized_keys`; the matching private key is never part of
-the repository or image. Create a dedicated key and input file with:
-
-```sh
-install -d -m 0700 .local/appliance
-ssh-keygen -t ed25519 -f .local/appliance/id_ed25519 -C sc-adat-appliance
-cp .local/appliance/id_ed25519.pub .local/appliance/authorized_keys
-./lab build candidate
-```
-
-After DHCP, connect with:
+Dropbear password authentication and root login are intentionally enabled for
+temporary diagnostics on a trusted local network. No
+`.local/appliance/authorized_keys` file is required or included. After DHCP,
+connect with:
 
 ```sh
-ssh -i .local/appliance/id_ed25519 root@<candidate-dhcp-address>
+ssh root@<candidate-dhcp-address>
 ```
+
+Use the temporary diagnostic password `scadat`. This is development-only
+policy and must be removed before production deployment.
 
 The address is available from the DHCP lease table, the serial console, or
 `/var/log/boot-diagnostics.log` (`ip -brief addr`).

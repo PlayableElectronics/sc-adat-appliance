@@ -1,5 +1,5 @@
 #!/bin/sh
 set -u
 test "$(tty 2>/dev/null)" = /dev/tty1 || exit 1
-printf '\nSC-ADAT physical recovery console; SSH keys only.\n'
+printf '\nSC-ADAT physical recovery console; development SSH password is scadat.\n'
 exec /bin/sh -l

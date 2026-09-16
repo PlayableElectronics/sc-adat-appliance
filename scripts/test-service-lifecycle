@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+for f in board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S35network board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S50scsynth; do
+  grep -q 'timeout ' "$f"
+done
+grep -q 'rm -f /run/jack-ready' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack
+grep -q 'rm -f /run/scsynth-ready' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S50scsynth
+grep -q 'kill -0' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S40jack
+grep -q 'kill -0' board/dell-optiplex-7010/rootfs-overlay/etc/init.d/S50scsynth
+grep -q 'FINAL RESULT:' board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-boot-report
+echo 'PASS service timeout, stale-marker and live-process guards'

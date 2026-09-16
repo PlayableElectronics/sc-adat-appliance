@@ -1,2 +1,3 @@
-/* Appliance access is by the provisioned root authorized_keys only. */
-#define DROPBEAR_SVR_PASSWORD_AUTH 0
+/* Development-only diagnostic access on the trusted local network. */
+#define DROPBEAR_SVR_PASSWORD_AUTH 1
+#define DROPBEAR_SVR_ROOTLOGIN 1

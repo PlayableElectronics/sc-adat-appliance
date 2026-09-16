@@ -1,0 +1,63 @@
+#!/bin/sh
+set -u
+log=/var/log/sc-adat-boot-report.log
+tmp=/run/sc-adat-boot-report.txt
+mkdir -p /var/log /run
+: >"$tmp"
+failures=0
+value() { test -r "$1" && tr '\n' ' ' <"$1" | sed 's/[[:space:]]*$//' || printf '%s' "${2:-0}"; }
+line() { name=$1; result=$2; detail=${3:-}; test "$result" = PASS || failures=$((failures + 1)); printf '%-36s %s' "$name" "$result" >>"$tmp"; test -n "$detail" && printf ' %s' "$detail" >>"$tmp"; printf '\n' >>"$tmp"; }
+kernel=FAIL; uname -v 2>/dev/null | grep -q PREEMPT_RT && kernel=PASS
+line 'kernel PREEMPT_RT:' "$kernel"
+line 'AF_PACKET:' "$(test -e /run/af-packet-ready && echo PASS || echo FAIL)"
+line 'SysV IPC:' "$(test -e /run/sysv-ipc-ready && echo PASS || echo FAIL)"
+shm=FAIL; grep -Eq '[[:space:]]/dev/shm[[:space:]]+tmpfs[[:space:]]' /proc/mounts 2>/dev/null && ls -ld /dev/shm 2>/dev/null | grep -q '^drwxrwxrwt' && shm=PASS
+line '/dev/shm tmpfs mode 1777:' "$shm"
+line 'display console:' "$(test -c /dev/tty0 && echo PASS || echo FAIL)"
+line 'USB keyboard support:' "$(test -d /sys/bus/usb/drivers/usbhid && find /sys/class/input -type f -name name -exec grep -qi keyboard {} \; -print -quit | grep -q . && echo PASS || echo FAIL)"
+line 'loopback:' "$(test -e /run/loopback-ready && echo PASS || echo FAIL)"
+iface=$(value /run/sc-adat-network-interface none); link=FAIL; test "$iface" != none && ip link show "$iface" 2>/dev/null | grep -Eq 'state UP|<[A-Z0-9,]*UP' && link=PASS
+line 'Ethernet link:' "$link" "$iface"
+address=$(value /run/sc-adat-ipv4 none); dhcp=FAIL; test "$address" != none && dhcp=PASS
+line 'DHCP IPv4:' "$dhcp" "$address"
+dropbear=FAIL; test -e /run/dropbear-ready && dropbear=PASS
+line 'Dropbear:' "$dropbear" 'password-development-mode'
+card=FAIL; grep -q Digi9652 /proc/asound/cards 2>/dev/null && card=PASS
+line 'Digi9652:' "$card"
+capture=$(value /run/alsa-capture-channels 0); test "$capture" = 26 && ac=PASS || ac=FAIL; line 'ALSA capture channels:' "$ac" "$capture"
+playback=$(value /run/alsa-playback-channels 0); test "$playback" = 26 && ap=PASS || ap=FAIL; line 'ALSA playback channels:' "$ap" "$playback"
+line 'JACK process:' "$(test -r /run/jackd.pid && kill -0 "$(cat /run/jackd.pid)" 2>/dev/null && echo PASS || echo FAIL)"
+rt=FAIL; sched=$(ps -eLo cls,rtprio,comm,args 2>/dev/null | awk '$0 ~ /jackd/ && $1 == "FF" {print $1 "/" $2; exit}'); test "$sched" = FF/70 && rt=PASS
+line 'JACK realtime:' "$rt" "${sched:-unknown}"
+rate=$(value /run/jack-rate 0); test "$rate" = 48000 && jr=PASS || jr=FAIL; line 'JACK rate:' "$jr" "$rate"
+period=$(value /run/jack-period 0); test "$period" = 128 && jp=PASS || jp=FAIL; line 'JACK period:' "$jp" "$period"
+nperiods=$(value /run/jack-nperiods 0); test "$nperiods" = 2 && jn=PASS || jn=FAIL; line 'JACK periods:' "$jn" "$nperiods"
+jc=$(value /run/jack-capture-ports 0); test "$jc" = 26 && jcp=PASS || jcp=FAIL; line 'JACK physical capture ports:' "$jcp" "$jc"
+jpout=$(value /run/jack-playback-ports 0); test "$jpout" = 26 && jpp=PASS || jpp=FAIL; line 'JACK physical playback ports:' "$jpp" "$jpout"
+xruns=$(grep -Eic 'xrun' /var/log/jack.log 2>/dev/null || true); test "$xruns" = 0 && jx=PASS || jx=FAIL; line 'JACK xruns during startup:' "$jx" "$xruns"
+line 'scsynth process:' "$(test -r /run/scsynth.pid && kill -0 "$(cat /run/scsynth.pid)" 2>/dev/null && echo PASS || echo FAIL)"
+ready=FAIL; grep -Eqi 'server.*ready|SuperCollider 3 server ready' /var/log/scsynth.log 2>/dev/null && ready=PASS
+line 'scsynth ready:' "$ready"
+si=$(value /run/scsynth-input-ports 0); test "$si" = 26 && sip=PASS || sip=FAIL; line 'scsynth input ports:' "$sip" "$si"
+so=$(value /run/scsynth-output-ports 0); test "$so" = 26 && sop=PASS || sop=FAIL; line 'scsynth output ports:' "$sop" "$so"
+printf 'SSH: root@%s password: scadat\n' "$address" >>"$tmp"
+printf 'FINAL RESULT: %s (%s failed)\n' "$(test "$failures" -eq 0 && echo PASS || echo FAIL)" "$failures" >>"$tmp"
+{
+  printf 'SC-ADAT BOOT REPORT\n'; cat "$tmp"
+  printf '\nCOMMANDS AND EVIDENCE\n'
+  printf '$ uname -a\n'; uname -a
+  printf '$ cat /proc/cmdline\n'; cat /proc/cmdline
+  printf '$ cat /proc/asound/cards\n'; cat /proc/asound/cards 2>&1 || true
+  printf '$ ip -brief addr\n'; ip -brief addr 2>&1 || true
+  printf '$ ps -eLo pid,tid,cls,rtprio,pri,ni,stat,comm,args\n'; ps -eLo pid,tid,cls,rtprio,pri,ni,stat,comm,args 2>&1 || true
+  printf '$ sc-adat-jack-probe\n'; sc-adat-jack-probe 2>&1 || true
+  printf '$ jackd -d alsa --help\n'; cat /run/jack-alsa-help 2>&1 || true
+  printf '\nFAILURE LOG TAILS\n-- kernel-probes.log --\n'; tail -40 /var/log/kernel-probes.log 2>&1 || true
+  printf '\n-- dhcpcd.log --\n'; tail -40 /var/log/dhcpcd.log 2>&1 || true
+  printf '\n-- jack.log --\n'; tail -80 /var/log/jack.log 2>&1 || true
+  printf '\n-- scsynth.log --\n'; tail -80 /var/log/scsynth.log 2>&1 || true
+  printf '\n-- boot-diagnostics.log --\n'; tail -80 /var/log/boot-diagnostics.log 2>&1 || true
+} >"$log" 2>&1
+cat "$log" > /dev/tty0 2>/dev/null || true
+cat "$log" > /dev/ttyS0 2>/dev/null || true
+exit 0

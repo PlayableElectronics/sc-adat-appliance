@@ -13,6 +13,7 @@ fi
 jackd $jack_mode -dalsa -d'hw:CARD=Digi9652,DEV=0' \
   -r48000 -p128 -n2 -i26 -o26 > /var/log/jack.log 2>&1 &
 jack_pid=$!
+printf '%s\n' "$jack_pid" > /run/jackd.pid
 sc_pid=0
 
 cleanup() {
@@ -20,6 +21,7 @@ cleanup() {
   if [ "$jack_pid" -gt 0 ]; then kill "$jack_pid" 2>/dev/null || true; fi
   if [ "$sc_pid" -gt 0 ]; then wait "$sc_pid" 2>/dev/null || true; fi
   if [ "$jack_pid" -gt 0 ]; then wait "$jack_pid" 2>/dev/null || true; fi
+  rm -f /run/jackd.pid /run/scsynth.pid
 }
 trap cleanup INT TERM EXIT
 
@@ -47,5 +49,6 @@ mkdir -p /root/.local/share/SuperCollider/synthdefs
 scsynth -u 57110 -a 4096 -b 4096 -m 262144 -w 1024 \
   -i 26 -o 26 -z 128 -H jack -R 0 > /var/log/scsynth.log 2>&1 &
 sc_pid=$!
+printf '%s\n' "$sc_pid" > /run/scsynth.pid
 
 wait "$sc_pid"

@@ -2,13 +2,13 @@
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 S="$ROOT/board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-tone-test"
-T="$ROOT/supercollider/sc-adat-tone.scd"
+T="$ROOT/supercollider/synthdefs/sc-adat-tone.scd"
 grep -Fq 'duration=${2:-60}' "$S"; grep -Fq 'level=${3:--36}' "$S"; grep -Fq 'level <= -18' "$S"
 grep -Fq 'sleep 1' "$S"; grep -Fq 'nohup "$0" --worker' "$S"; grep -Fq 'tone test already active' "$S"
-grep -Fq 'jack:out_$n' "$S"; grep -Fq 'system:playback_$n' "$S"; grep -Fq 'playback_(25|26)' "$S"
+grep -Fq 'jack:out_$n' "$S"; grep -Fq 'system:playback_$n' "$S"; grep -Fq 'playback_(25|26)' "$S"; grep -Fq 'sc-adat-osc-loader load' "$S"
 grep -Fq 'xrun delta=' "$S"; grep -Fq 'JACK alive' "$S"; grep -Fq 'scsynth alive' "$S"
-test "$(grep -o '200+i\*50' "$ROOT/package/sc-adat-tone-test/make-synthdef.c" | wc -l)" -eq 1
-test "$(grep -o 'SinOsc' "$T" | wc -l)" -ge 1
-test "$(grep -o 'Out.ar(i' "$T" | wc -l)" -eq 1
+grep -Fq 'var freqs = (200, 250 .. 1350)' "$T"
+test "$(grep -o 'SinOsc' "$T" | wc -l)" -ge 2
+grep -Fq 'Out.ar(0' "$T"; grep -Fq 'Out.ar(output' "$T"
 test "$(awk '{for(i=1;i<=NF;i++)if($i~/Hz/)n++}END{print n+0}' "$ROOT/docs/adat-output-testing.md")" -ge 3
 echo 'PASS tone-test mapping, safety, lifecycle, scan and documentation checks'

@@ -4,6 +4,19 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
 case "${1:-}" in
 start) sh -c "$COMPOSE exec -T sc-audio env SC_ADAT_DEV=1 SC_ADAT_TONE_DEF=/payload-out/synthdefs/sc_adat_tone24.scsyndef /usr/bin/sc-adat-tone-test start";;
+scan)
+  sh -c "$COMPOSE exec -T sc-audio env SC_ADAT_DEV=1 SC_ADAT_TONE_DEF=/payload-out/synthdefs/sc_adat_tone24.scsyndef /usr/bin/sc-adat-tone-test scan" &
+  scan_pid=$!; seen=0
+  while kill -0 "$scan_pid" 2>/dev/null; do
+    lines=$(sh -c "$COMPOSE exec -T sc-audio sh -c 'grep -c ^ADAT /var/log/sc-adat-tone-test.log 2>/dev/null || true'" 2>/dev/null || echo 0)
+    if [ "$lines" -gt "$seen" ] 2>/dev/null; then
+      sh -c "$COMPOSE exec -T sc-audio sh -c 'grep ^ADAT /var/log/sc-adat-tone-test.log | tail -n +$((seen + 1))'"
+      seen=$lines
+    fi
+    sleep 1
+  done
+  wait "$scan_pid" || exit $?
+  ;;
 stop) sh -c "$COMPOSE exec -T sc-audio env SC_ADAT_DEV=1 /usr/bin/sc-adat-tone-test stop";;
-*) echo 'Usage: dev-tone-test {start|stop}' >&2; exit 2;;
+*) echo 'Usage: dev-tone-test {start|scan|stop}' >&2; exit 2;;
 esac

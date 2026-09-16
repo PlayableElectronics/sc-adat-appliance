@@ -11,6 +11,7 @@ logs) sh -c "$COMPOSE logs --no-color";;
 shell) sh -c "$COMPOSE exec sc-audio sh";;
 test) exec "$ROOT/scripts/payload-test-real";;
 tone-test) exec "$ROOT/scripts/dev-tone-test" start;;
+tone-scan) exec "$ROOT/scripts/dev-tone-test" scan;;
 tone-stop) exec "$ROOT/scripts/dev-tone-test" stop;;
-*) echo 'Usage: sc-dev {build|start|stop|status|logs|shell|test|tone-test|tone-stop}' >&2; exit 2;;
+*) echo 'Usage: sc-dev {build|start|stop|status|logs|shell|test|tone-test|tone-scan|tone-stop}' >&2; exit 2;;
 esac

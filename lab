@@ -15,7 +15,7 @@ Commands:
   doctor [--json]                 Check host/tool/container prerequisites
   audio <build|start|stop|status|logs|test>
                                   Run the verified Docker JACK workflow
-  dev <build|start|stop|status|logs|shell|test|tone-test|tone-stop>
+  dev <build|start|stop|status|logs|shell|test|tone-test|tone-scan|tone-stop>
                                   Debian Docker development workflow
   payload <build|test|inspect|promote|status|rollback|verify> [options]
                                   Build/test/promote shared-data payloads
@@ -80,7 +80,7 @@ EOF
   esac
 }
 
-dev_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab dev {build|start|stop|status|logs|shell|test|tone-test|tone-stop}'; return 0; }; exec "$ROOT/scripts/sc-dev" "$@"; }
+dev_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab dev {build|start|stop|status|logs|shell|test|tone-test|tone-scan|tone-stop}'; return 0; }; exec "$ROOT/scripts/sc-dev" "$@"; }
 payload_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab payload {build|test|inspect|promote|status|rollback|verify} [--data-root PATH]'; return 0; }; case "$1" in build) exec "$ROOT/scripts/payload-build";; test) exec "$ROOT/scripts/payload-test-real";; inspect) exec "$ROOT/scripts/payload-inspect";; promote|status|rollback|verify) exec "$ROOT/scripts/payload-promote" "$@";; *) die_usage "unknown payload action: $1";; esac; }
 
 candidate_help() {

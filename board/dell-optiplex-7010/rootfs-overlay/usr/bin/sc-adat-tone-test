@@ -2,10 +2,11 @@
 set -u
 RUN=/run/sc-adat-tone-test
 LOG=/var/log/sc-adat-tone-test.log
-DEF=${SC_ADAT_TONE_DEF:-/usr/share/sc-adat/sc-adat-tone.scsyndef}
+DEF=${SC_ADAT_TONE_DEF:-/run/sc-adat/current/synthdefs/sc_adat_tone24.scsyndef}
+test -r "$DEF" || DEF=/usr/share/sc-adat/factory/synthdefs/sc_adat_tone24.scsyndef
 FREQS='200 250 300 350 400 450 500 550 600 650 700 750 800 850 900 950 1000 1050 1100 1150 1200 1250 1300 1350'
 mkdir -p /run /var/log
-xrun_count() { grep -ciE 'xrun|process error' /var/log/jack.log 2>/dev/null || echo 0; }
+xrun_count() { count=$(grep -ciE 'xrun|process error' /var/log/jack.log 2>/dev/null || true); printf '%s\n' "${count:-0}"; }
 alive() { test -r "$1" && kill -0 "$(cat "$1")" 2>/dev/null; }
 connect_ports() {
   n=1
@@ -61,7 +62,22 @@ case "${1:-}" in
   printf '%s\n' "$before" >"$RUN/before"; printf '%s\n' "$level" >"$RUN/level"; printf '%s\n' "$duration" >"$RUN/duration"; printf '%s\n' "$mode" >"$RUN/mode"; printf '%s\n' "$(( $(date +%s) + duration ))" >"$RUN/deadline"; touch "$RUN/state"
   nohup "$0" --worker "$(( $(date +%s) ))" "$duration" "$level" "$mode" </dev/null >>"$LOG" 2>&1 & echo $! >"$RUN/controller"; echo 'tone test started';;
 scan)
-  exec "$0" start 24 -36 scan;;
+  "$0" start 24 -36 scan
+  seen=0
+  while test -e "$RUN/state"; do
+    lines=$(grep -c '^ADAT' "$LOG" 2>/dev/null || true)
+    if test "$lines" -gt "$seen" 2>/dev/null; then
+      first=$((seen + 1)); last=$lines
+      grep '^ADAT' "$LOG" | sed -n "${first},${last}p" || true
+      seen=$lines
+    fi
+    sleep 1
+  done
+  lines=$(grep -c '^ADAT' "$LOG" 2>/dev/null || true)
+  if test "$lines" -gt "$seen" 2>/dev/null; then
+    grep '^ADAT' "$LOG" | sed -n "$((seen + 1)),${lines}p" || true
+  fi
+  test ! -e "$RUN/state";;
 stop) release; cleanup; rm -f "$RUN/state" "$RUN/controller"; echo 'tone test stopped';;
 status)
   if test -e "$RUN/state"; then now=$(date +%s); remain=$(( $(cat "$RUN/deadline") - now )); test "$remain" -ge 0 || remain=0; echo "active mode=$(cat "$RUN/mode") remaining=${remain}s level=$(cat "$RUN/level") dBFS xrun_delta=$(( $(xrun_count) - $(cat "$RUN/before") ))"; else echo 'inactive'; fi;;

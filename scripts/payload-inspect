@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); OUT=${SC_ADAT_PAYLOAD_OUT:-$ROOT/.local/payload-build}
+test -f "$OUT/manifest.sha256" || { echo 'payload has not been built' >&2; exit 1; }
+cat "$OUT/metadata.json"; (cd "$OUT" && sha256sum -c manifest.sha256)

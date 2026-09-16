@@ -63,28 +63,16 @@ implementation choice.
 norns / Dyaxis -- OSC/control --> scsynth appliance -- PCI --> DIGI9652 -- ADAT
 ```
 
-## Mac-controlled payload topology
+## SC-ADAT payload ownership
 
-The external controller is the user's Mac. Debian and Buildroot are mutually
-exclusive Dell boot modes; neither mode deploys to the other locally. Run
-these commands on the Mac, replacing the address with the Dell's current
-address:
-
-```text
-./lab payload deploy --host <dell-address>
-./lab payload status --host <dell-address>
-./lab payload stop --host <dell-address>
-./lab payload rollback --host <dell-address>
-```
-
-In Debian mode, SSH reaches the Dell and controls the Docker JACK/scsynth
-container. In Buildroot mode, SSH copies target-independent SynthDef source
-under `/run/sc-adat` and controls the stable appliance helper; this data is
-intentionally lost on reboot. The Mac does not build or execute x86_64
-helpers. The stable appliance contains the musl x86_64 helper, while the
-Debian container builds its own native helper for the Dell's x86_64 runtime.
-SynthDef source and payload data are architecture-neutral. No shared data
-partition is created, formatted, or required by this workflow.
+The Dell has one active boot mode at a time. While Debian is booted, Codex,
+the checkout, the pinned Docker development environment, sclang, JACK,
+scsynth and the physical DIGI9652 are all operated locally on that Dell.
+Compiled payloads are promoted to the shared data filesystem. While Buildroot
+is booted, its read-only/RAM appliance mounts that filesystem, validates and
+loads the compiled payload, and never compiles `.scd` or communicates with
+Debian. The Mac is an SSH client only; it is not a compiler, deployment host,
+or required repository location.
 
 ## Build and release flow
 

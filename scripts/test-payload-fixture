@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); t=$(mktemp -d); trap 'rm -rf "$t"' EXIT
+o="$t/out"; d="$t/data"; mkdir -p "$o/synthdefs" "$o/config" "$o/scripts" "$d/releases"
+printf 'SCgf changed synthdef\n' >"$o/synthdefs/sc_adat_tone24.scsyndef"; printf 'SCgf scan\n' >"$o/synthdefs/sc_adat_scan.scsyndef"; printf '1\n' >"$o/VERSION"; printf '{}\n' >"$o/metadata.json"; printf 'protocol_version=1\n' >"$o/config/payload.conf"; printf '#!/bin/sh\n' >"$o/scripts/payload-consumer"; (cd "$o" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$o/manifest.sha256"; touch "$o/.tests-passed"
+SC_ADAT_PAYLOAD_OUT="$o" "$ROOT/scripts/payload-promote" promote --data-root "$d"; test "$(cat "$d/current/VERSION")" = 1
+test "$(stat -c '%a' "$d/releases/1/manifest.sha256")" = 444; cp -a "$d/releases/1" "$d/releases/bad"; chmod -R u+w "$d/releases/bad"; printf bad >"$d/releases/bad/synthdefs/sc_adat_tone24.scsyndef"; ln -sfn releases/bad "$d/current"; if SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" verify; then exit 1; fi; ln -sfn releases/1 "$d/current"
+cp -a "$o" "$t/o2"; printf '2\n' >"$t/o2/VERSION"; (cd "$t/o2" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$t/o2/manifest.sha256"; SC_ADAT_PAYLOAD_OUT="$t/o2" "$ROOT/scripts/payload-promote" promote --data-root "$d"; test "$(cat "$d/previous/VERSION")" = 1; SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" rollback; test "$(cat "$d/current/VERSION")" = 1
+cat >"$t/loader" <<'EOF'
+#!/bin/sh
+case "${SC_FIXTURE_ACK:-ok}:$1" in
+fail:load) echo /fail; exit 1;;
+ok:load) echo /done;;
+ok:sync) echo /synced;;
+ok:validate) echo VALID;;
+ok:activate) echo ACTIVATED;;
+*) exit 1;; esac
+EOF
+chmod +x "$t/loader"; SC_ADAT_OWNER="$(id -u)" SC_ADAT_OSC_LOADER="$t/loader" SC_ADAT_STATE_DIR="$t/state" "$ROOT/payload/runtime/payload-consumer" "$d" activate; test "$(cat "$t/state/payload-version")" = 1
+if SC_FIXTURE_ACK=fail SC_ADAT_OWNER="$(id -u)" SC_ADAT_OSC_LOADER="$t/loader" SC_ADAT_STATE_DIR="$t/state" "$ROOT/payload/runtime/payload-consumer" "$d" activate; then exit 1; fi
+chmod -R u+w "$d"; echo 'PASS fixture manifest rejection, immutable releases, atomic switch, rollback and OSC ack gating'

@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+case "${1:-}" in
+start) sh -c "$COMPOSE exec -T sc-audio env SC_ADAT_DEV=1 SC_ADAT_TONE_DEF=/payload-out/synthdefs/sc_adat_tone24.scsyndef /usr/bin/sc-adat-tone-test start";;
+stop) sh -c "$COMPOSE exec -T sc-audio env SC_ADAT_DEV=1 /usr/bin/sc-adat-tone-test stop";;
+*) echo 'Usage: dev-tone-test {start|stop}' >&2; exit 2;;
+esac

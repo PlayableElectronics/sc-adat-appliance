@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+OUT=${SC_ADAT_PAYLOAD_OUT:-$ROOT/.local/payload-build}
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+VERSION=${SC_ADAT_PAYLOAD_VERSION:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}
+SC_VERSION=${SC_ADAT_VERSION:-3.13.0}; PROTOCOL=1
+rm -rf "$OUT"; mkdir -p "$OUT/synthdefs" "$OUT/config" "$OUT/scripts"
+sh -c "$COMPOSE run --rm --no-deps --entrypoint env sc-audio QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/compile.scd" >"$OUT/sclang.log" 2>&1
+for f in sc_adat_tone24.scsyndef sc_adat_scan.scsyndef; do
+  test -s "$OUT/$f" || { echo "missing or empty SynthDef: $f" >&2; exit 1; }; mv "$OUT/$f" "$OUT/synthdefs/$f"
+done
+test "$(find "$OUT" -maxdepth 1 -type f -name '*.scsyndef' | wc -l)" -eq 0 || { echo 'unexpected SynthDef output' >&2; exit 1; }
+cp "$ROOT/payload/config/payload.conf" "$OUT/config/payload.conf"
+cp "$ROOT/payload/runtime/payload-consumer" "$OUT/scripts/payload-consumer"
+printf '%s\n' "$VERSION" >"$OUT/VERSION"
+source_commit=$(git -C "$ROOT" rev-parse HEAD); source_sha=$(sha256sum "$ROOT/supercollider/synthdefs/sc-adat-tone.scd" | cut -d' ' -f1); epoch=$(git -C "$ROOT" show -s --format=%ct HEAD)
+cat >"$OUT/metadata.json" <<EOF
+{"version":"$VERSION","source_commit":"$source_commit","source_sha256":"$source_sha","supercollider_version":"$SC_VERSION","protocol_version":$PROTOCOL,"source_date_epoch":$epoch}
+EOF
+(cd "$OUT" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$OUT/manifest.sha256"
+(cd "$OUT" && sha256sum -c manifest.sha256)
+printf 'built payload %s: %s\n' "$VERSION" "$OUT"

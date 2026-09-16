@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+sh -n "$ROOT/scripts/payload-build" "$ROOT/scripts/payload-promote" "$ROOT/payload/runtime/payload-consumer"
+grep -Fq 'supercollider-language' "$ROOT/containers/sc-development/Dockerfile"
+grep -Fq 'sc_adat_tone24.scsyndef' "$ROOT/scripts/payload-build"
+grep -Fq 'manifest.sha256' "$ROOT/scripts/payload-build" "$ROOT/scripts/payload-promote"
+grep -Fq 'sha256sum -c' "$ROOT/payload/runtime/payload-consumer"
+grep -Fq '/done' "$ROOT/payload/runtime/payload-consumer"
+grep -Fq '/synced' "$ROOT/payload/runtime/payload-consumer"
+! grep -Fq 'make-synthdef' "$ROOT/package/sc-adat-tone-test/sc-adat-tone-test.mk"
+! grep -Fq 'grub' "$ROOT/scripts/payload-build" "$ROOT/scripts/payload-promote"
+! grep -Fq 'reboot' "$ROOT/scripts/payload-build" "$ROOT/scripts/payload-promote"
+echo 'PASS payload compiler, manifest, consumer and no-platform-mutation contract'

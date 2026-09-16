@@ -35,7 +35,7 @@ worker() {
   if test "$mode" = scan; then
     i=1; for f in $FREQS; do
       echo "ADAT$(( (i-1)/8 + 1 )) channel $(( (i-1)%8 + 1 )) / JACK output $i / ${f} Hz"
-      /usr/bin/sc-adat-tone-osc scan "$i" "$level"; echo "$i" >"$RUN/node"; sleep 1; cleanup; completed=$i; i=$((i+1)); done
+      /usr/bin/sc-adat-tone-osc scan "$i" "$f" "$level"; echo "$i" >"$RUN/node"; sleep 1; cleanup; completed=$i; i=$((i+1)); done
   else
     /usr/bin/sc-adat-tone-osc start -90; echo 1000 >"$RUN/node"; fade_in
     while test $(( $(date +%s) - start )) -lt "$duration"; do
@@ -50,7 +50,7 @@ case "${1:-}" in
   duration=${2:-60}; level=${3:--36}; mode=${4:-simultaneous}
   test "$duration" -ge 1 2>/dev/null || { echo 'duration must be positive' >&2; exit 2; }
   awk "BEGIN { exit !($level <= -18) }" || { echo 'level must be -18 dBFS or lower' >&2; exit 2; }
-  if test "${SC_ADAT_ALLOW_DEBIAN:-0}" != 1; then
+  if test "${SC_ADAT_DEV:-0}" != 1; then
     test -e /run/sc-adat-self-test-passed && test -e /run/jack-ready && test -e /run/scsynth-ready || { echo 'boot/audio self-test has not passed' >&2; exit 1; }
   fi
   test ! -e "$RUN/state" || { echo 'tone test already active' >&2; exit 1; }

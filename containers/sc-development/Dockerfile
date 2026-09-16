@@ -16,7 +16,9 @@ RUN apt-get update \
         procps \
         psmisc \
         supercollider-server \
+        supercollider-language \
         gcc \
+        libc6-dev \
         util-linux \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,9 +26,8 @@ COPY containers/sc-development/sc-audio-entrypoint /usr/local/bin/sc-audio-entry
 COPY containers/sc-development/sc-audio-status /usr/local/bin/sc-audio-status
 COPY board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-tone-test /usr/bin/sc-adat-tone-test
 COPY package/sc-adat-tone-test/sc-adat-tone-osc.c /tmp/sc-adat-tone-osc.c
-COPY supercollider/sc-adat-tone.scd /usr/share/sc-adat/sc-adat-tone.scd
-RUN gcc -O2 /tmp/sc-adat-tone-osc.c -o /usr/bin/sc-adat-tone-osc \
-    && chmod 0755 /usr/local/bin/sc-audio-entrypoint /usr/local/bin/sc-audio-status \
-       /usr/bin/sc-adat-tone-test /usr/bin/sc-adat-tone-osc
+RUN test "$(sclang -v 2>&1 | sed -n 's/.*sclang[[:space:]]\+\([0-9][0-9.]*\).*/\1/p' | head -1)" = 3.13.0 \
+    && gcc -O2 /tmp/sc-adat-tone-osc.c -o /usr/bin/sc-adat-tone-osc \
+    && chmod 0755 /usr/local/bin/sc-audio-entrypoint /usr/local/bin/sc-audio-status /usr/bin/sc-adat-tone-test /usr/bin/sc-adat-tone-osc
 
 ENTRYPOINT ["/usr/local/bin/sc-audio-entrypoint"]

@@ -15,8 +15,10 @@ Commands:
   doctor [--json]                 Check host/tool/container prerequisites
   audio <build|start|stop|status|logs|test>
                                   Run the verified Docker JACK workflow
-  payload <deploy|status|stop|rollback> --host <dell-address>
-                                  Control transient payload from the Mac
+  dev <build|start|stop|status|logs|shell|test|tone-test|tone-stop>
+                                  Debian Docker development workflow
+  payload <build|test|inspect|promote|status|rollback|verify> [options]
+                                  Build/test/promote shared-data payloads
   build candidate                 Build the native Buildroot RAM appliance
   verify candidate                Verify candidate artifacts and checksums
   stage candidate --dry-run       Show candidate files and destinations
@@ -78,15 +80,8 @@ EOF
   esac
 }
 
-payload_cmd() {
-  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
-Usage: ./lab payload {deploy|status|stop|rollback} --host <dell-address>
-Run from the Mac. Detects Debian or Buildroot on the remote Dell.
-EOF
-  }
-  [[ "$1" =~ ^(deploy|status|stop|rollback)$ && "${2:-}" == --host && -n "${3:-}" && $# -eq 3 ]] || die_usage "expected payload action --host address"
-  exec "$ROOT/scripts/payload" "$@"
-}
+dev_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab dev {build|start|stop|status|logs|shell|test|tone-test|tone-stop}'; return 0; }; exec "$ROOT/scripts/sc-dev" "$@"; }
+payload_cmd() { [[ "${1:-}" == --help || $# -eq 0 ]] && { echo 'Usage: ./lab payload {build|test|inspect|promote|status|rollback|verify} [--data-root PATH]'; return 0; }; case "$1" in build) exec "$ROOT/scripts/payload-build";; test) exec "$ROOT/scripts/payload-test-real";; inspect) exec "$ROOT/scripts/payload-inspect";; promote|status|rollback|verify) exec "$ROOT/scripts/payload-promote" "$@";; *) die_usage "unknown payload action: $1";; esac; }
 
 candidate_help() {
   cat <<'EOF'
@@ -166,6 +161,7 @@ main() {
     -h|--help|help) usage ;;
     doctor) shift; doctor "$@" ;;
     audio) shift; audio "$@" ;;
+    dev) shift; dev_cmd "$@" ;;
     payload) shift; payload_cmd "$@" ;;
     build) shift; build_cmd "$@" ;;
     verify) shift; verify_cmd "$@" ;;

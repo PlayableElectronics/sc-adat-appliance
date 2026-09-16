@@ -31,9 +31,9 @@ int main(int argc,char **argv) {
     if(left<n)return 2; memcpy(p,b+64,n); return send_packet(b,p-b+n);
   }
   if(!strcmp(argv[1],"free")) { const char *a[]={argv[2]}; return packet("/n_free",",i",1,a); }
-  if(!strcmp(argv[1],"start")) { const char *a[]={"sc_adat_tone24","1000","-1","0","level",argv[2],"gate","1"}; return packet("/s_new",",siiisfsi",0,a); }
-  if(!strcmp(argv[1],"scan")) { const char *a[]={"sc_adat_tone24","2000","-1","0","level",argv[3],"gate","1"}; return packet("/s_new",",siiisfsi",0,a); }
-  if(!strcmp(argv[1],"release")) { const char *a[]={argv[2],"gate","0"}; return packet("/n_set",",isf",0,a); }
-  if(!strcmp(argv[1],"set")) { const char *a[]={argv[2],argv[3],argv[4]}; return packet("/n_set",",isf",0,a); }
+  if(!strcmp(argv[1],"start") && argc >= 3) { const char *a[]={"sc_adat_tone24","1000","-1","0","level",argv[2],"gate","1"}; return packet("/s_new",",siiisfsi",8,a); }
+  if(!strcmp(argv[1],"scan") && argc >= 5) { const char *a[]={"sc_adat_scan","2000","-1","0","output",argv[2],"freq",argv[3],"level",argv[4],"gate","1"}; return packet("/s_new",",siiisisfsfsi",12,a); }
+  if(!strcmp(argv[1],"release") && argc >= 3) { const char *a[]={argv[2],"gate","0"}; return packet("/n_set",",isf",3,a); }
+  if(!strcmp(argv[1],"set") && argc >= 5) { const char *a[]={argv[2],argv[3],argv[4]}; return packet("/n_set",",isf",3,a); }
   return 2;
 }

@@ -6,7 +6,11 @@ ART=${1:-$ROOT/artifacts/sc-adat-candidate-1}
 test -s "$ART/initramfs"
 
 tmp=$(mktemp -d)
-trap 'chmod -R u+w "$tmp" 2>/dev/null || true; rm -rf "$tmp"' EXIT
+cleanup() {
+  docker run --rm -v "$tmp:/cleanup" debian:13-slim sh -c 'chmod -R u+w /cleanup; rm -rf /cleanup/*' >/dev/null 2>&1 || true
+  rmdir "$tmp" 2>/dev/null || true
+}
+trap cleanup EXIT
 archive=$(gzip -cd "$ART/initramfs" | cpio -tv --quiet)
 printf '%s\n' "$archive" | awk '$NF ~ /^usr\/share\/sc-adat\/factory(\/|$)/ && substr($1,1,1) != "d" && substr($1,1,1) != "-" {bad=1} END {exit bad}'
 printf '%s\n' "$archive" | grep -Eq '^dr-xr-xr-x[[:space:]]+5[[:space:]]+root[[:space:]]+root[[:space:]].*usr/share/sc-adat/factory$'

@@ -1,0 +1,39 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+CONTAINER=${SC_ADAT_CONTAINER:-sc-adat-sc-audio}
+SSH_OPTS=${SC_ADAT_SSH_OPTS:-}
+usage() { echo "Usage: $0 {deploy|status|stop|rollback} --host <dell-address>" >&2; exit 2; }
+action=${1:-}; test -n "$action" || usage; shift
+test "${1:-}" = --host && test -n "${2:-}" && test "$#" -eq 2 || usage
+host=$2
+ssh_cmd() { if test -n "$SSH_OPTS"; then ssh $SSH_OPTS "$host" "$@"; else ssh "$host" "$@"; fi; }
+scp_file() { if test -n "$SSH_OPTS"; then scp $SSH_OPTS "$1" "$host:$2"; else scp "$1" "$host:$2"; fi; }
+is_buildroot() { ssh_cmd 'test -e /etc/sc-adat-release'; }
+remote_exec() { ssh_cmd "SC_ADAT_ALLOW_DEBIAN=1 /usr/bin/sc-adat-tone-test $*"; }
+case "$action" in
+deploy)
+  if is_buildroot; then
+    ssh_cmd 'mkdir -p /run/sc-adat'
+    scp_file "$ROOT/supercollider/sc-adat-tone.scd" /run/sc-adat/sc-adat-tone.scd
+    echo "payload uploaded to $host:/run/sc-adat (Buildroot; transient until reboot)"
+  else
+    test "$(ssh_cmd "docker inspect -f '{{.State.Running}}' '$CONTAINER' 2>/dev/null || true")" = true || { echo "Debian Docker container $CONTAINER is not running" >&2; exit 1; }
+    ssh_cmd "docker exec '$CONTAINER' mkdir -p /run/sc-adat"
+    ssh_cmd "docker exec -i '$CONTAINER' sh -c 'cat > /run/sc-adat/sc-adat-tone.scd'" <"$ROOT/supercollider/sc-adat-tone.scd"
+    echo "payload uploaded to $host Docker container $CONTAINER (Debian mode)"
+  fi
+  ;;
+status)
+  if is_buildroot; then ssh_cmd 'SC_ADAT_TONE_DEF=/usr/share/sc-adat/sc-adat-tone.scsyndef /usr/bin/sc-adat-tone-test status'; else remote_exec status; fi
+  ;;
+stop)
+  if is_buildroot; then ssh_cmd '/usr/bin/sc-adat-tone-test stop; rm -rf /run/sc-adat/*'; else remote_exec stop; fi
+  ;;
+rollback)
+  if is_buildroot; then ssh_cmd '/usr/bin/sc-adat-tone-test stop; rm -rf /run/sc-adat/*'; else ssh_cmd "docker exec '$CONTAINER' /usr/bin/sc-adat-tone-test stop; docker exec '$CONTAINER' rm -rf /run/sc-adat/*"; fi
+  echo "transient payload removed from $host"
+  ;;
+*) usage ;;
+esac

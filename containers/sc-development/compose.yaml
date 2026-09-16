@@ -1,8 +1,8 @@
 services:
   sc-audio:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: containers/sc-development/Dockerfile
     image: sc-adat-sc-development:debian13
     container_name: sc-adat-sc-audio
     init: true

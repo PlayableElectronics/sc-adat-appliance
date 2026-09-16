@@ -2,7 +2,7 @@
 set -u
 RUN=/run/sc-adat-tone-test
 LOG=/var/log/sc-adat-tone-test.log
-DEF=/usr/share/sc-adat/sc-adat-tone.scsyndef
+DEF=${SC_ADAT_TONE_DEF:-/usr/share/sc-adat/sc-adat-tone.scsyndef}
 FREQS='200 250 300 350 400 450 500 550 600 650 700 750 800 850 900 950 1000 1050 1100 1150 1200 1250 1300 1350'
 mkdir -p /run /var/log
 xrun_count() { grep -ciE 'xrun|process error' /var/log/jack.log 2>/dev/null || echo 0; }
@@ -50,7 +50,9 @@ case "${1:-}" in
   duration=${2:-60}; level=${3:--36}; mode=${4:-simultaneous}
   test "$duration" -ge 1 2>/dev/null || { echo 'duration must be positive' >&2; exit 2; }
   awk "BEGIN { exit !($level <= -18) }" || { echo 'level must be -18 dBFS or lower' >&2; exit 2; }
-  test -e /run/sc-adat-self-test-passed && test -e /run/jack-ready && test -e /run/scsynth-ready || { echo 'boot/audio self-test has not passed' >&2; exit 1; }
+  if test "${SC_ADAT_ALLOW_DEBIAN:-0}" != 1; then
+    test -e /run/sc-adat-self-test-passed && test -e /run/jack-ready && test -e /run/scsynth-ready || { echo 'boot/audio self-test has not passed' >&2; exit 1; }
+  fi
   test ! -e "$RUN/state" || { echo 'tone test already active' >&2; exit 1; }
   rm -f "$RUN/node"; : >"$LOG"; mkdir -p "$RUN"; before=$(xrun_count); date -u '+start=%Y-%m-%dT%H:%M:%SZ' >>"$LOG"; printf 'mode=%s duration=%s level=%s\n' "$mode" "$duration" "$level" >>"$LOG"
   { cat /run/jack-ports 2>/dev/null || true; ps -eLo pid,tid,cls,rtprio,pri,stat,comm,args 2>/dev/null || true; } >>"$LOG"

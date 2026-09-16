@@ -39,3 +39,23 @@ does not crash the appliance. Boot evidence is in
 This validates software routing, channel order, timing, and xruns. Only the
 subsequent powered optical-receiver/listening check validates real optical
 output at the ADAT devices.
+
+## Machine ownership
+
+The following commands are typed on the Mac and use SSH to reach the Dell:
+
+```text
+./lab payload deploy --host <dell-address>
+./lab payload status --host <dell-address>
+./lab payload stop --host <dell-address>
+./lab payload rollback --host <dell-address>
+```
+
+When the Dell is booted into Debian, those commands operate the Docker
+container on the Dell. When it is booted into Buildroot, they operate the live
+appliance and use `/run/sc-adat`; the payload disappears at reboot. Commands
+such as `sc-adat-tone-test start` shown above are executed on the Dell by the
+Mac dispatcher (or in an SSH session from the Mac), never by Debian against a
+simultaneously running Buildroot system. Build and repository commands run on
+the Mac checkout; the Docker build/test process runs on the Dell only when
+Debian is booted. No command here creates or formats shared storage.

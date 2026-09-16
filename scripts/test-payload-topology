@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+grep -Fq 'payload <deploy|status|stop|rollback> --host' "$ROOT/lab"
+grep -Fq 'Run from the Mac' "$ROOT/lab"
+grep -Fq '/run/sc-adat' "$ROOT/scripts/payload"
+grep -Fq 'SC_ADAT_TONE_DEF' "$ROOT/board/dell-optiplex-7010/rootfs-overlay/usr/bin/sc-adat-tone-test"
+grep -Fq 'docker exec' "$ROOT/scripts/payload"
+grep -Fq 'is_buildroot' "$ROOT/scripts/payload"
+grep -Fq 'context: ../..' "$ROOT/containers/sc-development/compose.yaml"
+! grep -Fq '/boot/sc-adat' "$ROOT/scripts/payload"
+! grep -Fq 'mkfs' "$ROOT/scripts/payload"
+echo 'PASS Mac-controlled Debian/Buildroot payload topology checks'

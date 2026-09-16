@@ -15,6 +15,8 @@ Commands:
   doctor [--json]                 Check host/tool/container prerequisites
   audio <build|start|stop|status|logs|test>
                                   Run the verified Docker JACK workflow
+  payload <deploy|status|stop|rollback> --host <dell-address>
+                                  Control transient payload from the Mac
   build candidate                 Build the native Buildroot RAM appliance
   verify candidate                Verify candidate artifacts and checksums
   stage candidate --dry-run       Show candidate files and destinations
@@ -74,6 +76,16 @@ EOF
     build|start|stop|status|logs|test) exec "$ROOT/scripts/sc-audio" "$action" ;;
     *) die_usage "unknown audio action: $action" ;;
   esac
+}
+
+payload_cmd() {
+  [[ "${1:-}" == --help || $# -eq 0 ]] && { cat <<'EOF'; return 0;
+Usage: ./lab payload {deploy|status|stop|rollback} --host <dell-address>
+Run from the Mac. Detects Debian or Buildroot on the remote Dell.
+EOF
+  }
+  [[ "$1" =~ ^(deploy|status|stop|rollback)$ && "${2:-}" == --host && -n "${3:-}" && $# -eq 3 ]] || die_usage "expected payload action --host address"
+  exec "$ROOT/scripts/payload" "$@"
 }
 
 candidate_help() {
@@ -154,6 +166,7 @@ main() {
     -h|--help|help) usage ;;
     doctor) shift; doctor "$@" ;;
     audio) shift; audio "$@" ;;
+    payload) shift; payload_cmd "$@" ;;
     build) shift; build_cmd "$@" ;;
     verify) shift; verify_cmd "$@" ;;
     stage) shift; stage_cmd "$@" ;;

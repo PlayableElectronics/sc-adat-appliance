@@ -25,7 +25,18 @@ grep -Eq 'Dropbear status: PASS \(password-development-mode\)' "$ART/qemu-boot.l
 grep -Eq 'xhci|EHCI|USB' "$ART/qemu-boot.log"
 echo "PASS QEMU userspace/console/bounded-no-network boot (exit=$status): $ART/qemu-boot.log"
 
-timeout 35 qemu-system-x86_64 -accel tcg -m 512 -no-reboot -display none -kernel "$ART/kernel" -initrd "$ART/initramfs" -append 'console=ttyS0,115200n8 qemu-payload-test' -nic none -serial stdio >"$ART/qemu-payload.log" 2>&1
-grep -q 'PASS target-runtime payload command audit' "$ART/qemu-payload.log"
-! grep -q 'PAYLOAD-QEMU FAIL' "$ART/qemu-payload.log"
-echo "PASS QEMU target-runtime payload matrix: $ART/qemu-payload.log"
+set +e
+timeout 35 qemu-system-x86_64 -accel tcg -m 512 -no-reboot -display none -kernel "$ART/kernel" -initrd "$ART/initramfs" -append 'console=tty0 console=ttyS0,115200n8 qemu-payload-test' -nic none -serial stdio >"$ART/qemu-payload.log" 2>&1
+payload_status=$?
+set -e
+# Inspect the log regardless of QEMU's status, then require clean poweroff.
+test "$payload_status" -eq 0
+tr -d '\r' <"$ART/qemu-payload.log" >"$ART/qemu-payload.normalized.log"
+test "$(grep -cE '^PAYLOAD-QEMU FINAL (PASS|FAIL)$' "$ART/qemu-payload.normalized.log")" -eq 1
+grep -qx 'PAYLOAD-QEMU FINAL PASS' "$ART/qemu-payload.normalized.log"
+! grep -qE 'PAYLOAD-QEMU FINAL FAIL|Kernel panic|emergency shell|not found|missing target command|PAYLOAD-QEMU FAIL' "$ART/qemu-payload.normalized.log"
+grep -q 'PAYLOAD-QEMU PASS: current-valid:' "$ART/qemu-payload.normalized.log"
+grep -q 'PAYLOAD-QEMU PASS: current-previous:' "$ART/qemu-payload.normalized.log"
+grep -q 'PAYLOAD-QEMU PASS: factory-fallback:' "$ART/qemu-payload.normalized.log"
+grep -q 'PAYLOAD-QEMU PASS: missing-data:' "$ART/qemu-payload.normalized.log"
+echo "PASS QEMU target-runtime payload matrix (exit=$payload_status): $ART/qemu-payload.log"

@@ -19,13 +19,15 @@ sudo ./lab payload promote --data-root /mnt/sc-adat
 one-shot boot Buildroot
 ```
 
-Buildroot never compiles `.scd`. It mounts the future data filesystem at
-`/data`, verifies `current`, loads the compiled SynthDefs through the stable
-OSC loader (`/done` or `/fail`, then `/sync` and `/synced`), and falls back to
-`previous` and then a factory payload. Payload files are immutable after
-promotion. `current` and `previous` are relative symlinks replaced with
-temporary symlinks and `mv`; no Buildroot, GRUB or reboot command is called by
-payload build/test/promote.
+The consumer and stable OSC loader are implemented and tested against
+temporary roots and the Docker scsynth, but Buildroot is not yet rebuilt and
+has not yet mounted a real data filesystem in this task. The eventual
+Buildroot boot service will never compile `.scd`: it will mount `/data`, verify
+`current`, load compiled SynthDefs through `/usr/bin/sc-adat-osc-loader`, and
+fall back to `previous` and then the immutable factory payload. Payload files
+are immutable after promotion. `current` and `previous` are relative symlinks
+replaced with temporary symlinks and `mv`; no Buildroot, GRUB or reboot command
+is called by payload build/test/promote.
 
 The fixture contract is:
 

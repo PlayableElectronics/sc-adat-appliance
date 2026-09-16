@@ -2,10 +2,17 @@
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); OUT=${SC_ADAT_PAYLOAD_OUT:-$ROOT/.local/payload-build}; COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
 start_epoch=$(date +%s)
+SC_ADAT_TEST_PORT=$((57000 + ($$ % 900)))
 "$ROOT/scripts/payload-build"
 for f in "$OUT"/synthdefs/*.scsyndef; do test -s "$f"; done
 grep -aFq sc_adat_tone24 "$OUT/synthdefs/sc_adat_tone24.scsyndef"
 grep -aFq sc_adat_scan "$OUT/synthdefs/sc_adat_scan.scsyndef"
-sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'jackd -d dummy -r 48000 -p 128 >/tmp/jack.log 2>&1 & j=\$!; scsynth -u 57120 -a 26 -i 0 -o 26 >/tmp/scsynth.log 2>&1 & p=\$!; trap \"kill \$p \$j 2>/dev/null || true\" EXIT; sleep 2; QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/integration.scd'"
+sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'jackd -d dummy -r 48000 -p 128 >/tmp/jack.log 2>&1 & j=\$!; scsynth -u $SC_ADAT_TEST_PORT -a 26 -i 0 -o 26 >/tmp/scsynth.log 2>&1 & p=\$!; trap \"kill \$p \$j 2>/dev/null || true\" EXIT; sleep 2; SC_ADAT_OSC_PORT=$SC_ADAT_TEST_PORT /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_tone24.scsyndef /payload-out/synthdefs/sc_adat_scan.scsyndef; SC_ADAT_OSC_PORT=$SC_ADAT_TEST_PORT /usr/bin/sc-adat-osc-loader sync; SC_ADAT_OSC_PORT=$SC_ADAT_TEST_PORT /usr/bin/sc-adat-osc-loader validate; SC_ADAT_OSC_PORT=$SC_ADAT_TEST_PORT /usr/bin/sc-adat-osc-loader activate'"
+printf 'not-a-synthdef' >"$OUT/malformed.scsyndef"
+if sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'SC_ADAT_OSC_PORT=$SC_ADAT_TEST_PORT /usr/bin/sc-adat-osc-loader load /payload-out/malformed.scsyndef'"; then echo 'malformed SynthDef was accepted' >&2; exit 1; fi
+if SC_ADAT_OSC_PORT=57119 timeout 6 sh -c "$COMPOSE run --rm --no-deps --entrypoint sh sc-audio -c 'SC_ADAT_OSC_PORT=57119 /usr/bin/sc-adat-osc-loader sync'"; then echo 'missing scsynth was accepted' >&2; exit 1; fi
+docker compose -f "$ROOT/containers/sc-development/compose.yaml" run --rm --no-deps --entrypoint sh sc-audio -c 'QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/nrt-render.scd'
+docker compose -f "$ROOT/containers/sc-development/compose.yaml" run --rm --no-deps --entrypoint sh sc-audio -c 'QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/nrt-scan.scd'
+docker compose -f "$ROOT/containers/sc-development/compose.yaml" run --rm --no-deps --entrypoint sh sc-audio -c 'gcc -O2 /workspace/scripts/payload-analyze.c -lm -o /tmp/payload-analyze && /tmp/payload-analyze tone /payload-out/sc-adat-tone24.wav && /tmp/payload-analyze scan /payload-out/sc-adat-scan.wav'
 touch "$OUT/.tests-passed"
 echo "PASS pinned sclang compilation, SynthDef inspection and scsynth binary integration (${SECONDS:-$(( $(date +%s) - start_epoch ))}s)"

@@ -25,11 +25,6 @@ static int packet(const char *addr,const char *types,int argc,const char **args)
 }
 int main(int argc,char **argv) {
   if(argc<2)return 2;
-  if(!strcmp(argv[1],"load")) {
-    FILE *f=fopen(argv[2],"rb"); unsigned char b[65536]; size_t n; if(!f)return 1;
-    n=fread(b+64,1,sizeof(b)-64,f); fclose(f); p=b;left=64;str("/d_recv");str(",b");
-    if(left<n)return 2; memcpy(p,b+64,n); return send_packet(b,p-b+n);
-  }
   if(!strcmp(argv[1],"free")) { const char *a[]={argv[2]}; return packet("/n_free",",i",1,a); }
   if(!strcmp(argv[1],"start") && argc >= 3) { const char *a[]={"sc_adat_tone24","1000","-1","0","level",argv[2],"gate","1"}; return packet("/s_new",",siiisfsi",8,a); }
   if(!strcmp(argv[1],"scan") && argc >= 5) { const char *a[]={"sc_adat_scan","2000","-1","0","output",argv[2],"freq",argv[3],"level",argv[4],"gate","1"}; return packet("/s_new",",siiisisfsfsi",12,a); }

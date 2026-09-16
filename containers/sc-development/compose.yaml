@@ -29,5 +29,6 @@ services:
     volumes:
       - ../../supercollider:/workspace/supercollider:ro
       - ../../payload:/workspace/payload:ro
+      - ../../scripts:/workspace/scripts:ro
       - ../../.local/payload-build:/payload-out
       - ../../.local/sc-audio-logs:/var/log

@@ -16,7 +16,7 @@ cp "$ROOT/payload/runtime/payload-consumer" "$OUT/scripts/payload-consumer"
 printf '%s\n' "$VERSION" >"$OUT/VERSION"
 source_commit=$(git -C "$ROOT" rev-parse HEAD); source_sha=$(sha256sum "$ROOT/supercollider/synthdefs/sc-adat-tone.scd" | cut -d' ' -f1); epoch=$(git -C "$ROOT" show -s --format=%ct HEAD)
 cat >"$OUT/metadata.json" <<EOF
-{"version":"$VERSION","source_commit":"$source_commit","source_sha256":"$source_sha","supercollider_version":"$SC_VERSION","protocol_version":$PROTOCOL,"source_date_epoch":$epoch}
+{"version":"$VERSION","source_commit":"$source_commit","source_sha256":"$source_sha","supercollider_version":"$SC_VERSION","protocol_version":$PROTOCOL,"synthdefs":["sc_adat_tone24","sc_adat_scan"],"source_date_epoch":$epoch}
 EOF
 (cd "$OUT" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$OUT/manifest.sha256"
 (cd "$OUT" && sha256sum -c manifest.sha256)

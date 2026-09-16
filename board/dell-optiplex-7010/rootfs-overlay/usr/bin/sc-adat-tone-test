@@ -35,7 +35,7 @@ worker() {
   if test "$mode" = scan; then
     i=1; for f in $FREQS; do
       echo "ADAT$(( (i-1)/8 + 1 )) channel $(( (i-1)%8 + 1 )) / JACK output $i / ${f} Hz"
-      /usr/bin/sc-adat-tone-osc scan "$i" "$f" "$level"; echo "$i" >"$RUN/node"; sleep 1; cleanup; completed=$i; i=$((i+1)); done
+      /usr/bin/sc-adat-tone-osc scan "$i" "$f" "$level"; echo "$i" >"$RUN/node"; sleep 1; release; sleep 1; cleanup; completed=$i; i=$((i+1)); done
   else
     /usr/bin/sc-adat-tone-osc start -90; echo 1000 >"$RUN/node"; fade_in
     while test $(( $(date +%s) - start )) -lt "$duration"; do
@@ -57,7 +57,7 @@ case "${1:-}" in
   rm -f "$RUN/node"; : >"$LOG"; mkdir -p "$RUN"; before=$(xrun_count); date -u '+start=%Y-%m-%dT%H:%M:%SZ' >>"$LOG"; printf 'mode=%s duration=%s level=%s\n' "$mode" "$duration" "$level" >>"$LOG"
   { cat /run/jack-ports 2>/dev/null || true; ps -eLo pid,tid,cls,rtprio,pri,stat,comm,args 2>/dev/null || true; } >>"$LOG"
   connect_ports || { echo 'JACK output connection validation failed' >&2; exit 1; }
-  /usr/bin/sc-adat-tone-osc load "$DEF" || { echo 'SynthDef load failed' >&2; exit 1; }
+  /usr/bin/sc-adat-osc-loader load "$DEF" || { echo 'SynthDef load failed' >&2; exit 1; }
   printf '%s\n' "$before" >"$RUN/before"; printf '%s\n' "$level" >"$RUN/level"; printf '%s\n' "$duration" >"$RUN/duration"; printf '%s\n' "$mode" >"$RUN/mode"; printf '%s\n' "$(( $(date +%s) + duration ))" >"$RUN/deadline"; touch "$RUN/state"
   nohup "$0" --worker "$(( $(date +%s) ))" "$duration" "$level" "$mode" </dev/null >>"$LOG" 2>&1 & echo $! >"$RUN/controller"; echo 'tone test started';;
 scan)

@@ -1,10 +1,12 @@
 #!/bin/sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); t=$(mktemp -d); trap 'rm -rf "$t"' EXIT
-o="$t/out"; d="$t/data"; mkdir -p "$o/synthdefs" "$o/config" "$o/scripts" "$d/releases"
-printf 'SCgf changed synthdef\n' >"$o/synthdefs/sc_adat_tone24.scsyndef"; printf 'SCgf scan\n' >"$o/synthdefs/sc_adat_scan.scsyndef"; printf '1\n' >"$o/VERSION"; printf '{}\n' >"$o/metadata.json"; printf 'protocol_version=1\n' >"$o/config/payload.conf"; printf '#!/bin/sh\n' >"$o/scripts/payload-consumer"; (cd "$o" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$o/manifest.sha256"; touch "$o/.tests-passed"
+o="$t/out"; d="$t/data"; factory="$t/factory"; mkdir -p "$o/synthdefs" "$o/config" "$o/scripts" "$d/releases"
+printf 'SCgf sc_adat_tone24 changed synthdef\n' >"$o/synthdefs/sc_adat_tone24.scsyndef"; printf 'SCgf sc_adat_scan\n' >"$o/synthdefs/sc_adat_scan.scsyndef"; printf '1\n' >"$o/VERSION"; printf '{"protocol_version":1,"synthdefs":["sc_adat_tone24","sc_adat_scan"]}\n' >"$o/metadata.json"; printf 'protocol_version=1\n' >"$o/config/payload.conf"; printf '#!/bin/sh\n' >"$o/scripts/payload-consumer"; chmod 755 "$o/scripts/payload-consumer"; (cd "$o" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$o/manifest.sha256"; touch "$o/.tests-passed"
 SC_ADAT_PAYLOAD_OUT="$o" "$ROOT/scripts/payload-promote" promote --data-root "$d"; test "$(cat "$d/current/VERSION")" = 1
 test "$(stat -c '%a' "$d/releases/1/manifest.sha256")" = 444; cp -a "$d/releases/1" "$d/releases/bad"; chmod -R u+w "$d/releases/bad"; printf bad >"$d/releases/bad/synthdefs/sc_adat_tone24.scsyndef"; ln -sfn releases/bad "$d/current"; if SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" verify; then exit 1; fi; ln -sfn releases/1 "$d/current"
+chmod u+w "$d/releases/1"; printf extra >"$d/releases/1/extra"; chmod a-w "$d/releases/1"; if SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" verify; then exit 1; fi; chmod u+w "$d/releases/1"; rm -f "$d/releases/1/extra"; chmod a-w "$d/releases/1"; chmod 644 "$d/releases/1/VERSION"; if SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" verify; then exit 1; fi; chmod 444 "$d/releases/1/VERSION"
+if SC_ADAT_OWNER=0 "$ROOT/payload/runtime/payload-consumer" "$d" verify; then exit 1; fi
 cp -a "$o" "$t/o2"; printf '2\n' >"$t/o2/VERSION"; (cd "$t/o2" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$t/o2/manifest.sha256"; SC_ADAT_PAYLOAD_OUT="$t/o2" "$ROOT/scripts/payload-promote" promote --data-root "$d"; test "$(cat "$d/previous/VERSION")" = 1; SC_ADAT_OWNER="$(id -u)" "$ROOT/payload/runtime/payload-consumer" "$d" rollback; test "$(cat "$d/current/VERSION")" = 1
 cat >"$t/loader" <<'EOF'
 #!/bin/sh
@@ -18,4 +20,6 @@ ok:activate) echo ACTIVATED;;
 EOF
 chmod +x "$t/loader"; SC_ADAT_OWNER="$(id -u)" SC_ADAT_OSC_LOADER="$t/loader" SC_ADAT_STATE_DIR="$t/state" "$ROOT/payload/runtime/payload-consumer" "$d" activate; test "$(cat "$t/state/payload-version")" = 1
 if SC_FIXTURE_ACK=fail SC_ADAT_OWNER="$(id -u)" SC_ADAT_OSC_LOADER="$t/loader" SC_ADAT_STATE_DIR="$t/state" "$ROOT/payload/runtime/payload-consumer" "$d" activate; then exit 1; fi
-chmod -R u+w "$d"; echo 'PASS fixture manifest rejection, immutable releases, atomic switch, rollback and OSC ack gating'
+cp -a "$o" "$factory"; rm -f "$factory/.tests-passed"; chmod -R a-w "$factory"; chmod u+w "$d/releases/1/synthdefs/sc_adat_tone24.scsyndef" "$d/releases/2/synthdefs/sc_adat_tone24.scsyndef"; printf bad >"$d/releases/1/synthdefs/sc_adat_tone24.scsyndef"; printf bad >"$d/releases/2/synthdefs/sc_adat_tone24.scsyndef"; if SC_ADAT_OWNER="$(id -u)" SC_ADAT_FACTORY="$factory" SC_ADAT_OSC_LOADER="$t/loader" SC_ADAT_STATE_DIR="$t/state" "$ROOT/payload/runtime/payload-consumer" "$d" activate; then :; else exit 1; fi; test "$(cat "$t/state/payload-version")" = 1
+echo 'PASS fixture checksum/extra/mode rejection, immutable switch, rollback, factory fallback and OSC ack gating'
+chmod -R u+w "$d" "$factory"

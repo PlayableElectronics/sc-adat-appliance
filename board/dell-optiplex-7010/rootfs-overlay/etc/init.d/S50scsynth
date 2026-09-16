@@ -1,20 +1,18 @@
 #!/bin/sh
-set -eu
-
-log=/var/log/scsynth.log
-pidfile=/run/scsynth.pid
-
+set -u
 case "$1" in
   start)
-    if ! jack_lsp >/dev/null 2>&1; then
-      echo 'JACK is not ready; scsynth not started' | tee -a "$log" >&2
-      exit 1
-    fi
-    scsynth -u 57110 -a 4096 -b 4096 -m 262144 -w 1024 \
-      -i 26 -o 26 -z 128 -H jack -R 0 >"$log" 2>&1 &
-    echo $! > "$pidfile"
+    if test ! -e /run/jack-ready; then /usr/bin/sc-adat-progress 'scsynth status: FAIL (JACK unavailable)'; exit 0; fi
+    scsynth -u 57110 -a 4096 -b 4096 -m 262144 -w 1024 -i 26 -o 26 -z 128 -H jack -R 0 >/var/log/scsynth.log 2>&1 &
+    echo $! >/run/scsynth.pid
+    i=0
+    while test "$i" -lt 15; do
+      jack_lsp 2>/run/scsynth-ports || true
+      grep -q '^jack:in_1$' /run/scsynth-ports && { touch /run/scsynth-ready; /usr/bin/sc-adat-progress 'scsynth status: PASS'; exit 0; }
+      kill -0 "$(cat /run/scsynth.pid)" 2>/dev/null || break; sleep 1; i=$((i + 1))
+    done
+    /usr/bin/sc-adat-progress 'scsynth status: FAIL (timeout)'
     ;;
-  stop)
-    test -r "$pidfile" && kill "$(cat "$pidfile")" 2>/dev/null || true
-    ;;
+  stop) test -r /run/scsynth.pid && kill "$(cat /run/scsynth.pid)" 2>/dev/null || true ;;
+  *) exit 2 ;;
 esac

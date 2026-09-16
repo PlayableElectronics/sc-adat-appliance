@@ -1,34 +1,18 @@
 #!/bin/sh
-set -eu
-
-log=/var/log/jack.log
-pidfile=/run/jackd.pid
-
+set -u
 case "$1" in
   start)
-    mkdir -p /var/log /run
-    if ! grep -q 'Digi9652' /proc/asound/cards 2>/dev/null; then
-      modprobe snd-rme9652 2>/dev/null || true
-    fi
-    if ! grep -q 'Digi9652' /proc/asound/cards 2>/dev/null; then
-      echo 'Digi9652 not detected; JACK not started' | tee -a "$log" >&2
-      exit 1
-    fi
-    jackd -R -P 70 -d alsa -d hw:CARD=Digi9652,DEV=0 \
-      -r 48000 -p 128 -n 2 -i 26 -o 26 >"$log" 2>&1 &
-    echo $! > "$pidfile"
-    for _ in $(seq 1 100); do
-      if jack_lsp >/dev/null 2>&1; then exit 0; fi
-      if ! kill -0 "$(cat "$pidfile")" 2>/dev/null; then
-        cat "$log" >&2 || true
-        exit 1
-      fi
-      sleep 0.1
-    done
-    echo 'JACK did not become ready' | tee -a "$log" >&2
-    exit 1
+    /usr/bin/sc-adat-progress 'Digi9652 status: waiting'
+    i=0
+    while test "$i" -lt 8; do grep -q Digi9652 /proc/asound/cards 2>/dev/null && break; modprobe snd-rme9652 2>/dev/null || true; sleep 1; i=$((i + 1)); done
+    if ! grep -q Digi9652 /proc/asound/cards 2>/dev/null; then /usr/bin/sc-adat-progress 'Digi9652 status: FAIL (not detected)'; exit 0; fi
+    /usr/bin/sc-adat-progress 'Digi9652 status: PASS'
+    jackd -R -P 70 -d alsa -d hw:CARD=Digi9652,DEV=0 -r 48000 -p 128 -n 2 -i 26 -o 26 >/var/log/jack.log 2>&1 &
+    echo $! >/run/jackd.pid
+    i=0
+    while test "$i" -lt 15; do jack_lsp >/dev/null 2>&1 && { touch /run/jack-ready; /usr/bin/sc-adat-progress 'JACK status: PASS'; exit 0; }; kill -0 "$(cat /run/jackd.pid)" 2>/dev/null || break; sleep 1; i=$((i + 1)); done
+    /usr/bin/sc-adat-progress 'JACK status: FAIL (timeout)'
     ;;
-  stop)
-    test -r "$pidfile" && kill "$(cat "$pidfile")" 2>/dev/null || true
-    ;;
+  stop) test -r /run/jackd.pid && kill "$(cat /run/jackd.pid)" 2>/dev/null || true ;;
+  *) exit 2 ;;
 esac

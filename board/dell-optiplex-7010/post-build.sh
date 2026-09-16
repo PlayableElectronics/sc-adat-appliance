@@ -18,3 +18,8 @@ rm -f "$target/etc/sc-adat-release"
 printf '%s\n' 'candidate' > "$target/etc/sc-adat-release"
 chmod 0444 "$target/etc/sc-adat-release"
 install -m 0600 "$key_file" "$target/root/.ssh/authorized_keys"
+# tty1 is a physically gated recovery shell; lock the root password hash.
+sed -i 's/^root:[^:]*:/root:!:/' "$target/etc/shadow"
+# This board overlay owns DHCP startup. Remove Buildroot's generated launchers
+# so exactly one dhcpcd instance can exist.
+rm -f "$target/etc/init.d/S40network" "$target/etc/init.d/S41dhcpcd"

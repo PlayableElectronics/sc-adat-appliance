@@ -1,15 +1,51 @@
 #!/bin/sh
-set -eu
+set -u
+
+NETWORK_TIMEOUT=12
+iface=
+
+select_iface() {
+  for path in /sys/class/net/*; do
+    test -e "$path" || continue
+    name=${path##*/}
+    test "$name" != lo || continue
+    test -r "$path/type" && test "$(cat "$path/type" 2>/dev/null)" = 1 || continue
+    test -e "$path/device" || continue
+    iface=$name
+    break
+  done
+}
 
 case "$1" in
   start)
-    mkdir -p /var/log
-    dmesg -wH > /var/log/dmesg-live.log 2>&1 &
-    echo $! > /run/dmesg-live.pid
-    ;;
-  stop)
-    if test -r /run/dmesg-live.pid; then
-      kill "$(cat /run/dmesg-live.pid)" 2>/dev/null || true
+    mkdir -p /run/network /var/log
+    /usr/bin/sc-adat-progress 'hardware discovery: network'
+    select_iface
+    if test -z "$iface"; then
+      /usr/bin/sc-adat-progress 'network interface selected: none'
+      /usr/bin/sc-adat-progress 'DHCP timeout: no suitable non-loopback Ethernet'
+      exit 0
+    fi
+    printf '%s\n' "$iface" > /run/sc-adat-network-interface
+    /usr/bin/sc-adat-progress "network interface selected: $iface"
+    ip link set dev "$iface" up 2>/run/network/error.log || true
+    /usr/bin/sc-adat-progress 'DHCP waiting'
+    dhcpcd -B -t "$NETWORK_TIMEOUT" "$iface" >/var/log/dhcpcd.log 2>&1 || true
+    found=
+    i=0
+    while test "$i" -lt "$NETWORK_TIMEOUT"; do
+      address=$(ip -4 -o addr show dev "$iface" scope global 2>/dev/null | awk '{print $4; exit}')
+      if test -n "${address:-}"; then found=$address; break; fi
+      sleep 1
+      i=$((i + 1))
+    done
+    if test -n "${found:-}"; then
+      printf '%s\n' "$found" > /run/sc-adat-ipv4
+      /usr/bin/sc-adat-progress "assigned IPv4 address: $found"
+    else
+      /usr/bin/sc-adat-progress "DHCP timeout after ${NETWORK_TIMEOUT}s"
     fi
     ;;
+  stop) test -r /var/run/dhcpcd/pid && kill "$(cat /var/run/dhcpcd/pid)" 2>/dev/null || true ;;
+  *) echo "Usage: $0 {start|stop}" >&2; exit 2 ;;
 esac

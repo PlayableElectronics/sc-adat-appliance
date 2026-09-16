@@ -1,0 +1,12 @@
+::sysinit:/bin/mount -t proc proc /proc
+::sysinit:/bin/mount -t sysfs sysfs /sys
+::sysinit:/bin/mount -t devpts devpts /dev/pts
+::sysinit:/bin/mount -t tmpfs tmpfs /dev/shm
+::sysinit:/bin/mount -t tmpfs tmpfs /run
+::sysinit:/bin/mkdir -p /run/lock/subsys /tmp
+::sysinit:/bin/hostname -F /etc/hostname
+::sysinit:/etc/init.d/rcS
+tty1::respawn:/sbin/getty -n -l /usr/sbin/sc-adat-tty1-login -L tty1 115200 linux
+ttyS0::respawn:/sbin/getty -L ttyS0 115200 linux
+::shutdown:/etc/init.d/rcK
+::shutdown:/bin/umount -a -r

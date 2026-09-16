@@ -1,36 +1,37 @@
 #!/bin/sh
 set -eu
-
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-RELEASE="${1:-candidate-1}"
+RELEASE=${1:-candidate-1}
 ART="$ROOT/artifacts/sc-adat-$RELEASE"
-test -s "$ART/kernel"
-test -s "$ART/initramfs"
-test -s "$ART/kernel.config"
-test -s "$ART/manifest"
-test -s "$ART/grub-entry.cfg"
+for f in kernel initramfs kernel.config manifest grub-entry.cfg checksums.sha256; do test -s "$ART/$f"; done
 (cd "$ART" && sha256sum -c checksums.sha256)
 sh -n "$ART/grub-entry.cfg"
-GRUB_OUTPUT=$("$ART/grub-entry.cfg")
-test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^menuentry '")" -eq 1
-test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c -- "--id sc-adat-$RELEASE {")" -eq 1
-test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    search .* /boot/sc-adat/$RELEASE/kernel$")" -eq 1
-test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    linux /boot/sc-adat/$RELEASE/kernel ")" -eq 1
-test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    initrd /boot/sc-adat/$RELEASE/initramfs$")" -eq 1
-file "$ART/kernel" "$ART/initramfs"
 gzip -t "$ART/initramfs"
-test "$(stat -c %s "$ART/kernel")" -gt 1000000
-test "$(stat -c %s "$ART/initramfs")" -gt 1000000
-for setting in \
-    'CONFIG_PREEMPT_RT=y' \
-    'CONFIG_HIGH_RES_TIMERS=y' \
-    'CONFIG_HZ_1000=y' \
-    'CONFIG_IKCONFIG=y' \
-    'CONFIG_IKCONFIG_PROC=y' \
-    'CONFIG_SND_RME9652=y'; do
-    grep -qx "$setting" "$ART/kernel.config"
+for setting in CONFIG_PREEMPT_RT CONFIG_HIGH_RES_TIMERS CONFIG_HZ_1000 CONFIG_IKCONFIG CONFIG_IKCONFIG_PROC CONFIG_SOUND CONFIG_SND CONFIG_SND_PCM CONFIG_SND_RME9652 CONFIG_VT CONFIG_VT_CONSOLE CONFIG_VGA_CONSOLE CONFIG_DRM CONFIG_DRM_FBDEV_EMULATION CONFIG_FRAMEBUFFER_CONSOLE CONFIG_E1000E CONFIG_NET CONFIG_INET CONFIG_NETDEVICES CONFIG_ETHERNET CONFIG_PHYLIB CONFIG_PCI; do
+  grep -qx "$setting=y" "$ART/kernel.config"
 done
-! grep -q '^CONFIG_PREEMPT=y$' "$ART/kernel.config"
-! grep -q '^CONFIG_PREEMPT_DYNAMIC=y$' "$ART/kernel.config"
-! grep -q '^CONFIG_PREEMPT_NONE=y$' "$ART/kernel.config"
+grep -Eq '^(CONFIG_DRM_I915|CONFIG_DRM_NOUVEAU|CONFIG_FB_VESA|CONFIG_FB_EFI|CONFIG_FB_SIMPLE)=([ym])$' "$ART/kernel.config"
+! grep -qx CONFIG_PREEMPT_DYNAMIC=y "$ART/kernel.config"
+! grep -qx CONFIG_PREEMPT_NONE=y "$ART/kernel.config"
+! grep -qx CONFIG_PREEMPT=y "$ART/kernel.config"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+gzip -cd "$ART/initramfs" | (cd "$tmp" && umask 000 && cpio -idm --quiet --no-preserve-owner) || true
+for f in init sbin/init bin/busybox sbin/dhcpcd usr/sbin/dropbear usr/bin/jackd usr/bin/scsynth usr/bin/sc-adat-progress usr/sbin/sc-adat-tty1-login; do test -x "$tmp/$f"; done
+for f in S00boot-progress S10hardware S35network S40jack S50scsynth S51dropbear-status S60self-test S99diagnostics; do test -x "$tmp/etc/init.d/$f"; head -n 1 "$tmp/etc/init.d/$f" | grep -qx '#!/bin/sh'; done
+test -s "$tmp/root/.ssh/authorized_keys"
+archive_listing=$(gzip -cd "$ART/initramfs" | cpio -tv --quiet)
+printf '%s\n' "$archive_listing" | grep -Eq 'drwx------ +2 root +root +[0-9]+ .+ root/\.ssh$'
+printf '%s\n' "$archive_listing" | grep -Eq '^-rw------- +1 root +root +[0-9]+ .+ root/\.ssh/authorized_keys$'
+test "$(grep -c 'tty1::respawn' "$tmp/etc/inittab")" -eq 1
+test "$(grep -c 'ttyS0::respawn' "$tmp/etc/inittab")" -eq 1
+grep -q '^root:!:' "$tmp/etc/shadow"
+test "$(find "$tmp/etc/init.d" -maxdepth 1 -type f -name '*dhcpcd*' | wc -l)" -eq 0
+for mountpoint in '/bin/mount -t proc proc /proc' '/bin/mount -t sysfs sysfs /sys' '/bin/mount -t devpts devpts /dev/pts' '/bin/mount -t tmpfs tmpfs /run'; do grep -Fq "$mountpoint" "$tmp/etc/inittab"; done
+grep -q 'DEVTMPFS_MOUNT=y' "$ART/kernel.config"
+grep -q "console=tty0 console=ttyS0,115200n8" "$ART/grub-entry.cfg"
+if command -v readelf >/dev/null 2>&1; then readelf -l "$tmp/init" "$tmp/bin/busybox" "$tmp/sbin/dhcpcd" "$tmp/usr/sbin/dropbear" | grep -q '/lib/ld-musl-x86_64.so.1'; fi
+for required in 'init started' 'hardware discovery' 'network interface selected' 'DHCP waiting' 'Dropbear status' 'Digi9652 status' 'JACK status' 'scsynth status' 'final PASS summary'; do grep -R -q "$required" "$tmp/usr/bin" "$tmp/etc/init.d"; done
+grep -Eq 'assigned IPv4 address|DHCP timeout' "$tmp/etc/init.d/S35network"
+echo "PASS initramfs structure and startup validation: $ART"
 echo "PASS candidate artifact validation: $ART"

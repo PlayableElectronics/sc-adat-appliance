@@ -40,17 +40,28 @@ case "${1:-start}" in
     jack_pid=$(cat /run/jackd.pid 2>/dev/null || true)
     check 'JACK realtime scheduling' sh -c "test -n '$jack_pid' && test -d /proc/$jack_pid && ps -L -p '$jack_pid' -o cls=,rtprio= 2>/dev/null | awk '\$1 == \"RR\" || \$1 == \"FF\" { if (\$2 >= 70) found=1 } END { exit !found }'"
 
-    ports=$(jack_lsp 2>/dev/null || true)
-    capture_count=$(printf '%s\n' "$ports" | grep -Ec '^system:capture_[0-9]+$' || true)
-    playback_count=$(printf '%s\n' "$ports" | grep -Ec '^system:playback_[0-9]+$' || true)
-    sc_in_count=$(printf '%s\n' "$ports" | grep -Ec '^jack:in_[0-9]+$' || true)
-    sc_out_count=$(printf '%s\n' "$ports" | grep -Ec '^jack:out_[0-9]+$' || true)
+    i=0
+    ports=
+    while test "$i" -lt 100; do
+        sc_pid=$(cat /run/scsynth.pid 2>/dev/null || true)
+        ports=$(jack_lsp 2>/dev/null || true)
+        capture_count=$(printf '%s\n' "$ports" | grep -Ec '^system:capture_[0-9]+$' || true)
+        playback_count=$(printf '%s\n' "$ports" | grep -Ec '^system:playback_[0-9]+$' || true)
+        sc_in_count=$(printf '%s\n' "$ports" | grep -Ec '^jack:in_[0-9]+$' || true)
+        sc_out_count=$(printf '%s\n' "$ports" | grep -Ec '^jack:out_[0-9]+$' || true)
+        if test -n "$sc_pid" && test -d "/proc/$sc_pid" && \
+            test "$capture_count" -eq 26 && test "$playback_count" -eq 26 && \
+            test "$sc_in_count" -eq 26 && test "$sc_out_count" -eq 26; then
+            break
+        fi
+        i=$((i + 1))
+        sleep 0.1
+    done
     check '26 JACK capture ports' test "$capture_count" -eq 26
     check '26 JACK playback ports' test "$playback_count" -eq 26
     check '26 scsynth input ports' test "$sc_in_count" -eq 26
     check '26 scsynth output ports' test "$sc_out_count" -eq 26
 
-    sc_pid=$(cat /run/scsynth.pid 2>/dev/null || true)
     check 'scsynth ready' sh -c "test -n '$sc_pid' && test -d /proc/$sc_pid && grep -q '^jack:in_1$' <<EOF
 $ports
 EOF"

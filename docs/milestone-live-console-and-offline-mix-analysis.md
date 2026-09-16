@@ -176,6 +176,35 @@ Offline review should compare:
 If the dynamic version is audibly working or not clearly more natural, reject
 it.
 
+## Musical groups and DSP allocation
+
+Groups are first-class mixer objects. They represent musical function rather
+than automatically detected frequency ranges. The initial group vocabulary is
+drums, bass, instruments, vocals, and effects returns, with explicit membership
+stored per song. For example, bass may be a sampler input in one song and a
+modular input in another. The live engine never classifies or moves it
+automatically.
+
+Processing is deliberately hierarchical:
+
+1. inputs perform trim, polarity, high-pass filtering, mute, routing, and only
+   source-specific corrective EQ or dynamics that are genuinely required;
+2. musical groups perform broad tonal EQ, level control, and gentle compression;
+3. groups feed the master, shared vocal effects, and explicit monitor mixes.
+
+Offline analysis proposes corrections from broadest to narrowest: group
+balance, broad group EQ, gentle group compression, individual-channel
+correction, and only then shallow dynamic or sidechain treatment. This saves DSP
+and produces controls and scenes that express musical intent.
+
+Automatic frequency-band grouping and default multiband processing are outside
+scope. Spectral measurements may inform an ordinary group EQ recommendation,
+but they never create live routing, crossovers, or adaptive grouping.
+
+The same explicit group model must drive song scenes, virtual soundcheck,
+recording metadata, norns/virtual controls, and the later Studer Dyaxis II
+surface.
+
 ## Implementation sequence
 
 1. Prove the compiled-payload path and the tone/xrun test; physical evidence

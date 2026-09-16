@@ -9,21 +9,24 @@ tmp=$(mktemp -d)
 trap 'chmod -R u+w "$tmp" 2>/dev/null || true; rm -rf "$tmp"' EXIT
 archive=$(gzip -cd "$ART/initramfs" | cpio -tv --quiet)
 printf '%s\n' "$archive" | awk '$NF ~ /^usr\/share\/sc-adat\/factory(\/|$)/ && substr($1,1,1) != "d" && substr($1,1,1) != "-" {bad=1} END {exit bad}'
-printf '%s\n' "$archive" | grep -Eq '^dr-xr-xr-x[[:space:]]+5 root root[[:space:]].*usr/share/sc-adat/factory$'
-printf '%s\n' "$archive" | grep -Eq '^dr-xr-xr-x[[:space:]]+2 root root[[:space:]].*usr/share/sc-adat/factory/(config|scripts|synthdefs)$'
-printf '%s\n' "$archive" | grep -Eq '^[-]r--r--r--[[:space:]]+.* root root[[:space:]].*usr/share/sc-adat/factory/(VERSION|metadata.json|manifest.sha256|config/payload.conf|synthdefs/sc_adat_(scan|tone24)\.scsyndef)$'
-printf '%s\n' "$archive" | grep -Eq '^[-]r-xr-xr-x[[:space:]]+.* root root[[:space:]].*usr/share/sc-adat/factory/scripts/payload-consumer$'
-printf '%s\n' "$archive" | grep -qv 'usr/share/sc-adat/factory/.*\.scd' || exit 1
+printf '%s\n' "$archive" | grep -Eq '^dr-xr-xr-x[[:space:]]+5[[:space:]]+root[[:space:]]+root[[:space:]].*usr/share/sc-adat/factory$'
+printf '%s\n' "$archive" | grep -Eq '^dr-xr-xr-x[[:space:]]+2[[:space:]]+root[[:space:]]+root[[:space:]].*usr/share/sc-adat/factory/(config|scripts|synthdefs)$'
+printf '%s\n' "$archive" | grep -Eq '^[-]r--r--r--[[:space:]]+.*[[:space:]]root[[:space:]]+root[[:space:]].*usr/share/sc-adat/factory/(VERSION|metadata.json|manifest.sha256|config/payload.conf|synthdefs/sc_adat_(scan|tone24)\.scsyndef)$'
+printf '%s\n' "$archive" | grep -Eq '^[-]r-xr-xr-x[[:space:]]+.*[[:space:]]root[[:space:]]+root[[:space:]].*usr/share/sc-adat/factory/scripts/payload-consumer$'
+! printf '%s\n' "$archive" | grep -q 'usr/share/sc-adat/factory/.*\.scd'
 gzip -cd "$ART/initramfs" | (cd "$tmp" && umask 000 && cpio -idm --quiet --no-preserve-owner \
   usr/bin/sc-adat-payload-consumer 'usr/share/sc-adat/factory/*' \
   'usr/share/sc-adat/factory/*/*' 'usr/share/sc-adat/factory/*/*/*')
 
 factory="$tmp/usr/share/sc-adat/factory"
-chown -R 0:0 "$factory"
-test "$(stat -c '%u:%g:%a' "$factory")" = 0:0:555
-find "$factory" -type d -exec sh -c 'test "$(stat -c "%u:%g:%a" "$1")" = 0:0:555' sh {} \;
-find "$factory" -type f ! -path '*/scripts/payload-consumer' -exec sh -c 'test "$(stat -c "%u:%g:%a" "$1")" = 0:0:444' sh {} \;
-test "$(stat -c '%u:%g:%a' "$factory/scripts/payload-consumer")" = 0:0:555
+uid=$(id -u); gid=$(id -g)
+find "$factory" -type d -exec chmod 0555 {} +
+find "$factory" -type f -exec chmod 0444 {} +
+chmod 0555 "$factory/scripts/payload-consumer"
+test "$(stat -c '%u:%g:%a' "$factory")" = "$uid:$gid:555"
+find "$factory" -type d -exec sh -c 'test "$(stat -c "%u:%g:%a" "$1")" = "'$uid':'$gid':555"' sh {} \;
+find "$factory" -type f ! -path '*/scripts/payload-consumer' -exec sh -c 'test "$(stat -c "%u:%g:%a" "$1")" = "'$uid':'$gid':444"' sh {} \;
+test "$(stat -c '%u:%g:%a' "$factory/scripts/payload-consumer")" = "$uid:$gid:555"
 test -z "$(find "$factory" -type l -o ! -type f -a ! -type d -print)"
 test -z "$(find "$factory" -type f -name '*.scd' -print)"
 expected=$(printf '%s\n' VERSION metadata.json manifest.sha256 config/payload.conf scripts/payload-consumer synthdefs/sc_adat_scan.scsyndef synthdefs/sc_adat_tone24.scsyndef | sort)
@@ -45,14 +48,14 @@ EOF
 chmod 755 "$loader"
 data="$tmp/data/sc-adat"
 mkdir -p "$data"
-SC_ADAT_OSC_LOADER="$loader" SC_ADAT_FACTORY="$factory" SC_ADAT_OWNER=0 \
+SC_ADAT_OSC_LOADER="$loader" SC_ADAT_FACTORY="$factory" SC_ADAT_OWNER="$(id -u)" \
   SC_ADAT_STATE_DIR="$tmp/state" "$tmp/usr/bin/sc-adat-payload-consumer" "$data" activate
 test "$(cat "$tmp/state/payload-version")" = "$(cat "$factory/VERSION")"
 
 mkdir -p "$data/releases/bad-current" "$data/releases/bad-previous"
 ln -s releases/bad-current "$data/current"
 ln -s releases/bad-previous "$data/previous"
-SC_ADAT_OSC_LOADER="$loader" SC_ADAT_FACTORY="$factory" SC_ADAT_OWNER=0 \
+SC_ADAT_OSC_LOADER="$loader" SC_ADAT_FACTORY="$factory" SC_ADAT_OWNER="$(id -u)" \
   SC_ADAT_STATE_DIR="$tmp/state-fallback" "$tmp/usr/bin/sc-adat-payload-consumer" "$data" activate
 test "$(cat "$tmp/state-fallback/payload-version")" = "$(cat "$factory/VERSION")"
 echo 'PASS staged factory contract, validation and current/previous factory fallback'

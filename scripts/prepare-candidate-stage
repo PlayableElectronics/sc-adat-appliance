@@ -10,6 +10,7 @@ DRY RUN — no files will be copied.
 Source files:
   $ART/kernel
   $ART/initramfs
+  $ART/kernel.config
   $ART/manifest
   $ART/checksums.sha256
 Destination directory (Debian existing root filesystem):
@@ -17,6 +18,7 @@ Destination directory (Debian existing root filesystem):
 Proposed copies:
   install -D -m 0644 $ART/kernel /boot/sc-adat/$RELEASE/kernel
   install -D -m 0644 $ART/initramfs /boot/sc-adat/$RELEASE/initramfs
+  install -D -m 0644 $ART/kernel.config /boot/sc-adat/$RELEASE/kernel.config
   install -D -m 0644 $ART/manifest /boot/sc-adat/$RELEASE/manifest
   install -D -m 0644 $ART/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
 No partition, block device, GRUB configuration, or boot variable is changed.

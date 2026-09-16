@@ -7,6 +7,13 @@ OUT="$ROOT/.local/buildroot-output"
 RELEASE="${SC_ADAT_RELEASE_ID:-candidate-1}"
 ART="$ROOT/artifacts/sc-adat-$RELEASE"
 BUILD_JOBS="${SC_ADAT_JOBS:-2}"
+KEY_FILE="${SC_ADAT_PUBLIC_KEY_FILE:-$ROOT/.local/appliance/authorized_keys}"
+
+if [ ! -s "$KEY_FILE" ]; then
+    echo "ERROR: missing appliance public key: $KEY_FILE" >&2
+    echo "Create it with: install -D -m 0644 ~/.ssh/id_ed25519.pub $ROOT/.local/appliance/authorized_keys" >&2
+    exit 1
+fi
 
 mkdir -p "$OUT" "$ART"
 make -C "$BR" BR2_EXTERNAL="$ROOT" O="$OUT" sc_adat_defconfig
@@ -15,14 +22,16 @@ make -C "$BR" BR2_EXTERNAL="$ROOT" O="$OUT" -j"$BUILD_JOBS"
 
 cp "$OUT/images/bzImage" "$ART/kernel"
 cp "$OUT/images/rootfs.cpio.gz" "$ART/initramfs"
+cp "$OUT/build/linux-6.12.107/.config" "$ART/kernel.config"
 {
   printf 'release=%s\n' "$RELEASE"
   printf 'buildroot=2025.02.9\nlinux=6.12.107\nsupercollider=3.13.0\n'
   printf 'source_revision=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
   printf 'kernel_sha256=%s\n' "$(sha256sum "$ART/kernel" | cut -d' ' -f1)"
   printf 'initramfs_sha256=%s\n' "$(sha256sum "$ART/initramfs" | cut -d' ' -f1)"
+  printf 'kernel_config_sha256=%s\n' "$(sha256sum "$ART/kernel.config" | cut -d' ' -f1)"
 } > "$ART/manifest"
-(cd "$ART" && sha256sum kernel initramfs manifest > checksums.sha256)
+(cd "$ART" && sha256sum kernel initramfs kernel.config manifest > checksums.sha256)
 cp "$ROOT/candidates/grub-entry.cfg.in" "$ART/grub-entry.cfg"
 sed -i "s/@RELEASE@/$RELEASE/g" "$ART/grub-entry.cfg"
 printf 'built %s\n' "$ART"

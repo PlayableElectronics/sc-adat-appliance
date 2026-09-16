@@ -2,6 +2,6 @@ menuentry 'SC-ADAT @RELEASE@ (one-shot candidate)' {
     insmod part_gpt
     insmod ext2
     search --no-floppy --file --set=root /boot/sc-adat/@RELEASE@/kernel
-    linux /boot/sc-adat/@RELEASE@/kernel console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
+    linux /boot/sc-adat/@RELEASE@/kernel console=tty0 console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
     initrd /boot/sc-adat/@RELEASE@/initramfs
 }

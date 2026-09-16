@@ -1,8 +1,14 @@
 # Hardware-independent real-time and audio requirements.
 # Validate every resulting symbol with scripts/check-rt-capabilities.
 CONFIG_PREEMPT_RT=y
+CONFIG_EXPERT=y
+# PREEMPT_RT owns the preemption choice; Kconfig disables PREEMPT_NONE and
+# the incompatible dynamic-preemption option when resolving it.
+# CONFIG_PREEMPT_DYNAMIC is not set
 CONFIG_HZ_1000=y
 CONFIG_HIGH_RES_TIMERS=y
+CONFIG_IKCONFIG=y
+CONFIG_IKCONFIG_PROC=y
 CONFIG_SOUND=y
 CONFIG_SND=y
 CONFIG_SND_PCM=y

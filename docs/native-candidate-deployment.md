@@ -13,6 +13,7 @@ artifacts/sc-adat-candidate-1/kernel             -> /boot/sc-adat/candidate-1/ke
 artifacts/sc-adat-candidate-1/initramfs          -> /boot/sc-adat/candidate-1/initramfs
 artifacts/sc-adat-candidate-1/manifest           -> /boot/sc-adat/candidate-1/manifest
 artifacts/sc-adat-candidate-1/checksums.sha256   -> /boot/sc-adat/candidate-1/checksums.sha256
+artifacts/sc-adat-candidate-1/kernel.config      -> /boot/sc-adat/candidate-1/kernel.config
 ```
 
 The proposed GRUB entry is:
@@ -22,7 +23,7 @@ menuentry 'SC-ADAT candidate-1 (one-shot candidate)' {
     insmod part_gpt
     insmod ext2
     search --no-floppy --file --set=root /boot/sc-adat/candidate-1/kernel
-    linux /boot/sc-adat/candidate-1/kernel console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
+    linux /boot/sc-adat/candidate-1/kernel console=tty0 console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
     initrd /boot/sc-adat/candidate-1/initramfs
 }
 ```
@@ -36,6 +37,7 @@ sudo install -D -m 0644 artifacts/sc-adat-candidate-1/kernel /boot/sc-adat/candi
 sudo install -D -m 0644 artifacts/sc-adat-candidate-1/initramfs /boot/sc-adat/candidate-1/initramfs
 sudo install -D -m 0644 artifacts/sc-adat-candidate-1/manifest /boot/sc-adat/candidate-1/manifest
 sudo install -D -m 0644 artifacts/sc-adat-candidate-1/checksums.sha256 /boot/sc-adat/candidate-1/checksums.sha256
+sudo install -D -m 0644 artifacts/sc-adat-candidate-1/kernel.config /boot/sc-adat/candidate-1/kernel.config
 sudo install -D -m 0755 artifacts/sc-adat-candidate-1/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 sudo grub-reboot 'SC-ADAT candidate-1 (one-shot candidate)'
@@ -60,3 +62,26 @@ entry from Debian.
 Use `./lab stage candidate --dry-run` and `./lab boot candidate --dry-run` to
 print the current release-specific proposal. The commands intentionally stop
 at this deployment gate.
+
+## SSH access
+
+Password authentication is disabled at Dropbear compile time. Root access uses
+only the public key from the ignored local file
+`.local/appliance/authorized_keys`; the matching private key is never part of
+the repository or image. Create a dedicated key and input file with:
+
+```sh
+install -d -m 0700 .local/appliance
+ssh-keygen -t ed25519 -f .local/appliance/id_ed25519 -C sc-adat-appliance
+cp .local/appliance/id_ed25519.pub .local/appliance/authorized_keys
+./lab build candidate
+```
+
+After DHCP, connect with:
+
+```sh
+ssh -i .local/appliance/id_ed25519 root@<candidate-dhcp-address>
+```
+
+The address is available from the DHCP lease table, the serial console, or
+`/var/log/boot-diagnostics.log` (`ip -brief addr`).

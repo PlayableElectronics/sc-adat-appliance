@@ -6,11 +6,21 @@ RELEASE="${1:-candidate-1}"
 ART="$ROOT/artifacts/sc-adat-$RELEASE"
 test -s "$ART/kernel"
 test -s "$ART/initramfs"
+test -s "$ART/kernel.config"
 test -s "$ART/manifest"
 (cd "$ART" && sha256sum -c checksums.sha256)
 file "$ART/kernel" "$ART/initramfs"
 gzip -t "$ART/initramfs"
 test "$(stat -c %s "$ART/kernel")" -gt 1000000
 test "$(stat -c %s "$ART/initramfs")" -gt 1000000
-grep -q 'snd_rme9652' "$ROOT/board/dell-optiplex-7010/linux.config"
+for setting in \
+    'CONFIG_PREEMPT_RT=y' \
+    'CONFIG_HIGH_RES_TIMERS=y' \
+    'CONFIG_HZ_1000=y' \
+    'CONFIG_IKCONFIG=y' \
+    'CONFIG_IKCONFIG_PROC=y' \
+    'CONFIG_SND_RME9652=y'; do
+    grep -qx "$setting" "$ART/kernel.config"
+done
+grep -q '^# CONFIG_PREEMPT_DYNAMIC is not set$' "$ART/kernel.config"
 echo "PASS candidate artifact validation: $ART"

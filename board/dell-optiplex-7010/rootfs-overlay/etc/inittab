@@ -2,7 +2,6 @@
 ::sysinit:/bin/mount -t sysfs sysfs /sys
 ::sysinit:/bin/mount -t devtmpfs devtmpfs /dev
 ::sysinit:/bin/mount -t devpts devpts /dev/pts
-::sysinit:/bin/mount -t tmpfs tmpfs /dev/shm
 ::sysinit:/bin/mount -t tmpfs tmpfs /run
 ::sysinit:/bin/mkdir -p /run/lock/subsys /tmp
 ::sysinit:/bin/hostname -F /etc/hostname

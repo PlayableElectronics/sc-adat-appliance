@@ -7,7 +7,7 @@ for f in kernel initramfs kernel.config manifest grub-entry.cfg checksums.sha256
 (cd "$ART" && sha256sum -c checksums.sha256)
 sh -n "$ART/grub-entry.cfg"
 gzip -t "$ART/initramfs"
-for setting in CONFIG_PREEMPT_RT CONFIG_HIGH_RES_TIMERS CONFIG_HZ_1000 CONFIG_IKCONFIG CONFIG_IKCONFIG_PROC CONFIG_SOUND CONFIG_SND CONFIG_SND_PCM CONFIG_SND_RME9652 CONFIG_VT CONFIG_VT_CONSOLE CONFIG_VGA_CONSOLE CONFIG_DRM CONFIG_DRM_FBDEV_EMULATION CONFIG_FRAMEBUFFER_CONSOLE CONFIG_E1000E CONFIG_NET CONFIG_INET CONFIG_PACKET CONFIG_SYSVIPC CONFIG_NETDEVICES CONFIG_ETHERNET CONFIG_PHYLIB CONFIG_PCI CONFIG_USB CONFIG_USB_XHCI_HCD CONFIG_USB_XHCI_PCI CONFIG_USB_EHCI_HCD CONFIG_USB_EHCI_PCI CONFIG_USB_EHCI_ROOT_HUB_TT CONFIG_HID CONFIG_HID_GENERIC CONFIG_USB_HID CONFIG_INPUT CONFIG_INPUT_EVDEV; do
+for setting in CONFIG_PREEMPT_RT CONFIG_HIGH_RES_TIMERS CONFIG_HZ_1000 CONFIG_IKCONFIG CONFIG_IKCONFIG_PROC CONFIG_TMPFS CONFIG_SOUND CONFIG_SND CONFIG_SND_PCM CONFIG_SND_RME9652 CONFIG_VT CONFIG_VT_CONSOLE CONFIG_VGA_CONSOLE CONFIG_DRM CONFIG_DRM_FBDEV_EMULATION CONFIG_FRAMEBUFFER_CONSOLE CONFIG_E1000E CONFIG_NET CONFIG_INET CONFIG_PACKET CONFIG_SYSVIPC CONFIG_NETDEVICES CONFIG_ETHERNET CONFIG_PHYLIB CONFIG_PCI CONFIG_USB CONFIG_USB_XHCI_HCD CONFIG_USB_XHCI_PCI CONFIG_USB_EHCI_HCD CONFIG_USB_EHCI_PCI CONFIG_USB_EHCI_ROOT_HUB_TT CONFIG_HID CONFIG_HID_GENERIC CONFIG_USB_HID CONFIG_INPUT CONFIG_INPUT_EVDEV; do
   grep -qx "$setting=y" "$ART/kernel.config"
 done
 grep -Eq '^(CONFIG_DRM_I915|CONFIG_DRM_NOUVEAU|CONFIG_FB_VESA|CONFIG_FB_EFI|CONFIG_FB_SIMPLE)=([ym])$' "$ART/kernel.config"
@@ -18,7 +18,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 gzip -cd "$ART/initramfs" | (cd "$tmp" && umask 000 && cpio -idm --quiet --no-preserve-owner) || true
 for f in init sbin/init bin/busybox sbin/dhcpcd usr/sbin/dropbear usr/bin/jackd usr/bin/scsynth usr/bin/sc-adat-kernel-probes usr/bin/sc-adat-progress usr/sbin/sc-adat-tty1-login; do test -x "$tmp/$f"; done
-for f in S00boot-progress S05kernel-probes S10hardware S35network S40jack S50scsynth S51dropbear-status S60self-test S99diagnostics; do test -x "$tmp/etc/init.d/$f"; head -n 1 "$tmp/etc/init.d/$f" | grep -qx '#!/bin/sh'; done
+for f in S00boot-progress S03shm S05kernel-probes S10hardware S35network S40jack S50scsynth S51dropbear-status S60self-test S99diagnostics; do test -x "$tmp/etc/init.d/$f"; head -n 1 "$tmp/etc/init.d/$f" | grep -qx '#!/bin/sh'; done
 test -s "$tmp/root/.ssh/authorized_keys"
 archive_listing=$(gzip -cd "$ART/initramfs" | cpio -tv --quiet)
 printf '%s\n' "$archive_listing" | grep -Eq 'drwx------ +2 root +root +[0-9]+ .+ root/\.ssh$'
@@ -31,7 +31,11 @@ for mountpoint in '/bin/mount -t proc proc /proc' '/bin/mount -t sysfs sysfs /sy
 grep -q 'DEVTMPFS_MOUNT=y' "$ART/kernel.config"
 grep -q "console=tty0 console=ttyS0,115200n8" "$ART/grub-entry.cfg"
 if command -v readelf >/dev/null 2>&1; then readelf -l "$tmp/init" "$tmp/bin/busybox" "$tmp/sbin/dhcpcd" "$tmp/usr/sbin/dropbear" | grep -q '/lib/ld-musl-x86_64.so.1'; fi
-for required in 'init started' 'hardware discovery' 'network interface selected' 'DHCP waiting' 'Dropbear status' 'Digi9652 status' 'JACK status' 'scsynth status' 'final PASS summary'; do grep -R -q "$required" "$tmp/usr/bin" "$tmp/etc/init.d"; done
+for required in 'init started' 'hardware discovery' 'network interface selected' 'DHCP waiting' 'Dropbear status' 'Digi9652 status' '/dev/shm status: PASS' 'JACK status' 'scsynth status' 'final PASS summary'; do grep -R -q "$required" "$tmp/usr/bin" "$tmp/etc/init.d"; done
+grep -Fq 'mkdir -p /dev/shm' "$tmp/etc/init.d/S03shm"
+grep -Fq 'mount -t tmpfs tmpfs /dev/shm' "$tmp/etc/init.d/S03shm"
+grep -Fq "grep -q '^drwxrwxrwt'" "$tmp/etc/init.d/S03shm"
+grep -Fq ': >"$probe"' "$tmp/etc/init.d/S03shm"
 grep -Eq 'assigned IPv4 address|DHCP timeout' "$tmp/etc/init.d/S35network"
 grep -Fq 'ip link set lo up' "$tmp/etc/init.d/S35network"
 grep -Fq 'loopback lo: UP' "$tmp/etc/init.d/S35network"

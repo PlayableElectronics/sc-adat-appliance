@@ -1,0 +1,25 @@
+#!/bin/sh
+set -u
+
+case "$1" in
+  start)
+    is_tmpfs() { grep -Eq '[[:space:]]/dev/shm[[:space:]]+tmpfs[[:space:]]' /proc/mounts 2>/dev/null; }
+    mkdir -p /dev/shm
+    if ! is_tmpfs; then
+      mount -t tmpfs tmpfs /dev/shm 2>/dev/null || true
+    fi
+    chmod 1777 /dev/shm 2>/dev/null || true
+    probe=/dev/shm/.sc-adat-probe.$$
+    if is_tmpfs &&
+       ls -ld /dev/shm 2>/dev/null | grep -q '^drwxrwxrwt' &&
+       : >"$probe" 2>/dev/null && rm -f "$probe"; then
+      touch /run/dev-shm-ready
+      /usr/bin/sc-adat-progress '/dev/shm status: PASS'
+    else
+      rm -f "$probe" 2>/dev/null || true
+      /usr/bin/sc-adat-progress '/dev/shm status: FAIL'
+    fi
+    ;;
+  stop) : ;;
+  *) exit 2 ;;
+esac

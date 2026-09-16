@@ -114,20 +114,19 @@ at this deployment gate.
 ## Console diagnostics
 
 The kernel command line contains `console=tty0 console=ttyS0,115200n8`.
-`tty0` supplies visible boot diagnostics on the monitor; `ttyS0` is currently
-the interactive getty. The monitor is not claimed as shell recovery because
-`tty1` is not configured as a getty.
+`tty0` supplies visible boot diagnostics on the monitor. `tty1` is the
+physically accessible recovery console and starts a key-only shell; `ttyS0`
+also carries the serial getty and diagnostics. No password login is enabled.
 
 ## In-appliance self-test
 
 After JACK and scsynth start, `S60self-test` runs automatically. It writes the
 full evidence and concise result to `/var/log/sc-adat-self-test.log`, checking
-the RT kernel configuration, Digi9652 detection, JACK realtime scheduling,
-26 capture ports, 26 playback ports, 26 scsynth inputs, 26 scsynth outputs and
-scsynth readiness. The final line is written to both `tty0` and `ttyS0`:
+the `/dev/shm` readiness probe, Digi9652 detection, JACK readiness, and
+scsynth readiness. The final result is written to both `tty0` and `ttyS0`:
 
 ```text
-summary: PASS (0 failed)
+final PASS summary
 ```
 
 After the candidate has booted, the exact commands are:

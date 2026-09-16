@@ -5,6 +5,7 @@ case "${1:-start}" in
     if test ! -e /run/scsynth-ready; then /usr/bin/sc-adat-progress 'self-test: FAIL (scsynth not ready)'; /usr/bin/sc-adat-progress 'final FAIL summary'; exit 0; fi
     failures=0; log=/var/log/sc-adat-self-test.log; : >"$log"
     check() { if "$@"; then r=PASS; else r=FAIL; failures=$((failures + 1)); fi; printf '%s %s\n' "$1" "$r" >>"$log"; }
+    check test -e /run/dev-shm-ready
     check grep -q Digi9652 /proc/asound/cards
     check test -e /run/jack-ready
     check test -e /run/scsynth-ready

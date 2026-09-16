@@ -7,7 +7,7 @@ for f in kernel initramfs kernel.config manifest grub-entry.cfg checksums.sha256
 (cd "$ART" && sha256sum -c checksums.sha256)
 sh -n "$ART/grub-entry.cfg"
 gzip -t "$ART/initramfs"
-for setting in CONFIG_PREEMPT_RT CONFIG_HIGH_RES_TIMERS CONFIG_HZ_1000 CONFIG_IKCONFIG CONFIG_IKCONFIG_PROC CONFIG_SOUND CONFIG_SND CONFIG_SND_PCM CONFIG_SND_RME9652 CONFIG_VT CONFIG_VT_CONSOLE CONFIG_VGA_CONSOLE CONFIG_DRM CONFIG_DRM_FBDEV_EMULATION CONFIG_FRAMEBUFFER_CONSOLE CONFIG_E1000E CONFIG_NET CONFIG_INET CONFIG_NETDEVICES CONFIG_ETHERNET CONFIG_PHYLIB CONFIG_PCI; do
+for setting in CONFIG_PREEMPT_RT CONFIG_HIGH_RES_TIMERS CONFIG_HZ_1000 CONFIG_IKCONFIG CONFIG_IKCONFIG_PROC CONFIG_SOUND CONFIG_SND CONFIG_SND_PCM CONFIG_SND_RME9652 CONFIG_VT CONFIG_VT_CONSOLE CONFIG_VGA_CONSOLE CONFIG_DRM CONFIG_DRM_FBDEV_EMULATION CONFIG_FRAMEBUFFER_CONSOLE CONFIG_E1000E CONFIG_NET CONFIG_INET CONFIG_NETDEVICES CONFIG_ETHERNET CONFIG_PHYLIB CONFIG_PCI CONFIG_USB CONFIG_USB_XHCI_HCD CONFIG_USB_XHCI_PCI CONFIG_USB_EHCI_HCD CONFIG_USB_EHCI_PCI CONFIG_USB_EHCI_ROOT_HUB_TT CONFIG_HID CONFIG_HID_GENERIC CONFIG_USB_HID CONFIG_INPUT CONFIG_INPUT_EVDEV; do
   grep -qx "$setting=y" "$ART/kernel.config"
 done
 grep -Eq '^(CONFIG_DRM_I915|CONFIG_DRM_NOUVEAU|CONFIG_FB_VESA|CONFIG_FB_EFI|CONFIG_FB_SIMPLE)=([ym])$' "$ART/kernel.config"
@@ -33,5 +33,11 @@ grep -q "console=tty0 console=ttyS0,115200n8" "$ART/grub-entry.cfg"
 if command -v readelf >/dev/null 2>&1; then readelf -l "$tmp/init" "$tmp/bin/busybox" "$tmp/sbin/dhcpcd" "$tmp/usr/sbin/dropbear" | grep -q '/lib/ld-musl-x86_64.so.1'; fi
 for required in 'init started' 'hardware discovery' 'network interface selected' 'DHCP waiting' 'Dropbear status' 'Digi9652 status' 'JACK status' 'scsynth status' 'final PASS summary'; do grep -R -q "$required" "$tmp/usr/bin" "$tmp/etc/init.d"; done
 grep -Eq 'assigned IPv4 address|DHCP timeout' "$tmp/etc/init.d/S35network"
+grep -Fq '/usr/bin/sc-adat-console-log --tail /var/log/dhcpcd.log' "$tmp/etc/init.d/S35network"
+grep -Fq '/usr/bin/sc-adat-console-log --tail /var/log/jack.log' "$tmp/etc/init.d/S40jack"
+grep -Fq '/usr/bin/sc-adat-console-log --tail /var/log/scsynth.log' "$tmp/etc/init.d/S50scsynth"
+grep -Fq 'tail -c 4096' "$tmp/usr/bin/sc-adat-console-log"
+grep -Fq '/dev/tty0' "$tmp/usr/bin/sc-adat-console-log"
+grep -Fq '/dev/ttyS0' "$tmp/usr/bin/sc-adat-console-log"
 echo "PASS initramfs structure and startup validation: $ART"
 echo "PASS candidate artifact validation: $ART"

@@ -8,10 +8,11 @@ if ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
   exit 0
 fi
 set +e
-timeout 35 qemu-system-x86_64 -accel tcg -m 512 -no-reboot -display none -kernel "$ART/kernel" -initrd "$ART/initramfs" -append 'console=tty0 console=ttyS0,115200n8 rdinit=/sbin/init' -nic none -serial stdio >"$ART/qemu-boot.log" 2>&1
+timeout 35 qemu-system-x86_64 -accel tcg -m 512 -no-reboot -display none -kernel "$ART/kernel" -initrd "$ART/initramfs" -append 'console=tty0 console=ttyS0,115200n8 rdinit=/sbin/init' -nic none -device qemu-xhci,id=xhci -device usb-kbd,bus=xhci.0 -serial stdio >"$ART/qemu-boot.log" 2>&1
 status=$?
 set -e
 grep -q 'init started' "$ART/qemu-boot.log"
 grep -q 'hardware discovery' "$ART/qemu-boot.log"
 grep -q 'final FAIL summary' "$ART/qemu-boot.log"
+grep -Eq 'xhci|EHCI|USB' "$ART/qemu-boot.log"
 echo "PASS QEMU userspace/console/bounded-no-network boot (exit=$status): $ART/qemu-boot.log"

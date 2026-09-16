@@ -1,16 +1,38 @@
 #!/bin/sh
 set +e
 
+tail_file=
+if test "${1:-}" = --tail; then
+    tail_file=${2:-}
+    shift 2
+fi
 message=${*:-}
 mkdir -p /run /var/log
 printf '%s %s\n' "$(date -u '+%H:%M:%S')" "$message" >> /var/log/boot-progress.log
 
 # Console drivers can block a write while a console is changing state. Keep
 # every diagnostic write out of the rcS critical path and kill it after 1s.
+# Failure tails are capped at 4096 bytes so a noisy daemon cannot flood either
+# console. The worker trap also terminates its pipeline if the write blocks.
 for console in /dev/tty0 /dev/ttyS0; do
     test -c "$console" || continue
     (
-        printf '%s\n' "$message" > "$console"
+        tail_pid=
+        trap 'test -n "$tail_pid" && kill "$tail_pid" >/dev/null 2>&1 || true; exit 0' TERM INT HUP
+        if test -n "$tail_file"; then
+            {
+                printf '%s\n' "$message"
+                if test -r "$tail_file"; then
+                    tail -c 4096 "$tail_file"
+                else
+                    printf '%s\n' "(log unavailable: $tail_file)"
+                fi
+            } | head -c 4608 > "$console" &
+            tail_pid=$!
+            wait "$tail_pid"
+        else
+            printf '%s\n' "$message" > "$console"
+        fi
     ) >/dev/null 2>&1 &
     writer=$!
     (

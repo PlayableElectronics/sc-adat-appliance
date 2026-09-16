@@ -47,6 +47,7 @@ case "$1" in
       /usr/bin/sc-adat-progress "assigned IPv4 address: $found"
     else
       /usr/bin/sc-adat-progress "DHCP timeout after ${NETWORK_TIMEOUT}s"
+      /usr/bin/sc-adat-console-log --tail /var/log/dhcpcd.log 'DHCP failure log'
     fi
     ;;
   stop)

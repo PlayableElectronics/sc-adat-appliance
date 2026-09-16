@@ -1,3 +1,12 @@
 #!/bin/sh
 set -u
-case "$1" in start) /usr/bin/sc-adat-progress 'init started' ;; stop) : ;; *) exit 2 ;; esac
+case "$1" in
+  start)
+    /usr/bin/sc-adat-progress 'init started'
+    case "$(cat /proc/cmdline 2>/dev/null)" in
+      *qemu-payload-test*) exec /usr/libexec/sc-adat-qemu-payload-test ;;
+    esac
+    ;;
+  stop) : ;;
+  *) exit 2 ;;
+esac

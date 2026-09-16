@@ -24,6 +24,10 @@ gzip -cd "$ART/initramfs" | (cd "$tmp" && umask 000 && cpio -idm --quiet --no-pr
   etc/init.d/S51dropbear-status etc/init.d/S60self-test etc/init.d/S99diagnostics \
   etc/inittab etc/shadow etc/default/dropbear 'usr/bin/*' 'usr/sbin/*' 'usr/share/*')
 for f in init sbin/init bin/busybox sbin/dhcpcd usr/sbin/dropbear sbin/blkid usr/bin/jackd usr/bin/scsynth usr/bin/sc-adat-kernel-probes usr/bin/sc-adat-jack-probe usr/bin/sc-adat-progress usr/bin/sc-adat-boot-report usr/bin/sc-adat-report usr/bin/sc-adat-tone-test usr/bin/sc-adat-tone-osc usr/bin/sc-adat-payload-consumer; do test -x "$tmp/$f"; done
+for f in usr/libexec/sc-adat-qemu-payload-test usr/libexec/sc-adat-qemu-payload-loader; do test -x "$tmp/$f"; done
+test -x "$tmp/bin/stat" || test -x "$tmp/usr/bin/stat"
+grep -q '^CONFIG_STAT=y$' "$ROOT/board/dell-optiplex-7010/busybox.fragment"
+grep -q '^CONFIG_FEATURE_STAT_FORMAT=y$' "$ROOT/board/dell-optiplex-7010/busybox.fragment"
 for f in S00boot-progress S03shm S04pts S05kernel-probes S10hardware S35network S40jack S50scsynth S55data-payload S51dropbear-status S60self-test S99diagnostics; do test -x "$tmp/etc/init.d/$f"; head -n 1 "$tmp/etc/init.d/$f" | grep -qx '#!/bin/sh'; done
 archive_listing=$(gzip -cd "$ART/initramfs" | cpio -tv --quiet)
 printf '%s\n' "$archive_listing" | grep -q 'usr/sbin/sc-adat-tty1-login'

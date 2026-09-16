@@ -2,7 +2,7 @@
 set -u
 case "${1:-start}" in
   start)
-    if test ! -e /run/scsynth-ready; then /usr/bin/sc-adat-progress 'self-test: FAIL (scsynth not ready)'; /usr/bin/sc-adat-progress 'final FAIL summary'; exit 0; fi
+    if test ! -e /run/scsynth-ready; then /usr/bin/sc-adat-progress 'self-test: FAIL (scsynth not ready)'; exit 0; fi
     failures=0; log=/var/log/sc-adat-self-test.log; : >"$log"
     check() { if "$@"; then r=PASS; else r=FAIL; failures=$((failures + 1)); fi; printf '%s %s\n' "$1" "$r" >>"$log"; }
     check test -e /run/dev-shm-ready
@@ -11,9 +11,11 @@ case "${1:-start}" in
     check test -e /run/scsynth-ready
     printf 'cmdline: '; cat /proc/cmdline >>"$log"; cat /proc/asound/cards >>"$log" 2>/dev/null || true; ps >>"$log" 2>&1 || true
     if test "$failures" -eq 0; then
-      summary='final PASS summary'; touch /run/sc-adat-self-test-passed
+      touch /run/sc-adat-self-test-passed
+      summary='self-test complete: PASS'
     else
-      summary="final FAIL summary ($failures failed)"; rm -f /run/sc-adat-self-test-passed
+      rm -f /run/sc-adat-self-test-passed
+      summary="self-test complete: FAIL ($failures failed)"
     fi
     printf '%s\n' "$summary" >>"$log"; /usr/bin/sc-adat-progress "$summary"
     ;;

@@ -1,1 +1,5 @@
 CONFIG_TIMEOUT=y
+# Payload validation requires BusyBox stat's format support for ownership and
+# numeric mode checks.
+CONFIG_STAT=y
+CONFIG_FEATURE_STAT_FORMAT=y

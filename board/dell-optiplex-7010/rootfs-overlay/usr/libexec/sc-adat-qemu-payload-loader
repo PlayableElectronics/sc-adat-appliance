@@ -1,0 +1,2 @@
+#!/bin/sh
+case "$1" in load) echo /done;; sync) echo /synced;; validate) echo VALID;; activate) :;; *) exit 2;; esac

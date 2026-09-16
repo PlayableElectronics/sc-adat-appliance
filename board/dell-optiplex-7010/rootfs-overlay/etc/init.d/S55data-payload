@@ -8,8 +8,12 @@ case "${1:-start}" in
     printf '%s\n' 'data filesystem: waiting for label SC_ADAT_DATA' >/var/log/sc-adat-payload.log
     source=
     i=0
-    while test "$i" -lt 15; do
-      source=$(blkid -L SC_ADAT_DATA 2>/dev/null || true)
+    # The labeled partition is present before rcS on the appliance. Bound the
+    # probe so a missing or unresponsive block device cannot suppress the
+    # authoritative boot report indefinitely; the consumer still performs
+    # factory fallback below.
+    while test "$i" -lt 1; do
+      source=$(timeout 1 blkid -L SC_ADAT_DATA 2>/dev/null || true)
       if test -b "$source"; then
         touch /run/sc-adat-data-discovered
         printf 'data filesystem discovered: %s\n' "$source" >>/var/log/sc-adat-payload.log
@@ -28,7 +32,7 @@ case "${1:-start}" in
     done
     if test ! -e /run/sc-adat-data-discovered; then printf '%s\n' 'data filesystem missing; using factory payload' >>/var/log/sc-adat-payload.log; fi
     if test ! -e /run/sc-adat-data-mounted; then mkdir -p /data/sc-adat; fi
-    if SC_ADAT_NO_SWITCH=1 SC_ADAT_STATE_DIR=/run/sc-adat /usr/bin/sc-adat-payload-consumer /data/sc-adat activate >>/var/log/sc-adat-payload.log 2>&1; then
+    if SC_ADAT_NO_SWITCH=1 SC_ADAT_STATE_DIR=/run/sc-adat timeout 10 /usr/bin/sc-adat-payload-consumer /data/sc-adat activate >>/var/log/sc-adat-payload.log 2>&1; then
       if test -r /run/sc-adat/payload-version; then printf 'payload version: %s\n' "$(cat /run/sc-adat/payload-version)" >>/var/log/sc-adat-payload.log; fi
       touch /run/sc-adat-payload-activated
     else

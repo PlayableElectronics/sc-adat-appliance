@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+fail() { echo "PAYLOAD-QEMU FAIL: $*"; exit 1; }
+pass() { echo "PAYLOAD-QEMU PASS: $*"; }
+for c in stat find grep sed sort readlink sha256sum dirname blkid mount awk mv ln mkdir cat cp rm touch sleep umount timeout; do command -v "$c" >/dev/null 2>&1 || fail "missing target command: $c"; done
+test "$(stat -c '%u:%a' /usr/share/sc-adat/factory)" = 0:555 || fail stat
+test -z "$(find /usr/share/sc-adat/factory -type d ! -perm 555 -print)" || fail find-perm
+(cd /usr/share/sc-adat/factory && sha256sum -c manifest.sha256 >/dev/null) || fail sha256sum
+mkdir -p /run/payload-qemu; mount -t tmpfs -o nosuid,nodev,noexec,noatime tmpfs /run/payload-qemu || fail mount
+awk '$2 == "/run/payload-qemu" && $4 ~ /(^|,)rw(,|$)/ {ok=1} END {exit !ok}' /proc/mounts || fail awk
+umount /run/payload-qemu
+cp /usr/libexec/sc-adat-qemu-payload-loader /run/payload-test-loader
+make_valid() { cp -a /usr/share/sc-adat/factory "$1"; }
+run_case() { n=$1; r=$2; e=$3; o=$(SC_ADAT_OSC_LOADER=/run/payload-test-loader SC_ADAT_FACTORY=/usr/share/sc-adat/factory SC_ADAT_OWNER=0 SC_ADAT_STATE_DIR=/run/payload-state-$n /usr/bin/sc-adat-payload-consumer "$r" activate 2>&1) || fail "$n $o"; echo "$o" | grep -Fq "$e" || fail "$n expected $e"; pass "$n: $o"; }
+rm -rf /run/payload-data; mkdir -p /run/payload-data/releases; make_valid /run/payload-data/releases/current-valid; ln -s releases/current-valid /run/payload-data/current; run_case current-valid /run/payload-data 'activated 1'
+rm -rf /run/payload-data; mkdir -p /run/payload-data/releases; make_valid /run/payload-data/releases/previous-valid; make_valid /run/payload-data/releases/current-invalid; rm -f /run/payload-data/releases/current-invalid/manifest.sha256; ln -s releases/current-invalid /run/payload-data/current; ln -s releases/previous-valid /run/payload-data/previous; run_case current-previous /run/payload-data 'activated previous'
+rm -rf /run/payload-data; mkdir -p /run/payload-data/releases; make_valid /run/payload-data/releases/current-invalid; make_valid /run/payload-data/releases/previous-invalid; rm -f /run/payload-data/releases/current-invalid/manifest.sha256 /run/payload-data/releases/previous-invalid/manifest.sha256; ln -s releases/current-invalid /run/payload-data/current; ln -s releases/previous-invalid /run/payload-data/previous; run_case factory-fallback /run/payload-data 'activated 1'
+rm -rf /run/payload-data; run_case missing-data /run/payload-data 'activated 1'
+echo 'PASS target-runtime payload command audit and current/previous/factory fallback'

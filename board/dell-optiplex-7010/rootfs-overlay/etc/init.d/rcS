@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Start all init scripts in lexical numerical order. The trace is launched
+# asynchronously with a watchdog by sc-adat-console-log, so a console driver
+# can never block the init-script loop.
+trace() {
+    /usr/bin/sc-adat-console-log "[rcS] $*"
+}
+
+trace 'rcS entered'
+for i in /etc/init.d/S??*; do
+    [ ! -f "$i" ] && continue
+    trace "starting $i"
+    case "$i" in
+        *.sh)
+            (
+                trap - INT QUIT TSTP
+                set start
+                . "$i"
+            )
+            ;;
+        *)
+            "$i" start
+            ;;
+    esac
+    trace "finished $i"
+done
+trace 'rcS complete'

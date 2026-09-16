@@ -1,0 +1,20 @@
+#!/bin/sh
+set +e
+
+message=${*:-}
+mkdir -p /run /var/log
+printf '%s %s\n' "$(date -u '+%H:%M:%S')" "$message" >> /var/log/boot-progress.log
+
+# Console drivers can block a write while a console is changing state. Keep
+# every diagnostic write out of the rcS critical path and kill it after 1s.
+for console in /dev/tty0 /dev/ttyS0; do
+    test -c "$console" || continue
+    (
+        printf '%s\n' "$message" > "$console"
+    ) >/dev/null 2>&1 &
+    writer=$!
+    (
+        sleep 1
+        kill "$writer" >/dev/null 2>&1 || true
+    ) >/dev/null 2>&1 &
+done

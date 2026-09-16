@@ -8,7 +8,15 @@ test -s "$ART/kernel"
 test -s "$ART/initramfs"
 test -s "$ART/kernel.config"
 test -s "$ART/manifest"
+test -s "$ART/grub-entry.cfg"
 (cd "$ART" && sha256sum -c checksums.sha256)
+sh -n "$ART/grub-entry.cfg"
+GRUB_OUTPUT=$("$ART/grub-entry.cfg")
+test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^menuentry '")" -eq 1
+test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c -- "--id sc-adat-$RELEASE {")" -eq 1
+test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    search .* /boot/sc-adat/$RELEASE/kernel$")" -eq 1
+test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    linux /boot/sc-adat/$RELEASE/kernel ")" -eq 1
+test "$(printf '%s\n' "$GRUB_OUTPUT" | grep -c "^    initrd /boot/sc-adat/$RELEASE/initramfs$")" -eq 1
 file "$ART/kernel" "$ART/initramfs"
 gzip -t "$ART/initramfs"
 test "$(stat -c %s "$ART/kernel")" -gt 1000000
@@ -22,5 +30,7 @@ for setting in \
     'CONFIG_SND_RME9652=y'; do
     grep -qx "$setting" "$ART/kernel.config"
 done
-grep -q '^# CONFIG_PREEMPT_DYNAMIC is not set$' "$ART/kernel.config"
+! grep -q '^CONFIG_PREEMPT=y$' "$ART/kernel.config"
+! grep -q '^CONFIG_PREEMPT_DYNAMIC=y$' "$ART/kernel.config"
+! grep -q '^CONFIG_PREEMPT_NONE=y$' "$ART/kernel.config"
 echo "PASS candidate artifact validation: $ART"

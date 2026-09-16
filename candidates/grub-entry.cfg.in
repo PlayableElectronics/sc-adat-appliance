@@ -1,7 +1,13 @@
-menuentry 'SC-ADAT @RELEASE@ (one-shot candidate)' {
+#!/bin/sh
+set -eu
+
+# /etc/grub.d generators must print GRUB configuration when executed.
+cat <<'SC_ADAT_GRUB_ENTRY'
+menuentry 'SC-ADAT @RELEASE@ (one-shot candidate)' --id sc-adat-@RELEASE@ {
     insmod part_gpt
     insmod ext2
     search --no-floppy --file --set=root /boot/sc-adat/@RELEASE@/kernel
     linux /boot/sc-adat/@RELEASE@/kernel console=tty0 console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
     initrd /boot/sc-adat/@RELEASE@/initramfs
 }
+SC_ADAT_GRUB_ENTRY

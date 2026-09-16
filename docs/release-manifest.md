@@ -16,7 +16,7 @@ build_timestamp_utc=
 target=dell-optiplex-7010
 rootfs_mode=
 rootfs_artifact_sha256=
-grub_fragment_sha256=
+grub_entry_sha256=
 audio_driver=snd-rme9652
 ```
 

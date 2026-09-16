@@ -23,6 +23,9 @@ make -C "$BR" BR2_EXTERNAL="$ROOT" O="$OUT" -j"$BUILD_JOBS"
 cp "$OUT/images/bzImage" "$ART/kernel"
 cp "$OUT/images/rootfs.cpio.gz" "$ART/initramfs"
 cp "$OUT/build/linux-6.12.107/.config" "$ART/kernel.config"
+cp "$ROOT/candidates/grub-entry.cfg.in" "$ART/grub-entry.cfg"
+sed -i "s/@RELEASE@/$RELEASE/g" "$ART/grub-entry.cfg"
+chmod 0755 "$ART/grub-entry.cfg"
 {
   printf 'release=%s\n' "$RELEASE"
   printf 'buildroot=2025.02.9\nlinux=6.12.107\nsupercollider=3.13.0\n'
@@ -30,8 +33,7 @@ cp "$OUT/build/linux-6.12.107/.config" "$ART/kernel.config"
   printf 'kernel_sha256=%s\n' "$(sha256sum "$ART/kernel" | cut -d' ' -f1)"
   printf 'initramfs_sha256=%s\n' "$(sha256sum "$ART/initramfs" | cut -d' ' -f1)"
   printf 'kernel_config_sha256=%s\n' "$(sha256sum "$ART/kernel.config" | cut -d' ' -f1)"
+  printf 'grub_entry_sha256=%s\n' "$(sha256sum "$ART/grub-entry.cfg" | cut -d' ' -f1)"
 } > "$ART/manifest"
-(cd "$ART" && sha256sum kernel initramfs kernel.config manifest > checksums.sha256)
-cp "$ROOT/candidates/grub-entry.cfg.in" "$ART/grub-entry.cfg"
-sed -i "s/@RELEASE@/$RELEASE/g" "$ART/grub-entry.cfg"
+(cd "$ART" && sha256sum kernel initramfs kernel.config manifest grub-entry.cfg > checksums.sha256)
 printf 'built %s\n' "$ART"

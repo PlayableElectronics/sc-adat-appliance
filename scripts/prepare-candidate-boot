@@ -3,26 +3,42 @@ set -Eeuo pipefail
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 RELEASE="${SC_ADAT_RELEASE_ID:-candidate-1}"
+ART="$ROOT/artifacts/sc-adat-$RELEASE"
 [[ "${1:-}" == --dry-run && $# -eq 1 ]] || { echo 'refusing boot: only --dry-run is implemented' >&2; exit 4; }
 cat <<EOF
 DRY RUN — no GRUB or boot variable command will execute.
-Proposed GRUB generator file: /etc/grub.d/42-sc-adat-candidate (exact entry from candidates/grub-entry.cfg.in)
-menuentry 'SC-ADAT $RELEASE (one-shot candidate)' {
-    insmod part_gpt
-    insmod ext2
-    search --no-floppy --file --set=root /boot/sc-adat/$RELEASE/kernel
-    linux /boot/sc-adat/$RELEASE/kernel console=tty0 console=ttyS0,115200n8 root=/dev/ram0 rdinit=/sbin/init
-    initrd /boot/sc-adat/$RELEASE/initramfs
-}
+Proposed GRUB generator file: /etc/grub.d/42-sc-adat-candidate
+Exact source artifact: $ART/grub-entry.cfg
+Stable GRUB ID: sc-adat-$RELEASE
+Generated entry:
+$("$ART/grub-entry.cfg" 2>/dev/null || echo 'ERROR: build the candidate first')
 Proposed privileged commands after explicit approval:
-  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/kernel /boot/sc-adat/$RELEASE/kernel
-  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/initramfs /boot/sc-adat/$RELEASE/initramfs
-  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/manifest /boot/sc-adat/$RELEASE/manifest
-  sudo install -D -m 0644 artifacts/sc-adat-$RELEASE/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
-  sudo install -D -m 0755 artifacts/sc-adat-$RELEASE/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
-  sudo grub-reboot 'SC-ADAT $RELEASE (one-shot candidate)'
+  sudo install -D -m 0644 $ART/kernel /boot/sc-adat/$RELEASE/kernel
+  sudo install -D -m 0644 $ART/initramfs /boot/sc-adat/$RELEASE/initramfs
+  sudo install -D -m 0644 $ART/kernel.config /boot/sc-adat/$RELEASE/kernel.config
+  sudo install -D -m 0644 $ART/manifest /boot/sc-adat/$RELEASE/manifest
+  sudo install -D -m 0644 $ART/checksums.sha256 /boot/sc-adat/$RELEASE/checksums.sha256
+  sudo install -D -m 0755 $ART/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
+  # Replace DEBIAN_STABLE_ID with the exact ID from the host preflight.
+  sudo install -D -m 0644 /dev/stdin /etc/default/grub.d/90-sc-adat-candidate <<'GRUB_DEFAULTS'
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=false
+GRUB_DEFAULTS
+  sudo grub-editenv /boot/grub/grubenv set saved_entry=DEBIAN_STABLE_ID
+  TMP_CFG=\$(mktemp)
+  sudo grub-mkconfig -o "\$TMP_CFG"
+  sudo grub-script-check "\$TMP_CFG"
+  test "\$(grep -c -- "--id sc-adat-$RELEASE" "\$TMP_CFG")" -eq 1
+  test "\$(grep -c "menuentry 'SC-ADAT $RELEASE" "\$TMP_CFG")" -eq 1
+  grep -q 'next_entry' "\$TMP_CFG"
+  sudo install -m 0644 "\$TMP_CFG" /boot/grub/grub.cfg
+  sudo grub-reboot sc-adat-$RELEASE
   sudo reboot
-Rollback: before reboot, remove only the candidate entry/files; after a failed one-shot boot,
-Debian remains the persistent default because grub-reboot sets only the next boot.
+Validation of one-shot state uses a disposable environment before touching the
+real grubenv: grub-editenv TEST_ENV create; grub-editenv TEST_ENV set
+next_entry=sc-adat-$RELEASE; grub-editenv TEST_ENV unset next_entry.
+Rollback: clear next_entry, restore the prior /etc/default/grub settings,
+restore the prior saved_entry, remove only /etc/grub.d/42-sc-adat-candidate and
+/boot/sc-adat/$RELEASE, then regenerate grub.cfg through a temporary file after
+grub-script-check. Do not remove Debian files.
 EOF

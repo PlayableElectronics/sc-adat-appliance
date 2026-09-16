@@ -11,15 +11,16 @@ For `SC_ADAT_RELEASE_ID=candidate-1`, copy these generated files:
 ```text
 artifacts/sc-adat-candidate-1/kernel             -> /boot/sc-adat/candidate-1/kernel
 artifacts/sc-adat-candidate-1/initramfs          -> /boot/sc-adat/candidate-1/initramfs
+artifacts/sc-adat-candidate-1/kernel.config      -> /boot/sc-adat/candidate-1/kernel.config
 artifacts/sc-adat-candidate-1/manifest           -> /boot/sc-adat/candidate-1/manifest
 artifacts/sc-adat-candidate-1/checksums.sha256   -> /boot/sc-adat/candidate-1/checksums.sha256
-artifacts/sc-adat-candidate-1/kernel.config      -> /boot/sc-adat/candidate-1/kernel.config
+artifacts/sc-adat-candidate-1/grub-entry.cfg     -> /etc/grub.d/42-sc-adat-candidate
 ```
 
 The proposed GRUB entry is:
 
 ```grub
-menuentry 'SC-ADAT candidate-1 (one-shot candidate)' {
+menuentry 'SC-ADAT candidate-1 (one-shot candidate)' --id sc-adat-candidate-1 {
     insmod part_gpt
     insmod ext2
     search --no-floppy --file --set=root /boot/sc-adat/candidate-1/kernel
@@ -30,17 +31,37 @@ menuentry 'SC-ADAT candidate-1 (one-shot candidate)' {
 
 ## Exact proposed commands
 
-After explicit approval, and only after reviewing the dry-run output:
+The commands below are the complete proposed transition. They are not run by
+the current gate. `DEBIAN_STABLE_ID` must be replaced by the exact stable ID
+reported by read-only host preflight; it must never be guessed.
+
+From any working directory, set `REPO_ROOT` to the absolute repository path,
+then after explicit approval and only after reviewing the dry-run output:
 
 ```sh
-sudo install -D -m 0644 artifacts/sc-adat-candidate-1/kernel /boot/sc-adat/candidate-1/kernel
-sudo install -D -m 0644 artifacts/sc-adat-candidate-1/initramfs /boot/sc-adat/candidate-1/initramfs
-sudo install -D -m 0644 artifacts/sc-adat-candidate-1/manifest /boot/sc-adat/candidate-1/manifest
-sudo install -D -m 0644 artifacts/sc-adat-candidate-1/checksums.sha256 /boot/sc-adat/candidate-1/checksums.sha256
-sudo install -D -m 0644 artifacts/sc-adat-candidate-1/kernel.config /boot/sc-adat/candidate-1/kernel.config
-sudo install -D -m 0755 artifacts/sc-adat-candidate-1/grub-entry.cfg /etc/grub.d/42-sc-adat-candidate
-sudo grub-mkconfig -o /boot/grub/grub.cfg
-sudo grub-reboot 'SC-ADAT candidate-1 (one-shot candidate)'
+REPO_ROOT=/absolute/path/to/sc-adat-appliance
+ART="$REPO_ROOT/artifacts/sc-adat-candidate-1"
+sudo install -D -m 0644 "$ART/kernel" /boot/sc-adat/candidate-1/kernel
+sudo install -D -m 0644 "$ART/initramfs" /boot/sc-adat/candidate-1/initramfs
+sudo install -D -m 0644 "$ART/kernel.config" /boot/sc-adat/candidate-1/kernel.config
+sudo install -D -m 0644 "$ART/manifest" /boot/sc-adat/candidate-1/manifest
+sudo install -D -m 0644 "$ART/checksums.sha256" /boot/sc-adat/candidate-1/checksums.sha256
+sudo install -D -m 0755 "$ART/grub-entry.cfg" /etc/grub.d/42-sc-adat-candidate
+sudo install -D -m 0644 /dev/stdin /etc/default/grub.d/90-sc-adat-candidate <<'EOF'
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=false
+EOF
+sudo grub-editenv /boot/grub/grubenv set saved_entry=DEBIAN_STABLE_ID
+TMP_CFG=$(mktemp)
+trap 'rm -f "$TMP_CFG"' EXIT
+sudo grub-mkconfig -o "$TMP_CFG"
+sudo grub-script-check "$TMP_CFG"
+test "$(grep -c -- "--id sc-adat-candidate-1" "$TMP_CFG")" -eq 1
+test "$(grep -c "menuentry 'SC-ADAT candidate-1" "$TMP_CFG")" -eq 1
+grep -q 'next_entry' "$TMP_CFG"
+test "$(sudo grub-editenv /boot/grub/grubenv list | grep -c '^saved_entry=DEBIAN_STABLE_ID$')" -eq 1
+sudo install -m 0644 "$TMP_CFG" /boot/grub/grub.cfg
+sudo grub-reboot sc-adat-candidate-1
 sudo reboot
 ```
 
@@ -49,12 +70,37 @@ script must be reviewed and explicitly enabled before use.
 
 ## One-shot behavior and rollback
 
-`grub-reboot` selects only the next boot. Debian remains the persistent default:
-do not change `GRUB_DEFAULT` and do not use `grub-set-default`. If the
-candidate has not been booted, remove the four candidate files and
-`/etc/grub.d/42-sc-adat-candidate`, then regenerate `grub.cfg`. To clear a
-pending one-shot selection before reboot, use the distribution's
-`grub-editenv /boot/grub/grubenv unset next_entry`.
+The minimal persistent transition is `GRUB_DEFAULT=saved` and
+`GRUB_SAVEDEFAULT=false`, with Debian's exact stable ID explicitly written as
+`saved_entry` before selecting the candidate. This keeps Debian persistent
+while `grub-reboot sc-adat-candidate-1` sets only `next_entry`. Verify that the
+generated `grub.cfg` contains its normal `next_entry` handling and that
+`grub-editenv list` shows Debian as `saved_entry` before reboot.
+
+The one-shot variable behavior can be checked without touching the host
+environment:
+
+```sh
+TEST_ENV=$(mktemp)
+grub-editenv "$TEST_ENV" create
+grub-editenv "$TEST_ENV" set next_entry=sc-adat-candidate-1
+test "$(grub-editenv "$TEST_ENV" list | grep -c '^next_entry=sc-adat-candidate-1$')" -eq 1
+grub-editenv "$TEST_ENV" unset next_entry
+test "$(grub-editenv "$TEST_ENV" list | grep -c '^next_entry=')" -eq 0
+```
+
+To clear a pending one-shot selection before reboot, use:
+
+```sh
+sudo grub-editenv /boot/grub/grubenv unset next_entry
+```
+
+To roll back before or after a failed candidate boot, first clear
+`next_entry`, restore the previous `/etc/default/grub` contents, restore the
+previous `saved_entry`, remove only `/etc/grub.d/42-sc-adat-candidate` and
+`/boot/sc-adat/candidate-1`, and regenerate `grub.cfg` through a temporary
+file followed by `grub-script-check`. Debian files and partitions are not
+removed.
 After a failed candidate boot, select Debian from the firmware/GRUB menu or
 allow the one-shot selection to expire, then remove the candidate files and
 entry from Debian.
@@ -62,6 +108,13 @@ entry from Debian.
 Use `./lab stage candidate --dry-run` and `./lab boot candidate --dry-run` to
 print the current release-specific proposal. The commands intentionally stop
 at this deployment gate.
+
+## Console diagnostics
+
+The kernel command line contains `console=tty0 console=ttyS0,115200n8`.
+`tty0` supplies visible boot diagnostics on the monitor; `ttyS0` is currently
+the interactive getty. The monitor is not claimed as shell recovery because
+`tty1` is not configured as a getty.
 
 ## SSH access
 

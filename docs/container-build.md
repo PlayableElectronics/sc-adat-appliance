@@ -48,9 +48,10 @@ A release is staged as:
 artifacts/sc-adat-<release-id>/
 ├── kernel
 ├── initramfs
+├── kernel.config
 ├── manifest
 ├── checksums.sha256
-└── grub-entry.cfg
+└── grub-entry.cfg (executable /etc/grub.d generator)
 ```
 
 Names may be refined after the first real build, but the bundle must remain

@@ -7,12 +7,15 @@ ART="$ROOT/artifacts/sc-adat-$RELEASE"
 [[ "${1:-}" == --dry-run && $# -eq 1 ]] || { echo 'refusing stage: only --dry-run is implemented' >&2; exit 4; }
 cat <<EOF
 DRY RUN — no files will be copied.
+Boot bundle files (5):
 Source files:
   $ART/kernel
   $ART/initramfs
   $ART/kernel.config
   $ART/manifest
   $ART/checksums.sha256
+GRUB generator artifact (1, installed separately by the boot gate):
+  $ART/grub-entry.cfg -> /etc/grub.d/42-sc-adat-candidate
 Destination directory (Debian existing root filesystem):
   /boot/sc-adat/$RELEASE/
 Proposed copies:

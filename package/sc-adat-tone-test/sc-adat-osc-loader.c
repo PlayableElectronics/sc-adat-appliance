@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
   else if (!strcmp(argv[1],"sync")) { rc=send_sync(fd,&target); if (!rc) puts("/synced"); }
   else if (!strcmp(argv[1],"validate")) {
     unsigned char msg[256]; const char *args[]={"sc_adat_tone24","19000","0","0","level","-120","gate","1"};
-    packet(msg,sizeof msg,"/s_new",",siiisfsi");
+    packet(msg,sizeof msg,"/s_new",",siiisfsf");
     for (int i=0; i<8; i++) { char t=",siiisfsi"[i+1]; if(t=='s') oscstr(args[i]); else if(t=='i') oscint(atoi(args[i])); else { uint32_t bits; float v=(float)atof(args[i]); memcpy(&bits,&v,4); put32(bits); } }
     size_t n=(size_t)(cursor-msg); rc=send_only(fd,&target,msg,n); if (!rc) rc=send_sync(fd,&target); if (!rc) { packet(msg,sizeof msg,"/n_free",",i"); oscint(19000); n=(size_t)(cursor-msg); rc=send_only(fd,&target,msg,n); } if (!rc) puts("VALID");
   }

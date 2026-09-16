@@ -15,7 +15,8 @@ static void i32(int32_t v) { put32((uint32_t)v); }
 static void f32(float f) { uint32_t v; memcpy(&v,&f,4); put32(v); }
 static int send_packet(const unsigned char *b,size_t n) {
   int fd=socket(AF_INET,SOCK_DGRAM,0); struct sockaddr_in a; if(fd<0)return 1;
-  memset(&a,0,sizeof(a)); a.sin_family=AF_INET; a.sin_port=htons(57110); a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+  const char *port=getenv("SC_ADAT_OSC_PORT");
+  memset(&a,0,sizeof(a)); a.sin_family=AF_INET; a.sin_port=htons((uint16_t)(port ? atoi(port) : 57110)); a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
   int r=sendto(fd,b,n,0,(struct sockaddr*)&a,sizeof(a)); close(fd); return r==(int)n?0:1;
 }
 static int packet(const char *addr,const char *types,int argc,const char **args) {
@@ -26,8 +27,8 @@ static int packet(const char *addr,const char *types,int argc,const char **args)
 int main(int argc,char **argv) {
   if(argc<2)return 2;
   if(!strcmp(argv[1],"free")) { const char *a[]={argv[2]}; return packet("/n_free",",i",1,a); }
-  if(!strcmp(argv[1],"start") && argc >= 3) { const char *a[]={"sc_adat_tone24","1000","-1","0","level",argv[2],"gate","1"}; return packet("/s_new",",siiisfsi",8,a); }
-  if(!strcmp(argv[1],"scan") && argc >= 5) { const char *a[]={"sc_adat_scan","2000","-1","0","output",argv[2],"freq",argv[3],"level",argv[4],"gate","1"}; return packet("/s_new",",siiisisfsfsi",12,a); }
+  if(!strcmp(argv[1],"start") && argc >= 3) { const char *a[]={"sc_adat_tone24","1000","0","0","level",argv[2],"gate","1"}; return packet("/s_new",",siiisfsf",8,a); }
+  if(!strcmp(argv[1],"scan") && argc >= 5) { const char *a[]={"sc_adat_scan","2000","0","0","output",argv[2],"freq",argv[3],"level",argv[4],"gate","1"}; return packet("/s_new",",siiisisfsfsf",12,a); }
   if(!strcmp(argv[1],"release") && argc >= 3) { const char *a[]={argv[2],"gate","0"}; return packet("/n_set",",isf",3,a); }
   if(!strcmp(argv[1],"set") && argc >= 5) { const char *a[]={argv[2],argv[3],argv[4]}; return packet("/n_set",",isf",3,a); }
   return 2;

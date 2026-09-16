@@ -10,3 +10,8 @@ __pycache__/
 *.squashfs
 *.wav
 .local/sc-audio-reports/
+.local/buildroot-output/
+.local/buildroot-downloads/
+artifacts/
+candidates/*.cpio*
+candidates/*.bzImage

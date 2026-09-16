@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+RELEASE="${1:-candidate-1}"
+ART="$ROOT/artifacts/sc-adat-$RELEASE"
+test -s "$ART/kernel"
+test -s "$ART/initramfs"
+test -s "$ART/manifest"
+(cd "$ART" && sha256sum -c checksums.sha256)
+file "$ART/kernel" "$ART/initramfs"
+gzip -t "$ART/initramfs"
+test "$(stat -c %s "$ART/kernel")" -gt 1000000
+test "$(stat -c %s "$ART/initramfs")" -gt 1000000
+grep -q 'snd_rme9652' "$ROOT/board/dell-optiplex-7010/linux.config"
+echo "PASS candidate artifact validation: $ART"

@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+case "$1" in
+  start)
+    mkdir -p /var/log
+    {
+      date -u '+boot=%Y-%m-%dT%H:%M:%SZ'
+      uname -a
+      cat /proc/cmdline
+      cat /proc/asound/cards 2>/dev/null || true
+      ip -brief addr 2>/dev/null || true
+      ps -eo pid,ppid,cls,rtprio,pri,ni,stat,comm,args
+    } > /var/log/boot-diagnostics.log 2>&1
+    ;;
+  stop)
+    {
+      date -u '+shutdown=%Y-%m-%dT%H:%M:%SZ'
+      dmesg | tail -100
+    } >> /var/log/boot-diagnostics.log 2>&1 || true
+    ;;
+esac

@@ -1,0 +1,2 @@
+SC-ADAT native candidate. Diagnostics: /var/log/boot-diagnostics.log,
+/var/log/jack.log, /var/log/scsynth.log, and /var/log/dmesg-live.log.

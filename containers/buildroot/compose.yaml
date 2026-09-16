@@ -1,0 +1,16 @@
+services:
+  buildroot:
+    build:
+      context: ../..
+      dockerfile: containers/buildroot/Dockerfile
+    image: sc-adat-buildroot:2025.02.9
+    container_name: sc-adat-buildroot
+    working_dir: /work
+    volumes:
+      - ../..:/work
+      - ../../.local/buildroot-cache:/cache
+    environment:
+      BR2_DL_DIR: /cache/downloads
+      SC_ADAT_RELEASE_ID: "${SC_ADAT_RELEASE_ID:-candidate-1}"
+    user: "${SC_ADAT_UID:-1000}:${SC_ADAT_GID:-1000}"
+    entrypoint: ["/work/scripts/build-native-candidate"]

@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+log=/var/log/scsynth.log
+pidfile=/run/scsynth.pid
+
+case "$1" in
+  start)
+    if ! jack_lsp >/dev/null 2>&1; then
+      echo 'JACK is not ready; scsynth not started' | tee -a "$log" >&2
+      exit 1
+    fi
+    scsynth -u 57110 -a 4096 -b 4096 -m 262144 -w 1024 \
+      -i 26 -o 26 -z 128 -H jack -R 0 >"$log" 2>&1 &
+    echo $! > "$pidfile"
+    ;;
+  stop)
+    test -r "$pidfile" && kill "$(cat "$pidfile")" 2>/dev/null || true
+    ;;
+esac

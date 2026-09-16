@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+case "$1" in
+  start)
+    mkdir -p /var/log
+    dmesg -wH > /var/log/dmesg-live.log 2>&1 &
+    echo $! > /run/dmesg-live.pid
+    ;;
+  stop)
+    if test -r /run/dmesg-live.pid; then
+      kill "$(cat /run/dmesg-live.pid)" 2>/dev/null || true
+    fi
+    ;;
+esac

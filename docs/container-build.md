@@ -8,11 +8,11 @@ system that boots from GRUB.
 
 The final audio appliance never runs inside Docker and does not include Docker.
 
-## Planned containers
+## Containers
 
 | Container | Responsibility |
 |---|---|
-| `buildroot` | Authoritative kernel, rootfs and appliance release bundle |
+| `buildroot` | Authoritative kernel, initramfs and appliance release bundle |
 | `sc-development` | Fast SuperCollider/plugin builds and non-hardware tests |
 | `arduino-avr` | Dyaxis Arduino Nano firmware |
 | `daisy-arm` | Daisy Seed and libDaisy |
@@ -38,13 +38,16 @@ only for a deliberate flashing session.
 
 ## Buildroot output contract
 
+The canonical commands are `./lab build candidate` and
+`./lab verify candidate`. They use the pinned image in
+`containers/buildroot/` and run unprivileged.
+
 A release is staged as:
 
 ```text
 artifacts/sc-adat-<release-id>/
 ├── kernel
 ├── initramfs
-├── rootfs.squashfs        # when the selected RAM-root design uses it
 ├── manifest
 ├── checksums.sha256
 └── grub-entry.cfg

@@ -64,3 +64,16 @@ disassembly and, for baud/protocol claims, captures from the real RS-422 link.
 
 This is an initial, read-only, evidence-separated report. It does not claim a
 decoded RS-422 protocol, confirmed baud rate, or complete disassembly.
+
+## Control-flow-aware qualification
+
+The reproducible follow-up in `analysis/generated/u17/` uses disasm51 1.0.2
+with the P80C552-specific SFR/vector definition in `analysis/p80c552.mcu`.
+It confirms the vector targets and the serial ISR at `0x3416`. The serial ISR
+saves registers, reads external data at `MOVX DPTR=0xFED0`, calls external
+target `0xFED1`, restores context and executes `RETI`. It does not directly
+access `S0CON`, `S0BUF`, `TH1`, `TMOD` or `PCON` at any reachable instruction
+boundary in this image. Therefore the earlier generic-SFR byte-pattern
+observations are not UART findings and the baud rate remains unresolved.
+
+The P80C552 vector at `0x002B` is SIO1/I2C, not a generic Timer 2 vector.

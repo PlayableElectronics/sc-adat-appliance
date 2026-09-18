@@ -1,0 +1,4 @@
+# Human labels supplied to disasm51 / confirmed entry points.
+RESET_TARGET = 0x2F6F
+SERIAL_ISR = 0x3416
+# P80C552 vector labels are defined in p80c552.mcu.

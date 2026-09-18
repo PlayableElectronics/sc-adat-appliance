@@ -1,0 +1,20 @@
+address	function	register	instruction
+boundary in fwd_0000_RESET_TARGET	fwd_0000_RESET_TARGET	S1STA	push S1STA
+boundary in jump_01E0	jump_01E0	IEN0	mov IEN0, A
+boundary in jump_01E0	jump_01E0	IEN1	mov IEN1, A
+boundary in jump_0212	jump_0212	IEN0	setb IEN0.7
+boundary in jump_032F	jump_032F	TM2CON	mov TM2CON, A
+boundary in jump_032F	jump_032F	IP1	clr IP1.4
+boundary in jump_032F	jump_032F	TM2IR	clr TM2IR.4
+boundary in jump_032F	jump_032F	IEN1	setb IEN1.4
+boundary in jump_032F	jump_032F	TM2CON	mov TM2CON, #01h
+boundary in jump_0F1F	jump_0F1F	IEN1	clr IEN1.4
+boundary in jump_0F1F	jump_0F1F	IEN1	setb IEN1.4
+boundary in jump_314B	jump_314B	IEN1	clr IEN1.4
+boundary in jump_314B	jump_314B	IEN1	setb IEN1.4
+boundary in jump_3253	jump_3253	IEN1	clr IEN1.4
+boundary in jump_3253	jump_3253	IEN1	setb IEN1.4
+boundary in jump_328A	jump_328A	IEN0	mov IEN0, A
+boundary in jump_328A	jump_328A	IEN1	mov IEN1, A
+boundary in jump_328A	jump_328A	TM2CON	mov TM2CON, A
+boundary in jump_328A	jump_328A	TM2IR	clr TM2IR.4

@@ -1,0 +1,30 @@
+address	count	contexts
+0x20	2	boundary jump_2FAC: orl A, #20h | boundary jump_3066: subb A, #20h
+0x21	1	boundary jump_3348: mov A, #21h
+0x24	1	boundary jump_01E0: mov R6, #24h
+0x26	2	boundary jump_037C: mov 26h, R4 | boundary jump_0383: subb A, 26h
+0x27	4	boundary jump_037C: mov 27h, R5 | boundary jump_0383: subb A, 27h | boundary jump_0EA2: mov A, #27h | boundary jump_0F1F: mov A, #27h
+0x28	1	boundary jump_314B: mov @R0, #28h
+0x29	1	boundary jump_027E: mov R1, #29h
+0x32	3	boundary jump_0212: mov A, #32h | boundary jump_0E05: subb A, #32h | boundary jump_30F8: mov A, #32h
+0x33	1	boundary jump_3176: mov R2, #33h
+0x34	23	boundary jump_032F: mov @R0, #34h | boundary jump_3348: xrl 34h, #0FFh | boundary jump_3348: xrl 34h, #0FFh | boundary jump_3348: xrl 34h, #0FFh
+0x38	1	boundary jump_0F3C: anl A, #38h
+0x3F	1	boundary jump_2FD5: anl A, #3Fh
+0x41	1	boundary jump_02A1: mov R1, #41h
+0x42	5	boundary jump_10F5: subb A, #42h | boundary jump_1103: subb A, #42h | boundary jump_1118: subb A, #42h | boundary jump_112D: subb A, #42h
+0x47	1	boundary jump_1440: mov A, #47h
+0x4D	2	boundary jump_31C1: mov R2, #4Dh | boundary jump_31C1: mov R5, #4Dh
+0x4E	1	boundary jump_31C1: mov R5, #4Eh
+0x50	2	boundary jump_3204: add A, #50h | boundary jump_3348: mov A, #50h
+0x52	1	boundary jump_3176: add A, #52h
+0x55	2	boundary jump_0293: xrl A, #55h | boundary jump_02A1: cjne A, #55h, jump_02CD
+0x58	2	boundary jump_3066: add A, #58h | boundary jump_3087: add A, #58h
+0x5A	4	boundary jump_30E7: add A, #5Ah | boundary jump_3121: mov @R0, #5Ah | boundary jump_31BA: mov @R0, #5Ah | boundary jump_3216: mov @R0, #5Ah
+0x5C	5	boundary jump_0E3D: add A, #5Ch | boundary jump_0EA2: mov R1, #5Ch | boundary jump_0FA0: add A, #5Ch | boundary jump_0FCD: mov A, #5Ch
+0x64	8	boundary jump_01E0: mov 7Fh, #64h | boundary jump_0E05: mov 7Fh, #64h | boundary jump_0E73: add A, #64h | boundary jump_0EA2: mov R1, #64h
+0x67	1	boundary jump_02CD: mov R1, #67h
+0x6A	1	boundary jump_3348: mov A, #6Ah
+0x70	1	boundary jump_1016: mov R1, #70h
+0x72	2	boundary jump_1016: mov R1, #72h | boundary jump_1048: mov A, #72h
+0x7F	8	boundary jump_01E0: mov 7Fh, #64h | boundary jump_0E05: mov 7Fh, #64h | boundary jump_1440: mov 7Fh, #64h | boundary jump_3176: mov R7, #7Fh

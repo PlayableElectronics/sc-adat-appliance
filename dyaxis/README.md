@@ -33,6 +33,8 @@ repair and interoperability:
   U17 MultiDesk Boot ROM;
 - `firmware/original/490-0270-MI-V2.7-M27C128.bin` — the Uptown Automation U7
   controller/fader-board firmware.
+- `analysis/generated/u17/` — reproducible disasm51 reachable disassembly,
+  P80C552 vector/SFR cross-references, call graph and analysis metrics for U17.
 
 The image is associated with the P80C552 controller board and rear RS-422
 interfaces. Local intermediate reads remain under ignored `.local/` paths;
@@ -79,3 +81,8 @@ RS-422 host emulation is a separate, unfinished layer.
 
 See `REVERSE_ENGINEERING_PLAN.md` for the staged procedure and
 `SOURCES.md` for the research trail.
+
+The U17-specific reverse-engineering report is
+`analysis/RS422_U17_REVERSE_ENGINEERING.md`. It distinguishes verified
+instruction-boundary findings from protocol hypotheses and defines the safe
+receive-only capture gate before any connector is probed.

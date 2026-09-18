@@ -101,4 +101,13 @@ in `analysis/STANDALONE_STARTUP_STATE.md`, with the focused ROM comparison in
 
 The U3 Edit Panel preservation and comparison report is
 `analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md`; its reachable
-disassembly is under `analysis/generated/u3/`.
+disassembly is under `analysis/generated/u3/`. The unresolved-U3 audit,
+functional map, protocol candidates, three-controller architecture, storage
+inventory and targeted hardware observations are in:
+
+- `analysis/U3_TASK_AUDIT.md`
+- `analysis/U3_FUNCTIONAL_MAP.md`
+- `analysis/U3_PROTOCOL_CANDIDATES.md`
+- `analysis/THREE_CONTROLLER_ARCHITECTURE.md`
+- `analysis/FIRMWARE_STORAGE_INVENTORY.md`
+- `analysis/NEXT_HARDWARE_OBSERVATIONS.md`

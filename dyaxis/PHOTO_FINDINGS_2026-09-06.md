@@ -102,3 +102,20 @@ new close-ups `photo/2684.jpg` through `photo/2699.jpg`.
   main host link. The original host path could instead use NETWORK. This is a
   hypothesis to test through continuity mapping, firmware analysis and passive
   capture.
+
+## Additional supplied close-ups — 2026-09-18
+
+- `photo/image-1789743792173.jpg` is a clear overview of the `DYAXIS II
+  CONSOLE EDIT PANEL CPU BOARD`, assembly `41.005.430.01`, with P80C552, U3
+  EPROM, 12.000 MHz crystal, J1 and J2 visible.
+- `photo/image-1789744696234.jpg` shows a board section with an `AM26LS32PC`
+  receiver at U4 and an `SN75174N` driver at U13. These are confirmed
+  differential line-interface candidates; exact connector-pair routing still
+  requires continuity mapping.
+- `photo/image-1789743657991.jpg` shows the Zilog device visibly marked in the
+  `Z85230...` family, date code `9319`, beside a `3.672000 MHz` crystal. The
+  full suffix/reference remains uncertain.
+- `photo/image-1789744598797.jpg` records the standalone display text,
+  including the U17 boot-ROM identity and battery-backed-RAM checksum message.
+- `photo/image-1789743413261.jpg` and `photo/image-1789743641546.jpg` provide
+  additional close-ups of the FPGA/PAL area and nearby programmed devices.

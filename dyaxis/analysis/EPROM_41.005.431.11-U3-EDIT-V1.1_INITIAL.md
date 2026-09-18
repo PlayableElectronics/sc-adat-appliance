@@ -34,6 +34,18 @@ P80C552 SFR/vector definition:
 This is a reachable control-flow pass from reset plus the P80C552 vector
 definitions. It does not treat the whole mostly-`0xFF` image as executable.
 
+For the interrupt/service expansion, use the same tool with explicit vector
+and Timer-0 entries:
+
+```sh
+.local/disasm51-venv/bin/disasm51 \
+  --include dyaxis/analysis/p80c552.mcu \
+  --entry RESET --entry 0x0103 --entry 0x0113 --entry 0x011B \
+  --entry 0x0262 --entry 0x0023 --entry 0x002B \
+  dyaxis/firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin \
+  > dyaxis/analysis/generated/u3/u3.vectors.asm
+```
+
 ## Verified instruction-level findings
 
 Reset is `LJMP 0x00F7`. The reset path clears internal RAM, sets `SP=0xC7`,
@@ -78,9 +90,10 @@ which physical connector or peripheral owns SIO0.
 
 ## Interrupt/vector caution
 
-Only reset is a clean `LJMP` in the conventional vector table. The bytes at
-`0x0003`, `0x000B`, `0x0013`, `0x001B`, `0x0023` and `0x002B` are not clean
-long-jump vectors in this image; some overlap printable/data-looking material.
+Only reset is a clean `LJMP` in the conventional vector table. The external-
+interrupt and Timer-1 slots contain compact `AJMP` entries; Timer 0 reaches
+`0x0262` through `AJMP 0x0262`. The serial and SIO1/I2C slots contain inline
+stubs, some of which overlap printable/data-looking material.
 The firmware does enable Timer 0, SIO0 and global interrupts, so interrupt
 entry likely uses compact inline stubs or board/compiler-specific layout. The
 reachable disassembly therefore does not claim a serial ISR target from the

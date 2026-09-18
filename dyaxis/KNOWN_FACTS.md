@@ -17,10 +17,10 @@
 | Main board is labelled Dyaxis II Console Edit Panel CPU Board, assembly 41.005.430.01, Aug 1993. | High | Photo 2676 |
 | At least two boards use Philips P80C552-5 8051-family MCUs. | High | Photos 2671, 2676 |
 | Multiple boards share the same P80C552 CPU family and socketed program EPROMs. | High | New close-ups; user confirmation |
-| Main board contains a Xilinx XC3030-family FPGA, apparently XC3030TM-70 PC68C. | High; exact suffix to be confirmed | Photo 2677 |
+| FPGA-area photo visibly marks the large device `XILINX XC3030TM-70 PC68C`; `PC68C` identifies the 68-pin plastic leaded chip-carrier package. | High | Photo 2677 |
 | A fader board is labelled UPTOWN AUTOMATION, CONTROLLER FADER, ASSY 935 REV B. | High | Photo 2694 |
 | A verified 16 KiB U7 EPROM from the Uptown Automation controller/fader board is publicly preserved as `firmware/original/490-0270-MI-V2.7-M27C128.bin`. | High | Three identical reads; photos 2694-2695; preservation record |
 | A Zilog Z85230-family serial controller is present. | Medium-high | Photo 2667; suffix needs confirmation |
 | Socketed firmware and programmable devices are present. | High | Photos 2672-2674, 2676 |
-| FPGA area contains at least two socketed Studer-labelled ROMs and a PALC22V10L programmable logic device. | High | Photos fpga/2700, 2702, 2703 |
+| FPGA area contains at least two socketed Studer-labelled ROMs and a `PALC22V10L-25PC` programmable logic device marked `9353 000020`; its PCB reference is not legible in available photos. | High | Photos fpga/2700, 2702, 2703 |
 | A public Dyaxis controller schematic/service manual is available. | Not found | Search status 2026-09-06 |

@@ -86,3 +86,5 @@ The U17-specific reverse-engineering report is
 `analysis/RS422_U17_REVERSE_ENGINEERING.md`. It distinguishes verified
 instruction-boundary findings from protocol hypotheses and defines the safe
 receive-only capture gate before any connector is probed.
+The FPGA and external-address reassessment is
+`analysis/U17_FPGA_ARCHITECTURE.md`.

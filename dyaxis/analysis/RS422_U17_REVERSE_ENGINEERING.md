@@ -21,6 +21,13 @@ Timer 1. The documented board photo/notes identify a 12.000 MHz oscillator;
 the exact crystal marking should still be checked against the U17 board before
 using a calculated baud candidate.
 
+The board also contains an identified Xilinx `XC3030TM-70 PC68C` FPGA and a
+nearby `PALC22V10L-25PC` programmable PAL (`9353 000020`), plus a photographed
+Z85230-family serial controller. See `U17_FPGA_ARCHITECTURE.md`. Consequently,
+out-of-image `MOVX`/call targets around `0xFEC0`–`0xFEF9` are treated as an
+unresolved external bus/peripheral window, not presumed to be another ordinary
+ROM.
+
 ## Confirmed findings
 
 - Reset vector `0x0000` is `LJMP 0x2F6F`; reset clears internal RAM, clears

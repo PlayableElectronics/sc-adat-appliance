@@ -18,6 +18,12 @@ The U17-only host-wait analysis is documented in
 mode is disabled unless `--transmit` is explicitly supplied, and currently
 refuses transmission because no exact wire packet has been recovered.
 
+The dedicated second-Nano passive edge recorder is documented in
+`NANO_RS422_CAPTURE.md`. Its firmware is
+`../arduino/DyaxisRS422EdgeCapture/DyaxisRS422EdgeCapture.ino`; the host
+decoder preserves raw edge streams and ranks UART hypotheses without assigning
+packet semantics.
+
 Offline tests:
 
 ```sh

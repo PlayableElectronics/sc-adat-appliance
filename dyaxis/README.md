@@ -92,6 +92,9 @@ receive-only capture gate before any connector is probed.
 The U17 Macintosh-host wait-state and one-shot capture/probe boundary are in
 `host/U17_HOST_HANDSHAKE.md`; the receive-only tool is
 `host/u17_host_tool.py`.
+The dedicated second-Nano passive RS-422 edge recorder, exact receive-only
+wiring, first-recording timeline, and offline UART decoder are documented in
+`host/NANO_RS422_CAPTURE.md`.
 The FPGA and external-address reassessment is
 `analysis/U17_FPGA_ARCHITECTURE.md`.
 The executable-RAM loading verdict and application ABI are in

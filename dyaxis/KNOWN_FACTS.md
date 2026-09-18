@@ -19,6 +19,7 @@
 | Multiple boards share the same P80C552 CPU family and socketed program EPROMs. | High | New close-ups; user confirmation |
 | Main board contains a Xilinx XC3030-family FPGA, apparently XC3030TM-70 PC68C. | High; exact suffix to be confirmed | Photo 2677 |
 | A fader board is labelled UPTOWN AUTOMATION, CONTROLLER FADER, ASSY 935 REV B. | High | Photo 2694 |
+| A verified 16 KiB U7 EPROM from the Uptown Automation controller/fader board is publicly preserved as `firmware/original/490-0270-MI-V2.7-M27C128.bin`. | High | Three identical reads; photos 2694-2695; preservation record |
 | A Zilog Z85230-family serial controller is present. | Medium-high | Photo 2667; suffix needs confirmation |
 | Socketed firmware and programmable devices are present. | High | Photos 2672-2674, 2676 |
 | FPGA area contains at least two socketed Studer-labelled ROMs and a PALC22V10L programmable logic device. | High | Photos fpga/2700, 2702, 2703 |

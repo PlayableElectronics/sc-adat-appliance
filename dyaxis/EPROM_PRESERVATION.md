@@ -45,3 +45,26 @@ authorized publication of the verified canonical image as a historical,
 repair, maintenance and interoperability artifact at
 `dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin`. No
 unverified intermediate read is published.
+
+## U7 — Uptown Automation MI V2.7++
+
+- Board: Uptown Automation Systems, Inc., Boulder, Colorado, USA; multichannel
+  control/fader automation board associated with the Dyaxis/MultiDesk surface.
+- Processor: Intel/Philips PCB 80C552-5 with a 24.000 MHz crystal.
+- Socket: `U7`; adjacent following IC reference: `U8`.
+- EPROM: ST/SGS-Thomson `M27C128-12F1`, DIP-28, 16 KiB / 16,384 bytes.
+- Sticker: provisional transcription `MI V2.7++ / 490-0270 / SUM 0F1C`;
+  sticker was not peeled further. `12.75V PGM` is programming information
+  only.
+- Read date: 2026-09-18.
+- Programmer/tool: TL866A, `minipro 0.7.4`, firmware `03.2.86`; approved
+  read-compatible definition `AM27C128@DIP28`.
+- Three reads were exactly 16,384 bytes and byte-for-byte identical; each
+  produced SHA-256
+  `a29a17def1f51a6475d21da22a93bd9adf2c7c62f984f87c15170c2bd78eb0c3`.
+- Canonical local copy (read-only mode `0444`):
+  `.local/dyaxis/eprom-dumps/490-0270-MI-V2.7-M27C128/490-0270-MI-V2.7-M27C128.bin`.
+- Public copy:
+  `dyaxis/firmware/original/490-0270-MI-V2.7-M27C128.bin`.
+- This is the Uptown Automation U7 controller/fader-board firmware, distinct
+  from the Studer-Editech U17 MultiDesk Boot ROM.

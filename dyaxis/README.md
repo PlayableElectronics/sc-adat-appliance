@@ -29,8 +29,10 @@ repair and interoperability:
 - `firmware/README.md` — provenance, preservation notice and verification
   instructions;
 - `firmware/SHA256SUMS` — checksum manifest;
-- `firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin` — the single
-  published original image.
+- `firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin` — the Studer-Editech
+  U17 MultiDesk Boot ROM;
+- `firmware/original/490-0270-MI-V2.7-M27C128.bin` — the Uptown Automation U7
+  controller/fader-board firmware.
 
 The image is associated with the P80C552 controller board and rear RS-422
 interfaces. Local intermediate reads remain under ignored `.local/` paths;

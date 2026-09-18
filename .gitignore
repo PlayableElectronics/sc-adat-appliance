@@ -15,6 +15,7 @@ __pycache__/
 # Only deliberately verified archival firmware is permitted in the public tree.
 /dyaxis/firmware/original/*
 !/dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin
+!/dyaxis/firmware/original/490-0270-MI-V2.7-M27C128.bin
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage

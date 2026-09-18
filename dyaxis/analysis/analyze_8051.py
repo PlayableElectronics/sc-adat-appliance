@@ -16,7 +16,7 @@ import pathlib
 import re
 from collections import Counter
 
-EXPECTED_SIZE = 32_768
+EXPECTED_SIZES = {16_384, 32_768}
 
 SFR_NAMES = {
     0x80: "P0", 0x81: "SP", 0x82: "DPL", 0x83: "DPH", 0x87: "PCON",
@@ -76,8 +76,9 @@ def main() -> int:
     parser.add_argument("image", type=pathlib.Path)
     args = parser.parse_args()
     data = args.image.read_bytes()
-    if len(data) != EXPECTED_SIZE:
-        raise SystemExit(f"size mismatch: {len(data)} != {EXPECTED_SIZE}")
+    if len(data) not in EXPECTED_SIZES:
+        allowed = ", ".join(str(size) for size in sorted(EXPECTED_SIZES))
+        raise SystemExit(f"size mismatch: {len(data)} not in {{{allowed}}}")
 
     print(f"image: {args.image}")
     print(f"size: {len(data)} bytes")

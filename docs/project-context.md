@@ -63,9 +63,10 @@ Other available hardware:
   serial;
 - two rear RS-422 ports and network hardware remain future reverse-engineering
   work;
-- the verified Studer Dyaxis/MultiDesk U17 firmware image is preserved and
-  deliberately published at `dyaxis/firmware/`; its provenance and checksum
-  manifest are in `dyaxis/firmware/README.md` and `SHA256SUMS`.
+- the verified Studer Dyaxis/MultiDesk U17 and Uptown Automation U7 firmware
+  images are preserved and deliberately published at `dyaxis/firmware/`; their
+  provenance and checksum manifest are in `dyaxis/firmware/README.md` and
+  `SHA256SUMS`.
 
 Never describe this installation as a 24-channel physical interface unless the
 ADAT3 expansion hardware is added and verified. Keep the software data model

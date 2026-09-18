@@ -52,6 +52,44 @@ Or verify the manifest from this directory with:
 sha256sum -c SHA256SUMS
 ```
 
+## Uptown Automation U7, MI V2.7++
+
+- Board manufacturer: Uptown Automation Systems, Inc., Boulder, Colorado,
+  USA.
+- Board role: multichannel control/fader automation board associated with the
+  Dyaxis/MultiDesk surface.
+- Processor: Intel/Philips PCB 80C552-5.
+- Processor crystal: 24.000 MHz.
+- EPROM socket: `U7`; adjacent following IC reference: `U8`.
+- EPROM: ST/SGS-Thomson `M27C128-12F1`, DIP-28, 16 KiB / 16,384 bytes.
+- Sticker transcription (provisional; the sticker was not peeled further):
+  `MI V2.7++ / 490-0270 / SUM 0F1C`.
+- The printed `12.75V PGM` marking is programming information only; it was
+  not used and the device was never programmed.
+- Provenance photographs already stored in this repository include
+  [`2694.jpg`](../photo/2694.jpg) (Uptown Automation fader-board context) and
+  [`2695.jpg`](../photo/2695.jpg) (U7/U8-area component context).
+- Published filename: `original/490-0270-MI-V2.7-M27C128.bin`.
+- Size: 16,384 bytes.
+- Read date: 2026-09-18.
+- SHA-256:
+  `a29a17def1f51a6475d21da22a93bd9adf2c7c62f984f87c15170c2bd78eb0c3`.
+
+This image was read three independent times using the TL866A and the
+read-compatible `AM27C128@DIP28` definition. The installed database reported
+`Memory: 16384 Bytes` and `Package: DIP28`. Each read used only:
+
+```text
+minipro -p 'AM27C128@DIP28' -r '<raw-output-path>.bin'
+```
+
+All three reads were exactly 16,384 bytes, byte-for-byte identical, and
+non-blank. The programmer reported chip ID `0x0116 OK` during each read. This
+is a distinct Uptown Automation U7 controller/fader-board image, not the
+Studer-Editech U17 MultiDesk Boot ROM above; the comparison and initial 8051
+analysis are recorded in
+[`../analysis/EPROM_490-0270-MI-V2.7-M27C128_INITIAL.md`](../analysis/EPROM_490-0270-MI-V2.7-M27C128_INITIAL.md).
+
 ## Preservation notice
 
 These firmware images are preserved for historical research, maintenance,

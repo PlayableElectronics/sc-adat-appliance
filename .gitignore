@@ -10,6 +10,8 @@ __pycache__/
 *.squashfs
 *.wav
 .local/
+# Proprietary Dyaxis EPROM reads and all derived machine-local dump material.
+.local/dyaxis/eprom-dumps/
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage

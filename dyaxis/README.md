@@ -21,6 +21,21 @@ panel CPU board also contains a Z85230-family dual serial controller and an
 XC3030-family FPGA. See `KNOWN_FACTS.md` and the photo findings for evidence
 and confidence levels.
 
+## Public firmware archive
+
+The verified U17 EPROM is deliberately published for historical preservation,
+repair and interoperability:
+
+- `firmware/README.md` — provenance, preservation notice and verification
+  instructions;
+- `firmware/SHA256SUMS` — checksum manifest;
+- `firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin` — the single
+  published original image.
+
+The image is associated with the P80C552 controller board and rear RS-422
+interfaces. Local intermediate reads remain under ignored `.local/` paths;
+derived analysis is kept separate from the untouched original image.
+
 ## Working ADB subsystem
 
 The ADB keyboard and Kensington trackball already work through the current

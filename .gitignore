@@ -12,6 +12,9 @@ __pycache__/
 .local/
 # Proprietary Dyaxis EPROM reads and all derived machine-local dump material.
 .local/dyaxis/eprom-dumps/
+# Only deliberately verified archival firmware is permitted in the public tree.
+/dyaxis/firmware/original/*
+!/dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage

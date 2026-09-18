@@ -40,4 +40,8 @@ Canonical local copy (read-only mode `0444`):
 .local/dyaxis/eprom-dumps/41.005.415.Z1-U17-V1.06/41.005.415.Z1-U17-V1.06-AM27C256.bin
 ```
 
-All raw bytes are ignored locally and are intentionally absent from Git.
+The raw intermediate reads remain ignored locally. The owner has explicitly
+authorized publication of the verified canonical image as a historical,
+repair, maintenance and interoperability artifact at
+`dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin`. No
+unverified intermediate read is published.

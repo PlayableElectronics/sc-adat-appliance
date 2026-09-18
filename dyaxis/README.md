@@ -88,3 +88,6 @@ instruction-boundary findings from protocol hypotheses and defines the safe
 receive-only capture gate before any connector is probed.
 The FPGA and external-address reassessment is
 `analysis/U17_FPGA_ARCHITECTURE.md`.
+The executable-RAM loading verdict and application ABI are in
+`analysis/U17_EXECUTABLE_RAM_LOADING.md`; the non-transmitting planning
+skeleton is `host/u17_loader_skeleton.py`.

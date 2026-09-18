@@ -50,6 +50,12 @@ Given the XC3030/PAL/Z85230 hardware, the architectural possibilities include:
 The U17 image alone cannot select among these. It is not reasonable to
 describe the missing targets as another ordinary ROM without bus tracing.
 
+The ROM does, however, contain a separate confirmed executable-RAM path:
+`jump_03A4` clears `0x8000`–`0xFDFD`, `jump_037C` validates that span, and
+`jump_328A` executes `LCALL 0x8000`. The receive-side state machine writes
+`MOVX` bytes into that external window. See
+`U17_EXECUTABLE_RAM_LOADING.md` for the evidence chain and ABI boundary.
+
 ## Possible FPGA roles
 
 These are hypotheses, not confirmed assignments:

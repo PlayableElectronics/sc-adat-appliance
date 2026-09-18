@@ -28,6 +28,11 @@ out-of-image `MOVX`/call targets around `0xFEC0`–`0xFEF9` are treated as an
 unresolved external bus/peripheral window, not presumed to be another ordinary
 ROM.
 
+The executable-RAM question is now answered separately in
+`U17_EXECUTABLE_RAM_LOADING.md`: U17 contains a confirmed receive/XDATA-write/
+checksum/`LCALL 0x8000` path. This establishes the loader mechanism but not
+the wire framing or a usable host protocol.
+
 ## Confirmed findings
 
 - Reset vector `0x0000` is `LJMP 0x2F6F`; reset clears internal RAM, clears

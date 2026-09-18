@@ -68,3 +68,33 @@ unverified intermediate read is published.
   `dyaxis/firmware/original/490-0270-MI-V2.7-M27C128.bin`.
 - This is the Uptown Automation U7 controller/fader-board firmware, distinct
   from the Studer-Editech U17 MultiDesk Boot ROM.
+
+## U3 — Studer-Editech Console Edit Panel firmware
+
+- Board: `DYAXIS II CONSOLE EDIT PANEL CPU BOARD`, assembly `41.005.430.01`.
+- EPROM board reference: `U3`.
+- EPROM: AMD `AM27C256-95DC`, DIP-28, 32 KiB / 32,768 bytes.
+- Label transcription: approximately `41.005.431.11 / U3 EDIT V1.1 / SEP
+  1994`; punctuation and exact spacing are preserved as uncertain.
+- Associated processor: Philips/Intel P80C552, 8051 family.
+- UV-window handling: the UV window was briefly exposed during identification
+  and was subsequently covered with an opaque label. No erase or programming
+  operation was performed.
+- Programmer/tool: TL866A, `minipro 0.7.4`, firmware `03.2.86`; exact
+  definition `AM27C256@DIP28` (`Memory: 32768 Bytes`, `Package: DIP28`).
+- Read-only command, repeated three times with distinct output paths:
+
+  ```text
+  minipro -p 'AM27C256@DIP28' -r '<raw-output-path>.bin'
+  ```
+
+- Read date: 2026-09-18.
+- Three reads were exactly 32,768 bytes, byte-for-byte identical, non-blank,
+  and each produced SHA-256
+  `7de44a1ed4ccadbafb3ef62e8f50383919c25bc32fbc6c7e74013dd4747f22b3`.
+- Canonical local copy, mode `0444`:
+  `.local/dyaxis/eprom-dumps/41.005.430.01-U3-EDIT-V1.1/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin`.
+- Public copy:
+  `dyaxis/firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin`.
+- This is Edit Panel firmware on the same assembly family as U17, not the U17
+  MultiDesk Boot ROM and not the Uptown Automation U7 fader-board firmware.

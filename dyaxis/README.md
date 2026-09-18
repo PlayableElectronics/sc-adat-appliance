@@ -34,6 +34,8 @@ repair and interoperability:
   U17 MultiDesk Boot ROM;
 - `firmware/original/490-0270-MI-V2.7-M27C128.bin` — the Uptown Automation U7
   controller/fader-board firmware.
+- `firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin` — the Studer
+  Dyaxis II Console Edit Panel U3 firmware from assembly 41.005.430.01.
 - `analysis/generated/u17/` — reproducible disasm51 reachable disassembly,
   P80C552 vector/SFR cross-references, call graph and analysis metrics for U17.
 
@@ -96,3 +98,7 @@ Standalone local-control evidence and the revised critical path are documented
 in `analysis/STANDALONE_STARTUP_STATE.md`, with the focused ROM comparison in
 `analysis/ROM_LOCAL_CONTROL_COMPARISON.md` and the low-effort capture sheet in
 `STARTUP_OBSERVATION_WORKSHEET.md`.
+
+The U3 Edit Panel preservation and comparison report is
+`analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md`; its reachable
+disassembly is under `analysis/generated/u3/`.

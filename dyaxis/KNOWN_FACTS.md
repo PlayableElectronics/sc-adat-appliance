@@ -26,3 +26,4 @@
 | A public Dyaxis controller schematic/service manual is available. | Not found | Search status 2026-09-06 |
 | The controller performs standalone startup with no original Macintosh host connected: motorized faders move, LEDs light, and displays show text. | High | Owner's standalone power-up observation, 2026-09-18 |
 | Standalone behavior is best explained by a distributed combination of U17 boot/diagnostic code, Uptown U7 local-control firmware, FPGA/PAL glue and serial/peripheral services; host download is not required for all operation. | Medium-high | U17/U7 disassembly plus standalone observation; exact ownership of display and transport services remains open |
+| U3 is an AMD AM27C256-95DC containing Studer-Editech `U3 EDIT V1.1` firmware from the `DYAXIS II CONSOLE EDIT PANEL CPU BOARD`, assembly `41.005.430.01`. | High | Three identical reads; board/chip markings |

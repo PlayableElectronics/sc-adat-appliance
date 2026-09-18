@@ -90,6 +90,38 @@ Studer-Editech U17 MultiDesk Boot ROM above; the comparison and initial 8051
 analysis are recorded in
 [`../analysis/EPROM_490-0270-MI-V2.7-M27C128_INITIAL.md`](../analysis/EPROM_490-0270-MI-V2.7-M27C128_INITIAL.md).
 
+## U3 Edit Panel V1.1
+
+- Board: `DYAXIS II CONSOLE EDIT PANEL CPU BOARD`, assembly `41.005.430.01`.
+- EPROM socket/reference: `U3`.
+- EPROM: AMD `AM27C256-95DC`, DIP-28, 32 KiB / 32,768 bytes.
+- Label transcription is approximate: `41.005.431.11 / U3 EDIT V1.1 / SEP
+  1994`.
+- Processor: Philips/Intel `P80C552`, 8051 family.
+- Published filename:
+  `original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin`.
+- Size: 32,768 bytes.
+- Read date: 2026-09-18.
+- SHA-256:
+  `7de44a1ed4ccadbafb3ef62e8f50383919c25bc32fbc6c7e74013dd4747f22b3`.
+
+The installed database definition reported `Memory: 32768 Bytes` and
+`Package: DIP28`. Three independent reads used only:
+
+```text
+minipro -p 'AM27C256@DIP28' -r '<raw-output-path>.bin'
+```
+
+All three files were exactly 32,768 bytes, byte-for-byte identical, and
+non-blank. The UV window was briefly exposed during identification and was
+subsequently covered with an opaque label; the EPROM was never erased,
+programmed, blank-checked, or protection-modified.
+
+This U3 image is Studer-Editech Console Edit Panel firmware, distinct from the
+U17 MultiDesk Boot ROM and the Uptown Automation U7 controller/fader firmware.
+The control-flow-aware first-pass disassembly and cross-ROM comparison are in
+[`../analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md`](../analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md).
+
 ## Preservation notice
 
 These firmware images are preserved for historical research, maintenance,

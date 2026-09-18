@@ -24,3 +24,5 @@
 | Socketed firmware and programmable devices are present. | High | Photos 2672-2674, 2676 |
 | FPGA area contains at least two socketed Studer-labelled ROMs and a `PALC22V10L-25PC` programmable logic device marked `9353 000020`; its PCB reference is not legible in available photos. | High | Photos fpga/2700, 2702, 2703 |
 | A public Dyaxis controller schematic/service manual is available. | Not found | Search status 2026-09-06 |
+| The controller performs standalone startup with no original Macintosh host connected: motorized faders move, LEDs light, and displays show text. | High | Owner's standalone power-up observation, 2026-09-18 |
+| Standalone behavior is best explained by a distributed combination of U17 boot/diagnostic code, Uptown U7 local-control firmware, FPGA/PAL glue and serial/peripheral services; host download is not required for all operation. | Medium-high | U17/U7 disassembly plus standalone observation; exact ownership of display and transport services remains open |

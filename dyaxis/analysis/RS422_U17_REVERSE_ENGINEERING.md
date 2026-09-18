@@ -104,3 +104,9 @@ Once framing is evidenced, keep the implementation boundary as:
 `Dyaxis RS-422 protocol <-> normalized events/state <-> OSC mixer API`
 
 No daemon or protocol implementation is claimed by this report.
+
+The critical path is now: reuse existing controller startup/local-control
+behavior, identify the physical RS-422 interface, passively reconstruct the
+existing command protocol, then bridge normalized surface events/state to OSC.
+Replacement 8051 firmware is a fallback only if the existing command
+interface cannot be reused.

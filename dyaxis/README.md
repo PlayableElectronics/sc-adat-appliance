@@ -7,8 +7,9 @@ and harnesses are preservation material.
 
 ## Confirmed from the owner's unit
 
-The surface powers up and operates when the original computer-side software
-responds; otherwise it waits for the host. It contains a VFD, knobs/encoders,
+The surface demonstrates meaningful standalone operation with no original
+Macintosh host connected: motorised faders move, LEDs light, and its displays
+show text. It contains a VFD, knobs/encoders,
 buttons, motorised faders, trackball, keyboard and multiple intelligent boards.
 Rear-panel photo 2865 confirms two ports explicitly labelled `(RS422) SERIAL
 1` and `(RS422) SERIAL 2`, two ADB ports, a `METER POWER +5V (2A MAX.)`
@@ -91,3 +92,7 @@ The FPGA and external-address reassessment is
 The executable-RAM loading verdict and application ABI are in
 `analysis/U17_EXECUTABLE_RAM_LOADING.md`; the non-transmitting planning
 skeleton is `host/u17_loader_skeleton.py`.
+Standalone local-control evidence and the revised critical path are documented
+in `analysis/STANDALONE_STARTUP_STATE.md`, with the focused ROM comparison in
+`analysis/ROM_LOCAL_CONTROL_COMPARISON.md` and the low-effort capture sheet in
+`STARTUP_OBSERVATION_WORKSHEET.md`.

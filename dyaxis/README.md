@@ -89,6 +89,9 @@ The U17-specific reverse-engineering report is
 `analysis/RS422_U17_REVERSE_ENGINEERING.md`. It distinguishes verified
 instruction-boundary findings from protocol hypotheses and defines the safe
 receive-only capture gate before any connector is probed.
+The U17 Macintosh-host wait-state and one-shot capture/probe boundary are in
+`host/U17_HOST_HANDSHAKE.md`; the receive-only tool is
+`host/u17_host_tool.py`.
 The FPGA and external-address reassessment is
 `analysis/U17_FPGA_ARCHITECTURE.md`.
 The executable-RAM loading verdict and application ABI are in

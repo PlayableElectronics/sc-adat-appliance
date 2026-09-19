@@ -9,7 +9,7 @@ does not prove the chip-select wiring or address decode.
 | Range | Evidence | Assessment |
 |---|---|---|
 | `8000..FDFC` | Reset clear, receive transfer writes, checksum input | Strong candidate for persistent application/data contents |
-| `FDFC..FDFF` | Both pairs are checked as `AA55`; `FDFE/FDFF` is then compared with the checksum result | Overloaded marker/checksum region; prior simple image contract is falsified by hardware |
+| `FDFC..FDFF` | Both pairs are checked as `AA55`; a marker mismatch enters checksum validation, where `FDFE/FDFF` is compared with the checksum result | Marker and checksum phases share the same bytes without requiring a value change |
 | XDATA `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire XDATA range to DS1230 storage |
 | CODE `FE00..FE7F` | Dump contains 43 three-byte `LJMP` trampolines; `FE06 -> 075D`, `FE33 -> 2182`, `FE60 -> 037C` | Strong evidence DS1230 supplies the external CODE trampoline table under the proposed `8000` mapping |
 

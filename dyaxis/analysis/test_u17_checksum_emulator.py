@@ -1,10 +1,14 @@
 import importlib.util
 import unittest
+import importlib.util
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location("u17_checksum_emulator", Path(__file__).with_name("u17_checksum_emulator.py"))
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+independent_spec = importlib.util.spec_from_file_location("u17_checksum_independent", Path(__file__).with_name("u17_checksum_independent.py"))
+independent = importlib.util.module_from_spec(independent_spec)
+independent_spec.loader.exec_module(independent)
 
 
 class U17ChecksumEmulatorTests(unittest.TestCase):
@@ -49,6 +53,22 @@ class U17ChecksumEmulatorTests(unittest.TestCase):
         self.assertEqual(result["reads"][0]["cpu_address"], "0x8000")
         self.assertEqual(result["reads"][-1]["cpu_address"], "0xFDFC")
         self.assertEqual(result["result_r6_r7"], "0xFF55")
+
+    def test_independent_calculator_matches_images_random_and_boundaries(self):
+        root = Path(__file__).parents[1]
+        images = [
+            (root / "firmware/original/41.005.415.Z1-U17-DS1230Y-100.bin").read_bytes(),
+            (root / "firmware/candidates/41.005.415.Z1-U17-first-app-SJMP-8000.bin").read_bytes(),
+        ]
+        import random
+        rng = random.Random(0x517)
+        images.extend(bytes(rng.randrange(256) for _ in range(module.IMAGE_SIZE)) for _ in range(4))
+        for image in images:
+            self.assertEqual(independent.complemented_sum(image), module.checksum_037c(image)["complement"])
+        for offset in (0, 0x7DFC, 0x7DFD, 0x7DFE, 0x7DFF, 0x7FFF):
+            image = bytearray(module.IMAGE_SIZE)
+            image[offset] = 0xA5
+            self.assertEqual(independent.complemented_sum(bytes(image)), module.checksum_037c(bytes(image))["complement"])
 
 
 if __name__ == "__main__":

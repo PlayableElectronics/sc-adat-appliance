@@ -75,5 +75,5 @@ protected region contradicts complete battery loss but does not by itself
 prove the exact chip-select or CODE/XDATA mapping.
 
 No further DS1230 write is authorized until a bus/address-decode measurement
-or equivalent hardware evidence resolves that mapping and the dual
-`AA55`/checksum use.
+or equivalent hardware evidence resolves the remaining physical startup
+mapping.

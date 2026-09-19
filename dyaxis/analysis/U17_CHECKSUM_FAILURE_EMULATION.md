@@ -49,12 +49,12 @@ earlier marker branch does not itself explain the observed failure.
 ## Corrected conclusion
 
 The prior image model was incomplete and is falsified as a hardware startup
-contract. `FDFC/FDFD` is checked as `AA55`, while `FDFE/FDFF` is also checked
-as `AA55` before the checksum path. The same `FDFE/FDFF` bytes are then read
-as the stored checksum. Under the assumed mapping, the candidate's `FDD7`
+contract. `FDFC/FDFD` and `FDFE/FDFF` are checked as marker pairs; a marker
+mismatch deliberately enters the checksum path. The same `FDFE/FDFF` bytes
+are then read as the stored checksum. Under the assumed mapping, the candidate's `FDD7`
 matches the computed `FDD7` and predicts the success display at `0x02FD`, but
-hardware produced the failure display at `0x0311`. This points to separate
-CODE/XDATA decode, banking, or another physical address interpretation.
+hardware produced the failure display at `0x0311`. This leaves the linear
+XDATA contents or another part of the physical startup model unconfirmed.
 
 No replacement candidate is authorized. The original DS1230 remains
 preserved, and no further write is permitted until the emulator and hardware
@@ -88,11 +88,10 @@ model of the reachable static U17 bytes, not a claim about that run:
 
 The modeled branch is `0293 -> 02CD -> 037C -> 02E8 -> 02EB -> 02F0 ->
 02FD`, i.e. **Checksum Good** under one linear XDATA image. No MOVX writes
-occur in this interval. Therefore the exact contradiction remains: the same
-physical CPU addresses must appear as `AA55` during the marker gate and later
-as `FDD7` during checksum comparison. A single static linear mapping cannot
-explain both. The missing fact is a bank/decode transition or a distinct
-hardware source selected between those reads.
+occur in this interval. The marker mismatch is the deliberate reason control
+enters checksum validation; the bytes do not need to change between reads.
+The remaining discrepancy is between this linear-XDATA prediction and the
+physical display result.
 
 ## CODE versus XDATA
 

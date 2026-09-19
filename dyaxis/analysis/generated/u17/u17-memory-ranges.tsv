@@ -3,7 +3,7 @@ CODE	0x0000	0x7FFF	U17 EPROM	confirmed physical device and address range
 XDATA	0x0000	0x7FFF	working RAM	confirmed startup clear; U18 assignment is strong hardware hypothesis
 XDATA	0x8000	0xFDFC	persistent/application window	confirmed checksum and transfer accesses; DS1230 assignment is hardware hypothesis
 XDATA	0xFDFC	0xFDFD	startup marker AA55	confirmed read by startup; first pair is checked before the failure path
-XDATA	0xFDFE	0xFDFF	startup marker and overloaded checksum pair	confirmed AA55 marker check, then read/clear and compared with checksum result
+XDATA	0xFDFE	0xFDFF	startup marker and checksum comparison pair	marker mismatch enters checksum validation; bytes need not change
 XDATA	0xFE00	0xFFFF	external service/peripheral window	confirmed separately cleared and accessed; not proven DS1230 storage
 CODE	0x8000	0x8000	application entry	confirmed LCALL after validation; provider is external to U17
 CODE	0xFE00	0xFEF9	external service/shim code	DS1230 FE trampoline table under proposed 8000 mapping; physical decode still requires bus evidence

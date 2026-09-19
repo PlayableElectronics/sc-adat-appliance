@@ -530,7 +530,7 @@ def generate(args):
         ("XDATA", "0x0000", "0x7FFF", "working RAM", "confirmed startup clear; U18 assignment is strong hardware hypothesis"),
         ("XDATA", "0x8000", "0xFDFC", "persistent/application window", "confirmed checksum and transfer accesses; DS1230 assignment is hardware hypothesis"),
         ("XDATA", "0xFDFC", "0xFDFD", "startup marker AA55", "confirmed read by startup; first pair is checked before the failure path"),
-        ("XDATA", "0xFDFE", "0xFDFF", "startup marker and overloaded checksum pair", "confirmed AA55 marker check, then read/clear and compared with checksum result"),
+        ("XDATA", "0xFDFE", "0xFDFF", "startup marker and checksum comparison pair", "marker mismatch enters checksum validation; then compared with checksum result"),
         ("XDATA", "0xFE00", "0xFFFF", "external service/peripheral window", "confirmed separately cleared and accessed; not proven DS1230 storage"),
         ("CODE", "0x8000", "0x8000", "application entry", "confirmed LCALL after validation; provider is external to U17"),
         ("CODE", "0xFE00", "0xFEF9", "external service/shim code", "DS1230 FE trampoline table under proposed 8000 mapping; physical decode still requires bus evidence"),
@@ -538,8 +538,8 @@ def generate(args):
     write_tsv(args.out / "u17-memory-ranges.tsv", ["space", "start", "end", "observed_role", "evidence"], memory_ranges)
     checksum_ranges = [
         ("checksum_input", "0x8000", "0xFDFD", "half-open [start,end)", "sum bytes 0x8000..0xFDFC inclusive; complement in R6:R7"),
-        ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02D7..0x0304, after the same pair is checked as AA55"),
-        ("startup_markers", "0xFDFC", "0xFDFF", "AA 55 at both pairs", "startup gates at 0x0293..0x02AC; dual use remains unresolved"),
+        ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02E8..0x02F0 after a marker mismatch"),
+        ("startup_markers", "0xFDFC", "0xFDFF", "AA 55 at both pairs", "startup gates at 0x0293..0x02AC; mismatch enters checksum validation"),
         ("clear_application", "0x8000", "0xFDFD", "half-open [start,end)", "clear loop 0x03A4..0x03BE"),
         ("clear_checksum", "0xFDFE", "0xFFFF", "half-open [start,end)", "two explicit zero writes at 0x03BE..0x03C5"),
     ]
@@ -694,7 +694,7 @@ does not prove the chip-select wiring or address decode.
 | Range | Evidence | Assessment |
 |---|---|---|
 | `8000..FDFC` | Reset clear, receive transfer writes, checksum input | Strong candidate for persistent application/data contents |
-| `FDFC..FDFF` | Both pairs are checked as `AA55`; `FDFE/FDFF` is then compared with the checksum result | Overloaded marker/checksum region; prior simple image contract is falsified by hardware |
+| `FDFC..FDFF` | Both pairs are checked as `AA55`; a marker mismatch enters checksum validation, where `FDFE/FDFF` is compared with the checksum result | Marker and checksum phases share the same bytes without requiring a value change |
 | XDATA `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire XDATA range to DS1230 storage |
 | CODE `FE00..FE7F` | Dump contains 43 three-byte `LJMP` trampolines; `FE06 -> 075D`, `FE33 -> 2182`, `FE60 -> 037C` | Strong evidence DS1230 supplies the external CODE trampoline table under the proposed `8000` mapping |
 
@@ -727,10 +727,9 @@ preserving the raw captures separately from U17 executable code.
    pointer held in internal RAM `9E:9F`; `321C` performs the `MOVX` write.
 5. `037C` sums bytes in half-open range `[8000,FDFD)`, i.e. through `FDFC`,
    with 16-bit carry and returns the bitwise-complement in `R6:R7`.
-6. Startup checks `FDFE/FDFF == AA55`, then `FDFC/FDFD == AA55`; the failure
-   path at `02CD` computes and compares the complemented sum against the same
-   `FDFE/FDFF` pair. The dual use is unresolved and must not be used to build
-   another image.
+6. Startup checks `FDFE/FDFF == AA55`, then `FDFC/FDFD == AA55`; any marker
+   mismatch enters `02CD`, which computes and compares the complemented sum
+   against `FDFE/FDFF`. The bytes need not change between these reads.
 7. The success path calls `328A`, which disables services and executes
    `LCALL 8000`; the launched code is expected to return through the observed
    call frame before U17's reset-target call.

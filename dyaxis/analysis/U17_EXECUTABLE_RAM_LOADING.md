@@ -34,7 +34,7 @@ The following are valid instructions in the control-flow-aware disassembly
    and then `0xFDFC/0xFDFD == AA55`. Any marker failure branches to
    `jump_02CD`,
    which calls `jump_037C`, reads `0xFDFE/0xFDFF` again, and compares those
-   same bytes against the complemented sum. Only a low- or high-byte mismatch
+   bytes against the complemented sum. Only a low- or high-byte mismatch
    reaches `0x0311` (`Checksum Failed`); a complete match reaches `0x02FD`
    (`Checksum Good`). The candidate matched under the linear-XDATA model but
    failed physically, so that mapping hypothesis is falsified.
@@ -48,8 +48,9 @@ Confirmed ABI surface:
 
 - Load base: `0x8000` in external code/XDATA address space.
 - Checksum input span: `0x8000`–`0xFDFC`, inclusive; the emulator confirms
-  the half-open file slice `image[:0x7DFD]`. Startup separately requires
-  `AA55` at both `FDFE/FDFF` and `FDFC/FDFD` before the failure/checksum path.
+  the half-open file slice `image[:0x7DFD]`. Startup checks both marker pairs;
+  a marker mismatch enters checksum validation, so `FDFE/FDFF` need not change
+  between the marker and checksum reads.
   The clear/checksum endpoint is exclusive at `0xFDFD`.
 - Entry: `LCALL 0x8000`; application must eventually use `RET` to return to
   U17 `jump_328A`. A reset, `RETI`, or non-returning transfer is not supported

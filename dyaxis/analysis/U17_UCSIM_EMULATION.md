@@ -46,7 +46,7 @@ The U17 check deliberately stops at reset-entry. It therefore proves reset
 execution only; it does not claim checksum, display, launch, or application
 execution.
 
-The earlier offline arithmetic model reproduced the established contradiction:
+The earlier offline arithmetic model differed from the physical result:
 
 | Mapping | Projection |
 |---|---|

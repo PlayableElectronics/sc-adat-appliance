@@ -38,8 +38,8 @@ The subsequent three-read retention diagnosis is in
 [`U17_DS1230_RETENTION_DIAGNOSIS.md`](U17_DS1230_RETENTION_DIAGNOSIS.md).
 
 No further write, candidate construction, serial transmission, or hardware
-modification is authorized until the address/decode and dual marker/checksum
-contract are resolved.
+modification is authorized until the remaining physical address/decode and
+startup validation behavior are resolved.
 
 ## Second confirmed physical failure
 

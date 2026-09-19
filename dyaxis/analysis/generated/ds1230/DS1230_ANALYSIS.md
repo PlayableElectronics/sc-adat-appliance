@@ -106,7 +106,8 @@ Under the linear XDATA hypothesis, the original contents would enter
 original, not proof of the physical chip mapping or of when the bytes became
 zero. The later `de42ce8` candidate retained its checksum and is predicted by
 the same model to reach `0x02FD` (`Checksum Good`), contrary to the physical
-console result; that contradiction falsifies the simple mapping hypothesis.
+console result; this discrepancy leaves the simple mapping hypothesis
+unconfirmed.
 
 ## Mapping limits
 

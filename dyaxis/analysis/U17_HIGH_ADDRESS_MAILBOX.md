@@ -50,8 +50,9 @@ or host packet fields by themselves.
 - `FEEE/FEEF` are written during startup as a separate adjacent pair (`32/C9`);
   they are below the `FFE0..FFFF` table and their peripheral role is not
   identified.
-- `FDFC..FDFF` hold two startup `AA55` marker pairs; `FDFE/FDFF` is then
-  reused as the checksum comparison pair. The dual-use contract is unresolved.
+- `FDFC..FDFF` are checked as two startup marker pairs. A marker mismatch
+  enters checksum validation, where `FDFE/FDFF` are compared with the stored
+  complemented sum; the bytes need not change between reads.
 - `8000..FDFF` is the external application/update window used by download and
   `LCALL 8000`; the checksum input is the half-open span `[0x8000,0xFDFD)`,
   ending at `FDFC`, with signature/checksum metadata at `FDFC..FDFF`.

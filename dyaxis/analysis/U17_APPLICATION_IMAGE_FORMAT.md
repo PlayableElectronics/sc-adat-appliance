@@ -8,14 +8,14 @@ Do not use this format to create or program another image.
 |---|---:|---|---|
 | `8000..FDFB` | `0000..7DFB` | application payload and zero-filled remainder | `31C1/321C` block writes and `037C` checksum loop |
 | `FDFC..FDFD` | `7DFC..7DFD` | startup marker `AA 55` | startup validation at `02A3..02AC` |
-| `FDFE..FDFF` | `7DFE..7DFF` | startup marker `AA 55`, then reused as complemented checksum bytes | startup validation at `0293..02A1`; checksum comparison at `02D7..0304` |
+| `FDFE..FDFF` | `7DFE..7DFF` | first marker pair; after any marker mismatch, stored complemented checksum bytes | marker validation at `0293..02A1`; checksum comparison at `02E8..02F0` |
 | `FE00..FFFF` | `7E00..7FFF` | protected persistent trampoline/service window | verified DS1230 read; physical CODE decode remains a hardware hypothesis |
 
 The checksum loop itself is confirmed over CPU `8000..FDFC` inclusive,
 equivalently the half-open file slice `[0x0000, 0x7DFD)`. The stored bytes are
-read from `FDFE/FDFF` high then low. However, startup first requires those same
-bytes to equal `AA55`; the dual-use contract is unresolved and the simple
-builder model is not hardware-valid.
+read from `FDFE/FDFF` high then low. A marker mismatch deliberately enters the
+checksum path, so `FDFE/FDFF` may remain the checksum value during both reads.
+The simple linear mapping is nevertheless falsified by the physical result.
 
 The transfer routine accepts 128-byte blocks with block indices below `FC`,
 which permits writes through `FDFF`; this transport bound is wider than the

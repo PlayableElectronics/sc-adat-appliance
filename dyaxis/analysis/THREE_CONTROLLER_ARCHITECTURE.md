@@ -4,10 +4,10 @@
 
 | Board/device | Firmware/storage | Proven responsibility | Open boundary |
 |---|---|---|---|
-| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | System leader: boot text, checksum/NVRAM tests, FPGA/PIC service initialization, main wait/event state machine, executable-RAM launch path | Exact mailbox decode, display service endpoint, Z85230/rear-port ownership |
+| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | Strongest system-leader candidate: main boot and supervisory firmware, checksum/NVRAM tests, FPGA/peripheral service initialization, main wait/event state machine, executable-RAM launch path | Exact mailbox decode, display service endpoint, Z85230/rear-port ownership; entire executable system not yet proven inside U17 |
 | Same Edit Panel CPU board, U3 | AMD AM27C256 U3, public SHA `7de44a…f22b3` | SIO0 byte rings, Timer-0 panel scan, P4/P5 multiplex I/O, event queue, output update | Physical connector and exact display/LED/encoder assignments |
 | Uptown Automation fader board, U7 | ST M27C128, public SHA `a29a17…eb0c3` | PWM motor paths, ADC/fader feedback, P1/P4 scan/output, local SIO0 diagnostics | Board-link framing, transceiver and rear-port relationship |
-| Main-board programmable logic beside FPGA | `PALC22V10L-25PC`, `9353 000020`; PCB reference not legible | New trace evidence associates it with XC3030 communication; likely scan/configuration glue/service logic | Exact nets, programmed equations and relation to U17 mailbox |
+| Main-board programmable logic beside FPGA | `PALC22V10L-25PC`, `9353 000020`; PCB reference not legible | Current evidence places it in address-decoding, control, timing or glue logic around the XC3030 | Exact nets, programmed equations and any stateful role remain unknown |
 | Main-board XC3030/PAL | Volatile XC3030 plus `PALC22V10L-25PC` glue | FPGA scans encoders/console controls; PAL/FPGA likely decode U17 service window and provide timing/glue | Configuration source, exact nets and function |
 | Main-board Z85230-family device | Volatile dual-channel serial controller | Plausible dual serial transport/service endpoint | Full suffix, channel wiring and port mapping |
 
@@ -24,8 +24,9 @@ sequence is:
    and maintains output buffers even without a host.
 3. U7 starts PWM/ADC and per-channel feedback loops, providing fader motion
    and local control-board output.
-4. The PALC22V10 programmable-logic device communicates with the XC3030; the XC3030 scans encoders and other
-   console controls. XC3030/PAL/Z85230 hardware mediates distinct local and
+4. The XC3030 probably implements scanning/interface logic, while the
+   PALC22V10 likely supplies glue/decode/control logic around it. Both
+   assignments remain partly inferential; XC3030/PAL/Z85230 hardware mediates distinct local and
    serial-service paths.
 5. The surface reaches a local waiting/diagnostic state.
 

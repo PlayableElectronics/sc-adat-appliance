@@ -3,10 +3,10 @@
 Scope: the verified Studer-Editech U17 AM27C256 image only. This report
 incorporates the new board trace evidence that U17 directly supplies the
 P80C552 code bus, the small `PALC22V10L-25PC` programmable-logic device
-communicates with the XC3030, and the FPGA scans encoders and other console
-controls. “PIC” is retained only as the owner’s shorthand for this small
-programmable IC; it is not a Microchip PIC microcontroller. U3, U7 and the
-Macintosh protocol remain separate evidence domains.
+participates in address decoding, control, timing or glue logic around the
+XC3030, and the FPGA scans encoders and other console controls. Its exact
+equations and stateful role remain unknown. U3, U7 and the Macintosh protocol
+remain separate evidence domains.
 
 ## Evidence status
 
@@ -14,7 +14,8 @@ Confirmed from ROM: reset/startup control flow, XDATA addresses and access
 directions, state transitions, interrupt shim targets, external-memory writes,
 and the bytes written to the service ports. Strong architectural inference:
 U17 is the system leader and `FFE1/FFE3` is a mailbox or service-register
-window behind FPGA/PAL glue. Not proven: the exact PAL PCB reference, the
+window behind FPGA/peripheral glue, possibly decoded or controlled by the PAL.
+Not proven: the exact PAL PCB reference, the
 electrical decode of the window, or whether any window is directly visible on
 the Macintosh RS-422 interface.
 
@@ -117,7 +118,7 @@ Repository photos clearly identify `XILINX XC3030TM-70 PC68C` and
 in that image. The 2676/2677/2684 close-ups show the U3/P80C552 board, FPGA
 and PAL area, while 2667/2668 show the
 `Z85230VSC` and 3.672 MHz oscillator. The photographed `LH5163-10L SHARP`
-device is SRAM on the Uptown board, not an identified PIC.
+device is SRAM on the Uptown board and is unrelated to this PAL identification.
 
 The referenced small device is therefore identified as a PALC22V10-family
 programmable-logic device, not a CPU with ordinary executable program memory.
@@ -126,10 +127,10 @@ state are not preserved in the repository. Do not remove, erase, program or
 attempt a programmer read until the exact supported device definition,
 orientation and preservation procedure are established.
 
-The physical trace evidence makes this division plausible: the PAL can be
-small configuration/scan-service logic communicating with the FPGA, while the
+The physical trace evidence makes this division plausible: the PAL can provide
+configuration/scan-service glue around the FPGA, while the
 P80C552 remains the leader that accesses the decoded service window. It does
-not prove that every `FFE1/FFE3` transaction reaches the PAL; FPGA/PAL
+not prove that every `FFE1/FFE3` transaction reaches the PAL; FPGA/peripheral
 registers or another peripheral remain possible.
 
 ## Remaining passive measurements

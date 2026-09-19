@@ -10,7 +10,7 @@ the address is a Macintosh register.
 | Address | Direction | ROM locations/functions | Values/behavior | Likely role |
 |---|---|---|---|---|
 | `FFE0` | none found | — | No literal reachable access | Unresolved |
-| `FFE1` | R/W | `30AA`, `3253`, `3332`, `3348` | bit 0 gates service-byte availability; bit 2 gates timer/status return; `3332` writes `09`, `C0`, derived values; `3348` writes fixed init sequence | Strong mailbox/status-control candidate between U17 and FPGA/PIC/service logic |
+| `FFE1` | R/W | `30AA`, `3253`, `3332`, `3348` | bit 0 gates service-byte availability; bit 2 gates timer/status return; `3332` writes `09`, `C0`, derived values; `3348` writes fixed init sequence | Candidate FPGA/peripheral service-register window, possibly decoded or controlled by PAL |
 | `FFE2` | none found | — | No literal reachable access | Unresolved |
 | `FFE3` | R/W | `30C3`, `327E` | read into internal `A5`; write `R7` after timeout/service routine | one-byte mailbox data/status register; exact producer is external |
 | `FFE4..FFEF` | none found | — | No literal reachable access in this range | Unresolved |

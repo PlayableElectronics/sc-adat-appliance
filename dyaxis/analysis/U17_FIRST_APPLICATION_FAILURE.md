@@ -1,6 +1,6 @@
 # U17 first-application physical test failure
 
-Date: 2026-09-19
+Dates: 2026-09-19 and 2026-09-20
 
 The derived candidate from commit `de42ce8` was programmed into the original
 Dallas `DS1230Y-100` using TL866A profile `DS1230Y(RW)`. The programmer
@@ -40,3 +40,24 @@ The subsequent three-read retention diagnosis is in
 No further write, candidate construction, serial transmission, or hardware
 modification is authorized until the address/decode and dual marker/checksum
 contract are resolved.
+
+## Second confirmed physical failure
+
+The guarded candidate procedure was run again on 2026-09-20 with the exact
+`DS1230Y(RW)` profile. The candidate write/read-back was verified byte-for-byte
+with SHA-256
+`cb5a4306ce73bef3b6ec76b18b367606d1a954e99d6584350c6b7ef394c9ee19`. After
+reinstallation in the powered-off console, Dyaxis again displayed:
+
+```text
+Checksum Failed...
+```
+
+This is a second confirmed physical failure of the candidate startup
+assumption. It is not evidence of a Dallas retention or programmer fault: the
+candidate was verified after programming. No new guessed image is authorized.
+The candidate is retained only as diagnostic evidence and must not be reused
+for another write without a separately reviewed procedure. The operator must
+restore the canonical original with the guarded command in
+`../DS1230_PROGRAMMING_PROCEDURE.md`; restoration is intentionally not
+automatic.

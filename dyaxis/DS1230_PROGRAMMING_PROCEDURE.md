@@ -1,9 +1,9 @@
 # Controlled DS1230Y candidate test
 
-This is an operator procedure only. It was prepared without writing the
-connected programmer or the Dyaxis. The candidate is a derived diagnostic
-image, not original firmware, and the previous physical result is not being
-reinterpreted as successful application execution.
+This is an operator procedure only. The candidate is a derived diagnostic
+image, not original firmware. It has now failed the Dyaxis checksum display in
+two verified physical tests and is retained only as diagnostic evidence. Do
+not reuse it for another write without a new reviewed procedure.
 
 ## Images and deliberate differences
 
@@ -87,5 +87,6 @@ DS1230, confirm orientation, and run:
 ./dyaxis/analysis/program_ds1230_candidate.sh --restore-original --confirm-original
 ```
 
-The same three-read pre-write gate and immediate read-back verification apply.
-The canonical original remains unchanged throughout.
+The restore mode accepts only the canonical original or the known candidate as
+the current image, then performs the same three-read gate and immediate
+read-back verification. The canonical original remains unchanged throughout.

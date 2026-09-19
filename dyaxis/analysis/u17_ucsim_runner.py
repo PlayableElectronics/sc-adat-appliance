@@ -15,6 +15,7 @@ import os
 import pty
 import re
 import select
+import signal
 import tempfile
 import time
 from pathlib import Path
@@ -73,7 +74,7 @@ def projected_path(image: bytes) -> str:
     return "Checksum Failed"
 
 
-STOP_RE = re.compile(r"Stop at 0x([0-9A-Fa-f]+):")
+BREAKPOINT_STOP_RE = re.compile(r"Stop at 0x([0-9A-Fa-f]+):\s*\([0-9]+\) Breakpoint")
 TICKS_RE = re.compile(r"stepped ([0-9]+) ticks")
 STATE_PC_RE = re.compile(r"CPU state=.*?PC=\s*0x([0-9A-Fa-f]+)")
 INST_RE = re.compile(r"Inst=\s*([0-9]+)")
@@ -99,7 +100,7 @@ def ucsim_session(ucsim: str, work: Path, commands: list[str], instruction_limit
         os.chdir(work)
         os.execv(ucsim, [ucsim, "-q", "-C", "commands"])
     output = bytearray()
-    deadline = time.monotonic() + 15
+    deadline = time.monotonic() + 5
     expected_breakpoints = sum(command.startswith("break ") for command in commands)
     # Wait until the -C file has installed its breakpoints. Sending `run`
     # immediately races uCsim startup and is silently consumed before the
@@ -131,7 +132,10 @@ def ucsim_session(ucsim: str, work: Path, commands: list[str], instruction_limit
             break
         output.extend(chunk)
         text = output.decode(errors="replace")
-        matches = list(STOP_RE.finditer(text))
+        # A bounded `step N` also prints “Stop at ...: (...) stepped ...”.
+        # Only the explicit Breakpoint event is evidence of a requested
+        # address being executed.
+        matches = list(BREAKPOINT_STOP_RE.finditer(text))
         if matches:
             stop = matches[-1]
             break
@@ -139,7 +143,8 @@ def ucsim_session(ucsim: str, work: Path, commands: list[str], instruction_limit
     # is the authoritative fallback when no breakpoint event was emitted.
     os.write(fd, b"state\nquit\n")
     time.sleep(0.05)
-    while True:
+    drain_deadline = time.monotonic() + 1
+    while time.monotonic() < drain_deadline:
         ready, _, _ = select.select([fd], [], [], 0.1)
         if not ready:
             break
@@ -154,11 +159,25 @@ def ucsim_session(ucsim: str, work: Path, commands: list[str], instruction_limit
         os.close(fd)
     except OSError:
         pass
-    try:
-        _, status = os.waitpid(pid, 0)
-        returncode = os.waitstatus_to_exitcode(status)
-    except ChildProcessError:
-        returncode = None
+    # A bounded `step` can leave the console child alive after it has printed
+    # its state. Never block indefinitely in waitpid: terminate only this
+    # child if it has not exited promptly.
+    status = None
+    for _ in range(10):
+        try:
+            waited, status = os.waitpid(pid, os.WNOHANG)
+        except ChildProcessError:
+            break
+        if waited:
+            break
+        time.sleep(0.05)
+    else:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            _, status = os.waitpid(pid, 0)
+        except (ChildProcessError, ProcessLookupError):
+            pass
+    returncode = os.waitstatus_to_exitcode(status) if status is not None else None
     text = output.decode(errors="replace")
     pc = int(stop.group(1), 16) if stop else None
     ticks_match = TICKS_RE.search(text)
@@ -231,7 +250,8 @@ def run_one(ucsim: str, code_name: str, xdata_name: str, root: Path, keep_trace:
         if keep_trace:
             keep_trace.parent.mkdir(parents=True, exist_ok=True)
             keep_trace.write_text(trace, encoding="utf-8")
-    fetches = [int(value, 16) for value in re.findall(r"Stop at 0x([0-9a-fA-F]+):", trace)]
+    fetches = [int(value, 16) for value in re.findall(
+        r"Stop at 0x([0-9a-fA-F]+):\s*\([0-9]+\) Breakpoint", trace)]
     pc = int(session["stop_pc"], 16) if session["stop_pc"] else None
     final_path = BREAKS.get(pc, "bounded-stop/no terminal breakpoint")
     supplied = bytes(xdata)
@@ -296,6 +316,31 @@ def synthetic_smoke(ucsim: str, root: Path) -> dict[str, object]:
     }
 
 
+def validation_probe(ucsim: str, root: Path, address: int) -> dict[str, object]:
+    """Probe one startup/checksum boundary with candidate CODE and XDATA.
+
+    Each probe resets the CPU and has one explicit breakpoint. This is a
+    bounded observation aid, not a peripheral or bus emulator.
+    """
+    u17 = read_image(root / U17)
+    candidate = read_image(root / CANDIDATE)
+    with tempfile.TemporaryDirectory(prefix="u17-validation-") as directory:
+        work = Path(directory)
+        (work / "code.hex").write_text(ihex(u17 + candidate), encoding="ascii")
+        commands = ['file "code.hex"'] + xram_commands(candidate) + [f"break 0x{address:04X}"]
+        session = ucsim_session(ucsim, work, commands)
+    text = session["output"]
+    return {
+        "breakpoint": f"0x{address:04X}",
+        "stop_event": session["stop_event"],
+        "stop_pc": session["stop_pc"],
+        "state_pc": session["state_pc"],
+        "instruction_count": session["instruction_count"],
+        "registers": session["registers"],
+        "trace_excerpt": text.splitlines()[-22:],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ucsim", required=True)
@@ -304,9 +349,17 @@ def main() -> None:
     parser.add_argument("--trace-dir", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--validation", action="store_true")
     args = parser.parse_args()
     if args.smoke:
         print(json.dumps(synthetic_smoke(args.ucsim, args.root), indent=2) + "\n")
+        return
+    if args.validation:
+        addresses = [0x0293, 0x0296, 0x0299, 0x02CD, 0x02E8, 0x02EB,
+                     0x02F0, 0x02FD, 0x0311]
+        print(json.dumps({"mapping": "candidate CODE + candidate XDATA",
+                          "probes": [validation_probe(args.ucsim, args.root, address)
+                                     for address in addresses]}, indent=2) + "\n")
         return
     selected = EXPERIMENTS if args.experiment == "all" else {args.experiment: EXPERIMENTS[args.experiment]}
     results = []

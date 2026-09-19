@@ -96,6 +96,16 @@ def startup_validation(image: bytes):
         branch = f"{marker_branch} -> 0x02FD"
     return {
         "mapping": "file_offset = CPU_XDATA_address - 0x8000",
+        "startup_movx_reads": [
+            {"pc": "0x0296", "address": "0xFDFE", "value": f"0x{first_hi:02X}", "use": "first marker high byte"},
+            {"pc": "0x0299", "address": "0xFDFF", "value": f"0x{first_lo:02X}", "use": "first marker low byte"},
+            {"pc": "0x02A3", "address": "0xFDFC", "value": f"0x{second_hi:02X}", "use": "second marker high byte"},
+            {"pc": "0x02AA", "address": "0xFDFD", "value": f"0x{second_lo:02X}", "use": "second marker low byte"},
+            {"pc": "0x02E8", "address": "0xFDFE", "value": f"0x{stored_hi:02X}", "use": "stored checksum high byte"},
+            {"pc": "0x02EB", "address": "0xFDFF", "value": f"0x{stored_lo:02X}", "use": "stored checksum low byte"},
+        ],
+        "startup_movx_writes": [],
+        "checksum_branch_order": ["0x0293", "0x02CD", "0x037C", "0x02E8", "0x02EB", "0x02F0", "0x02FD/0x0311"],
         "marker_fdfE_fdff": {"bytes": f"{first_hi:02X}{first_lo:02X}", "matches_AA55": marker1_ok},
         "marker_fdfc_fdfd": {"bytes": f"{second_hi:02X}{second_lo:02X}", "matches_AA55": marker2_ok},
         "marker_branch": marker_branch,

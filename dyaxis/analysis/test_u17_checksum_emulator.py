@@ -21,6 +21,11 @@ class U17ChecksumEmulatorTests(unittest.TestCase):
         self.assertTrue(result["high_byte_matches"])
         self.assertEqual(result["final_path"], "Checksum Good")
         self.assertEqual(result["branch"], "0x029C -> 0x02A1 -> 0x02CD -> 0x02FD")
+        self.assertEqual([(x["pc"], x["address"], x["value"]) for x in result["startup_movx_reads"]], [
+            ("0x0296", "0xFDFE", "0xFD"), ("0x0299", "0xFDFF", "0xD7"),
+            ("0x02A3", "0xFDFC", "0xAA"), ("0x02AA", "0xFDFD", "0x55"),
+            ("0x02E8", "0xFDFE", "0xFD"), ("0x02EB", "0xFDFF", "0xD7"),
+        ])
         # The physical console displayed failure.  Therefore this complete
         # linear-XDATA prediction is a falsification of that mapping
         # hypothesis, not an explanation of the display.

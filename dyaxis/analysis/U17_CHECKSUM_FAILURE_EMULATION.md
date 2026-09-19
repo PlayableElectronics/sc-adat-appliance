@@ -60,6 +60,40 @@ No replacement candidate is authorized. The original DS1230 remains
 preserved, and no further write is permitted until the emulator and hardware
 address/decode evidence agree on the startup contract.
 
+## Second physical failure and bounded uCsim result
+
+The same candidate was physically programmed and read back byte-for-byte a
+second time on 2026-09-20. The console again displayed `Checksum Failed...`.
+This is a second confirmed physical failure, not evidence of Dallas data loss.
+The candidate is diagnostic evidence only; the operator must restore the
+canonical original using the guarded restore procedure.
+
+The bounded uCsim run was not allowed to infer a breakpoint from the generic
+`Stop at ... stepped ...` message. With candidate CODE and candidate XDATA,
+default uCsim P80C552 behavior, and no FPGA/PAL/Z85230 stubs, the run consumed
+the 200,000-instruction limit without reaching `0x0293`, `0x02CD`, `0x02FD`, or
+`0x0311`. The captured state was `PC=0x33EC`, `DPTR=0xFFF6`, `ACC=0x80`,
+`SP=0xD3`, and `Inst=200000`. Thus no checksum or display path was executed
+by uCsim; the following read sequence is the independent instruction-level
+model of the reachable static U17 bytes, not a claim about that run:
+
+| PC | MOVX address | Candidate value | Use |
+|---|---|---:|---|
+| `0296` | `FDFE` | `FD` | first marker high byte |
+| `0299` | `FDFF` | `D7` | first marker low byte |
+| `02A3` | `FDFC` | `AA` | second marker high byte |
+| `02AA` | `FDFD` | `55` | second marker low byte |
+| `02E8` | `FDFE` | `FD` | stored checksum high byte |
+| `02EB` | `FDFF` | `D7` | stored checksum low byte |
+
+The modeled branch is `0293 -> 02CD -> 037C -> 02E8 -> 02EB -> 02F0 ->
+02FD`, i.e. **Checksum Good** under one linear XDATA image. No MOVX writes
+occur in this interval. Therefore the exact contradiction remains: the same
+physical CPU addresses must appear as `AA55` during the marker gate and later
+as `FDD7` during checksum comparison. A single static linear mapping cannot
+explain both. The missing fact is a bank/decode transition or a distinct
+hardware source selected between those reads.
+
 ## CODE versus XDATA
 
 The checksum routine uses `MOVX`, so this emulation tests only the XDATA

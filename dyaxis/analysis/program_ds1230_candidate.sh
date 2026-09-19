@@ -73,9 +73,11 @@ fi
 if [ "$MODE" = write ]; then
     [ "${CONFIRM:-}" = candidate ] || die "use --write --confirm-candidate"
     image=$CANDIDATE expected=$CANDIDATE_SHA label=candidate
+    prewrite_expected=$ORIGINAL_SHA
 else
     [ "${CONFIRM:-}" = original ] || die "use --restore-original --confirm-original"
     image=$ORIGINAL expected=$ORIGINAL_SHA label=original
+    prewrite_expected='known-candidate-or-original'
 fi
 
 umask 077
@@ -87,7 +89,15 @@ mkdir -p "$outdir"
 # evidence and are never written over the tracked original.
 for n in 1 2 3; do
     minipro -p "$PROFILE" -r "$outdir/prewrite-$n.bin"
-    check_image "$outdir/prewrite-$n.bin" "$ORIGINAL_SHA" "pre-write read $n"
+    if [ "$prewrite_expected" = known-candidate-or-original ]; then
+        current=$(shasum -a 256 "$outdir/prewrite-$n.bin" | awk '{print $1}')
+        case "$current" in
+            "$ORIGINAL_SHA"|"$CANDIDATE_SHA") ;;
+            *) die "pre-write read $n is neither canonical original nor known candidate" ;;
+        esac
+    else
+        check_image "$outdir/prewrite-$n.bin" "$prewrite_expected" "pre-write read $n"
+    fi
 done
 cmp "$outdir/prewrite-1.bin" "$outdir/prewrite-2.bin" || die "pre-write reads differ"
 cmp "$outdir/prewrite-1.bin" "$outdir/prewrite-3.bin" || die "pre-write reads differ"

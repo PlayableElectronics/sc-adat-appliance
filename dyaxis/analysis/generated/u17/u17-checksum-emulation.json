@@ -8,8 +8,10 @@
     "bytes": "AA55",
     "matches_AA55": true
   },
-  "branch": "0x029C -> 0x02A1 -> 0x02CD",
-  "failure_message": true,
+  "marker_branch": "0x029C -> 0x02A1 -> 0x02CD",
+  "branch": "0x029C -> 0x02A1 -> 0x02CD -> 0x02FD",
+  "final_path": "Checksum Good",
+  "failure_message": false,
   "checksum": {
     "start_cpu": "0x8000",
     "end_exclusive_cpu": "0xFDFD",
@@ -161292,5 +161294,7 @@
   },
   "stored_checksum_read_at_fdfE_fdff": "0xFDD7",
   "stored_checksum_matches": true,
+  "low_byte_matches": true,
+  "high_byte_matches": true,
   "path": "41.005.415.Z1-U17-first-app-SJMP-8000.bin"
 }

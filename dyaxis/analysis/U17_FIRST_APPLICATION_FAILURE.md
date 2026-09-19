@@ -29,7 +29,10 @@ zero differences. Raw reads remain under the ignored local directory
 
 This result does not demonstrate application execution. It falsifies the
 previous assumption that the candidate's `AA55` at `FDFC/FDFD` plus calculated
-checksum at `FDFE/FDFF` was sufficient for startup. The instruction-accurate
+checksum at `FDFE/FDFF` was sufficient for startup. More specifically, the
+instruction-accurate emulator predicts **Checksum Good** at `0x02FD` under its
+linear XDATA mapping, while the console displayed **Checksum Failed** at
+`0x0311`; the marker branch alone does not explain the physical result. The
 analysis is in [`U17_CHECKSUM_FAILURE_EMULATION.md`](U17_CHECKSUM_FAILURE_EMULATION.md).
 The subsequent three-read retention diagnosis is in
 [`U17_DS1230_RETENTION_DIAGNOSIS.md`](U17_DS1230_RETENTION_DIAGNOSIS.md).

@@ -17,9 +17,9 @@ Under the explicit offline hypothesis `file_offset = CPU XDATA - 0x8000`:
 | `FDFD` | `7DFD` | `55` | second startup marker low byte |
 
 At `0x029C`, `FD ^ 55 != 0`, so the conditional branch reaches `0x02A1`,
-then `0x02A1` branches to the failure/checksum path at `0x02CD`. The `FDFC /
-FDFD` pair is `AA55`, but that pair is not reached as a successful startup
-gate because the earlier `FDFE/FDFF` pair fails its `AA55` test.
+then `0x02A1` branches to the checksum path at `0x02CD`. This is not yet the
+failure display path. The `FDFC/FDFD` pair is `AA55`, but the earlier
+`FDFE/FDFF` pair fails its marker test.
 
 ## Instruction-accurate checksum result
 
@@ -38,20 +38,23 @@ and file offsets `0x0000–0x7DFC`. The final values are:
 - sum `R4:R5 = 0x0228`;
 - complemented result `R6:R7 = 0xFDD7`;
 - stored bytes read at `FDFE/FDFF = 0xFDD7`;
-- checksum comparison at `0x02CD` therefore **passes**.
+- low-byte comparison at `0x02EB` passes;
+- high-byte comparison at `0x02F0` passes;
+- the final path is `0x02FD`, which displays **Checksum Good**.
 
-The console failure is therefore caused by the earlier marker branch, not by
-the corrected checksum loop.
+The console instead displayed **Checksum Failed**. Therefore the complete
+linear-XDATA prediction is falsified as a physical mapping hypothesis; the
+earlier marker branch does not itself explain the observed failure.
 
 ## Corrected conclusion
 
 The prior image model was incomplete and is falsified as a hardware startup
 contract. `FDFC/FDFD` is checked as `AA55`, while `FDFE/FDFF` is also checked
 as `AA55` before the checksum path. The same `FDFE/FDFF` bytes are then read
-as the stored checksum at `0x02D7–0x0304`. This dual use is unresolved; it may
-represent a combined marker/checksum convention, a bank/decode distinction,
-or another startup assumption not represented by the simple linear image
-model.
+as the stored checksum. Under the assumed mapping, the candidate's `FDD7`
+matches the computed `FDD7` and predicts the success display at `0x02FD`, but
+hardware produced the failure display at `0x0311`. This points to separate
+CODE/XDATA decode, banking, or another physical address interpretation.
 
 No replacement candidate is authorized. The original DS1230 remains
 preserved, and no further write is permitted until the emulator and hardware

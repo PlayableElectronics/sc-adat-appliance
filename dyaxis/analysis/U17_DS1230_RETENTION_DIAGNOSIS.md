@@ -61,9 +61,11 @@ power; and the protected FE-page contents survived unchanged. Widespread
 battery-retention failure is not supported. A selective U17 clear is also not
 supported by the observed bytes. The remaining primary explanation is that
 the startup image/marker model or physical CODE/XDATA decode is wrong. The
-emulator proves that, under the assumed linear XDATA mapping, U17 reaches the
-failure marker branch even though its later arithmetic checksum comparison
-passes.
+complete emulator proves that, under the assumed linear XDATA mapping, U17
+reaches the checksum path, compares matching low and high bytes, and predicts
+**Checksum Good** at `0x02FD`. The physical **Checksum Failed** result
+therefore falsifies that mapping hypothesis; the marker branch alone is not an
+explanation.
 
 The working boot display is consistent with U17 EPROM code and the preserved
 FE-page service/trampoline contents still being available. It does not prove

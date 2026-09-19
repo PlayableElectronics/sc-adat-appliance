@@ -31,10 +31,13 @@ The following are valid instructions in the control-flow-aware disassembly
    complemented 16-bit result in `R6:R7`. This is not a raw byte-pattern
    inference.
 4. **Validation gate:** the startup code first checks `0xFDFE/0xFDFF == AA55`
-   and then `0xFDFC/0xFDFD == AA55`. Any failure branches to `jump_02CD`,
+   and then `0xFDFC/0xFDFD == AA55`. Any marker failure branches to
+   `jump_02CD`,
    which calls `jump_037C`, reads `0xFDFE/0xFDFF` again, and compares those
-   same bytes against the complemented sum. The dual marker/checksum use is
-   unresolved; the prior image contract is falsified by the hardware test.
+   same bytes against the complemented sum. Only a low- or high-byte mismatch
+   reaches `0x0311` (`Checksum Failed`); a complete match reaches `0x02FD`
+   (`Checksum Good`). The candidate matched under the linear-XDATA model but
+   failed physically, so that mapping hypothesis is falsified.
 5. **Transfer:** `jump_328A` disables interrupts, quiesces Timer 2/PWM state,
    and executes `LCALL 0x8000`. The external application therefore enters as
    a subroutine, not as a reset vector or `LJMP`.

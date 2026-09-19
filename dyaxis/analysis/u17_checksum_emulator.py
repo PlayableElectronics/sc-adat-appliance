@@ -67,22 +67,45 @@ def startup_validation(image: bytes):
     second_lo = xdata_read(image, 0xFDFD)
     marker2_ok = (second_hi, second_lo) == (0xAA, 0x55)
     if not marker1_ok:
-        branch = "0x029C -> 0x02A1 -> 0x02CD"
+        marker_branch = "0x029C -> 0x02A1 -> 0x02CD"
     elif not marker2_ok:
-        branch = "0x02A9 -> 0x02CD"
+        marker_branch = "0x02A9 -> 0x02CD"
     else:
-        branch = "0x02AC -> 0x30A7 (wait path; checksum routine not called here)"
+        marker_branch = "0x02AC -> 0x30A7"
+
+    # The checksum path is not a failure path by itself.  02CD calls 037C,
+    # then 02E8/02EB compare the low and high result bytes.  Only the second
+    # comparison's mismatch target, 0311, displays "Checksum Failed".
     checksum = checksum_037c(image)
     stored_hi = xdata_read(image, 0xFDFE)
     stored_lo = xdata_read(image, 0xFDFF)
     stored = (stored_hi << 8) | stored_lo
+    low_matches = stored_lo == ((checksum["complement"] >> 0) & 0xFF)
+    high_matches = stored_hi == ((checksum["complement"] >> 8) & 0xFF)
+    if marker1_ok and marker2_ok:
+        final_path = "marker-wait"
+        branch = marker_branch
+    elif not low_matches:
+        final_path = "Checksum Failed"
+        branch = f"{marker_branch} -> 0x02EB -> 0x0311"
+    elif not high_matches:
+        final_path = "Checksum Failed"
+        branch = f"{marker_branch} -> 0x02F0 -> 0x0311"
+    else:
+        final_path = "Checksum Good"
+        branch = f"{marker_branch} -> 0x02FD"
     return {
         "mapping": "file_offset = CPU_XDATA_address - 0x8000",
         "marker_fdfE_fdff": {"bytes": f"{first_hi:02X}{first_lo:02X}", "matches_AA55": marker1_ok},
         "marker_fdfc_fdfd": {"bytes": f"{second_hi:02X}{second_lo:02X}", "matches_AA55": marker2_ok},
-        "branch": branch, "failure_message": not (marker1_ok and marker2_ok),
+        "marker_branch": marker_branch,
+        "branch": branch,
+        "final_path": final_path,
+        "failure_message": final_path == "Checksum Failed",
         "checksum": checksum, "stored_checksum_read_at_fdfE_fdff": f"0x{stored:04X}",
         "stored_checksum_matches": stored == checksum["complement"],
+        "low_byte_matches": low_matches,
+        "high_byte_matches": high_matches,
     }
 
 

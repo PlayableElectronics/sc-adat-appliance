@@ -37,6 +37,10 @@ python3 dyaxis/analysis/u17_image.py build payload.bin \
   dyaxis/firmware/original/41.005.415.Z1-U17-DS1230Y-100.bin candidate.bin
 ```
 
-The preserved DS1230 currently fails both startup marker checks. The emulator
-predicts the same failure path for the `de42ce8` candidate despite its checksum
-comparison passing. No replacement image should be built from this document.
+The preserved original DS1230 fails both startup marker checks. For the
+`de42ce8` candidate, the emulator follows the marker mismatch into `0x02CD`,
+calculates `FDD7`, and predicts the `0x02FD` **Checksum Good** path because
+both stored checksum-byte comparisons pass. The console instead displayed
+**Checksum Failed** at `0x0311`. This falsifies the assumed linear XDATA
+mapping or another part of the physical decode; no replacement image should
+be built from this document.

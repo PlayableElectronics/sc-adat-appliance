@@ -100,11 +100,13 @@ The second startup marker/checksum pair at file offsets `7DFE–7DFF` is
 `0000`; startup expects `AA55`: **False**.
 The checksum comparison also reads `7DFE–7DFF`: **False**.
 
-The dumped contents therefore explain the console's `Checksum Failed` result:
-both startup marker pairs are `0000` rather than `AA55`, and the checksum
-comparison pair is also zero rather than the calculated complement. This is
-consistent with U17's NVRAM-clear path having erased or never received the
-application image. It does not prove when that clearing occurred.
+Under the linear XDATA hypothesis, the original contents would enter
+`0x02CD`, calculate the checksum, fail the stored-byte comparison, and reach
+`0x0311` (`Checksum Failed`). This is a static prediction for the archived
+original, not proof of the physical chip mapping or of when the bytes became
+zero. The later `de42ce8` candidate retained its checksum and is predicted by
+the same model to reach `0x02FD` (`Checksum Good`), contrary to the physical
+console result; that contradiction falsifies the simple mapping hypothesis.
 
 ## Mapping limits
 

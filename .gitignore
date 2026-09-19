@@ -17,6 +17,7 @@ __pycache__/
 !/dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin
 !/dyaxis/firmware/original/490-0270-MI-V2.7-M27C128.bin
 !/dyaxis/firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin
+!/dyaxis/firmware/original/41.005.415.Z1-U17-DS1230Y-100.bin
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage

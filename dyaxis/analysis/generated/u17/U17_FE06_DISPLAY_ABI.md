@@ -18,6 +18,12 @@ instructions are in `u17-register-resolved-abi.tsv`. The FE06-specific view is
 `u17-fe06-calls.tsv`; referenced strings are in
 `u17-referenced-strings.tsv`.
 
+The preserved DS1230 FE trampoline table resolves the external entry itself:
+`FE06` contains `LJMP 075D` under the proposed mapping. This is strong evidence
+that FE06 dispatches into U17 CODE through DS1230-provided glue, while the
+display operation's internal semantics remain defined by the target routine
+and its hardware accesses.
+
 No screen-row or column meaning is assigned to R3/R5 from static code alone.
 Photographed display geometry and a passive bus trace are required for that
 mapping.

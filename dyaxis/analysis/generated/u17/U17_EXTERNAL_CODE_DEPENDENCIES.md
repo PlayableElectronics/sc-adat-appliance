@@ -12,10 +12,13 @@ serial, timer or storage API without repeated supporting sites.
 
 `LCALL` targets in `0xFE00..0xFEF9` are external CODE: the P80C552 fetches
 executable instructions there. They are not ordinary peripheral registers.
-Possible sources are mapped persistent memory such as the DS1230 window,
-executable RAM, or FPGA/PAL-supplied bus behavior; MOVX peripheral accesses
-remain a separate address-space category. The U17 image cannot identify the
-physical provider by itself.
+The preserved DS1230 read provides direct evidence for the FE service window:
+its file offsets `7E00..7E7F` contain 43 three-byte `LJMP` trampolines, under
+the proposed `8000` mapping, including `FE06 -> U17 CODE 075D`,
+`FE33 -> U17 CODE 2182`, and `FE60 -> U17 CODE 037C`. This resolves the FE
+window provider more strongly than the U17 image alone; the physical chip
+select and CODE/XDATA visibility still require bus evidence. MOVX peripheral
+accesses remain a separate address-space category.
 
 `FE06` has 16 resolved calls with CODE pointers in `R2:R1`; see
 `U17_FE06_DISPLAY_ABI.md`. `FE33` has 10 calls. Its first eight

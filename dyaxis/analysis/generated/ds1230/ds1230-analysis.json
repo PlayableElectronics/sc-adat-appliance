@@ -1,0 +1,239 @@
+{
+  "path": "41.005.415.Z1-U17-DS1230Y-100.bin",
+  "size": 32768,
+  "sha256": "2e58841c485f9f805c159cee5901de053ca7397c20e5c08941328b6028152ca4",
+  "all_zero": false,
+  "all_ff": false,
+  "zero_count": 32353,
+  "ff_count": 102,
+  "distinct_bytes": 123,
+  "printable_runs": [],
+  "fe_trampoline_count": 43,
+  "fe_trampolines": [
+    {
+      "cpu_address": "0xFE00",
+      "file_offset": "0x7E00",
+      "target": "0x2442"
+    },
+    {
+      "cpu_address": "0xFE03",
+      "file_offset": "0x7E03",
+      "target": "0x06EB"
+    },
+    {
+      "cpu_address": "0xFE06",
+      "file_offset": "0x7E06",
+      "target": "0x075D"
+    },
+    {
+      "cpu_address": "0xFE09",
+      "file_offset": "0x7E09",
+      "target": "0x22E2"
+    },
+    {
+      "cpu_address": "0xFE0C",
+      "file_offset": "0x7E0C",
+      "target": "0x1F51"
+    },
+    {
+      "cpu_address": "0xFE0F",
+      "file_offset": "0x7E0F",
+      "target": "0x205B"
+    },
+    {
+      "cpu_address": "0xFE12",
+      "file_offset": "0x7E12",
+      "target": "0x07B8"
+    },
+    {
+      "cpu_address": "0xFE15",
+      "file_offset": "0x7E15",
+      "target": "0x0821"
+    },
+    {
+      "cpu_address": "0xFE18",
+      "file_offset": "0x7E18",
+      "target": "0x090D"
+    },
+    {
+      "cpu_address": "0xFE1B",
+      "file_offset": "0x7E1B",
+      "target": "0x09E3"
+    },
+    {
+      "cpu_address": "0xFE1E",
+      "file_offset": "0x7E1E",
+      "target": "0x1A2A"
+    },
+    {
+      "cpu_address": "0xFE21",
+      "file_offset": "0x7E21",
+      "target": "0x1423"
+    },
+    {
+      "cpu_address": "0xFE24",
+      "file_offset": "0x7E24",
+      "target": "0x0C14"
+    },
+    {
+      "cpu_address": "0xFE27",
+      "file_offset": "0x7E27",
+      "target": "0x1D7E"
+    },
+    {
+      "cpu_address": "0xFE2A",
+      "file_offset": "0x7E2A",
+      "target": "0x1ADC"
+    },
+    {
+      "cpu_address": "0xFE2D",
+      "file_offset": "0x7E2D",
+      "target": "0x162C"
+    },
+    {
+      "cpu_address": "0xFE30",
+      "file_offset": "0x7E30",
+      "target": "0x1551"
+    },
+    {
+      "cpu_address": "0xFE33",
+      "file_offset": "0x7E33",
+      "target": "0x2182"
+    },
+    {
+      "cpu_address": "0xFE36",
+      "file_offset": "0x7E36",
+      "target": "0x0680"
+    },
+    {
+      "cpu_address": "0xFE39",
+      "file_offset": "0x7E39",
+      "target": "0x0542"
+    },
+    {
+      "cpu_address": "0xFE3C",
+      "file_offset": "0x7E3C",
+      "target": "0x05C6"
+    },
+    {
+      "cpu_address": "0xFE3F",
+      "file_offset": "0x7E3F",
+      "target": "0x0B4D"
+    },
+    {
+      "cpu_address": "0xFE42",
+      "file_offset": "0x7E42",
+      "target": "0x0BD9"
+    },
+    {
+      "cpu_address": "0xFE45",
+      "file_offset": "0x7E45",
+      "target": "0x1469"
+    },
+    {
+      "cpu_address": "0xFE48",
+      "file_offset": "0x7E48",
+      "target": "0x14B3"
+    },
+    {
+      "cpu_address": "0xFE4B",
+      "file_offset": "0x7E4B",
+      "target": "0x0C4B"
+    },
+    {
+      "cpu_address": "0xFE4E",
+      "file_offset": "0x7E4E",
+      "target": "0x0A55"
+    },
+    {
+      "cpu_address": "0xFE51",
+      "file_offset": "0x7E51",
+      "target": "0x007C"
+    },
+    {
+      "cpu_address": "0xFE54",
+      "file_offset": "0x7E54",
+      "target": "0x1671"
+    },
+    {
+      "cpu_address": "0xFE57",
+      "file_offset": "0x7E57",
+      "target": "0x21E6"
+    },
+    {
+      "cpu_address": "0xFE5A",
+      "file_offset": "0x7E5A",
+      "target": "0x1C7B"
+    },
+    {
+      "cpu_address": "0xFE5D",
+      "file_offset": "0x7E5D",
+      "target": "0x23C5"
+    },
+    {
+      "cpu_address": "0xFE60",
+      "file_offset": "0x7E60",
+      "target": "0x037C"
+    },
+    {
+      "cpu_address": "0xFE63",
+      "file_offset": "0x7E63",
+      "target": "0x168A"
+    },
+    {
+      "cpu_address": "0xFE66",
+      "file_offset": "0x7E66",
+      "target": "0x12D5"
+    },
+    {
+      "cpu_address": "0xFE69",
+      "file_offset": "0x7E69",
+      "target": "0x137B"
+    },
+    {
+      "cpu_address": "0xFE6C",
+      "file_offset": "0x7E6C",
+      "target": "0x12AB"
+    },
+    {
+      "cpu_address": "0xFE6F",
+      "file_offset": "0x7E6F",
+      "target": "0x1278"
+    },
+    {
+      "cpu_address": "0xFE72",
+      "file_offset": "0x7E72",
+      "target": "0x180E"
+    },
+    {
+      "cpu_address": "0xFE75",
+      "file_offset": "0x7E75",
+      "target": "0x1869"
+    },
+    {
+      "cpu_address": "0xFE78",
+      "file_offset": "0x7E78",
+      "target": "0x1909"
+    },
+    {
+      "cpu_address": "0xFE7B",
+      "file_offset": "0x7E7B",
+      "target": "0x19E2"
+    },
+    {
+      "cpu_address": "0xFE7E",
+      "file_offset": "0x7E7E",
+      "target": "0x0076"
+    }
+  ],
+  "reset_bytes": "0000000000000000",
+  "reset_plausible_8051": false,
+  "fe00_fef9_all_ff": false,
+  "checksum_sum_16bit": "0x0000",
+  "checksum_complement": "0xFFFF",
+  "signature": "0000",
+  "signature_expected": "AA55",
+  "signature_matches": false,
+  "stored_checksum": "0x0000",
+  "checksum_matches": false
+}

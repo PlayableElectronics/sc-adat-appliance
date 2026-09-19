@@ -6,4 +6,4 @@ XDATA	0xFDFD	0xFDFD	signature byte	confirmed read by startup; not cleared by the
 XDATA	0xFDFE	0xFDFF	complemented checksum	confirmed read/clear and compared with checksum result
 XDATA	0xFE00	0xFFFF	external service/peripheral window	confirmed separately cleared and accessed; not proven DS1230 storage
 CODE	0x8000	0x8000	application entry	confirmed LCALL after validation; provider is external to U17
-CODE	0xFE00	0xFEF9	external service/shim code	confirmed executable CODE targets; provider unresolved
+CODE	0xFE00	0xFEF9	external service/shim code	DS1230 FE trampoline table under proposed 8000 mapping; physical decode still requires bus evidence

@@ -11,8 +11,10 @@ physical-chip assignments inferred from the new board photographs.
 | XDATA `FDFC..FDFF` | Signature and checksum metadata are read; checksum bytes are explicitly cleared | Likely persistent metadata within the same upper RAM device | Strong hypothesis |
 | XDATA `FE00..FFFF` | Reset loop at `2F8B` clears this range separately; service accesses include `FFE1/FFE3`, `FFF0/FFF1`, `FFF4/FFF5` | External peripheral/service decode, not proven DS1230 storage | Strong static conclusion; exact devices unresolved |
 | CODE `8000` | `328A` executes `LCALL 8000` after validation | External application entry, provider unresolved | Confirmed code behavior |
-| CODE `FE00..FEF9` | Literal `LCALL` targets and interrupt shims | Mapped executable provider, possibly persistent memory, executable RAM or FPGA/PAL bus logic | Confirmed target; provider unresolved |
+| CODE `FE00..FEF9` | Literal `LCALL` targets; DS1230 offsets `7E00..7EF9` contain 43 LJMP trampolines into U17 | DS1230 supplies the FE trampoline window under the proposed mapping; bodies/physical decode remain separate questions | Strong evidence |
 
 The `u17-memory-ranges.tsv`, `u17-checksum-ranges.tsv` and
-`u17-update-writes.tsv` files are the machine-readable evidence tables. CODE
-fetches are never treated as MOVX/XDATA peripheral accesses.
+`u17-update-writes.tsv` files are the machine-readable evidence tables.
+DS1230-side FE trampoline details are generated in
+`../ds1230/ds1230-fe-trampolines.tsv`. CODE fetches are never treated as
+MOVX/XDATA peripheral accesses.

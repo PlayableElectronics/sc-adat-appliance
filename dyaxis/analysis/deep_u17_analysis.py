@@ -533,7 +533,7 @@ def generate(args):
         ("XDATA", "0xFDFE", "0xFDFF", "complemented checksum", "confirmed read/clear and compared with checksum result"),
         ("XDATA", "0xFE00", "0xFFFF", "external service/peripheral window", "confirmed separately cleared and accessed; not proven DS1230 storage"),
         ("CODE", "0x8000", "0x8000", "application entry", "confirmed LCALL after validation; provider is external to U17"),
-        ("CODE", "0xFE00", "0xFEF9", "external service/shim code", "confirmed executable CODE targets; provider unresolved"),
+        ("CODE", "0xFE00", "0xFEF9", "external service/shim code", "DS1230 FE trampoline table under proposed 8000 mapping; physical decode still requires bus evidence"),
     ]
     write_tsv(args.out / "u17-memory-ranges.tsv", ["space", "start", "end", "observed_role", "evidence"], memory_ranges)
     checksum_ranges = [
@@ -614,10 +614,13 @@ serial, timer or storage API without repeated supporting sites.
 
 `LCALL` targets in `0xFE00..0xFEF9` are external CODE: the P80C552 fetches
 executable instructions there. They are not ordinary peripheral registers.
-Possible sources are mapped persistent memory such as the DS1230 window,
-executable RAM, or FPGA/PAL-supplied bus behavior; MOVX peripheral accesses
-remain a separate address-space category. The U17 image cannot identify the
-physical provider by itself.
+The preserved DS1230 read provides direct evidence for the FE service window:
+its file offsets `7E00..7E7F` contain 43 three-byte `LJMP` trampolines, under
+the proposed `8000` mapping, including `FE06 -> U17 CODE 075D`,
+`FE33 -> U17 CODE 2182`, and `FE60 -> U17 CODE 037C`. This resolves the FE
+window provider more strongly than the U17 image alone; the physical chip
+select and CODE/XDATA visibility still require bus evidence. MOVX peripheral
+accesses remain a separate address-space category.
 
 `FE06` has {len(fe06_rows)} resolved calls with CODE pointers in `R2:R1`; see
 `U17_FE06_DISPLAY_ABI.md`. `FE33` has {len(fe33_rows)} calls. Its first eight
@@ -649,6 +652,12 @@ instructions are in `u17-register-resolved-abi.tsv`. The FE06-specific view is
 `u17-fe06-calls.tsv`; referenced strings are in
 `u17-referenced-strings.tsv`.
 
+The preserved DS1230 FE trampoline table resolves the external entry itself:
+`FE06` contains `LJMP 075D` under the proposed mapping. This is strong evidence
+that FE06 dispatches into U17 CODE through DS1230-provided glue, while the
+display operation's internal semantics remain defined by the target routine
+and its hardware accesses.
+
 No screen-row or column meaning is assigned to R3/R5 from static code alone.
 Photographed display geometry and a passive bus trace are required for that
 mapping.
@@ -666,11 +675,13 @@ physical-chip assignments inferred from the new board photographs.
 | XDATA `FDFC..FDFF` | Signature and checksum metadata are read; checksum bytes are explicitly cleared | Likely persistent metadata within the same upper RAM device | Strong hypothesis |
 | XDATA `FE00..FFFF` | Reset loop at `2F8B` clears this range separately; service accesses include `FFE1/FFE3`, `FFF0/FFF1`, `FFF4/FFF5` | External peripheral/service decode, not proven DS1230 storage | Strong static conclusion; exact devices unresolved |
 | CODE `8000` | `328A` executes `LCALL 8000` after validation | External application entry, provider unresolved | Confirmed code behavior |
-| CODE `FE00..FEF9` | Literal `LCALL` targets and interrupt shims | Mapped executable provider, possibly persistent memory, executable RAM or FPGA/PAL bus logic | Confirmed target; provider unresolved |
+| CODE `FE00..FEF9` | Literal `LCALL` targets; DS1230 offsets `7E00..7EF9` contain 43 LJMP trampolines into U17 | DS1230 supplies the FE trampoline window under the proposed mapping; bodies/physical decode remain separate questions | Strong evidence |
 
 The `u17-memory-ranges.tsv`, `u17-checksum-ranges.tsv` and
-`u17-update-writes.tsv` files are the machine-readable evidence tables. CODE
-fetches are never treated as MOVX/XDATA peripheral accesses.
+`u17-update-writes.tsv` files are the machine-readable evidence tables.
+DS1230-side FE trampoline details are generated in
+`../ds1230/ds1230-fe-trampolines.tsv`. CODE fetches are never treated as
+MOVX/XDATA peripheral accesses.
 """, encoding="utf-8")
     (args.out / "U17_DS1230_LAYOUT.md").write_text("""# U17 DS1230 layout: preservation hypothesis
 
@@ -684,14 +695,16 @@ does not prove the chip-select wiring or address decode.
 |---|---|---|
 | `8000..FDFC` | Reset clear, receive transfer writes, checksum input | Strong candidate for persistent application/data contents |
 | `FDFC..FDFF` | `AA 55` signature at `FDFC/FDFD`; complemented checksum compared at `FDFE/FDFF` | Candidate persistent header/trailer; exact ownership is not electrically proven |
-| `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire range to DS1230 storage |
+| XDATA `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire XDATA range to DS1230 storage |
+| CODE `FE00..FE7F` | Dump contains 43 three-byte `LJMP` trampolines; `FE06 -> 075D`, `FE33 -> 2182`, `FE60 -> 037C` | Strong evidence DS1230 supplies the external CODE trampoline table under the proposed `8000` mapping |
 
 The DS1230 is 32 KiB, while `8000..FDFF` is `0x7E00` bytes; therefore the
 remaining `0x0200` bytes of a full 32 KiB device could be bank-select,
 reserved, mirrored, or part of an unobserved decode. A simple one-to-one
 `8000..FFFF` assignment is not established. The most conservative statement
-is “DS1230 is a plausible source for the persistent upper application window;
-the FE page is separately decoded until bus evidence says otherwise.”
+is “DS1230 is a plausible source for the persistent upper application window
+and is strongly evidenced as the CODE provider for the FE trampoline table;
+the corresponding XDATA decode remains unresolved.”
 
 Do not read it with an EPROM definition or remove it. A safe preservation path
 is first a powered-off, non-invasive pinout/continuity review and chip-select

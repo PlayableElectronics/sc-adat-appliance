@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Read-only, dependency-free analysis of a preserved DS1230 image."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+SIZE = 32768
+CHECKSUM_END = 0x7DFD  # U17 CPU [8000,FDFD), file offsets [0000,7DFD)
+FE_START = 0x7E00       # CPU FE00 when mapped at CPU 8000
+FE_END = 0x7EFA         # exclusive; CPU FE00..FEF9
+
+
+def printable_runs(data: bytes, minimum: int = 4):
+    runs, start = [], None
+    for index, value in enumerate(data + b"\x00"):
+        if 32 <= value < 127 and start is None:
+            start = index
+        elif not (32 <= value < 127) and start is not None:
+            if index - start >= minimum:
+                runs.append((start, data[start:index].decode("ascii")))
+            start = None
+    return runs
+
+
+def fe_trampolines(data: bytes):
+    """Decode FE00..FE7F as an 8000-based 8051 LJMP table."""
+    entries = []
+    for cpu_address in range(0xFE00, 0xFE81, 3):
+        offset = cpu_address - 0x8000
+        if data[offset] == 0x02:
+            target = (data[offset + 1] << 8) | data[offset + 2]
+            entries.append({"cpu_address": f"0x{cpu_address:04X}",
+                            "file_offset": f"0x{offset:04X}",
+                            "target": f"0x{target:04X}"})
+    return entries
+
+
+def analyze(path: Path):
+    data = path.read_bytes()
+    if len(data) != SIZE:
+        raise ValueError(f"DS1230 image must be {SIZE} bytes, got {len(data)}")
+    digest = hashlib.sha256(data).hexdigest()
+    total = sum(data[:CHECKSUM_END]) & 0xFFFF
+    complement = (~total) & 0xFFFF
+    signature = data[0x7DFC:0x7DFE].hex().upper()
+    stored = int.from_bytes(data[0x7DFE:0x7E00], "big")
+    fe = data[FE_START:FE_END]
+    trampolines = fe_trampolines(data)
+    return {
+        "path": path.name, "size": len(data), "sha256": digest,
+        "all_zero": data == b"\x00" * SIZE, "all_ff": data == b"\xFF" * SIZE,
+        "zero_count": data.count(0), "ff_count": data.count(0xFF),
+        "distinct_bytes": len(set(data)),
+        "printable_runs": [{"offset": f"0x{o:04X}", "text": t} for o, t in printable_runs(data)],
+        "fe_trampoline_count": len(trampolines), "fe_trampolines": trampolines,
+        "reset_bytes": data[:8].hex().upper(),
+        "reset_plausible_8051": data[:3] in {b"\x02\x2F\x6F", b"\x02\x80\x00"},
+        "fe00_fef9_all_ff": fe == b"\xFF" * len(fe),
+        "checksum_sum_16bit": f"0x{total:04X}",
+        "checksum_complement": f"0x{complement:04X}",
+        "signature": signature, "signature_expected": "AA55",
+        "signature_matches": signature == "AA55",
+        "stored_checksum": f"0x{stored:04X}",
+        "checksum_matches": stored == complement,
+    }
+
+
+def write_report(result, output: Path):
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "ds1230-analysis.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    (output / "ds1230-fe-trampolines.tsv").write_text(
+        "cpu_address\tfile_offset\tu17_code_target\n" +
+        "".join(f"{x['cpu_address']}\t{x['file_offset']}\t{x['target']}\n" for x in result["fe_trampolines"]),
+        encoding="utf-8")
+    strings = result["printable_runs"] or [{"offset": "—", "text": "none"}]
+    string_lines = "\n".join(f"- `{x['offset']}` `{x['text']}`" for x in strings)
+    trampoline_lines = "\n".join(
+        f"- `{x['cpu_address']}` (file `{x['file_offset']}`) → U17 CODE `{x['target']}`"
+        for x in result["fe_trampolines"]
+    ) or "- none"
+    (output / "DS1230_ANALYSIS.md").write_text(f"""# DS1230 read-only analysis
+
+Input: `{result['path']}`; size `{result['size']}` bytes; SHA-256
+`{result['sha256']}`.
+
+## Content and code plausibility
+
+- All `0xFF`: **{result['all_ff']}**; all `0x00`: **{result['all_zero']}**.
+- Zero bytes: `{result['zero_count']}`; `0xFF` bytes: `{result['ff_count']}`;
+  distinct byte values: `{result['distinct_bytes']}`.
+- Offset `0000` bytes: `{result['reset_bytes']}`; plausible 8051 reset entry:
+  **{result['reset_plausible_8051']}**.
+- If mapped at CPU `8000`, `LCALL 8000` fetches file offset `0000`; this image
+  does not present a normal 8051 reset-style application entry there.
+- CPU `FE00–FEF9` corresponds to file offsets `7E00–7EF9`; all-FF there:
+  **{result['fe00_fef9_all_ff']}**. The region contains
+  `{result['fe_trampoline_count']}` 8051 `LJMP` trampolines into U17 CODE:
+{trampoline_lines}
+- Printable runs (minimum four bytes):
+{string_lines}
+
+## U17 signature and checksum
+
+U17 sums file offsets `0000–7DFC` (CPU `8000–FDFC` inclusive), complements
+the 16-bit result, and compares it big-endian at file offsets `7DFE–7DFF`.
+The calculated sum is `{result['checksum_sum_16bit']}` and complement is
+`{result['checksum_complement']}`. Stored checksum: `{result['stored_checksum']}`.
+
+Signature bytes at file offsets `7DFC–7DFD`: `{result['signature']}`; expected
+`AA55`; match: **{result['signature_matches']}**.
+Checksum match: **{result['checksum_matches']}**.
+
+The dumped contents therefore explain the console's `Checksum Failed` result:
+the signature is `0000` rather than `AA55`, the stored checksum is `0000`
+rather than the calculated complement, and the proposed application region is
+zero-filled. This is consistent with U17's NVRAM-clear path having erased or
+never received the application image. It does not prove when that clearing
+occurred.
+
+## Mapping limits
+
+The bytes are compatible with the proposed `8000` file-offset relationship,
+but the dump alone does not prove CODE versus XDATA visibility, chip-select
+decode, or whether FE-page CODE is supplied by this device. A bus trace or
+additional live-board evidence remains required.
+""", encoding="utf-8")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dump", type=Path)
+    parser.add_argument("output", type=Path)
+    args = parser.parse_args()
+    write_report(analyze(args.dump), args.output)
+
+
+if __name__ == "__main__":
+    main()

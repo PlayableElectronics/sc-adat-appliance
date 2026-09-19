@@ -122,6 +122,49 @@ U17 MultiDesk Boot ROM and the Uptown Automation U7 controller/fader firmware.
 The control-flow-aware first-pass disassembly and cross-ROM comparison are in
 [`../analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md`](../analysis/EPROM_41.005.431.11-U3-EDIT-V1.1_INITIAL.md).
 
+## U17 battery-backed application/service memory
+
+- Board/socket: Studer Dyaxis II controller board, the Dallas NVRAM adjacent to
+  U17/U18; provenance photograph:
+  [`image-1789838797019.jpg`](../photo/image-1789838797019.jpg).
+- Device: Dallas `DS1230Y-100`, 32K x 8 nonvolatile SRAM, DIP-28, 32,768
+  bytes.
+- Related hardware: U17 AMD `AM27C256-95DC` boot ROM, U18 Toshiba
+  `TC55257BSPL-10` volatile SRAM, XC3030 FPGA, PALC22V10 and Z85230-family
+  serial controller. Physical mapping remains evidence-qualified.
+- Programmer: TL866A, firmware `03.2.86`; minipro `0.7.4`, commit
+  `3808aecb6a1dac9906a9691b93820ee1bd2b7a18`.
+- Selected definition: `DS1230Y(RW)` (database alias
+  `DS1230AB(RW),DS1230Y(RW)`), TL866A/CS, DIP28, 32,768 bytes, protocol
+  `0x31`. `DS1230Y(TEST)` was not selected.
+- Read date: 2026-09-19.
+- Published filename:
+  `original/41.005.415.Z1-U17-DS1230Y-100.bin`.
+- Size: 32,768 bytes.
+- SHA-256:
+  `2e58841c485f9f805c159cee5901de053ca7397c20e5c08941328b6028152ca4`.
+- Procedure: three independent raw reads using only:
+
+  ```text
+  minipro -p 'DS1230Y(RW)' -r '<unique-output-file>.bin'
+  ```
+
+  All three files were exactly 32,768 bytes, byte-for-byte identical, and
+  had the SHA-256 above. No test, blank-check, verify, write, program, erase,
+  protection, or ID operation was issued. Raw reads remain under the ignored
+  `.local/` preservation directory.
+
+The image is populated but strongly zero-heavy: 32,353 bytes are `0x00`, 102
+are `0xFF`, and 123 byte values occur. The original bytes are preserved exactly
+without headers, padding, repair, or transformation. Read-only analysis is in
+[`../analysis/generated/ds1230/DS1230_ANALYSIS.md`](../analysis/generated/ds1230/DS1230_ANALYSIS.md).
+Reproduce the analysis and its tests from a clean checkout with
+`./dyaxis/analysis/reproduce_ds1230.sh`.
+The dump's `FE00–FE7F` region contains 43 three-byte 8051 `LJMP` trampolines
+under the proposed `8000` mapping, including `FE06 -> U17 CODE 075D` and
+`FE33 -> U17 CODE 2182`; the application region and checksum fields are
+zero-filled.
+
 ## Preservation notice
 
 These firmware images are preserved for historical research, maintenance,

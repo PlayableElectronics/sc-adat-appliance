@@ -6,8 +6,8 @@ covering **2950 bytes**. It is not a complete program map: bytes
 outside reachable vector paths, unresolved indirect control flow and external
 CODE bodies remain separate evidence domains.
 
-Referenced strings: **0**; printable candidates not
-referenced by a literal ROM pointer or resolved MOVC base: **66**.
+Referenced strings: **14**; printable candidates not
+referenced by a literal ROM pointer or resolved MOVC base: **52**.
 See `u17-code-classification.json` for complete byte coverage and percentages.
 
 ## Confirmed entry families

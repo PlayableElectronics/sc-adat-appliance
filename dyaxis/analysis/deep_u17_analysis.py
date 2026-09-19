@@ -207,6 +207,109 @@ def xdata_xrefs(rows, labels):
         known.append((f"0x{state:04X}", direction, address_text(row), row["function"], row["text"]))
     return known, unknown, states
 
+REGISTER_NAMES = ("A", "B", "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7")
+
+def unknown_registers():
+    return {name: UNKNOWN for name in REGISTER_NAMES}
+
+def parse_imm(text):
+    match = re.search(r"#([0-9A-Fa-f]{1,3})h", text)
+    return int(match.group(1), 16) if match else None
+
+def transfer_registers(row, state):
+    result = dict(state)
+    text = row["text"]
+    if re.search(r"\b(?:lcall|acall)\b", text):
+        return unknown_registers()
+    immediate = parse_imm(text)
+    match = re.search(r"\bmov\s+(A|B|R[0-7]),\s*#", text)
+    if match and immediate is not None:
+        result[match.group(1)] = immediate
+        return result
+    if re.search(r"\bclr\s+A\b", text):
+        result["A"] = 0
+    match = re.search(r"\bmov\s+(A|B|R[0-7]),\s*(A|B|R[0-7])\b", text)
+    if match:
+        result[match.group(1)] = result[match.group(2)]
+        return result
+    match = re.search(r"\bmov\s+(R[0-7]),\s*(?:direct|@|DPTR|[0-9A-Fa-f]+h)", text, re.I)
+    if match:
+        result[match.group(1)] = UNKNOWN
+    if re.search(r"\bmov\s+(?:A|B),\s*(?:direct|@|DPTR|[0-9A-Fa-f]+h)", text, re.I):
+        result[re.search(r"\bmov\s+(A|B)", text, re.I).group(1).upper()] = UNKNOWN
+    match = re.search(r"\b(?:inc|dec)\s+(R[0-7])\b", text, re.I)
+    if match:
+        old = result[match.group(1)]
+        if isinstance(old, int):
+            result[match.group(1)] = (old + (1 if text.lower().startswith("inc") else -1)) & 0xFF
+        else:
+            result[match.group(1)] = UNKNOWN
+    if re.search(r"\bmovx\s+A", text, re.I):
+        result["A"] = UNKNOWN
+    if re.search(r"\b(?:add|addc|subb|anl|orl|xrl|rr|rl|rrc|rlc|swap|da)\s+A", text, re.I):
+        result["A"] = UNKNOWN
+    match = re.search(r"\bxch\s+A,\s*(R[0-7])", text, re.I)
+    if match:
+        other = match.group(1)
+        result["A"], result[other] = result[other], result["A"]
+    if re.search(r"\bpop\s+(?:A|B|R[0-7])\b", text, re.I):
+        result[re.search(r"\bpop\s+(A|B|R[0-7])", text, re.I).group(1).upper()] = UNKNOWN
+    return result
+
+def merge_registers(old, new):
+    if old is UNSET:
+        return dict(new)
+    merged = {}
+    for name in REGISTER_NAMES:
+        if old[name] is UNKNOWN or new[name] is UNKNOWN:
+            merged[name] = UNKNOWN
+        else:
+            merged[name] = old[name] if old[name] == new[name] else UNKNOWN
+    return merged
+
+def register_dataflow(rows, labels):
+    incoming = [UNSET] * len(rows)
+    queue = deque()
+    branch_refs = set()
+    for row in rows:
+        target = branch_target(row["text"])
+        if target and not re.search(r"\b(?:lcall|acall)\b", row["text"]):
+            branch_refs.add(target)
+    roots = {0}
+    roots.update(index for name, index in labels.items()
+                 if index < len(rows) and name not in branch_refs)
+    for root in roots:
+        incoming[root] = merge_registers(incoming[root], unknown_registers())
+        queue.append(root)
+    while queue:
+        index = queue.popleft()
+        outgoing = transfer_registers(rows[index], incoming[index])
+        for successor in successors(rows, labels, index):
+            if successor is None:
+                continue
+            merged = merge_registers(incoming[successor], outgoing)
+            if incoming[successor] is UNSET or any(merged[name] != incoming[successor][name] for name in REGISTER_NAMES):
+                incoming[successor] = merged
+                queue.append(successor)
+    return incoming
+
+def resolved_register_abi(rows, labels, calls, dptr_states):
+    states = register_dataflow(rows, labels)
+    by_address = {row["address"]: index for index, row in enumerate(rows) if row["address"] is not None}
+    output = []
+    for location, caller, target, _instruction in calls:
+        index = by_address.get(int(location, 16))
+        if index is None or states[index] is UNSET:
+            continue
+        values = states[index]
+        pointer = ((values["R2"] << 8) | values["R1"]) if isinstance(values["R2"], int) and isinstance(values["R1"], int) else "unknown"
+        rendered = [f"{name}=0x{values[name]:02X}" if isinstance(values[name], int) else f"{name}=?" for name in REGISTER_NAMES]
+        post = "; ".join(row["text"] for row in rows[index + 1:index + 5])
+        output.append((location, caller, target, *rendered,
+                       f"0x{dptr_states[index]:04X}" if isinstance(dptr_states[index], int) else "?",
+                       f"0x{pointer:04X}" if isinstance(pointer, int) else "?", post))
+    return output, states
+
 def external_calls(rows):
     out = []
     for row in rows:
@@ -276,7 +379,7 @@ def movc_tables(rows, labels, rom, states):
                        "bounded" if extent else "unbounded"))
     return output
 
-def string_rows(rom, rows, tables):
+def string_rows(rom, rows, tables, extra_refs=None):
     strings = printable_strings(rom)
     refs = defaultdict(list)
     for row in rows:
@@ -285,6 +388,8 @@ def string_rows(rom, rows, tables):
     for base, _length, _kind, _sites, _resolution in tables:
         if base.startswith("0x"):
             refs[int(base, 16)].append("MOVC table")
+    for address, sites in (extra_refs or {}).items():
+        refs[address].extend(sites)
     result = []
     for address, text in strings:
         matching = []
@@ -301,7 +406,7 @@ def write_tsv(path, header, rows):
             line = "\t".join(str(value).replace("\t", " ").rstrip() for value in row)
             handle.write(line.rstrip() + "\n")
 
-def coverage(rows, string_data, tables, rom_size):
+def coverage_sets(rows, string_data, tables, rom_size):
     categories = defaultdict(set)
     for row in rows:
         if row["address"] is not None:
@@ -312,6 +417,10 @@ def coverage(rows, string_data, tables, rom_size):
     for address, status, _sites, text in string_data:
         category = "referenced_string" if status == "referenced" else "candidate_string"
         categories[category].update(range(int(address, 16), min(rom_size, int(address, 16) + len(text))))
+    return categories
+
+def coverage(rows, string_data, tables, rom_size):
+    categories = coverage_sets(rows, string_data, tables, rom_size)
     owners = defaultdict(set)
     for category, addresses in categories.items():
         for address in addresses:
@@ -327,6 +436,24 @@ def coverage(rows, string_data, tables, rom_size):
     values["percentages"] = {key: round(value * 100 / rom_size, 3) for key, value in values.items()
                               if key.endswith("bytes") and key != "rom_bytes"}
     return values
+
+def unclassified_ranges(rom, rows, string_data, tables):
+    classified = set().union(*coverage_sets(rows, string_data, tables, len(rom)).values())
+    ranges, start = [], None
+    for address in range(len(rom) + 1):
+        if address < len(rom) and address not in classified and start is None:
+            start = address
+        elif (address == len(rom) or address in classified) and start is not None:
+            end = address - 1
+            linear = sum(1 for candidate in range(start, end + 1)
+                         if rom[candidate] == 0x12 and candidate + 2 < len(rom)
+                         and ((rom[candidate + 1] << 8) | rom[candidate + 2]) < 0x8000)
+            pointer_words = sum(1 for candidate in range(start, end)
+                                if ((rom[candidate] << 8) | rom[candidate + 1]) < 0x8000)
+            ranges.append((f"0x{start:04X}", f"0x{end:04X}", end - start + 1,
+                           linear, pointer_words, "linear candidates only"))
+            start = None
+    return ranges
 
 def fe_abi(rows, calls):
     by_address = {row["address"]: index for index, row in enumerate(rows) if row["address"] is not None}
@@ -356,9 +483,16 @@ def generate(args):
     rows, labels, _label_addresses = parse_asm(args.asm, rom)
     xrefs, unknown_xrefs, states = xdata_xrefs(rows, labels)
     calls = external_calls(rows)
+    resolved_abi, register_states = resolved_register_abi(rows, labels, calls, states)
     tables = movc_tables(rows, labels, rom, states)
-    strings = string_rows(rom, rows, tables)
+    fe06_rows = [row for row in resolved_abi if row[2] == "0xFE06"]
+    string_refs = defaultdict(list)
+    for row in fe06_rows:
+        if row[14] != "?":
+            string_refs[int(row[14], 16)].append(f"FE06 {row[0]} {row[1]}")
+    strings = string_rows(rom, rows, tables, string_refs)
     abi = fe_abi(rows, calls)
+    unclassified = unclassified_ranges(rom, rows, strings, tables)
     abi_groups = defaultdict(list)
     for row in abi:
         abi_groups[(row[2], row[3], row[4])].append(row[0])
@@ -369,6 +503,13 @@ def generate(args):
     write_tsv(args.out / "u17-xdata-unknown.tsv", ["rom_address", "function", "instruction"], unknown_xrefs)
     write_tsv(args.out / "u17-external-code-dependencies.tsv", ["rom_address", "caller", "target", "instruction"], calls)
     write_tsv(args.out / "u17-fe-abi.tsv", ["rom_address", "caller", "target", "family", "confidence", "inputs_before", "outputs_after"], abi)
+    write_tsv(args.out / "u17-register-resolved-abi.tsv",
+              ["rom_address", "caller", "target", *REGISTER_NAMES, "DPTR", "R2_R1_CODE_POINTER", "post_call"], resolved_abi)
+    write_tsv(args.out / "u17-fe06-calls.tsv",
+              ["rom_address", "caller", "target", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "CODE_pointer_R2_R1", "post_call"],
+              [(row[0], row[1], row[2], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[14], row[15]) for row in fe06_rows])
+    write_tsv(args.out / "u17-unclassified-ranges.tsv",
+              ["start", "end", "byte_count", "linear_lcall_candidates", "pointer_word_candidates", "status"], unclassified)
     write_tsv(args.out / "u17-fe-abi-summary.tsv", ["target", "family", "confidence", "call_count", "call_sites"],
               [(target, family, confidence, len(sites), "; ".join(sites))
                for (target, family, confidence), sites in sorted(abi_groups.items())])
@@ -393,6 +534,7 @@ def generate(args):
         "instruction_records": len(rows), "function_labels": function_count,
         "external_code_call_count": len(calls), "resolved_movc_table_count": sum(1 for row in tables if row[0].startswith("0x")),
         "unresolved_movc_count": sum(1 for row in tables if row[0] == "unknown"),
+        "unclassified_range_count": len(unclassified), "fe06_call_count": len(fe06_rows),
         "literal_high_xdata": {f"0x{address:04X}": value for address, value in sorted(high.items())},
         "coverage": coverage_data,
         "limits": ["External CODE bodies are outside the U17 image.", "Unknown or merged DPTR states are excluded from XDATA claims.", "Referenced string detection is limited to literal ROM pointers and MOVC bases."],
@@ -424,6 +566,8 @@ See `u17-code-classification.json` for complete byte coverage and percentages.
 Exact instruction addresses are present in generated TSVs. MOVC tables are in
 `u17-movc-tables.tsv`; only bounded target sets are eligible for promotion.
 """, encoding="utf-8")
+    fe33_rows = [row for row in resolved_abi if row[2] == "0xFE33"]
+    fe33_r7 = [row[12] for row in fe33_rows[:8]]
     (args.out / "U17_EXTERNAL_CODE_DEPENDENCIES.md").write_text(f"""# U17 external CODE dependencies
 
 The current reachable U17 image makes **{len(calls)}** literal external CODE
@@ -436,9 +580,44 @@ FE-page groups are separated into ordinary FE-page service calls and
 post-return observations; a single call is not promoted into a display,
 serial, timer or storage API without repeated supporting sites.
 
-These targets are outside the EPROM and may be mirrored ROM, peripheral/FPGA
-bus behavior, external RAM overlays or another socketed ROM. `LCALL 0x8000`
-remains a distinct external-code launch after transfer/validation.
+`LCALL` targets in `0xFE00..0xFEF9` are external CODE: the P80C552 fetches
+executable instructions there. They are not ordinary peripheral registers.
+Possible sources are mapped ROM, executable RAM or FPGA-supplied code; MOVX
+peripheral accesses remain a separate address-space category.
+
+`FE06` has {len(fe06_rows)} resolved calls with CODE pointers in `R2:R1`; see
+`U17_FE06_DISPLAY_ABI.md`. `FE33` has {len(fe33_rows)} calls. Its first eight
+repeated sites pass `R7` values {', '.join(fe33_r7)}, with `A`, `R4` and `R5`
+zero at those sites. This supports a repeated indexed initialization/service
+family, but does not prove whether it initializes display, timing, serial or
+another subsystem. `LCALL 0x8000` remains a distinct external-code launch.
+""", encoding="utf-8")
+    r3_values = sorted({row[8] for row in fe06_rows})
+    r5_values = sorted({row[10] for row in fe06_rows})
+    fe06_strings = [row for row in strings if row[1] == "referenced" and any("FE06" in ref for ref in row[2].split("; "))]
+    (args.out / "U17_FE06_DISPLAY_ABI.md").write_text(f"""# U17 FE06 display/string ABI
+
+The resolved call-site data-flow pass finds **{len(fe06_rows)}** calls to
+external CODE `0xFE06` with definite register values. In every definite case,
+`R2:R1` is a 16-bit CODE-space pointer into the U17 ROM and resolves to one of
+the embedded boot/status strings. This is strong evidence that `FE06` is an
+external display/string service, not an XDATA peripheral register.
+
+| Field | Observed evidence | Interpretation |
+|---|---|---|
+| `R2:R1` | Pointers resolve to `{len(fe06_strings)}` embedded strings | Confirmed CODE-space string pointer |
+| `R3` | Values: {', '.join(r3_values)} | Meaning unresolved; compare with display layout before assigning |
+| `R5` | Values: {', '.join(r5_values)} | Meaning unresolved; repeated values may encode an operation/style/destination, but no assignment is proven |
+| `R4`, `R6`, `R7` | Recorded per call in `u17-fe06-calls.tsv` | Inputs are preserved; no unsupported semantic label |
+
+The exact pointer, caller, all resolved register values and nearby post-call
+instructions are in `u17-register-resolved-abi.tsv`. The FE06-specific view is
+`u17-fe06-calls.tsv`; referenced strings are in
+`u17-referenced-strings.tsv`.
+
+No screen-row or column meaning is assigned to R3/R5 from static code alone.
+Photographed display geometry and a passive bus trace are required for that
+mapping.
 """, encoding="utf-8")
     (args.out / "U17_SERVICE_WINDOW.md").write_text("""# U17 FFE1/FFE3 service-window analysis
 

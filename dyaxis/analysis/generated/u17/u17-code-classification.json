@@ -5,6 +5,8 @@
   "external_code_call_count": 67,
   "resolved_movc_table_count": 1,
   "unresolved_movc_count": 1,
+  "unclassified_range_count": 160,
+  "fe06_call_count": 16,
   "literal_high_xdata": {
     "0xFFE1": {
       "R": 3,
@@ -91,15 +93,15 @@
     "rom_bytes": 32768,
     "reachable_instruction_bytes": 2950,
     "referenced_table_bytes": 32,
-    "referenced_string_bytes": 0,
-    "candidate_string_bytes": 654,
+    "referenced_string_bytes": 378,
+    "candidate_string_bytes": 276,
     "unclassified_bytes": 29137,
     "overlap_conflict_bytes": 5,
     "percentages": {
       "reachable_instruction_bytes": 9.003,
       "referenced_table_bytes": 0.098,
-      "referenced_string_bytes": 0.0,
-      "candidate_string_bytes": 1.996,
+      "referenced_string_bytes": 1.154,
+      "candidate_string_bytes": 0.842,
       "unclassified_bytes": 88.919,
       "overlap_conflict_bytes": 0.015
     }

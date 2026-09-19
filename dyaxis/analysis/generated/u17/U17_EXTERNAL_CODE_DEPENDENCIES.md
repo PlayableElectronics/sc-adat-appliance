@@ -10,6 +10,14 @@ FE-page groups are separated into ordinary FE-page service calls and
 post-return observations; a single call is not promoted into a display,
 serial, timer or storage API without repeated supporting sites.
 
-These targets are outside the EPROM and may be mirrored ROM, peripheral/FPGA
-bus behavior, external RAM overlays or another socketed ROM. `LCALL 0x8000`
-remains a distinct external-code launch after transfer/validation.
+`LCALL` targets in `0xFE00..0xFEF9` are external CODE: the P80C552 fetches
+executable instructions there. They are not ordinary peripheral registers.
+Possible sources are mapped ROM, executable RAM or FPGA-supplied code; MOVX
+peripheral accesses remain a separate address-space category.
+
+`FE06` has 16 resolved calls with CODE pointers in `R2:R1`; see
+`U17_FE06_DISPLAY_ABI.md`. `FE33` has 10 calls. Its first eight
+repeated sites pass `R7` values R7=0x00, R7=0x01, R7=0x02, R7=0x03, R7=0x04, R7=0x05, R7=0x06, R7=0x07, with `A`, `R4` and `R5`
+zero at those sites. This supports a repeated indexed initialization/service
+family, but does not prove whether it initializes display, timing, serial or
+another subsystem. `LCALL 0x8000` remains a distinct external-code launch.

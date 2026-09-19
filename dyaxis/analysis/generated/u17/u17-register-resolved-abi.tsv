@@ -1,0 +1,59 @@
+rom_address	caller	target	A	B	R0	R1	R2	R3	R4	R5	R6	R7	DPTR	R2_R1_CODE_POINTER	post_call
+0x01ED	jump_01E0	0xFE00	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=0x24	R7=0x95	?	?	mov 7Fh, #64h; lcall jump_33D8; lcall jump_FE21; lcall jump_1440
+0x01F6	jump_01E0	0xFE21	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	lcall jump_1440; mov A, R7; add A, #0FEh; jz jump_020C
+0x0212	jump_0212	0xFE24	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	clr A; mov R7, A; lcall jump_FE3F; lcall jump_FE42
+0x0217	jump_0212	0xFE3F	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x00	?	?	lcall jump_FE42; lcall jump_034D; mov DPTR, #dptr_FEEE; mov A, #32h
+0x021A	jump_0212	0xFE42	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	lcall jump_034D; mov DPTR, #dptr_FEEE; mov A, #32h; movx @DPTR, A
+0x0244	jump_023A	0xFE06	A=0x00	B=?	R0=?	R1=0xC6	R2=0x03	R3=0x05	R4=?	R5=0x04	R6=?	R7=0x00	0x0035	0x03C6	clr A; mov R7, A; mov R5, #05h; mov R3, #05h
+0x0251	jump_023A	0xFE06	A=0x00	B=?	R0=?	R1=0xEA	R2=0x03	R3=0x05	R4=?	R5=0x05	R6=?	R7=0x00	?	0x03EA	lcall jump_0DFE; mov DPTR, #dptr_0034; movx A, @DPTR; jz jump_027E
+0x0266	jump_0257	0xFE06	A=0x00	B=?	R0=?	R1=0xF9	R2=0x03	R3=0x05	R4=?	R5=0x03	R6=?	R7=0x00	?	0x03F9	clr A; mov R7, A; mov R5, #05h; mov R3, #05h
+0x0273	jump_0257	0xFE06	A=0x00	B=?	R0=?	R1=0x1E	R2=0x04	R3=0x05	R4=?	R5=0x05	R6=?	R7=0x00	?	0x041E	lcall jump_30A7; ret; mov A, P5; jb ACC.5, jump_0293
+0x028D	jump_027E	0xFE06	A=0x00	B=?	R0=?	R1=0x29	R2=0x04	R3=0x05	R4=?	R5=0x04	R6=?	R7=0x00	0x0034	0x0429	lcall jump_328A; mov DPTR, #dptr_FDFE; movx A, @DPTR; mov R6, A
+0x02B6	jump_02A1	0xFE06	A=0x00	B=?	R0=?	R1=0x41	R2=0x04	R3=0x05	R4=?	R5=0x04	R6=?	R7=0x00	0xFDFD	0x0441	clr A; mov R7, A; mov R5, #05h; mov R3, #05h
+0x02C3	jump_02A1	0xFE06	A=0x00	B=?	R0=?	R1=0x1E	R2=0x04	R3=0x05	R4=?	R5=0x05	R6=?	R7=0x00	?	0x041E	lcall jump_30A7; clr A; mov R7, A; mov R5, #03h
+0x02D7	jump_02CD	0xFE06	A=0x00	B=?	R0=?	R1=0x67	R2=0x04	R3=0x05	R4=?	R5=0x03	R6=?	R7=0x00	?	0x0467	mov R7, #00h; mov R6, #80h; mov A, #0FDh; mov R5, A
+0x02FD	jump_02CD	0xFE06	A=0x00	B=?	R0=?	R1=0x8A	R2=0x04	R3=0x05	R4=?	R5=0x04	R6=?	R7=0x00	0xFDFF	0x048A	clr A; mov R7, A; mov R5, #05h; mov R3, #05h
+0x030A	jump_02CD	0xFE06	A=0x00	B=?	R0=?	R1=0x9B	R2=0x04	R3=0x05	R4=?	R5=0x05	R6=?	R7=0x00	?	0x049B	lcall jump_328A; ret; clr A; mov R7, A
+0x031B	jump_0311	0xFE06	A=0x00	B=?	R0=?	R1=0xA8	R2=0x04	R3=0x05	R4=?	R5=0x04	R6=?	R7=0x00	0xFDFF	0x04A8	clr A; mov R7, A; mov R5, #05h; mov R3, #05h
+0x0328	jump_0311	0xFE06	A=0x00	B=?	R0=?	R1=0x1E	R2=0x04	R3=0x05	R4=?	R5=0x05	R6=?	R7=0x00	?	0x041E	lcall jump_30A7; ret; mov R0, #80h; mov @R0, #34h
+0x0359	jump_034D	0xFE06	A=0x00	B=?	R0=?	R1=0xBB	R2=0x04	R3=0x05	R4=?	R5=0x01	R6=?	R7=0x00	?	0x04BB	clr A; mov R7, A; mov R5, #02h; mov R3, #05h
+0x0366	jump_034D	0xFE06	A=0x00	B=?	R0=?	R1=0xE7	R2=0x04	R3=0x05	R4=?	R5=0x02	R6=?	R7=0x00	?	0x04E7	clr A; mov R7, A; mov R5, #07h; mov R3, #05h
+0x0373	jump_034D	0xFE06	A=0x00	B=?	R0=?	R1=0x15	R2=0x05	R3=0x05	R4=?	R5=0x07	R6=?	R7=0x00	?	0x0515	clr A; mov R7, A; lcall jump_FE51; ret
+0x0378	jump_034D	0xFE51	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x00	?	?	ret; mov 26h, R4; mov 27h, R5; clr A
+0x0E2E	jump_0E2C	0xFE54	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x00	0x005A	?	clr A; mov R7, A; lcall jump_FE54; clr A
+0x0E33	jump_0E2C	0xFE54	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x00	?	?	clr A; mov DPTR, #dptr_005A; movx @DPTR, A; inc DPTR
+0x0EA8	jump_0EA2	0xFE45	A=?	B=?	R0=?	R1=0x5C	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	0x005A	0x005C	mov R3, #02h; mov R2, #00h; mov R1, #64h; lcall jump_FE48
+0x0EB1	jump_0EA2	0xFE48	A=?	B=?	R0=?	R1=0x64	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	?	0x0064	clr A; mov PWMP, A; mov PWM0, #0E0h; lcall jump_FE1E
+0x0EBA	jump_0EA2	0xFE1E	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	clr A; mov R7, A; mov R5, A; mov R4, A
+0x0EC1	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x00	?	?	mov R7, #01h; clr A; mov R5, A; mov R4, A
+0x0EC9	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x01	?	?	mov R7, #02h; clr A; mov R5, A; mov R4, A
+0x0ED1	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x02	?	?	mov R7, #03h; clr A; mov R5, A; mov R4, A
+0x0ED9	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x03	?	?	mov R7, #04h; clr A; mov R5, A; mov R4, A
+0x0EE1	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x04	?	?	mov R7, #05h; clr A; mov R5, A; mov R4, A
+0x0EE9	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x05	?	?	mov R7, #06h; clr A; mov R5, A; mov R4, A
+0x0EF1	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x06	?	?	mov R7, #07h; clr A; mov R5, A; mov R4, A
+0x0EF9	jump_0EA2	0xFE33	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=0x00	R5=0x00	R6=?	R7=0x07	?	?	lcall jump_FE27; clr P4.4; mov R7, #02h; lcall jump_FE3F
+0x0EFC	jump_0EA2	0xFE27	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	clr P4.4; mov R7, #02h; lcall jump_FE3F; lcall jump_FE42
+0x0F03	jump_0EA2	0xFE3F	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x02	?	?	lcall jump_FE42; lcall jump_FE4B; mov DPTR, #dptr_0084; mov A, #27h
+0x0F06	jump_0EA2	0xFE42	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	lcall jump_FE4B; mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A
+0x0F09	jump_0EA2	0xFE4B	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR
+0x0F16	jump_0F16	0xFE6F	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	mov A, R7; jnz jump_0F1F; ljmp jump_0FE7; clr A
+0x0F21	jump_0F1F	0xFE51	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x00	?	?	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR
+0x0F30	jump_0F1F	0xFE6C	A=0x10	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0x0085	?	setb IEN1.4; mov A, R7; jb ACC.7, jump_0F3C; ljmp jump_0FE7
+0x0F99	jump_0F84	0xFE48	A=?	B=?	R0=?	R1=0x64	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	?	0x0064	sjmp jump_0FE7; mov DPTR, #dptr_0057; movx A, @DPTR; mov R7, A
+0x0FE2	jump_0FCD	0xFE45	A=?	B=?	R0=?	R1=0x5C	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	?	0x005C	mov DPTR, #dptr_0179; movx A, @DPTR; jnz jump_0FF0; ljmp jump_0F16
+0x100E	jump_0FFA	0xFE51	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=0x01	0x0066	?	mov R3, #02h; mov R2, #00h; mov R1, #70h; lcall jump_FE5A
+0x101C	jump_1016	0xFE5A	A=?	B=?	R0=?	R1=0x70	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	?	0x0070	mov A, R7; anl A, #02h; mov DPTR, #dptr_006F; movx @DPTR, A
+0x102A	jump_1016	0xFE2A	A=?	B=?	R0=?	R1=0x72	R2=0x00	R3=0x02	R4=?	R5=?	R6=?	R7=?	0x006F	0x0072	mov A, R6; mov R5, A; jnz jump_103C; mov DPTR, #dptr_006F
+0x10C4	jump_10B8	0xFE57	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0x006D	?	sjmp jump_10DB; mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; mov R7, A
+0x10D8	jump_10CB	0xFE33	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0x006D	?	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; inc A; movx @DPTR, A
+0x11A5	jump_119C	0xFE57	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0x006D	?	sjmp jump_11BB; mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; mov R7, A
+0x11B8	jump_11AB	0xFE33	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0x006D	?	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; inc A; movx @DPTR, A
+0x11CC	jump_11CC	0xFE27	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	ljmp jump_0F16; clr A; mov R6, A; mov A, R6
+0x31AF	jump_3176	0xFE06	A=0x00	B=?	R0=?	R1=0xCE	R2=0x33	R3=0x05	R4=?	R5=0x06	R6=?	R7=0x00	?	0x33CE	lcall jump_328A; ljmp jump_3253; mov R0, #0A8h; mov @R0, #5Ah
+0x32A2	jump_328A	0x8000	A=0x00	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	?	?	lcall fwd_0000_RESET_TARGET; ret; mov R7, #02h; lcall jump_3066
+0x3426	SERIAL_ISR	0xFED1	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFED0	?	pop PSW; pop DPL; pop DPH; pop B
+0x3444	jump_3434	0xFEED	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEEC	?	pop PSW; pop DPL; pop DPH; pop B
+0x34DA	jump_34CA	0xFEDD	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEDC	?	pop PSW; pop DPL; pop DPH; pop B
+0x3570	jump_3560	0xFEF5	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEF4	?	pop PSW; pop DPL; pop DPH; pop B
+0x358E	jump_357E	0xFEF9	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEF8	?	pop PSW; pop DPL; pop DPH; pop B

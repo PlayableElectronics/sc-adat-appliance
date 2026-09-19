@@ -22,11 +22,12 @@ rewrite, or normalize the canonical ROM.
 `run_u17_analysis.sh` runs the pinned control-flow disassembly, the existing
 P80C552 vector/SFR report, and `deep_u17_analysis.py`. The latter emits
 machine-readable exact-address XDATA cross-references, unknown-DPTR records,
-external-CODE ABI context, MOVC table records, referenced/candidate string
-inventories, state transitions and coverage JSON, plus the generated U17
-reports in `generated/u17/`. Literal XDATA accesses are tracked separately
-from external CODE calls; no high address is silently treated as a register
-or as executable code.
+external-CODE ABI context and register propagation, FE06/FE33 call tables,
+MOVC table records, referenced/candidate string inventories, unclassified ROM
+ranges, state transitions and coverage JSON, plus the generated U17 reports in
+`generated/u17/`. Literal XDATA accesses are tracked separately from external
+CODE calls; no high address is silently treated as a register or as executable
+code.
 
 The deep pass can be reproduced directly from tracked files:
 

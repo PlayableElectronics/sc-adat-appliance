@@ -108,6 +108,50 @@ start:
         self.assertEqual(calls[0][2], "0xFE06")
         self.assertEqual(known[0][0], "0x1234")
 
+    def test_register_constant_propagation_and_call_invalidation(self):
+        rom = bytearray([0] * 0x200)
+        rom[0x100:0x113] = bytes.fromhex("7A03 79C6 7B05 120000 79EA 120000") + b"\x00\x00"
+        asm = """org 100h
+start:
+    mov R2, #03h
+    mov R1, #0C6h
+    mov R3, #05h
+    lcall jump_FE06
+    mov R1, #0EAh
+    lcall jump_FE06
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "registers.asm"
+            path.write_text(asm)
+            rows, labels, _ = MODULE.parse_asm(path, bytes(rom))
+            calls = MODULE.external_calls(rows)
+            _xrefs, _unknown, dptr = MODULE.xdata_xrefs(rows, labels)
+            resolved, _states = MODULE.resolved_register_abi(rows, labels, calls, dptr)
+        self.assertEqual(resolved[0][14], "0x03C6")
+        self.assertEqual(resolved[0][8], "R3=0x05")
+        self.assertEqual(resolved[1][14], "?")
+
+    def test_register_branch_merge_is_unknown(self):
+        rom = bytearray([0] * 0x200)
+        rom[0x100:0x110] = bytes.fromhex("7A03 6003 7A04 79C6 120000") + b"\x00\x00"
+        asm = """org 100h
+start:
+    mov R2, #03h
+    jz jump_0108
+    mov R2, #04h
+jump_0108:
+    mov R1, #0C6h
+    lcall jump_FE06
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "register-merge.asm"
+            path.write_text(asm)
+            rows, labels, _ = MODULE.parse_asm(path, bytes(rom))
+            calls = MODULE.external_calls(rows)
+            _xrefs, _unknown, dptr = MODULE.xdata_xrefs(rows, labels)
+            resolved, _states = MODULE.resolved_register_abi(rows, labels, calls, dptr)
+        self.assertEqual(resolved[0][14], "?")
+
     def test_generation_emits_evidence_tables(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)

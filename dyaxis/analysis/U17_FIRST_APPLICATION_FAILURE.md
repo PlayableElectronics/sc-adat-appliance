@@ -31,6 +31,8 @@ This result does not demonstrate application execution. It falsifies the
 previous assumption that the candidate's `AA55` at `FDFC/FDFD` plus calculated
 checksum at `FDFE/FDFF` was sufficient for startup. The instruction-accurate
 analysis is in [`U17_CHECKSUM_FAILURE_EMULATION.md`](U17_CHECKSUM_FAILURE_EMULATION.md).
+The subsequent three-read retention diagnosis is in
+[`U17_DS1230_RETENTION_DIAGNOSIS.md`](U17_DS1230_RETENTION_DIAGNOSIS.md).
 
 No further write, candidate construction, serial transmission, or hardware
 modification is authorized until the address/decode and dual marker/checksum

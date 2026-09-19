@@ -58,9 +58,12 @@ the wire framing or a usable host protocol.
 ## Inferences and unresolved protocol questions
 
 Strong inference: the serial-vector path is a thin interrupt shim around an
-external-memory/peripheral service at `0xFED0`/`0xFED1`. Repeated `MOVX`
-accesses and calls outside the 32 KiB ROM mean the EPROM alone does not expose
-enough named UART state to recover packet framing or baud confidently.
+external-memory/peripheral service at `0xFED0`/`0xFED1`. Separately, the
+`0xFFE1/0xFFE3` path is now more plausibly a local FPGA/PIC mailbox because
+new board trace evidence places a PIC between the XC3030 and scanned controls.
+Those interfaces must not be combined. Repeated `MOVX` accesses and calls
+outside the 32 KiB ROM mean the EPROM alone does not expose enough named UART
+state to recover Macintosh packet framing or baud confidently.
 
 Hypotheses requiring a passive wire capture: the external service may be a
 serial controller/register window; the ROM may use RAM or external hardware
@@ -104,6 +107,11 @@ Once framing is evidenced, keep the implementation boundary as:
 `Dyaxis RS-422 protocol <-> normalized events/state <-> OSC mixer API`
 
 No daemon or protocol implementation is claimed by this report.
+
+For the U17 main-program reconstruction, including reset flow, mailbox
+semantics, service-value state transitions and the PIC/FPGA responsibility
+boundary, see `U17_MAIN_PROGRAM_ARCHITECTURE.md` and
+`U17_HIGH_ADDRESS_MAILBOX.md`.
 
 The critical path is now: reuse existing controller startup/local-control
 behavior, identify the physical RS-422 interface, passively reconstruct the

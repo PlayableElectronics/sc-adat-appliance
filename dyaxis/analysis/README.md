@@ -16,3 +16,8 @@ python3 -m venv .local/disasm51-venv
 
 The tracked assembly and reports are derived artifacts. They do not replace,
 rewrite, or normalize the canonical ROM.
+
+The U17 main-program reconstruction and high-address mailbox map are in:
+
+- `U17_MAIN_PROGRAM_ARCHITECTURE.md`
+- `U17_HIGH_ADDRESS_MAILBOX.md`

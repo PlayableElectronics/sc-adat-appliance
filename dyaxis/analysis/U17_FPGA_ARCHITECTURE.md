@@ -50,6 +50,14 @@ Given the XC3030/PAL/Z85230 hardware, the architectural possibilities include:
 The U17 image alone cannot select among these. It is not reasonable to
 describe the missing targets as another ordinary ROM without bus tracing.
 
+New board trace evidence narrows the architecture: U17 directly supplies the
+P80C552 program, a smaller PIC communicates with the XC3030, and the XC3030
+scans encoders and other console controls. The U17 `FFE1/FFE3` accesses should
+therefore first be tested as a local FPGA/PIC service mailbox. This does not
+prove that the PIC owns the whole window; the PAL/FPGA may decode some or all
+of it, and the Z85230 service window remains separate. See
+`U17_MAIN_PROGRAM_ARCHITECTURE.md` for the address-by-address evidence.
+
 The ROM does, however, contain a separate confirmed executable-RAM path:
 `jump_03A4` clears `0x8000`–`0xFDFD`, `jump_037C` validates that span, and
 `jump_328A` executes `LCALL 0x8000`. The receive-side state machine writes

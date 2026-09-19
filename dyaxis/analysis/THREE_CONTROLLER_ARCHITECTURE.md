@@ -4,10 +4,11 @@
 
 | Board/device | Firmware/storage | Proven responsibility | Open boundary |
 |---|---|---|---|
-| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | Boot text, checksum/NVRAM tests, external service calls, executable-RAM launch path | Exact display service, FPGA/Z85230 register mapping, rear-port ownership |
+| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | System leader: boot text, checksum/NVRAM tests, FPGA/PIC service initialization, main wait/event state machine, executable-RAM launch path | Exact mailbox decode, display service endpoint, Z85230/rear-port ownership |
 | Same Edit Panel CPU board, U3 | AMD AM27C256 U3, public SHA `7de44a…f22b3` | SIO0 byte rings, Timer-0 panel scan, P4/P5 multiplex I/O, event queue, output update | Physical connector and exact display/LED/encoder assignments |
 | Uptown Automation fader board, U7 | ST M27C128, public SHA `a29a17…eb0c3` | PWM motor paths, ADC/fader feedback, P1/P4 scan/output, local SIO0 diagnostics | Board-link framing, transceiver and rear-port relationship |
-| Main-board XC3030/PAL | Volatile XC3030 plus `PALC22V10L-25PC` glue | Likely bus decode, scan/timing/glue; XC3030 requires power-up configuration | Configuration source, exact nets and function |
+| Main-board small PIC | Marking/reference not legible in available repository photos | New trace evidence says it communicates with the XC3030; likely subordinate scan/configuration service | Exact part, reference, firmware/protection and relation to U17 mailbox |
+| Main-board XC3030/PAL | Volatile XC3030 plus `PALC22V10L-25PC` glue | FPGA scans encoders/console controls; PAL/FPGA likely decode U17 service window and provide timing/glue | Configuration source, exact nets and function |
 | Main-board Z85230-family device | Volatile dual-channel serial controller | Plausible dual serial transport/service endpoint | Full suffix, channel wiring and port mapping |
 
 ## Standalone startup interpretation
@@ -17,13 +18,15 @@ not require a host-download assumption. The strongest evidence-supported
 sequence is:
 
 1. U17 reset/startup initializes board services and emits boot/checksum text
-   through external service calls around `0xFE06`.
+   through external service calls around `0xFE06`; its `FFE1/FFE3` loop is now
+   more plausibly a local FPGA/PIC mailbox than a Macintosh-host parser.
 2. U3 runs its own reset path, starts SIO0 and Timer 0, scans P5 through P4,
    and maintains output buffers even without a host.
 3. U7 starts PWM/ADC and per-channel feedback loops, providing fader motion
    and local control-board output.
-4. XC3030/PAL/Z85230 hardware mediates buses and possibly display/serial
-   services.
+4. The PIC communicates with the XC3030; the XC3030 scans encoders and other
+   console controls. XC3030/PAL/Z85230 hardware mediates distinct local and
+   serial-service paths.
 5. The surface reaches a local waiting/diagnostic state.
 
 The first and third steps are directly supported by U17/U7 code. U3’s timer
@@ -39,8 +42,12 @@ register setup; its ISR is an external service shim. This is consistent with
 three different communication roles, not one shared MCU packet parser.
 
 No static result proves that the rear `(RS422) SERIAL 1/2` connectors carry
-U3, U7, U17, Z85230, or more than one of those paths. The rear-port hypothesis
-must remain passive until transceivers and pairs are identified.
+U3, U7, U17, Z85230, or more than one of those paths. The U17 `FFE1/FFE3`
+mailbox must not be treated as the Macintosh protocol. The rear-port
+hypothesis must remain passive until transceivers and pairs are identified.
+
+The detailed U17 reconstruction and literal high-address map are in
+`U17_MAIN_PROGRAM_ARCHITECTURE.md` and `U17_HIGH_ADDRESS_MAILBOX.md`.
 
 ## Minimum Linux boundary
 

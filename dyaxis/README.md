@@ -97,6 +97,9 @@ wiring, first-recording timeline, and offline UART decoder are documented in
 `host/NANO_RS422_CAPTURE.md`.
 The FPGA and external-address reassessment is
 `analysis/U17_FPGA_ARCHITECTURE.md`.
+The U17 system-leader reconstruction and literal `0xFFE0..0xFFFF` mailbox map
+are in `analysis/U17_MAIN_PROGRAM_ARCHITECTURE.md` and
+`analysis/U17_HIGH_ADDRESS_MAILBOX.md`.
 The executable-RAM loading verdict and application ABI are in
 `analysis/U17_EXECUTABLE_RAM_LOADING.md`; the non-transmitting planning
 skeleton is `host/u17_loader_skeleton.py`.

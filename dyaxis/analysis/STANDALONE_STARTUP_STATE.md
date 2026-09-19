@@ -51,7 +51,7 @@ Confirmed code path and calls:
    `LCALL 0x8000` through `0x328A`.
 6. The U17 image does not directly show a complete fader/LED/display loop;
    those functions are more strongly represented in U7 and/or external FPGA/
-   peripheral services. New trace evidence makes a PIC↔XC3030 scan subsystem
+   peripheral services. New trace evidence makes a PALC22V10↔XC3030 scan subsystem
    part of that external service layer. The final waiting state is therefore
    board-level, not assigned to U17 alone; `FFE1/FFE3` is not assumed to be a
    Macintosh-host protocol.

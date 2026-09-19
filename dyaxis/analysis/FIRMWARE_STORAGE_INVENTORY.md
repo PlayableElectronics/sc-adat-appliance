@@ -11,8 +11,7 @@ Unknowns are intentionally left unknown.
 | FPGA-area socket, reference unreadable | Studer label beginning `41.005.415.71` | Socketed programmable ROM; exact device not readable | Unknown | Candidate firmware/configuration source; not dumped | — |
 | FPGA-area socket, reference unreadable | Studer label beginning `41.005.416.70` | Socketed programmable ROM; exact device not readable | Unknown | Candidate firmware/configuration source; not dumped | — |
 | Main-board FPGA | `XILINX XC3030TM-70 PC68C` | Volatile SRAM FPGA, not permanent storage | Configuration size not established | Runtime programmable logic; external configuration source unknown | — |
-| Main-board small controller beside FPGA | Marking and PCB reference not legible in available photos | Device class unconfirmed; internal program-memory and protection status unknown | Unknown | New physical trace evidence says it communicates with the XC3030; do not remove or read until identified | — |
-| FPGA-area PLD | `PALC22V10L-25PC`, `9353 000020` | Nonvolatile programmable logic/fuse-map device, not byte-addressed firmware | Device logic capacity, not ROM bytes | Likely decode/glue; exact PCB reference and contents not preserved | — |
+| FPGA-area PLD beside XC3030 | `PALC22V10L-25PC`, `9353 000020` | Nonvolatile programmable logic device; not executable CPU firmware | Logic configuration, not ROM bytes | Trace evidence associates it with XC3030 communication/scan support; exact programmed equations not preserved | — |
 | Main-board serial controller | Zilog `Z85230`-family, full suffix unclear | Volatile register state | — | Dual-channel serial peripheral; no firmware storage | — |
 | RS-422/interface board, U4 | `AM26LS32PC` | Differential receiver, volatile logic | — | Receive-side line interface candidate; not storage | — |
 | RS-422/interface board, U13 | `SN75174N` | Differential driver, volatile logic | — | Transmit-side line interface candidate; not storage | — |

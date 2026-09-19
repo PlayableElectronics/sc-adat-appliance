@@ -51,10 +51,12 @@ The U17 image alone cannot select among these. It is not reasonable to
 describe the missing targets as another ordinary ROM without bus tracing.
 
 New board trace evidence narrows the architecture: U17 directly supplies the
-P80C552 program, a smaller PIC communicates with the XC3030, and the XC3030
+P80C552 program, and the small device shown in
+`photo/image-1789743641546.jpg` is the `PALC22V10L-25PC` programmable-logic
+device (`9353 000020`) associated with the XC3030 scan subsystem. The XC3030
 scans encoders and other console controls. The U17 `FFE1/FFE3` accesses should
-therefore first be tested as a local FPGA/PIC service mailbox. This does not
-prove that the PIC owns the whole window; the PAL/FPGA may decode some or all
+therefore first be tested as a local FPGA/PAL service mailbox. This does not
+prove that the PAL owns the whole window; the PAL/FPGA may decode some or all
 of it, and the Z85230 service window remains separate. See
 `U17_MAIN_PROGRAM_ARCHITECTURE.md` for the address-by-address evidence.
 

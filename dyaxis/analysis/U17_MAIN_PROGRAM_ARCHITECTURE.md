@@ -2,9 +2,11 @@
 
 Scope: the verified Studer-Editech U17 AM27C256 image only. This report
 incorporates the new board trace evidence that U17 directly supplies the
-P80C552 code bus, a smaller PIC communicates with the XC3030, and the FPGA
-scans encoders and other console controls. It does not treat U3, U7 or the
-Macintosh protocol as substitutes for U17 evidence.
+P80C552 code bus, the small `PALC22V10L-25PC` programmable-logic device
+communicates with the XC3030, and the FPGA scans encoders and other console
+controls. “PIC” is retained only as the owner’s shorthand for this small
+programmable IC; it is not a Microchip PIC microcontroller. U3, U7 and the
+Macintosh protocol remain separate evidence domains.
 
 ## Evidence status
 
@@ -12,7 +14,7 @@ Confirmed from ROM: reset/startup control flow, XDATA addresses and access
 directions, state transitions, interrupt shim targets, external-memory writes,
 and the bytes written to the service ports. Strong architectural inference:
 U17 is the system leader and `FFE1/FFE3` is a mailbox or service-register
-window behind FPGA/PAL/PIC glue. Not proven: the exact PIC part/reference, the
+window behind FPGA/PAL glue. Not proven: the exact PAL PCB reference, the
 electrical decode of the window, or whether any window is directly visible on
 the Macintosh RS-422 interface.
 
@@ -55,7 +57,7 @@ a wire byte received from the Macintosh.
 `01E0` is the central startup routine. `FE06` is called repeatedly with
 register tuples that select strings/messages; because its body is outside the
 EPROM, the ROM proves message selection but not the final display bus. This is
-consistent with U17 leading display/status services through the FPGA/PIC or an
+consistent with U17 leading display/status services through the FPGA/PAL or an
 external peripheral window.
 
 `1440` writes `FFF1=F0`, delays, writes `FFF1=47`, then reads `FFF0`. A read of
@@ -72,7 +74,7 @@ sequence below to `FFE1`:
 ```
 
 These are U17-to-external-service writes. Their register/command meaning is
-not assigned without observing the decoded bus or the PIC/FPGA side.
+not assigned without observing the decoded bus or the PAL/FPGA side.
 
 `3332` reads the current `FFE1` value, writes `09`, then `C0` and derived
 bitwise values. It behaves like service-register acknowledge/initialization
@@ -91,7 +93,7 @@ their effects depend on U17 state `A8`:
 | `FF` | `A8=28` | terminal transfer value; may complete validation and call 328A | Confirmed local effect |
 
 The `06`/`FF` paths are associated with the external-RAM/download machinery
-and must not be used as control-scan commands. The values could be PIC/FPGA
+and must not be used as control-scan commands. The values could be PAL/FPGA
 service events, but that remains a hypothesis until a passive bus or wire
 capture correlates them with hardware activity.
 
@@ -99,40 +101,44 @@ capture correlates them with hardware activity.
 
 | Interface | U17 evidence | Current interpretation |
 |---|---|---|
-| P80C552 ↔ PIC/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | local mailbox/status/service layer; strongest new architecture hypothesis |
+| P80C552 ↔ PAL/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | local mailbox/status/service layer; strongest new architecture hypothesis |
 | P80C552 ↔ subordinate controllers | external RAM window `8000..FDFD`, transfer states `28/2B/63`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
 | P80C552/Z85230 ↔ Macintosh host | serial ISR `3416` reads `FED0`, calls `FED1`; no direct SIO0 setup | separate external serial service path; no host framing proven |
 
 No U3 `FD/FE` meaning or U7 UART constant is imported into the U17 mailbox
 interpretation.
 
-## PIC/FPGA identity boundary
+## PAL/FPGA identity boundary
 
 Repository photos clearly identify `XILINX XC3030TM-70 PC68C` and
-`PALC22V10L-25PC` (`9353 000020`). The available photos do not show a legible
-PIC marking and PCB reference next to the XC3030. The 2676/2677/2684 close-ups
-show the U3/P80C552 board, FPGA and PAL area, while 2667/2668 show the
+`PALC22V10L-25PC` (`9353 000020`). In particular,
+`photo/image-1789743641546.jpg` shows the referenced small device clearly:
+`PALC22V10L-25PC`, second line `9353 000020`. The PCB reference is not legible
+in that image. The 2676/2677/2684 close-ups show the U3/P80C552 board, FPGA
+and PAL area, while 2667/2668 show the
 `Z85230VSC` and 3.672 MHz oscillator. The photographed `LH5163-10L SHARP`
 device is SRAM on the Uptown board, not an identified PIC.
 
-Therefore the PIC is recorded as **unidentified**, not guessed from package
-shape. Its internal program-memory and read-protection properties cannot be
-determined until a sharp, square-on marking/reference photograph is available.
-Do not remove or read it on the present evidence.
+The referenced small device is therefore identified as a PALC22V10-family
+programmable-logic device, not a CPU with ordinary executable program memory.
+Its nonvolatile programmable logic contents and any device security/protection
+state are not preserved in the repository. Do not remove, erase, program or
+attempt a programmer read until the exact supported device definition,
+orientation and preservation procedure are established.
 
-The physical trace evidence makes this division plausible: the PIC can be a
-small configuration/scan-service processor communicating with the FPGA, while
-the P80C552 remains the leader that accesses the decoded service window. It
-does not prove that every `FFE1/FFE3` transaction reaches the PIC; FPGA/PAL
+The physical trace evidence makes this division plausible: the PAL can be
+small configuration/scan-service logic communicating with the FPGA, while the
+P80C552 remains the leader that accesses the decoded service window. It does
+not prove that every `FFE1/FFE3` transaction reaches the PAL; FPGA/PAL
 registers or another peripheral remain possible.
 
 ## Remaining passive measurements
 
-1. With power off, photograph the PIC square-on so the complete marking and
-   PCB reference are readable; no removal is required.
+1. With power off, photograph the PAL square-on so its PCB reference and
+   surrounding trace destinations are readable; no removal is required.
 2. Capture the P80C552 external bus or use high-impedance probes on the
    decoded `FFE1`, `FFE3`, `FFF0/FFF1` and interrupt-service strobes during
-   power-up. This distinguishes a PIC mailbox from FPGA/PAL registers.
+   power-up. This distinguishes PAL/FPGA mailbox logic from other registers.
 3. Correlate one `FFE3` service event with the FPGA scan activity and one
    display/status update. Do not transmit on RS-422 during this step.
 4. Separately identify which external service window the Z85230 interrupt

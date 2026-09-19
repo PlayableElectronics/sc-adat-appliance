@@ -59,8 +59,9 @@ the wire framing or a usable host protocol.
 
 Strong inference: the serial-vector path is a thin interrupt shim around an
 external-memory/peripheral service at `0xFED0`/`0xFED1`. Separately, the
-`0xFFE1/0xFFE3` path is now more plausibly a local FPGA/PIC mailbox because
-new board trace evidence places a PIC between the XC3030 and scanned controls.
+`0xFFE1/0xFFE3` path is now more plausibly a local FPGA/PAL mailbox because
+new board trace evidence identifies the small device beside the XC3030 as
+`PALC22V10L-25PC` and associates it with the scanned controls.
 Those interfaces must not be combined. Repeated `MOVX` accesses and calls
 outside the 32 KiB ROM mean the EPROM alone does not expose enough named UART
 state to recover Macintosh packet framing or baud confidently.
@@ -109,7 +110,7 @@ Once framing is evidenced, keep the implementation boundary as:
 No daemon or protocol implementation is claimed by this report.
 
 For the U17 main-program reconstruction, including reset flow, mailbox
-semantics, service-value state transitions and the PIC/FPGA responsibility
+semantics, service-value state transitions and the PAL/FPGA responsibility
 boundary, see `U17_MAIN_PROGRAM_ARCHITECTURE.md` and
 `U17_HIGH_ADDRESS_MAILBOX.md`.
 

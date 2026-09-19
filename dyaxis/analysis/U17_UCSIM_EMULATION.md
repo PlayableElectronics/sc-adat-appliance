@@ -27,14 +27,32 @@ and `0xFF` diagnostic XDATA fixtures. It records the checksum span, supplied
 `FDFC..FDFF` bytes, terminal path, launch breakpoints and unknown peripheral
 behavior. No hardware device or serial port is opened.
 
-## Result and limitation
+## Driver validation and execution boundary
 
-The A–H matrix was run with a five-second bound per case. uCsim loaded the
-fixtures but did not reach a terminal checksum breakpoint; every case stopped
-in the startup/service path timeout. This is an emulator integration result,
-not evidence that the physical board waits for the same reason. The report's
-`static_path_projection` field is the independent known checksum model and is
-explicitly not instruction-execution evidence.
+The driver is exercised through the same Docker image, command-file
+mechanism, PTY console, explicit stop-event parser, and `state` query used by
+the real ROM:
+
+```sh
+./dyaxis/analysis/test_u17_ucsim_integration.sh
+```
+
+The synthetic fixture executes `LJMP 0003; MOV A,#42; SJMP $`, stops on an
+explicit breakpoint at `0x0005`, reports `ACC=0x42`, `PC=0x0005`, and reports
+`Inst=3`. The real U17 fixture reaches an explicit breakpoint at reset-entry
+`0x2F6F` after two instructions, with the queried CPU state also at `0x2F6F`.
+Breakpoint-definition/disassembly text is never treated as a hit.
+
+The execution request is `step 200000`, so instruction work is bounded. A
+short wall-clock guard only prevents a broken console process from hanging the
+test. The runner reports the explicit stop PC, queried state PC, instruction
+count, register snapshot, and compact trace excerpt.
+
+The current matrix deliberately stops at reset-entry. It therefore proves
+reset execution only; it does not claim checksum, display, launch, or
+application execution. The report's `static_path_projection` field remains a
+separate checksum-model calculation and is never promoted to an executed
+path.
 
 The projection reproduces the established contradiction:
 
@@ -51,12 +69,11 @@ addresses are `AA 55` at `FDFC/FDFD` and the complemented sum at `FDFE/FDFF`.
 For the candidate image that is `AA 55 FD D7`; for an all-zero XDATA fixture
 with `AA` at `FDFC`, it is `AA 55 FF 55`. These are model requirements only.
 
-Because complete uCsim execution did not reach the branch, no CODE/XDATA
-arrangement is promoted as physically established. The candidate-plus-
-independent-XDATA cases are the leading decode hypotheses, consistent with
-the existing PAL/FPGA/U18 architecture, but require the targeted chip-select
-measurement in `U17_MEMORY_DECODE_MEASUREMENT_PLAN.md`.
-
-The current runner intentionally does not claim executed instruction counts,
-FE06 display events, `0x328A`, or `LCALL 0x8000` when uCsim times out. Unknown
-FPGA, PAL and Z85230 interactions are not fabricated as successful responses.
+No CODE/XDATA arrangement is promoted as physically established by this
+matrix. The candidate-plus-independent-XDATA cases remain decode hypotheses,
+consistent with the existing PAL/FPGA/U18 architecture, and require the
+targeted chip-select measurement in `U17_MEMORY_DECODE_MEASUREMENT_PLAN.md`.
+Unknown FPGA, PAL and Z85230 interactions are not fabricated as successful
+responses. Since no current matrix run reached the checksum or launch
+breakpoints, those paths are intentionally absent from `display_strings` and
+the launch fields.

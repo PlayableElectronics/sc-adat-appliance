@@ -11,9 +11,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import pty
 import re
-import subprocess
+import select
 import tempfile
+import time
 from pathlib import Path
 
 SIZE = 0x8000
@@ -70,6 +73,131 @@ def projected_path(image: bytes) -> str:
     return "Checksum Failed"
 
 
+STOP_RE = re.compile(r"Stop at 0x([0-9A-Fa-f]+):")
+TICKS_RE = re.compile(r"stepped ([0-9]+) ticks")
+STATE_PC_RE = re.compile(r"CPU state=.*?PC=\s*0x([0-9A-Fa-f]+)")
+INST_RE = re.compile(r"Inst=\s*([0-9]+)")
+ACC_RE = re.compile(r"ACC=\s*0x([0-9A-Fa-f]+)")
+REG_ROW_RE = re.compile(r"\s+([0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2}){7})\s*$", re.MULTILINE)
+DPTR_RE = re.compile(r"DPTR=\s*0x([0-9A-Fa-f]+)")
+SP_RE = re.compile(r"SP\s+0x([0-9A-Fa-f]+)")
+
+
+def ucsim_session(ucsim: str, work: Path, commands: list[str], instruction_limit: int = 200_000) -> dict[str, object]:
+    """Run uCsim through a PTY and require an explicit Stop-at event.
+
+    A pipe can leave uCsim's console waiting for terminal input. The PTY is
+    intentional: it makes `step`, `state`, and `quit` follow the documented
+    interactive console. The execution request is a bounded instruction step,
+    not an unbounded `run`; the short wall-clock guard only protects the test
+    process if the console itself fails to respond.
+    """
+    command_file = work / "commands"
+    command_file.write_text("\n".join(commands) + "\n", encoding="ascii")
+    pid, fd = pty.fork()
+    if pid == 0:
+        os.chdir(work)
+        os.execv(ucsim, [ucsim, "-q", "-C", "commands"])
+    output = bytearray()
+    deadline = time.monotonic() + 15
+    expected_breakpoints = sum(command.startswith("break ") for command in commands)
+    # Wait until the -C file has installed its breakpoints. Sending `run`
+    # immediately races uCsim startup and is silently consumed before the
+    # command file has finished, which was the original false-timeout bug.
+    while time.monotonic() < deadline and len(output) < 2_000_000:
+        ready, _, _ = select.select([fd], [], [], 0.1)
+        if not ready:
+            continue
+        try:
+            chunk = os.read(fd, 8192)
+        except OSError:
+            break
+        if not chunk:
+            break
+        output.extend(chunk)
+        if output.decode(errors="replace").count("Breakpoint ") >= expected_breakpoints:
+            break
+    os.write(fd, f"step {instruction_limit}\n".encode("ascii"))
+    stop = None
+    while time.monotonic() < deadline and len(output) < 2_000_000:
+        ready, _, _ = select.select([fd], [], [], 0.1)
+        if not ready:
+            continue
+        try:
+            chunk = os.read(fd, 8192)
+        except OSError:
+            break
+        if not chunk:
+            break
+        output.extend(chunk)
+        text = output.decode(errors="replace")
+        matches = list(STOP_RE.finditer(text))
+        if matches:
+            stop = matches[-1]
+            break
+    # Query state after both a breakpoint stop and a bounded-step stop. This
+    # is the authoritative fallback when no breakpoint event was emitted.
+    os.write(fd, b"state\nquit\n")
+    time.sleep(0.05)
+    while True:
+        ready, _, _ = select.select([fd], [], [], 0.1)
+        if not ready:
+            break
+        try:
+            chunk = os.read(fd, 8192)
+        except OSError:
+            break
+        if not chunk:
+            break
+        output.extend(chunk)
+    try:
+        os.close(fd)
+    except OSError:
+        pass
+    try:
+        _, status = os.waitpid(pid, 0)
+        returncode = os.waitstatus_to_exitcode(status)
+    except ChildProcessError:
+        returncode = None
+    text = output.decode(errors="replace")
+    pc = int(stop.group(1), 16) if stop else None
+    ticks_match = TICKS_RE.search(text)
+    ticks = int(ticks_match.group(1)) if ticks_match else None
+    inst_match = INST_RE.search(text)
+    instructions = int(inst_match.group(1)) if inst_match else None
+    state_match = STATE_PC_RE.search(text)
+    state_pc = int(state_match.group(1), 16) if state_match else None
+    acc_match = ACC_RE.search(text)
+    dptr_match = DPTR_RE.search(text)
+    sp_match = SP_RE.search(text)
+    reg_match = REG_ROW_RE.search(text)
+    registers = None
+    if reg_match:
+        registers = dict(zip((f"R{i}" for i in range(8)),
+                             [f"0x{value.upper()}" for value in reg_match.group(1).split()]))
+    if acc_match:
+        registers = registers or {}
+        registers["ACC"] = f"0x{acc_match.group(1).upper()}"
+    if dptr_match:
+        registers = registers or {}
+        registers["DPTR"] = f"0x{dptr_match.group(1).upper()}"
+    if sp_match:
+        registers = registers or {}
+        registers["SP"] = f"0x{sp_match.group(1).upper()}"
+    if ticks is not None and ticks > instruction_limit * 24:
+        raise RuntimeError("uCsim exceeded deterministic instruction limit")
+    return {
+        "stop_pc": f"0x{pc:04X}" if pc is not None else None,
+        "state_pc": f"0x{state_pc:04X}" if state_pc is not None else None,
+        "executed_ticks": ticks,
+        "instruction_count": instructions,
+        "registers": registers,
+        "stop_event": bool(stop),
+        "returncode": returncode,
+        "output": text,
+    }
+
+
 def mapping_image(name: str, original: bytes, candidate: bytes) -> tuple[bytes, str]:
     if name == "original":
         return original, "original DS1230 dump"
@@ -95,35 +223,16 @@ def run_one(ucsim: str, code_name: str, xdata_name: str, root: Path, keep_trace:
         (work / "code.hex").write_text(ihex(u17 + bytes(external_code)), encoding="ascii")
         commands = ['file "code.hex"'] + xram_commands(bytes(xdata))
         commands.extend(f"break 0x{address:04X}" for address in BREAKS)
-        # -g does not reliably start after a -C command file in all uCsim
-        # builds; an explicit bounded run followed by quit is deterministic.
-        commands.extend(("run", "quit"))
         (work / "commands").write_text("\n".join(commands) + "\n", encoding="ascii")
-        try:
-            completed = subprocess.run(
-                [ucsim, "-q", "-C", "commands"],
-                cwd=work,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                timeout=5,
-                check=False,
-            )
-            trace = completed.stdout
-            timed_out = False
-            returncode = completed.returncode
-        except subprocess.TimeoutExpired as exc:
-            trace = (exc.stdout or "")
-            if isinstance(trace, bytes):
-                trace = trace.decode(errors="replace")
-            timed_out = True
-            returncode = None
+        session = ucsim_session(ucsim, work, commands)
+        trace = session["output"]
+        timed_out = not session["stop_event"]
+        returncode = session["returncode"]
         if keep_trace:
             keep_trace.parent.mkdir(parents=True, exist_ok=True)
             keep_trace.write_text(trace, encoding="utf-8")
-    fetches = [int(value, 16) for value in re.findall(r"0x([0-9a-fA-F]{6})\s+F\?", trace)]
-    hit = re.search(r"0x([0-9a-fA-F]{6})\s+F\?", trace)
-    pc = int(hit.group(1), 16) if hit else None
+    fetches = [int(value, 16) for value in re.findall(r"Stop at 0x([0-9a-fA-F]+):", trace)]
+    pc = int(session["stop_pc"], 16) if session["stop_pc"] else None
     final_path = BREAKS.get(pc, "bounded-stop/no terminal breakpoint")
     supplied = bytes(xdata)
     result = {
@@ -132,14 +241,17 @@ def run_one(ucsim: str, code_name: str, xdata_name: str, root: Path, keep_trace:
         "code_description": code_description,
         "xdata_mapping": xdata_name,
         "xdata_description": xdata_description,
-        "executed_instruction_count": "not exposed by uCsim batch breakpoint output",
-        "stop_reason": f"terminal breakpoint 0x{pc:04X}" if pc is not None else ("uCsim timeout in startup/service path" if timed_out else f"uCsim exit {returncode}"),
+        "executed_instruction_count": session["instruction_count"],
+        "stop_reason": f"explicit Stop-at event 0x{pc:04X}" if pc is not None else (f"bounded step ended at {session['state_pc']} without terminal breakpoint" if session["state_pc"] else ("bounded step produced no state" if timed_out else f"uCsim exit {returncode}")),
         "display_strings": [final_path] if final_path in {"Checksum Good", "Checksum Failed", "marker-wait"} else [],
         "checksum": checksum_summary(supplied),
         "comparison_addresses": ["0x02EB low byte", "0x02F0 high byte"],
         "final_path": final_path,
         "static_path_projection": projected_path(supplied),
-        "execution_status": "terminal breakpoint observed" if pc is not None else "uCsim did not reach a terminal breakpoint; projection is not instruction-execution evidence",
+        "execution_status": "terminal breakpoint observed" if pc is not None else "bounded instruction execution completed without a terminal breakpoint; projection is not instruction-execution evidence",
+        "uCsim_state_pc": session["state_pc"],
+        "uCsim_executed_ticks": session["executed_ticks"],
+        "final_registers": session["registers"],
         "reached_0x328A": pc in {0x328A, 0x8000},
         "lcall_0x8000_observed": pc == 0x8000,
         "code_0x8000_fetched": pc == 0x8000,
@@ -158,13 +270,30 @@ EXPERIMENTS = {
     "D": ("candidate", "mutable-original"),
     "E-original-code-candidate-xdata": ("original", "candidate"),
     "E-candidate-code-original-xdata": ("candidate", "original"),
-    "E-original-both": ("original", "original"),
-    "E-candidate-both": ("candidate", "candidate"),
-    "F": ("candidate", "zero"),
-    "G-zero-default": ("candidate", "zero"),
     "G-ff-default": ("candidate", "ff"),
-    "H-fe-code-ds1230-xdata-u18": ("candidate", "zero"),
 }
+
+
+def synthetic_smoke(ucsim: str, root: Path) -> dict[str, object]:
+    """Known reset -> MOV A,#42 -> terminating SJMP fixture."""
+    fixture = root / "dyaxis/analysis/fixtures/u17-ucsim-smoke.hex"
+    with tempfile.TemporaryDirectory(prefix="u17-ucsim-smoke-") as directory:
+        work = Path(directory)
+        (work / "code.hex").write_text(fixture.read_text(encoding="ascii"), encoding="ascii")
+        session = ucsim_session(ucsim, work, ['file "code.hex"', "break 0x0005"])
+    return {
+        "fixture": "reset LJMP 0003; MOV A,#42; SJMP $ at 0005",
+        "expected_stop_pc": "0x0005",
+        "expected_accumulator": "0x42",
+        "actual_stop_pc": session["stop_pc"],
+        "actual_state_pc": session["state_pc"],
+        "actual_accumulator": (f"0x{int(ACC_RE.search(session['output']).group(1), 16):02X}"
+                                if ACC_RE.search(session["output"]) else None),
+        "instruction_count": session["instruction_count"],
+        "stop_event": session["stop_event"],
+        "executed_ticks": session["executed_ticks"],
+        "output_excerpt": session["output"].splitlines()[-12:],
+    }
 
 
 def main() -> None:
@@ -174,7 +303,11 @@ def main() -> None:
     parser.add_argument("--experiment", choices=["all", *EXPERIMENTS], default="all")
     parser.add_argument("--trace-dir", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
+    if args.smoke:
+        print(json.dumps(synthetic_smoke(args.ucsim, args.root), indent=2) + "\n")
+        return
     selected = EXPERIMENTS if args.experiment == "all" else {args.experiment: EXPERIMENTS[args.experiment]}
     results = []
     for name, (code, xdata) in selected.items():

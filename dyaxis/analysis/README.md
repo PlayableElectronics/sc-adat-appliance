@@ -59,13 +59,17 @@ indirect dispatch, host framing and hardware ownership questions. The next
 highest-value passive observations are listed in `U17_UNRESOLVED_OBSERVATIONS.md`.
 The completed/partial/unresolved task audit is `U17_TASK_AUDIT.md`.
 
-The bounded U17 execution integration uses the pinned SDCC/uCsim container:
+The bounded U17 execution integration uses the pinned SDCC/uCsim container and
+has a real integration smoke test:
 
 ```sh
 ./dyaxis/analysis/run_u17_ucsim.sh --experiment all \
   --output /work/dyaxis/analysis/generated/u17/u17-ucsim-experiments.json
 ```
 
-See `U17_UCSIM_EMULATION.md`. A timeout in the preserved firmware's unknown
-startup/service path is reported as a limitation; static checksum projections
-are never presented as complete instruction execution.
+./dyaxis/analysis/test_u17_ucsim_integration.sh
+
+See `U17_UCSIM_EMULATION.md`. The synthetic fixture and U17 reset-entry test
+use explicit breakpoint stop events and a queried CPU state. The current
+matrix proves reset execution only; static checksum projections are never
+presented as complete instruction execution.

@@ -45,8 +45,8 @@ startup 01E0
         +-- FFE1.0 set -> A5 = FFE3 -> dispatch by A8 at 30C3
         +-- A8=01 -> A2=A5; A8++
         +-- A8=02 -> accept A5=01 or 06; initialize/validate next phase
-        +-- A8=D8 -> accept A5=02; arm 017B/017A and advance
-        +-- A8=28/2B/63 -> transfer state; external-RAM write path
+        +-- A8=00 -> accept A5=02; arm 017B/017A and advance to A8=01
+        +-- A8=28/29/5A -> transfer state; external-RAM write/count paths
         +-- other -> return to 3253/30AA
 ```
 
@@ -90,9 +90,9 @@ their effects depend on U17 state `A8`:
 | Service value | Required U17 state | ROM effect | Confidence |
 |---:|---:|---|---|
 | `01` | `A8=02` | branch at 3138; clear/finish phase, or call 32A9 when A2 is zero | Confirmed local effect |
-| `02` | `A8=D8` | set XDATA `017B=1`, `017A=32`, increment A8 | Confirmed local effect |
+| `02` | `A8=00` | set XDATA `017B=1`, `017A=32`, increment A8 | Confirmed local effect |
 | `06` | `A8=02` | if A2 is in `01..80`, load A6/A7 and enter transfer state `28` | Confirmed local effect |
-| `FF` | `A8=28` | terminal transfer value; may complete validation and call 328A | Confirmed local effect |
+| `FF` | `A8=28` | terminal transfer value; completes only when the byte count reaches zero, then may call 328A | Confirmed local effect |
 
 The `06`/`FF` paths are associated with the external-RAM/download machinery
 and must not be used as control-scan commands. The values could be PAL/FPGA
@@ -104,7 +104,7 @@ capture correlates them with hardware activity.
 | Interface | U17 evidence | Current interpretation |
 |---|---|---|
 | P80C552 ↔ PAL/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | candidate local service/status layer; strongest new architecture hypothesis |
-| P80C552 ↔ subordinate controllers | external application window `8000..FDFF`, transfer states `28/2B/63`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
+| P80C552 ↔ subordinate controllers | external application window `8000..FDFF`, transfer states `28/29/5A`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
 | P80C552/Z85230 ↔ Macintosh host | serial ISR `3416` reads `FED0`, calls `FED1`; no direct SIO0 setup | separate external serial service path; no host framing proven |
 
 No U3 `FD/FE` meaning or U7 UART constant is imported into the U17 service-window

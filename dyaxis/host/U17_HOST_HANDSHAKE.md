@@ -59,10 +59,10 @@ The one-byte service value at `0xFFE3` is dispatched by state `0xA8`:
 |---:|---|---|---|
 | `1` | `0x3109` | copy byte to `0xA2`, increment state | unknown host phase |
 | `2` | `0x3115` | accepts data values `1` or `6`, or resets/changes state | unknown host phase |
-| `0x28` | `0x3176 → 0x31C1` | receives block bytes and computes external-RAM address | EXCLUDE: download/write |
-| `0x2B` | `0x321C` | writes received byte to external RAM via `MOVX` | EXCLUDE: memory write |
-| `0x63` | `0x3246` | decrements a transfer counter | EXCLUDE: transfer state |
-| `0xD8` | `0x30EE` | accepts `0xFFE3==2`, arms `0x017B/0x017A` | unknown service phase |
+| `0x28` | `0x3176 → 0x31C1` | receives block index, decrements `A2`, validates index `< FC`, computes external-RAM address, advances to `0x29` | EXCLUDE: download/write |
+| `0x29` | `0x321C` | writes received payload byte to external RAM via `MOVX`; decrements `A2` | EXCLUDE: memory write |
+| `0x5A` | `0x3246` | decrements the transfer counter and clears the active service state at zero | EXCLUDE: transfer state |
+| `0x00` | `0x30EE` | accepts `0xFFE3==2`, arms `0x017B/0x017A`, advances to `0x01` | unknown service phase |
 | other | `0x3253` | returns to wait/status loop | no accepted transition proven |
 
 `0x30EE` therefore proves a local sequence requiring a received service byte
@@ -79,7 +79,7 @@ state predicates, not invented packets:
 | 1 | status/query | unknown prefix/address/command/length/checksum; service byte unknown | should produce a non-writing reply/status and advance no download state | low | lowest conceptually, but not transmittable yet |
 | 2 | phase-1 byte | unknown packet whose service byte is `01` | enters state `1`, stores byte in `0xA2` | low | unknown; do not transmit |
 | 3 | phase-2 byte | unknown packet whose service byte is `02` | enters state `2`; subsequent values `01`/`06` branch | low | unknown; do not transmit |
-| — | download/launch | includes state `0x28`, `0x2B`, `0x63` paths | writes/validates external RAM or launches at `0x8000` | high as ROM path, not packet | prohibited |
+| — | download/launch | includes states `0x28`, `0x29`, `0x5A` and terminal `0xFF` path | writes/validates external RAM or launches at `0x8000` | high as ROM path, not packet | prohibited |
 
 No length, address/unit ID, checksum, retry packet, or exact response bytes are
 proven. The safest active candidate is therefore **none** until a passive

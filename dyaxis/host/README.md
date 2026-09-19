@@ -17,6 +17,10 @@ The U17-only host-wait analysis is documented in
 `U17_HOST_HANDSHAKE.md`. `u17_host_tool.py capture` is receive-only; its probe
 mode is disabled unless `--transmit` is explicitly supplied, and currently
 refuses transmission because no exact wire packet has been recovered.
+The download-state reconstruction is documented in
+`U17_DOWNLOAD_PROTOCOL.md`. `u17_host_tool.py decode` is decode-only: it
+preserves raw capture records and reports candidate correlations against the
+U17 `FFE1/FFE3` state machine without treating RX bytes as proven packets.
 
 The dedicated second-Nano passive edge recorder is documented in
 `NANO_RS422_CAPTURE.md`. Its firmware is

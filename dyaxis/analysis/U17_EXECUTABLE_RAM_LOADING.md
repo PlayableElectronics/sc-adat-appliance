@@ -25,8 +25,9 @@ The following are valid instructions in the control-flow-aware disassembly
    `MOVX @DPTR,A`. `jump_31C1` forms that pointer as `0x8000 + (block * 0x80)`
    for block values below `0xFC`; the surrounding state/counter logic advances
    the received data through the external RAM window.
-3. **Clear and checksum:** `jump_03A4` explicitly clears external XDATA from
-   `0x8000` through `0xFDFD`. `jump_037C` sums that same range and returns the
+3. **Clear and checksum:** `jump_03A4` explicitly clears external XDATA in
+   the half-open range `[0x8000,0xFDFD)`, i.e. through `0xFDFC`.
+   `jump_037C` sums that same range and returns the
    complemented 16-bit result in `R6:R7`. This is not a raw byte-pattern
    inference.
 4. **Validation gate:** the startup path at `jump_02CD` calls `jump_037C`,
@@ -42,8 +43,9 @@ The following are valid instructions in the control-flow-aware disassembly
 Confirmed ABI surface:
 
 - Load base: `0x8000` in external code/XDATA address space.
-- Validation span: `0x8000`–`0xFDFD`, inclusive; metadata occupies at least
-  `0xFDFC`–`0xFDFF` in the external map.
+- Validation input span: `0x8000`–`0xFDFC`, inclusive; `0xFDFC/FDFD` is
+  checked as an `AA 55` signature and `0xFDFE/FDFF` stores the complemented
+  sum. The clear/checksum endpoint is exclusive at `0xFDFD`.
 - Entry: `LCALL 0x8000`; application must eventually use `RET` to return to
   U17 `jump_328A`. A reset, `RETI`, or non-returning transfer is not supported
   by this observed call site.

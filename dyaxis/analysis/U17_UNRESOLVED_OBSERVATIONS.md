@@ -12,10 +12,9 @@ Prioritized, receive-only observations:
    together. This is the smallest measurement that can distinguish an FPGA/
    peripheral service window from another ROM or RAM and can resolve the
    external CODE calls around `FE00..FEF9`.
-2. With power removed, photograph or continuity-trace the two undumped
-   socketed ROM candidates and their chip-select/address wiring. Do not remove
-   or read either device until its exact marking and a compatible definition
-   are established.
+2. With power removed, document the DS1230 and U18 chip-select/address wiring
+   and the FE-page peripheral decode. U13/U14 are line-interface devices, not
+   ROM candidates. Do not remove, program, or powered-probe the DS1230.
 3. Passively observe the XC3030/PAL area during startup to determine whether
    the FPGA is configured by a local source and whether PAL decode/control
    strobes correspond to `FFE1/FFE3`. The PALC22V10 is a PLD; its equations and

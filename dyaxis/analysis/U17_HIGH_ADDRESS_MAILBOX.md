@@ -51,8 +51,9 @@ or host packet fields by themselves.
   they are below the `FFE0..FFFF` table and their peripheral role is not
   identified.
 - `FDFC..FDFF` hold checksum/signature values used by startup validation.
-- `8000..FDFD` is the external RAM/program window used by checksum, download
-  and `LCALL 8000` launch logic.
+- `8000..FDFF` is the external application/update window used by download and
+  `LCALL 8000`; the checksum input is the half-open span `8000..FDFD`, ending
+  at `FDFC`, with signature/checksum metadata at `FDFC..FDFF`.
 
 The highest-confidence service-window interpretation is `FFE1/FFE3`; `FFF0/FFF1`
 looks like a separate startup identification exchange, and `FFF4/FFF5` is

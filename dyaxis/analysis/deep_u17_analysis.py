@@ -522,6 +522,38 @@ def generate(args):
     write_tsv(args.out / "u17-string-candidates.tsv", ["rom_address", "text"], [(row[0], row[3]) for row in strings if row[1] == "candidate"])
     write_tsv(args.out / "u17-state-transitions.tsv", ["condition", "code", "effect", "confidence"], STATE_ROWS)
 
+    # These ranges are emitted from instruction-level facts visible in the
+    # reachable listing, not from a presumed board schematic.  The physical
+    # device assignment is deliberately kept separate in the markdown report.
+    memory_ranges = [
+        ("CODE", "0x0000", "0x7FFF", "U17 EPROM", "confirmed physical device and address range"),
+        ("XDATA", "0x0000", "0x7FFF", "working RAM", "confirmed startup clear; U18 assignment is strong hardware hypothesis"),
+        ("XDATA", "0x8000", "0xFDFC", "persistent/application window", "confirmed checksum and transfer accesses; DS1230 assignment is hardware hypothesis"),
+        ("XDATA", "0xFDFD", "0xFDFD", "signature byte", "confirmed read by startup; not cleared by the observed clear loop"),
+        ("XDATA", "0xFDFE", "0xFDFF", "complemented checksum", "confirmed read/clear and compared with checksum result"),
+        ("XDATA", "0xFE00", "0xFFFF", "external service/peripheral window", "confirmed separately cleared and accessed; not proven DS1230 storage"),
+        ("CODE", "0x8000", "0x8000", "application entry", "confirmed LCALL after validation; provider is external to U17"),
+        ("CODE", "0xFE00", "0xFEF9", "external service/shim code", "confirmed executable CODE targets; provider unresolved"),
+    ]
+    write_tsv(args.out / "u17-memory-ranges.tsv", ["space", "start", "end", "observed_role", "evidence"], memory_ranges)
+    checksum_ranges = [
+        ("checksum_input", "0x8000", "0xFDFC", "half-open [start,end)", "sum bytes 0x8000..0xFDFC inclusive; complement in R6:R7"),
+        ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02D7..0x0304"),
+        ("signature", "0xFDFC", "0xFDFD", "AA 55", "startup gate at 0x0293..0x02AC"),
+        ("clear_application", "0x8000", "0xFDFD", "half-open [start,end)", "clear loop 0x03A4..0x03BE"),
+        ("clear_checksum", "0xFDFE", "0xFFFF", "half-open [start,end)", "two explicit zero writes at 0x03BE..0x03C5"),
+    ]
+    write_tsv(args.out / "u17-checksum-ranges.tsv", ["kind", "start", "end", "range_semantics", "evidence"], checksum_ranges)
+    update_writes = [
+        ("0x2F7D", "MOVX @DPTR,A", "0x0000..0x7FFF", "reset working-RAM clear; DPTR increments, outer count 0x80"),
+        ("0x2F8B", "MOVX @DPTR,A", "0xFE00..0xFFFF", "separate service/peripheral-window clear; outer count 0x01"),
+        ("0x03A4", "MOVX @DPTR,A", "0x8000..0xFDFC", "application/persistent-window clear"),
+        ("0x03BE", "MOVX @DPTR,A", "0xFDFE..0xFDFF", "checksum bytes cleared"),
+        ("0x321C", "MOVX @DPTR,A", "0x8000 + block*0x80", "received byte write; block/index A5 must be < 0xFC; destination pointer in 9E:9F"),
+        ("0x327E", "MOVX @FFE3,A", "0xFFE3", "service output, not application storage"),
+    ]
+    write_tsv(args.out / "u17-update-writes.tsv", ["rom_address", "instruction", "destination", "evidence"], update_writes)
+
     high = defaultdict(lambda: {"R": 0, "W": 0, "locations": []})
     for address, direction, location, function, text in xrefs:
         value = int(address, 16)
@@ -582,8 +614,10 @@ serial, timer or storage API without repeated supporting sites.
 
 `LCALL` targets in `0xFE00..0xFEF9` are external CODE: the P80C552 fetches
 executable instructions there. They are not ordinary peripheral registers.
-Possible sources are mapped ROM, executable RAM or FPGA-supplied code; MOVX
-peripheral accesses remain a separate address-space category.
+Possible sources are mapped persistent memory such as the DS1230 window,
+executable RAM, or FPGA/PAL-supplied bus behavior; MOVX peripheral accesses
+remain a separate address-space category. The U17 image cannot identify the
+physical provider by itself.
 
 `FE06` has {len(fe06_rows)} resolved calls with CODE pointers in `R2:R1`; see
 `U17_FE06_DISPLAY_ABI.md`. `FE33` has {len(fe33_rows)} calls. Its first eight
@@ -619,6 +653,84 @@ No screen-row or column meaning is assigned to R3/R5 from static code alone.
 Photographed display geometry and a passive bus trace are required for that
 mapping.
 """, encoding="utf-8")
+    (args.out / "U17_MEMORY_MAP.md").write_text("""# U17 memory map: evidence and hardware hypotheses
+
+This report separates address-space facts recovered from U17 instructions from
+physical-chip assignments inferred from the new board photographs.
+
+| Space/range | Static evidence | Physical interpretation | Confidence |
+|---|---|---|---|
+| CODE `0000..7FFF` | U17 is a 32 KiB EPROM; reset and reachable code occupy this range | U17 AMD AM27C256 | Confirmed |
+| XDATA `0000..7FFF` | Reset loop at `2F7D` writes zero for `0x8000` bytes | U18 Toshiba TC55257BSPL-10 is the strongest volatile-RAM candidate | Strong hardware hypothesis |
+| XDATA `8000..FDFC` | Checksum loop `037C` and clear loop `03A4` access this span | DS1230-backed persistent/application region is the best fit | Strong hypothesis |
+| XDATA `FDFC..FDFF` | Signature and checksum metadata are read; checksum bytes are explicitly cleared | Likely persistent metadata within the same upper RAM device | Strong hypothesis |
+| XDATA `FE00..FFFF` | Reset loop at `2F8B` clears this range separately; service accesses include `FFE1/FFE3`, `FFF0/FFF1`, `FFF4/FFF5` | External peripheral/service decode, not proven DS1230 storage | Strong static conclusion; exact devices unresolved |
+| CODE `8000` | `328A` executes `LCALL 8000` after validation | External application entry, provider unresolved | Confirmed code behavior |
+| CODE `FE00..FEF9` | Literal `LCALL` targets and interrupt shims | Mapped executable provider, possibly persistent memory, executable RAM or FPGA/PAL bus logic | Confirmed target; provider unresolved |
+
+The `u17-memory-ranges.tsv`, `u17-checksum-ranges.tsv` and
+`u17-update-writes.tsv` files are the machine-readable evidence tables. CODE
+fetches are never treated as MOVX/XDATA peripheral accesses.
+""", encoding="utf-8")
+    (args.out / "U17_DS1230_LAYOUT.md").write_text("""# U17 DS1230 layout: preservation hypothesis
+
+The new photograph identifies a Dallas `DS1230Y-100` 32K x 8 battery-backed
+nonvolatile SRAM on the U17 board. It is preservation-critical, but the ROM
+does not prove the chip-select wiring or address decode.
+
+## Best-supported layout
+
+| Range | Evidence | Assessment |
+|---|---|---|
+| `8000..FDFC` | Reset clear, receive transfer writes, checksum input | Strong candidate for persistent application/data contents |
+| `FDFC..FDFF` | `AA 55` signature at `FDFC/FDFD`; complemented checksum compared at `FDFE/FDFF` | Candidate persistent header/trailer; exact ownership is not electrically proven |
+| `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire range to DS1230 storage |
+
+The DS1230 is 32 KiB, while `8000..FDFF` is `0x7E00` bytes; therefore the
+remaining `0x0200` bytes of a full 32 KiB device could be bank-select,
+reserved, mirrored, or part of an unobserved decode. A simple one-to-one
+`8000..FFFF` assignment is not established. The most conservative statement
+is “DS1230 is a plausible source for the persistent upper application window;
+the FE page is separately decoded until bus evidence says otherwise.”
+
+Do not read it with an EPROM definition or remove it. A safe preservation path
+is first a powered-off, non-invasive pinout/continuity review and chip-select
+trace, followed by a reviewed high-impedance in-system read plan. The plan
+must account for the age of the internal battery and preserve power state; no
+powered probing, write/update, blank-check, erase, or programmer operation is
+authorized by this report. If the read plan is approved, acquire three
+read-only dumps with an independently verified byte count and SHA-256 while
+preserving the raw captures separately from U17 executable code.
+""", encoding="utf-8")
+    (args.out / "U17_UPDATE_AND_LAUNCH_PATH.md").write_text("""# U17 update, validation and launch path
+
+## Confirmed sequence
+
+1. `2F7D` clears XDATA `0000..7FFF` (the endpoint is exclusive).
+2. `2F8B` separately clears XDATA `FE00..FFFF`.
+3. `03A4` clears `8000..FDFC` and then explicitly clears `FDFE/FDFF`.
+4. `31C1` accepts block/index values `0x00..0xFB`, computes
+   `0x8000 + index*0x80`, and stores the received byte stream through the
+   pointer held in internal RAM `9E:9F`; `321C` performs the `MOVX` write.
+5. `037C` sums bytes in half-open range `[8000,FDFD)`, i.e. through `FDFC`,
+   with 16-bit carry and returns the bitwise-complement in `R6:R7`.
+6. Startup checks `FDFC/FDFD == AA 55`, then compares the complemented sum
+   with `FDFE/FDFF`.
+7. The success path calls `328A`, which disables services and executes
+   `LCALL 8000`; the launched code is expected to return through the observed
+   call frame before U17's reset-target call.
+
+The block bound implies a maximum block start of `FD80` and a final 128-byte
+block ending at `FDFF`. This is a transfer bound, not proof that every byte is
+valid application code. Exact writes are listed in `u17-update-writes.tsv`.
+
+## Unresolved
+
+The wire framing, header fields, completion marker, checksum byte order as
+sent by the host, and physical DS1230 chip-select mapping require a passive
+bus/serial observation or a reviewed non-destructive memory read. No active
+update should be attempted.
+""", encoding="utf-8")
     (args.out / "U17_SERVICE_WINDOW.md").write_text("""# U17 FFE1/FFE3 service-window analysis
 
 Only MOVX instructions with a CFG-proven DPTR value are included in
@@ -634,7 +746,7 @@ PAL-owned mailbox.
     (args.out / "U17_STARTUP_STATE_MACHINE.md").write_text("""# U17 startup state machine
 
 ```text
-0000 -> 2F6F: clear internal RAM; clear XDATA 0000..7FFF and FE00..FEFF
+0000 -> 2F6F: clear internal RAM; clear XDATA 0000..7FFF and FE00..FFFF
 2FD2: apply ROM table 2211 initialization; enter 01E0
 01E0: disable interrupts; external services; FFF1/FFF0 status test
       FEEE/FEEF setup; Timer-2/capture setup; enable EA

@@ -1,0 +1,7 @@
+rom_address	instruction	destination	evidence
+0x2F7D	MOVX @DPTR,A	0x0000..0x7FFF	reset working-RAM clear; DPTR increments, outer count 0x80
+0x2F8B	MOVX @DPTR,A	0xFE00..0xFFFF	separate service/peripheral-window clear; outer count 0x01
+0x03A4	MOVX @DPTR,A	0x8000..0xFDFC	application/persistent-window clear
+0x03BE	MOVX @DPTR,A	0xFDFE..0xFDFF	checksum bytes cleared
+0x321C	MOVX @DPTR,A	0x8000 + block*0x80	received byte write; block/index A5 must be < 0xFC; destination pointer in 9E:9F
+0x327E	MOVX @FFE3,A	0xFFE3	service output, not application storage

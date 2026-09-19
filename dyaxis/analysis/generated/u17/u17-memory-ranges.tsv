@@ -1,0 +1,9 @@
+space	start	end	observed_role	evidence
+CODE	0x0000	0x7FFF	U17 EPROM	confirmed physical device and address range
+XDATA	0x0000	0x7FFF	working RAM	confirmed startup clear; U18 assignment is strong hardware hypothesis
+XDATA	0x8000	0xFDFC	persistent/application window	confirmed checksum and transfer accesses; DS1230 assignment is hardware hypothesis
+XDATA	0xFDFD	0xFDFD	signature byte	confirmed read by startup; not cleared by the observed clear loop
+XDATA	0xFDFE	0xFDFF	complemented checksum	confirmed read/clear and compared with checksum result
+XDATA	0xFE00	0xFFFF	external service/peripheral window	confirmed separately cleared and accessed; not proven DS1230 storage
+CODE	0x8000	0x8000	application entry	confirmed LCALL after validation; provider is external to U17
+CODE	0xFE00	0xFEF9	external service/shim code	confirmed executable CODE targets; provider unresolved

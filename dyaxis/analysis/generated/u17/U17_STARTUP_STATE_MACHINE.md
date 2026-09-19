@@ -1,7 +1,7 @@
 # U17 startup state machine
 
 ```text
-0000 -> 2F6F: clear internal RAM; clear XDATA 0000..7FFF and FE00..FEFF
+0000 -> 2F6F: clear internal RAM; clear XDATA 0000..7FFF and FE00..FFFF
 2FD2: apply ROM table 2211 initialization; enter 01E0
 01E0: disable interrupts; external services; FFF1/FFF0 status test
       FEEE/FEEF setup; Timer-2/capture setup; enable EA

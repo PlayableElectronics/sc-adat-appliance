@@ -163,6 +163,18 @@ jump_0108:
             self.assertIn("0xFFE1", (out / "u17-xdata-xrefs.tsv").read_text())
             self.assertIn("A8=02, A5=06", (out / "u17-state-transitions.tsv").read_text())
 
+    def test_generation_separates_checksum_ranges_and_code_targets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            MODULE.generate(type("Args", (), {"asm": ASM, "rom": ROM, "out": out})())
+            ranges = (out / "u17-checksum-ranges.tsv").read_text()
+            memory = (out / "u17-memory-ranges.tsv").read_text()
+            self.assertIn("checksum_input\t0x8000\t0xFDFC\thalf-open", ranges)
+            self.assertIn("signature\t0xFDFC\t0xFDFD", ranges)
+            self.assertIn("XDATA\t0xFE00\t0xFFFF\texternal service/peripheral window", memory)
+            self.assertIn("CODE\t0xFE00\t0xFEF9\texternal service/shim code", memory)
+            self.assertNotIn("CODE\t0xFFE1", memory)
+
 
 if __name__ == "__main__":
     unittest.main()

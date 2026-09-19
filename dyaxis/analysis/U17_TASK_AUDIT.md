@@ -15,7 +15,7 @@ from questions that require hardware evidence.
 | Z85230/host protocol | Partial | Vector shim and FE-page dependencies are confirmed; channel, framing, baud and wire ownership are unresolved |
 | Standalone display/fader/LED behavior | Partial | Console behavior is confirmed by observation; U17-local ownership of each visible function is not proven |
 | PAL/FPGA architecture | Partial | XC3030/PAL markings and conservative role split are documented; PAL equations, nets and configuration source are unknown |
-| Two additional socketed ROMs | Unresolved | Candidate devices are inventoried but not mapped to the external CODE targets |
+| FPGA-area socketed programmable devices | Unresolved | Exact identities and mapping to external CODE/configuration targets remain unknown; U13/U14 are differential-interface devices, not ROM candidates |
 | Reproducibility | Complete | `run_u17_analysis.sh`, `deep_u17_analysis.py`, tracked ROM, and stdlib regression tests reproduce the reports |
 
 The analysis does not claim that U17 is the entire executable system. It is the

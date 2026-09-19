@@ -76,7 +76,22 @@ new close-ups `photo/2684.jpg` through `photo/2699.jpg`.
 
 ## FPGA-area close-ups
 
-- `photo/fpga/2700.jpg` and `2702.jpg` show two nearby socketed programmed ROMs
+- `photo/fpga/2700.jpg` and `2702.jpg` show two nearby socketed programmed
+  devices in the FPGA area; their exact device identities and roles remain
+  unresolved. They are not the U13/U14 differential-interface devices.
+
+## New board close-ups
+
+- `photo/image-1789838864227.jpg` visibly shows the U17 label
+  `41.005.415.Z1 / U17 V1.06 / SEC 1994`, the Toshiba `TC55257BSPL-10` at
+  U18, the XC3030 FPGA and a nearby PAL/logic device.
+- `photo/image-1789838797019.jpg` visibly shows the Dallas `DS1230Y-100`
+  `32K x 8 NONVOLATILE SRAM`.
+- `photo/image-1789838660551.jpg` visibly shows `AM26LS32PC` at U14, a
+  Z85230-family device, and a line-interface marking that appears to read
+  `SN75174AN` at U13. The supplied hardware inventory calls that part
+  `SN75177AN`; the suffix discrepancy is recorded rather than guessed away.
+  Both U13 and U14 are differential-interface devices, not ROMs.
   with Studer assembly labels beginning **41.005.415.71** and **41.005.416.70**.
 - `photo/fpga/2703.jpg` clearly shows a **PALC22V10L-25PC**, marking
   **9353 000020**. This is programmable logic, not an EPROM, and may implement

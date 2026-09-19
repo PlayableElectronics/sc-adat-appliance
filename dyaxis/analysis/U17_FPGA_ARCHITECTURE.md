@@ -25,10 +25,11 @@ supplies configuration data.
 
 The visible PAL cannot independently store the XC3030 bitstream. It may
 qualify chip selects, decode address regions, gate configuration signals, or
-implement other glue logic. The two nearby socketed ROMs in photos `2700` and
-`2702` are candidates for firmware/configuration storage, but no source is
-assigned without tracing `DIN`, `CCLK`, `DONE/PROG`, `INIT`, mode pins and ROM
-chip-select/output lines.
+implement other glue logic. The two nearby FPGA-area socketed devices in
+photos `2700` and `2702` remain candidates for firmware/configuration storage,
+but no source is assigned without tracing `DIN`, `CCLK`, `DONE/PROG`, `INIT`,
+mode pins and ROM chip-select/output lines. They are distinct from U13/U14,
+which are confirmed differential-interface devices and not ROM candidates.
 
 The U17 ROM could configure the FPGA only if the board selects peripheral mode
 and the U17 code implements the loader. The current U17 disassembly establishes

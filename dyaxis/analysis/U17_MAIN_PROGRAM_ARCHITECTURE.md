@@ -104,7 +104,7 @@ capture correlates them with hardware activity.
 | Interface | U17 evidence | Current interpretation |
 |---|---|---|
 | P80C552 ↔ PAL/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | candidate local service/status layer; strongest new architecture hypothesis |
-| P80C552 ↔ subordinate controllers | external RAM window `8000..FDFD`, transfer states `28/2B/63`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
+| P80C552 ↔ subordinate controllers | external application window `8000..FDFF`, transfer states `28/2B/63`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
 | P80C552/Z85230 ↔ Macintosh host | serial ISR `3416` reads `FED0`, calls `FED1`; no direct SIO0 setup | separate external serial service path; no host framing proven |
 
 No U3 `FD/FE` meaning or U7 UART constant is imported into the U17 service-window

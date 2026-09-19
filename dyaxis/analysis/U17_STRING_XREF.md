@@ -1,30 +1,28 @@
 # U17 embedded-message cross-reference
 
-The table covers every meaningful printable U17 message. Addresses are ROM
-addresses from the verified image. The control-flow-aware output contains no
-valid direct `MOVC`/DPTR reference that names these string addresses; the
-messages are therefore likely reached through indirect tables or external
-service call `0xFE06`. This is an absence of direct references, not proof that
-the messages are unused.
+Register constant propagation resolves the external CODE `FE06` calls that
+pass `R2:R1` pointers into these strings. The generated
+`generated/u17/u17-fe06-calls.tsv` and `u17-register-resolved-abi.tsv` are the
+authoritative machine-readable records; the earlier “none found” result was a
+tooling limitation.
 
-| ROM address | Message | Direct valid refs | Containing routine / calls before or after |
+| ROM address | Message | Valid FE06 reference(s) | Context |
 |---:|---|---|---|
-| `0x03C5` | `Beginning Manufacturing Diagnostics` | none found | Startup `0x01E0` initializes services, then calls `0xFE06`; `0x0DFE` follows the first diagnostic display calls |
-| `0x03EA` | `Please Wait...` | none found | Same indirect `0xFE06` display/message path |
-| `0x03F9` | `Non-Volatile RAM Has Been Cleared...` | none found | Near `0x03A4`, which clears `0x8000–0xFDFD`; message dispatch is indirect |
-| `0x041E` | `Booting...` | none found | Startup/launch path; indirect display service |
-| `0x0429` | `Unconditional Launch...` | none found | Associated with `0x328A -> LCALL 0x8000` path; indirect dispatch |
-| `0x0441` | `Updating Firmware to a New Version...` | none found | External-RAM/download state machine and `0xFE06` calls |
-| `0x0467` | `Checksumming Battery-Backed RAM...` | none found | `0x037C` checksum routine and startup validation |
-| `0x048A` | `Checksum Good...` | none found | Validation-success branch before local/external launch services |
-| `0x049B` | `Launching...` | none found | Launch branch around `0x328A` |
-| `0x04A8` | `Checksum Failed...` | none found | Validation-failure branch returning to diagnostic/service handling |
-| `0x04BB` | `MultiDesk Boot ROM, version 1.06, 28-Jun-94` | none found | Identification text; likely indirect diagnostic display/host service |
-| `0x04E7` | `Copyright (C) 1994 Studer-Editech Corporation` | none found | Identification text; likely indirect display/host service |
-| `0x0515` | `For Master Reset Press M1 and F1 at Power-On` | none found | Firmware-evidenced diagnostic control for the observation worksheet |
-| `0x33CD` | `Launch...` | none found | Containing routine unresolved; nearby `0x33D8` low-level service routine, but direct string use not recovered |
+| `0x03C5`/pointer `03C6` | Beginning Manufacturing Diagnostics | `0244` | Startup diagnostics |
+| `0x03EA` | Please Wait... | `0251` | Startup wait |
+| `0x03F9` | Non-Volatile RAM Has Been Cleared... | `0266` | Clear path |
+| `0x041E` | Booting... | `0273`, `02C3`, `0328` | Startup/validation branches |
+| `0x0429` | Unconditional Launch... | `028D` | Launch path |
+| `0x0441` | Updating Firmware to a New Version... | `02B6` | External-RAM transfer path |
+| `0x0467` | Checksumming Battery-Backed RAM... | `02D7` | `037C` checksum path |
+| `0x048A` | Checksum Good... | `02FD` | Validation success |
+| `0x049B` | Launching... | `030A` | Launch path |
+| `0x04A8` | Checksum Failed... | `031B` | Validation failure |
+| `0x04BB` | MultiDesk Boot ROM, version 1.06, 28-Jun-94 | `0359` | Identification |
+| `0x04E7` | Copyright (C) 1994 Studer-Editech Corporation | `0366` | Identification |
+| `0x0515` | For Master Reset Press M1 and F1 at Power-On | `0373` | Reset instruction |
+| `0x33CD`/pointer `33CE` | Launch... | `31AF` | Runtime launch/status path |
 
-The nearest confirmed message-call mechanism is startup register setup followed
-by repeated `LCALL 0xFE06`; the external target likely selects text and output
-destination. Recovering the exact message index table requires tracing the FPGA/
-external service bus or capture, not a raw string scan.
+These are code-pointer references, not MOVC table guesses. The FE06 body is
+outside U17, so display placement/style semantics beyond the observed register
+values remain unresolved.

@@ -1,14 +1,15 @@
 # U17 external CODE dependencies
 
-The reachable U17 image makes **67** literal external CODE call
-references. The full caller/target table is `u17-external-code-dependencies.tsv`.
+The current reachable U17 image makes **67** literal external CODE
+call references. Exact call-site addresses and targets are in
+`u17-external-code-dependencies.tsv`; call-site register/memory context is in
+`u17-fe-abi.tsv`; grouped target/family counts are in `u17-fe-abi-summary.tsv`.
 
-The repeated `0xFE00..0xFE6F` calls and `0xFEC1..0xFEF9` interrupt-service
-targets are outside the 32 KiB EPROM. Static evidence cannot distinguish
-mirrored ROM, FPGA/peripheral-provided bus behavior, external RAM overlays,
-or another socketed ROM. The two undumped socketed ROM candidates remain
-possible contributors, but no target-to-socket mapping is proven.
+FE-page groups are separated into ordinary FE-page service calls and
+`0xFEC0..0xFEF9` interrupt/service shims. Context is evidence for inputs and
+post-return observations; a single call is not promoted into a display,
+serial, timer or storage API without repeated supporting sites.
 
-`LCALL 0x8000` is a distinct external-code launch after the U17 transfer and
-validation path; it is not evidence that the external CODE service calls are
-ordinary registers.
+These targets are outside the EPROM and may be mirrored ROM, peripheral/FPGA
+bus behavior, external RAM overlays or another socketed ROM. `LCALL 0x8000`
+remains a distinct external-code launch after transfer/validation.

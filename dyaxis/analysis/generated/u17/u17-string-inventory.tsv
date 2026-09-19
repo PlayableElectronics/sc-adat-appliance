@@ -1,67 +1,67 @@
-rom_address	text
-0x00A3	yRxg
-0x03C5	"Beginning Manufacturing Diagnostics
-0x03EA	Please Wait...
-0x03F9	Non-Volatile RAM Has Been Cleared...
-0x041E	Booting...
-0x0429	Unconditional Launch...
-0x0441	Updating Firmware to a New Version...
-0x0467	Checksumming Battery-Backed RAM...
-0x048A	Checksum Good...
-0x049B	Launching...
-0x04A8	Checksum Failed...
-0x04BB	MultiDesk Boot ROM, version 1.06, 28-Jun-94
-0x04E7	Copyright (C) 1994 Studer-Editech Corporation
-0x0515	For Master Reset Press M1 and F1 at Power-On
-0x0C95	p(||((
-0x0CC8	0`8DD8
-0x0CDF	tTH8TT
-0x0CE7	@\`(TT( TT8
-0x0D09	@8DT <PP<|TT(8DD
-0x0D1A	|DD8|TTD|P@
-0x0D26	8DT\|
-0x0D3E	|00||
-0x0D45	|8DD8|PP 8D<
-0x0D52	|PX$$TTH
-0x0D5B	@|@x
-0x1347	2333T
-0x135D	2333T
-0x13ED	2333T
-0x1403	2333T
-0x1409	%3D@
-0x1BC0	]t!-
-0x1E95	RuSpu|
-0x24B1	fZ||x
-0x25B3	ys[s
-0x25CD	vWgo
-0x25F9	ynon
-0x2888	gwwgo
-0x28BD	skk[{
-0x291B	~wsmy
-0x2960	Ff~}o}}
-0x29A7	t#Cs[
-0x29BB	[{{Z
-0x29ED	rwWuv
-0x2A2E	?^6_
-0x2A73	>~>~m
-0x2A90	_>]/
-0x2AA5	kc{s
-0x2AD1	8{qp
-0x2BB8	kw7w
-0x2C28	o/+?<
-0x2C2E	I}]o
-0x2C5A	}x<}
-0x2C89	?~y}
-0x2CB5	{US7
-0x2D23	&\;|
-0x2D28	P5}Y|
-0x2D6B	~o}m
-0x2D9B	];aS
-0x2DC8	|xAv
-0x2DE1	r3uW
-0x2E0D	kw_mz
-0x2F23	????
-0x2F39	}{i9{
-0x2F4C	}]}}
-0x30E5	2F$Z`
-0x33CD	"Launch...
+rom_address	classification	references	text
+0x00A3	candidate		yRxg
+0x03C5	candidate		"Beginning Manufacturing Diagnostics
+0x03EA	candidate		Please Wait...
+0x03F9	candidate		Non-Volatile RAM Has Been Cleared...
+0x041E	candidate		Booting...
+0x0429	candidate		Unconditional Launch...
+0x0441	candidate		Updating Firmware to a New Version...
+0x0467	candidate		Checksumming Battery-Backed RAM...
+0x048A	candidate		Checksum Good...
+0x049B	candidate		Launching...
+0x04A8	candidate		Checksum Failed...
+0x04BB	candidate		MultiDesk Boot ROM, version 1.06, 28-Jun-94
+0x04E7	candidate		Copyright (C) 1994 Studer-Editech Corporation
+0x0515	candidate		For Master Reset Press M1 and F1 at Power-On
+0x0C95	candidate		p(||((
+0x0CC8	candidate		0`8DD8
+0x0CDF	candidate		tTH8TT
+0x0CE7	candidate		@\`(TT( TT8
+0x0D09	candidate		@8DT <PP<|TT(8DD
+0x0D1A	candidate		|DD8|TTD|P@
+0x0D26	candidate		8DT\|
+0x0D3E	candidate		|00||
+0x0D45	candidate		|8DD8|PP 8D<
+0x0D52	candidate		|PX$$TTH
+0x0D5B	candidate		@|@x
+0x1347	candidate		2333T
+0x135D	candidate		2333T
+0x13ED	candidate		2333T
+0x1403	candidate		2333T
+0x1409	candidate		%3D@
+0x1BC0	candidate		]t!-
+0x1E95	candidate		RuSpu|
+0x24B1	candidate		fZ||x
+0x25B3	candidate		ys[s
+0x25CD	candidate		vWgo
+0x25F9	candidate		ynon
+0x2888	candidate		gwwgo
+0x28BD	candidate		skk[{
+0x291B	candidate		~wsmy
+0x2960	candidate		Ff~}o}}
+0x29A7	candidate		t#Cs[
+0x29BB	candidate		[{{Z
+0x29ED	candidate		rwWuv
+0x2A2E	candidate		?^6_
+0x2A73	candidate		>~>~m
+0x2A90	candidate		_>]/
+0x2AA5	candidate		kc{s
+0x2AD1	candidate		8{qp
+0x2BB8	candidate		kw7w
+0x2C28	candidate		o/+?<
+0x2C2E	candidate		I}]o
+0x2C5A	candidate		}x<}
+0x2C89	candidate		?~y}
+0x2CB5	candidate		{US7
+0x2D23	candidate		&\;|
+0x2D28	candidate		P5}Y|
+0x2D6B	candidate		~o}m
+0x2D9B	candidate		];aS
+0x2DC8	candidate		|xAv
+0x2DE1	candidate		r3uW
+0x2E0D	candidate		kw_mz
+0x2F23	candidate		????
+0x2F39	candidate		}{i9{
+0x2F4C	candidate		}]}}
+0x30E5	candidate		2F$Z`
+0x33CD	candidate		"Launch...

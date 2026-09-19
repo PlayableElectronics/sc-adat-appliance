@@ -1,100 +1,112 @@
 {
-  "method": "disasm51 reachable instruction boundaries plus literal ROM/XDATA analysis",
-  "instruction_count": 1831,
-  "labeled_regions": 158,
+  "method": "disasm51 reachable boundaries plus ROM-backed 8051 address reconstruction and CFG DPTR analysis",
+  "instruction_records": 1830,
+  "function_labels": 158,
   "external_code_call_count": 67,
-  "indirect_reference_count": 13,
+  "resolved_movc_table_count": 1,
+  "unresolved_movc_count": 1,
   "literal_high_xdata": {
     "0xFFE1": {
       "R": 3,
       "W": 24,
-      "select": 0,
       "locations": [
-        "jump_30B9+1211 jump_30B9: movx A, @DPTR",
-        "jump_326C+1457 jump_326C: movx A, @DPTR",
-        "jump_3332+1501 jump_3332: movx A, @DPTR",
-        "jump_3332+1504 jump_3332: movx @DPTR, A",
-        "jump_3332+1509 jump_3332: movx @DPTR, A",
-        "jump_3348+1521 jump_3348: movx @DPTR, A",
-        "jump_3348+1524 jump_3348: movx @DPTR, A",
-        "jump_3348+1527 jump_3348: movx @DPTR, A",
-        "jump_3348+1530 jump_3348: movx @DPTR, A",
-        "jump_3348+1533 jump_3348: movx @DPTR, A",
-        "jump_3348+1536 jump_3348: movx @DPTR, A",
-        "jump_3348+1539 jump_3348: movx @DPTR, A",
-        "jump_3348+1542 jump_3348: movx @DPTR, A",
-        "jump_3348+1545 jump_3348: movx @DPTR, A",
-        "jump_3348+1548 jump_3348: movx @DPTR, A",
-        "jump_3348+1551 jump_3348: movx @DPTR, A",
-        "jump_3348+1554 jump_3348: movx @DPTR, A",
-        "jump_3348+1557 jump_3348: movx @DPTR, A",
-        "jump_3348+1560 jump_3348: movx @DPTR, A",
-        "jump_3348+1563 jump_3348: movx @DPTR, A",
-        "jump_3348+1566 jump_3348: movx @DPTR, A",
-        "jump_3348+1569 jump_3348: movx @DPTR, A",
-        "jump_3348+1571 jump_3348: movx @DPTR, A",
-        "jump_3348+1574 jump_3348: movx @DPTR, A",
-        "jump_3348+1577 jump_3348: movx @DPTR, A",
-        "jump_3348+1580 jump_3348: movx @DPTR, A",
-        "jump_3348+1583 jump_3348: movx @DPTR, A"
+        "0x30BC jump_30B9: movx A, @DPTR",
+        "0x326F jump_326C: movx A, @DPTR",
+        "0x3335 jump_3332: movx A, @DPTR",
+        "0x3339 jump_3332: movx @DPTR, A",
+        "0x333F jump_3332: movx @DPTR, A",
+        "0x3350 jump_3348: movx @DPTR, A",
+        "0x3356 jump_3348: movx @DPTR, A",
+        "0x335C jump_3348: movx @DPTR, A",
+        "0x3362 jump_3348: movx @DPTR, A",
+        "0x3368 jump_3348: movx @DPTR, A",
+        "0x336E jump_3348: movx @DPTR, A",
+        "0x3374 jump_3348: movx @DPTR, A",
+        "0x3379 jump_3348: movx @DPTR, A",
+        "0x337F jump_3348: movx @DPTR, A",
+        "0x3385 jump_3348: movx @DPTR, A",
+        "0x338B jump_3348: movx @DPTR, A",
+        "0x3391 jump_3348: movx @DPTR, A",
+        "0x3397 jump_3348: movx @DPTR, A",
+        "0x339D jump_3348: movx @DPTR, A",
+        "0x33A3 jump_3348: movx @DPTR, A",
+        "0x33A8 jump_3348: movx @DPTR, A",
+        "0x33AE jump_3348: movx @DPTR, A",
+        "0x33B2 jump_3348: movx @DPTR, A",
+        "0x33B8 jump_3348: movx @DPTR, A",
+        "0x33BD jump_3348: movx @DPTR, A",
+        "0x33C3 jump_3348: movx @DPTR, A",
+        "0x33C9 jump_3348: movx @DPTR, A"
       ]
     },
     "0xFFE3": {
       "R": 1,
       "W": 1,
-      "select": 0,
       "locations": [
-        "jump_30C3+1215 jump_30C3: movx A, @DPTR",
-        "jump_327E+1467 jump_327E: movx @DPTR, A"
+        "0x30C6 jump_30C3: movx A, @DPTR",
+        "0x3285 jump_327E: movx @DPTR, A"
       ]
     },
     "0xFFF0": {
       "R": 1,
       "W": 0,
-      "select": 0,
       "locations": [
-        "jump_1440+1035 jump_1440: movx A, @DPTR"
+        "0x1455 jump_1440: movx A, @DPTR"
       ]
     },
     "0xFFF1": {
       "R": 0,
       "W": 2,
-      "select": 0,
       "locations": [
-        "jump_1440+1028 jump_1440: movx @DPTR, A",
-        "jump_1440+1033 jump_1440: movx @DPTR, A"
+        "0x1445 jump_1440: movx @DPTR, A",
+        "0x1451 jump_1440: movx @DPTR, A"
       ]
     },
     "0xFFF4": {
       "R": 0,
-      "W": 10,
-      "select": 0,
+      "W": 6,
       "locations": [
-        "jump_0593+362 jump_0593: movx @DPTR, A",
-        "jump_0593+365 jump_0593: movx @DPTR, A",
-        "jump_0593+369 jump_0593: movx @DPTR, A",
-        "jump_0593+372 jump_0593: movx @DPTR, A",
-        "jump_0593+376 jump_0593: movx @DPTR, A",
-        "jump_0646+409 jump_0646: movx @DPTR, A",
-        "jump_0646+412 jump_0646: movx @DPTR, A",
-        "jump_0646+416 jump_0646: movx @DPTR, A",
-        "jump_0646+419 jump_0646: movx @DPTR, A",
-        "jump_0646+422 jump_0646: movx @DPTR, A"
+        "0x05A1 jump_0593: movx @DPTR, A",
+        "0x05AB jump_0593: movx @DPTR, A",
+        "0x05B7 jump_0593: movx @DPTR, A",
+        "0x066A jump_0646: movx @DPTR, A",
+        "0x0672 jump_0646: movx @DPTR, A",
+        "0x067D jump_0646: movx @DPTR, A"
       ]
     },
     "0xFFF5": {
       "R": 0,
-      "W": 2,
-      "select": 0,
+      "W": 6,
       "locations": [
-        "jump_0593+359 jump_0593: movx @DPTR, A",
-        "jump_0646+405 jump_0646: movx @DPTR, A"
+        "0x059D jump_0593: movx @DPTR, A",
+        "0x05A6 jump_0593: movx @DPTR, A",
+        "0x05B0 jump_0593: movx @DPTR, A",
+        "0x0663 jump_0646: movx @DPTR, A",
+        "0x066E jump_0646: movx @DPTR, A",
+        "0x0677 jump_0646: movx @DPTR, A"
       ]
+    }
+  },
+  "coverage": {
+    "rom_bytes": 32768,
+    "reachable_instruction_bytes": 2950,
+    "referenced_table_bytes": 32,
+    "referenced_string_bytes": 0,
+    "candidate_string_bytes": 654,
+    "unclassified_bytes": 29137,
+    "overlap_conflict_bytes": 5,
+    "percentages": {
+      "reachable_instruction_bytes": 9.003,
+      "referenced_table_bytes": 0.098,
+      "referenced_string_bytes": 0.0,
+      "candidate_string_bytes": 1.996,
+      "unclassified_bytes": 88.919,
+      "overlap_conflict_bytes": 0.015
     }
   },
   "limits": [
     "External CODE bodies are outside the U17 image.",
-    "Indirect dispatch tables are reported but not assigned without bus evidence.",
-    "String references through external FE06 services are not recoverable from U17 alone."
+    "Unknown or merged DPTR states are excluded from XDATA claims.",
+    "Referenced string detection is limited to literal ROM pointers and MOVC bases."
   ]
 }

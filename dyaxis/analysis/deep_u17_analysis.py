@@ -1,24 +1,52 @@
 #!/usr/bin/env python3
-"""Generate reproducible U17 architecture reports from reachable disassembly.
+"""Evidence-first, ROM-backed analysis of the reachable U17 disassembly.
 
-This is intentionally evidence-first: it reports valid disassembler boundaries,
-literal XDATA/CODE references and explicitly encoded state predicates. It does
-not promote unknown external targets or byte coincidences into protocol facts.
+The disasm51 text identifies function starts but does not print an address on
+every code line. This module reconstructs those addresses from labelled starts
+and the original ROM's 8051 opcode lengths. XDATA results are produced only
+when a control-flow data-flow pass proves the DPTR value at the MOVX.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import re
-from collections import defaultdict
+from collections import defaultdict, deque
 from pathlib import Path
 
 LABEL_RE = re.compile(r"^(?P<label>[A-Za-z_][A-Za-z0-9_]*):\s*$")
+ORG_RE = re.compile(r"^\s*org\s+(?P<value>[0-9A-Fa-f]+h|[A-Za-z_][A-Za-z0-9_]*)")
 INS_RE = re.compile(r"^\s*(?P<text>[^;]+?)(?:\s*;\s*\[(?P<addr>[0-9A-Fa-f]+)h\])?(?:\s*;.*)?\s*$")
 CALL_RE = re.compile(r"\b(?:lcall|acall)\s+(?P<target>[A-Za-z_][A-Za-z0-9_]*)")
-JUMP_RE = re.compile(r"\b(?:ljmp|sjmp|ajmp|jz|jnz|jc|jnc|jb|jnb|djnz|cjne)\s+(?P<target>[A-Za-z_][A-Za-z0-9_]*)")
-DPTR_RE = re.compile(r"dptr_([0-9A-Fa-f]{4})")
 TARGET_RE = re.compile(r"(?:jump|fwd)_([0-9A-Fa-f]{4})")
+DPTR_LITERAL_RE = re.compile(r"#(?:dptr|fwd)_([0-9A-Fa-f]{4})")
+
+ORG_SYMBOLS = {
+    "RESET": 0x0000, "EXT0": 0x0003, "TIMER0": 0x000B,
+    "EXT1": 0x0013, "TIMER1": 0x001B, "SIO0_UART": 0x0023,
+    "SIO1_I2C": 0x002B, "T2_CAPTURE0": 0x0033, "T2_CAPTURE1": 0x003B,
+    "T2_CAPTURE2": 0x0043, "T2_CAPTURE3": 0x004B, "ADC_COMPLETE": 0x0053,
+    "T2_COMPARE0": 0x005B, "T2_COMPARE1": 0x0063, "T2_COMPARE2": 0x006B,
+    "T2_OVERFLOW": 0x0073,
+}
+
+# Standard 8051 instruction lengths. Undefined opcodes remain one byte;
+# reachable U17 rows are valid disasm51 output.
+OPLEN = [1] * 256
+for op in (0x01, 0x05, 0x11, 0x15, 0x21, 0x25, 0x31, 0x35,
+           0x41, 0x42, 0x45, 0x51, 0x52, 0x55, 0x61, 0x62, 0x65,
+           0x71, 0x72, 0x74, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x7B,
+           0x7C, 0x7D, 0x7E, 0x7F, 0x81, 0x82, 0x86, 0x87, 0x88,
+           0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x91, 0x92,
+           0x94, 0x95, 0xA0, 0xA1, 0xA2, 0xA6, 0xA7, 0xA8, 0xA9,
+           0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2,
+           0xC0, 0xC1, 0xC2, 0xC5, 0xD0, 0xD1, 0xD2, 0xE1, 0xE5,
+           0xF1, 0xF5):
+    OPLEN[op] = 2
+for op in (0x02, 0x10, 0x12, 0x20, 0x30, 0x43, 0x53, 0x63,
+           0x75, 0x85, 0x90, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xB9,
+           0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF, 0xD5):
+    OPLEN[op] = 3
 
 STATE_ROWS = [
     ("A8=01", "3109", "A2=A5; increment A8", "confirmed local state transition"),
@@ -31,53 +59,153 @@ STATE_ROWS = [
     ("A8=63", "3246", "decrement A2; clear 017B/A8 at zero", "confirmed local effect"),
 ]
 
-def parse_asm(path: Path):
-    rows, labels = [], {}
+def label_address(name: str):
+    match = re.match(r"(?:jump|fwd|dptr)_([0-9A-Fa-f]{4})(?:_|$)", name)
+    return int(match.group(1), 16) if match else None
+
+def instruction_length(rom: bytes, address: int | None) -> int:
+    if address is None or address >= len(rom):
+        return 1
+    return OPLEN[rom[address]]
+
+def parse_asm(path: Path, rom: bytes | None = None):
+    rows, labels, label_addresses = [], {}, {}
     current = "(unlabeled)"
+    cursor = None
     for line in path.read_text(errors="replace").splitlines():
+        org = ORG_RE.match(line)
+        if org:
+            value = org.group("value")
+            cursor = int(value[:-1], 16) if value.endswith("h") else ORG_SYMBOLS.get(value)
+            continue
         label = LABEL_RE.match(line)
         if label:
             current = label.group("label")
             labels[current] = len(rows)
+            numeric = label_address(current)
+            if numeric is not None:
+                cursor = numeric
+            if cursor is not None:
+                label_addresses[current] = cursor
             continue
-        match = INS_RE.match(line)
-        if not match:
+        data_addr = re.search(r";\s*\[([0-9A-Fa-f]+)h\]", line)
+        text_match = INS_RE.match(line)
+        if not text_match:
+            if data_addr:
+                cursor = int(data_addr.group(1), 16) + 1
             continue
-        text = match.group("text").strip()
-        if not text or text.startswith(("db ", "db\t", "org", ";", "$")):
+        text = text_match.group("text").strip()
+        if not text or text.startswith(("db ", "db\t", "org", ";", "$", "cseg")):
+            if data_addr:
+                cursor = int(data_addr.group(1), 16) + 1
             continue
-        address = int(match.group("addr"), 16) if match.group("addr") else None
-        rows.append({"address": address, "text": text, "function": current, "ordinal": len(rows)})
-    return rows, labels
+        explicit = text_match.group("addr")
+        address = int(explicit, 16) if explicit else cursor
+        length = instruction_length(rom or b"", address)
+        rows.append({"address": address, "text": text, "function": current,
+                     "ordinal": len(rows), "length": length})
+        if address is not None:
+            cursor = address + length
+    return rows, labels, label_addresses
 
 def address_text(row):
-    if row["address"] is not None:
-        return f"0x{row['address']:04X}"
-    return f"{row['function']}+{row['ordinal']}"
+    return f"0x{row['address']:04X}" if row["address"] is not None else "unresolved-address"
 
 def target_address(name):
     match = TARGET_RE.fullmatch(name) or re.fullmatch(r"dptr_([0-9A-Fa-f]{4})", name)
     return int(match.group(1), 16) if match else None
 
-def xdata_xrefs(rows):
-    out = []
-    dptr = None
-    function = None
+UNKNOWN = object()
+UNSET = object()
+
+def branch_target(text: str):
+    tokens = re.findall(r"(?:jump|fwd)_[0-9A-Za-z_]+", text)
+    return tokens[-1] if tokens else None
+
+def successors(rows, labels, index):
+    text = rows[index]["text"].lower()
+    nxt = index + 1 if index + 1 < len(rows) else None
+    if text.startswith(("ret", "reti")):
+        return []
+    target = branch_target(rows[index]["text"])
+    if text.startswith(("ljmp ", "sjmp ", "ajmp ")):
+        return [labels[target]] if target in labels else []
+    if text.startswith(("j", "djnz ", "cjne ")) and target in labels:
+        return [labels[target]] + ([nxt] if nxt is not None else [])
+    return [nxt] if nxt is not None else []
+
+def merge_state(old, new):
+    if old is UNSET:
+        return new
+    if old is UNKNOWN or new is UNKNOWN:
+        return UNKNOWN
+    return old if old == new else UNKNOWN
+
+def transfer_dptr(row, state):
+    text = row["text"]
+    literal = DPTR_LITERAL_RE.search(text)
+    if literal:
+        return int(literal.group(1), 16)
+    if re.search(r"\b(?:lcall|acall)\b", text):
+        return UNKNOWN
+    if re.search(r"\b(?:pop|mov)\s+DPH\b", text) or re.search(r"\b(?:pop|mov)\s+DPL\b", text):
+        if "mov DPTR" not in text or "#" not in text:
+            return UNKNOWN
+    if re.search(r"\binc\s+DPTR\b", text, re.I):
+        return (state + 1) & 0xFFFF if isinstance(state, int) else UNKNOWN
+    if re.search(r"\b(?:mov|inc|dec|add|subb|xch)\s+DPH\b", text, re.I):
+        return UNKNOWN
+    if re.search(r"\b(?:mov|inc|dec|add|subb|xch)\s+DPL\b", text, re.I):
+        return UNKNOWN
+    return state
+
+def dptr_dataflow(rows, labels):
+    incoming = [UNSET] * len(rows)
+    queue = deque()
+    branch_refs, call_refs = set(), set()
     for row in rows:
-        if row["function"] != function:
-            function = row["function"]
-            dptr = None
-        match = DPTR_RE.search(row["text"])
-        if match:
-            dptr = int(match.group(1), 16)
-        if "movx A, @DPTR" in row["text"] and dptr is not None:
+        target = branch_target(row["text"])
+        if target:
+            if re.search(r"\b(?:lcall|acall)\b", row["text"]):
+                call_refs.add(target)
+            else:
+                branch_refs.add(target)
+    roots = {0}
+    roots.update(index for name, index in labels.items()
+                if index < len(rows) and name not in branch_refs)
+    for root in roots:
+        incoming[root] = merge_state(incoming[root], UNKNOWN)
+        queue.append(root)
+    while queue:
+        index = queue.popleft()
+        outgoing = transfer_dptr(rows[index], incoming[index])
+        for successor in successors(rows, labels, index):
+            if successor is None:
+                continue
+            merged = merge_state(incoming[successor], outgoing)
+            if merged != incoming[successor]:
+                incoming[successor] = merged
+                queue.append(successor)
+    return incoming
+
+def xdata_xrefs(rows, labels):
+    states = dptr_dataflow(rows, labels)
+    known, unknown = [], []
+    for index, row in enumerate(rows):
+        if "movx" not in row["text"].lower():
+            continue
+        state = states[index]
+        if not isinstance(state, int):
+            unknown.append((address_text(row), row["function"], row["text"]))
+            continue
+        if "movx A, @DPTR" in row["text"]:
             direction = "R"
-        elif "movx @DPTR, A" in row["text"] and dptr is not None:
+        elif "movx @DPTR, A" in row["text"]:
             direction = "W"
         else:
             continue
-        out.append((dptr, direction, address_text(row), row["function"], row["text"]))
-    return out
+        known.append((f"0x{state:04X}", direction, address_text(row), row["function"], row["text"]))
+    return known, unknown, states
 
 def external_calls(rows):
     out = []
@@ -90,12 +218,8 @@ def external_calls(rows):
             out.append((address_text(row), row["function"], f"0x{address:04X}", row["text"]))
     return out
 
-def indirect_rows(rows):
-    return [row for row in rows if "@A+DPTR" in row["text"] or "movc" in row["text"]]
-
 def printable_strings(rom: bytes, minimum=4):
-    found = []
-    start = None
+    found, start = [], None
     for index, byte in enumerate(rom + b"\x00"):
         printable = 0x20 <= byte <= 0x7E
         if printable and start is None:
@@ -106,67 +230,188 @@ def printable_strings(rom: bytes, minimum=4):
             start = None
     return found
 
+def movc_tables(rows, labels, rom, states):
+    tables = defaultdict(lambda: {"sites": [], "indices": set(), "masks": set(), "jump": False})
+    for index, row in enumerate(rows):
+        if "movc A, @A" not in row["text"]:
+            continue
+        base = states[index]
+        if not isinstance(base, int) or base >= len(rom):
+            tables[None]["sites"].append(row)
+            continue
+        entry = tables[base]
+        entry["sites"].append(row)
+        if index + 1 < len(rows) and "jmp @A+DPTR" in rows[index + 1]["text"]:
+            entry["jump"] = True
+        for previous in reversed(rows[max(0, index - 12):index]):
+            match = re.search(r"mov A, #([0-9A-Fa-f]{1,2})h", previous["text"])
+            mask = re.search(r"anl A, #([0-9A-Fa-f]{1,2})h", previous["text"])
+            if match:
+                entry["indices"].add(int(match.group(1), 16))
+                break
+            if mask:
+                entry["masks"].add(int(mask.group(1), 16))
+                break
+            if re.search(r"\b(?:movx A|mov A,|clr A)\b", previous["text"]):
+                break
+    output = []
+    for base, entry in sorted(tables.items(), key=lambda item: (-1 if item[0] is None else item[0])):
+        if base is None:
+            output.append(("unknown", "unknown", "unknown", "; ".join(address_text(row) for row in entry["sites"]), "unresolved"))
+            continue
+        indices = sorted(entry["indices"])
+        extent = (max(mask + 1 for mask in entry["masks"])
+                  if entry["masks"] else (max(indices) + 1 if indices else None))
+        sample = rom[base:base + extent] if extent else b""
+        if entry["jump"]:
+            kind = "jump table"
+        elif sample and sum(0x20 <= value <= 0x7E for value in sample) / len(sample) > 0.7:
+            kind = "display/text data"
+        elif extent:
+            kind = "lookup table"
+        else:
+            kind = "unknown table"
+        output.append((f"0x{base:04X}", str(extent or "unknown"), kind,
+                       "; ".join(address_text(row) + " " + row["function"] for row in entry["sites"]),
+                       "bounded" if extent else "unbounded"))
+    return output
+
+def string_rows(rom, rows, tables):
+    strings = printable_strings(rom)
+    refs = defaultdict(list)
+    for row in rows:
+        for match in re.finditer(r"(?:dptr|fwd)_([0-9A-Fa-f]{4})", row["text"]):
+            refs[int(match.group(1), 16)].append(address_text(row) + " " + row["function"])
+    for base, _length, _kind, _sites, _resolution in tables:
+        if base.startswith("0x"):
+            refs[int(base, 16)].append("MOVC table")
+    result = []
+    for address, text in strings:
+        matching = []
+        for base, sites in refs.items():
+            if address <= base < address + len(text):
+                matching.extend(sites)
+        result.append((f"0x{address:04X}", "referenced" if matching else "candidate", "; ".join(matching), text))
+    return result
+
 def write_tsv(path, header, rows):
     with path.open("w", encoding="utf-8") as handle:
         handle.write("\t".join(header) + "\n")
         for row in rows:
-            handle.write("\t".join(str(value).replace("\t", " ").rstrip() for value in row) + "\n")
+            line = "\t".join(str(value).replace("\t", " ").rstrip() for value in row)
+            handle.write(line.rstrip() + "\n")
+
+def coverage(rows, string_data, tables, rom_size):
+    categories = defaultdict(set)
+    for row in rows:
+        if row["address"] is not None:
+            categories["instruction"].update(range(row["address"], min(rom_size, row["address"] + row["length"])))
+    for base, length, _kind, _sites, bounded in tables:
+        if base.startswith("0x") and length != "unknown" and bounded == "bounded":
+            categories["table"].update(range(int(base, 16), min(rom_size, int(base, 16) + int(length))))
+    for address, status, _sites, text in string_data:
+        category = "referenced_string" if status == "referenced" else "candidate_string"
+        categories[category].update(range(int(address, 16), min(rom_size, int(address, 16) + len(text))))
+    owners = defaultdict(set)
+    for category, addresses in categories.items():
+        for address in addresses:
+            owners[address].add(category)
+    union = set(owners)
+    conflicts = {address for address, values in owners.items() if len(values) > 1}
+    values = {
+        "rom_bytes": rom_size, "reachable_instruction_bytes": len(categories["instruction"]),
+        "referenced_table_bytes": len(categories["table"]), "referenced_string_bytes": len(categories["referenced_string"]),
+        "candidate_string_bytes": len(categories["candidate_string"]), "unclassified_bytes": rom_size - len(union),
+        "overlap_conflict_bytes": len(conflicts),
+    }
+    values["percentages"] = {key: round(value * 100 / rom_size, 3) for key, value in values.items()
+                              if key.endswith("bytes") and key != "rom_bytes"}
+    return values
+
+def fe_abi(rows, calls):
+    by_address = {row["address"]: index for index, row in enumerate(rows) if row["address"] is not None}
+    output = []
+    for location, caller, target, _instruction in calls:
+        index = by_address.get(int(location, 16))
+        if index is None:
+            continue
+        target_int = int(target, 16)
+        if target_int == 0x8000:
+            family, confidence = "external application launch", "high"
+        elif 0xFEC0 <= target_int <= 0xFEF9:
+            family, confidence = "interrupt/service shim", "medium"
+        else:
+            family, confidence = "FE-page service", "low"
+        pre = rows[max(0, index - 6):index]
+        post = rows[index + 1:index + 7]
+        reg_re = re.compile(r"\b(?:mov|setb|clr|inc|dec|add|anl|orl|xrl)\s+(?:A|R[0-7]|DPH|DPL|DPTR|IEN[01]|TM\w+|P[0-7])")
+        context_re = re.compile(r"movx|DPTR|SBUF|S0|S1|SCON|TM\w+|IEN[01]|P[0-7]", re.I)
+        pre_regs = "; ".join(row["text"] for row in pre if reg_re.search(row["text"]) or context_re.search(row["text"]))
+        post_regs = "; ".join(row["text"] for row in post if reg_re.search(row["text"]) or context_re.search(row["text"]))
+        output.append((location, caller, target, family, confidence, pre_regs, post_regs))
+    return output
 
 def generate(args):
-    rows, labels = parse_asm(args.asm)
-    xrefs = xdata_xrefs(rows)
+    rom = args.rom.read_bytes()
+    rows, labels, _label_addresses = parse_asm(args.asm, rom)
+    xrefs, unknown_xrefs, states = xdata_xrefs(rows, labels)
     calls = external_calls(rows)
-    indirect = indirect_rows(rows)
-    strings = printable_strings(args.rom.read_bytes())
+    tables = movc_tables(rows, labels, rom, states)
+    strings = string_rows(rom, rows, tables)
+    abi = fe_abi(rows, calls)
+    abi_groups = defaultdict(list)
+    for row in abi:
+        abi_groups[(row[2], row[3], row[4])].append(row[0])
+    coverage_data = coverage(rows, strings, tables, len(rom))
     args.out.mkdir(parents=True, exist_ok=True)
 
-    write_tsv(args.out / "u17-xdata-xrefs.tsv", ["address", "direction", "rom_address", "function", "instruction"],
-              [(f"0x{a:04X}", d, loc, func, text) for a, d, loc, func, text in xrefs])
+    write_tsv(args.out / "u17-xdata-xrefs.tsv", ["address", "direction", "rom_address", "function", "instruction"], xrefs)
+    write_tsv(args.out / "u17-xdata-unknown.tsv", ["rom_address", "function", "instruction"], unknown_xrefs)
     write_tsv(args.out / "u17-external-code-dependencies.tsv", ["rom_address", "caller", "target", "instruction"], calls)
+    write_tsv(args.out / "u17-fe-abi.tsv", ["rom_address", "caller", "target", "family", "confidence", "inputs_before", "outputs_after"], abi)
+    write_tsv(args.out / "u17-fe-abi-summary.tsv", ["target", "family", "confidence", "call_count", "call_sites"],
+              [(target, family, confidence, len(sites), "; ".join(sites))
+               for (target, family, confidence), sites in sorted(abi_groups.items())])
+    write_tsv(args.out / "u17-movc-tables.tsv", ["base", "bounded_length", "classification", "call_sites", "resolution"], tables)
     write_tsv(args.out / "u17-indirect-targets.tsv", ["rom_address", "function", "instruction"],
-              [(address_text(row), row["function"], row["text"]) for row in indirect])
-    write_tsv(args.out / "u17-string-inventory.tsv", ["rom_address", "text"],
-              [(f"0x{address:04X}", text) for address, text in strings])
+              [(address_text(row), row["function"], row["text"])
+               for row in rows if "movc" in row["text"].lower() or "jmp @A+DPTR" in row["text"]])
+    write_tsv(args.out / "u17-string-inventory.tsv", ["rom_address", "classification", "references", "text"], strings)
+    write_tsv(args.out / "u17-referenced-strings.tsv", ["rom_address", "references", "text"], [row for row in strings if row[1] == "referenced"])
+    write_tsv(args.out / "u17-string-candidates.tsv", ["rom_address", "text"], [(row[0], row[3]) for row in strings if row[1] == "candidate"])
     write_tsv(args.out / "u17-state-transitions.tsv", ["condition", "code", "effect", "confidence"], STATE_ROWS)
 
-    high = defaultdict(lambda: {"R": 0, "W": 0, "select": 0, "locations": []})
+    high = defaultdict(lambda: {"R": 0, "W": 0, "locations": []})
     for address, direction, location, function, text in xrefs:
-        if 0xFFE0 <= address <= 0xFFFF:
-            high[address][direction] += 1
-            high[address]["locations"].append(f"{location} {function}: {text}")
-    code_labels = [name for name in labels if name.startswith(("jump_", "fwd_")) or name in ("RESET_TARGET", "SERIAL_ISR")]
+        value = int(address, 16)
+        if 0xFFE0 <= value <= 0xFFFF:
+            high[value][direction] += 1
+            high[value]["locations"].append(f"{location} {function}: {text}")
+    function_count = len([name for name in labels if name.startswith(("jump_", "fwd_")) or name in ("RESET_TARGET", "SERIAL_ISR")])
     classification = {
-        "method": "disasm51 reachable instruction boundaries plus literal ROM/XDATA analysis",
-        "instruction_count": len(rows),
-        "labeled_regions": len(code_labels),
-        "external_code_call_count": len(calls),
-        "indirect_reference_count": len(indirect),
-        "literal_high_xdata": {
-            f"0x{address:04X}": value for address, value in sorted(high.items())
-        },
-        "limits": [
-            "External CODE bodies are outside the U17 image.",
-            "Indirect dispatch tables are reported but not assigned without bus evidence.",
-            "String references through external FE06 services are not recoverable from U17 alone.",
-        ],
+        "method": "disasm51 reachable boundaries plus ROM-backed 8051 address reconstruction and CFG DPTR analysis",
+        "instruction_records": len(rows), "function_labels": function_count,
+        "external_code_call_count": len(calls), "resolved_movc_table_count": sum(1 for row in tables if row[0].startswith("0x")),
+        "unresolved_movc_count": sum(1 for row in tables if row[0] == "unknown"),
+        "literal_high_xdata": {f"0x{address:04X}": value for address, value in sorted(high.items())},
+        "coverage": coverage_data,
+        "limits": ["External CODE bodies are outside the U17 image.", "Unknown or merged DPTR states are excluded from XDATA claims.", "Referenced string detection is limited to literal ROM pointers and MOVC bases."],
     }
     (args.out / "u17-code-classification.json").write_text(json.dumps(classification, indent=2) + "\n", encoding="utf-8")
+    referenced_strings = sum(1 for row in strings if row[1] == "referenced")
+    candidate_strings = sum(1 for row in strings if row[1] == "candidate")
+    reachable_bytes = coverage_data["reachable_instruction_bytes"]
+    (args.out / "U17_COMPLETE_PROGRAM_MAP.md").write_text(f"""# U17 current reachable-vector map
 
-    (args.out / "U17_COMPLETE_PROGRAM_MAP.md").write_text(f"""# U17 complete reachable program map
+Generated from `{args.asm.name}` and the verified tracked ROM. The current
+pass reconstructs exact ROM addresses for **{len(rows)} valid instructions**
+covering **{reachable_bytes} bytes**. It is not a complete program map: bytes
+outside reachable vector paths, unresolved indirect control flow and external
+CODE bodies remain separate evidence domains.
 
-Generated from `{args.asm.name}` and the verified tracked ROM. The map covers
-**{len(rows)} valid instruction records** across **{len(labels)} labeled regions**;
-it is a complete reachable-vector map, not a claim that unreachable ROM bytes
-are non-code. External CODE calls remain unresolved dependencies.
-
-## Address-space boundaries
-
-- CODE: U17 physical ROM `0x0000..0x7FFF`; external CODE targets are listed in
-  `u17-external-code-dependencies.tsv`.
-- Internal RAM/SFR: P80C552 direct/register operations at valid instruction
-  boundaries only.
-- XDATA: literal DPTR references are listed in `u17-xdata-xrefs.tsv`; external
-  RAM/program window and service windows are not conflated.
+Referenced strings: **{referenced_strings}**; printable candidates not
+referenced by a literal ROM pointer or resolved MOVC base: **{candidate_strings}**.
+See `u17-code-classification.json` for complete byte coverage and percentages.
 
 ## Confirmed entry families
 
@@ -176,10 +421,37 @@ are non-code. External CODE calls remain unresolved dependencies.
 - Interrupt shims: `0x33F8`, `0x3416`, `0x3434`, `0x3452`, `0x3470`,
   `0x348E`, `0x34AC..0x357E`.
 
-Indirect/table references are preserved in `u17-indirect-targets.tsv`; no
-indirect target is silently promoted to a protocol or peripheral assignment.
+Exact instruction addresses are present in generated TSVs. MOVC tables are in
+`u17-movc-tables.tsv`; only bounded target sets are eligible for promotion.
 """, encoding="utf-8")
+    (args.out / "U17_EXTERNAL_CODE_DEPENDENCIES.md").write_text(f"""# U17 external CODE dependencies
 
+The current reachable U17 image makes **{len(calls)}** literal external CODE
+call references. Exact call-site addresses and targets are in
+`u17-external-code-dependencies.tsv`; call-site register/memory context is in
+`u17-fe-abi.tsv`; grouped target/family counts are in `u17-fe-abi-summary.tsv`.
+
+FE-page groups are separated into ordinary FE-page service calls and
+`0xFEC0..0xFEF9` interrupt/service shims. Context is evidence for inputs and
+post-return observations; a single call is not promoted into a display,
+serial, timer or storage API without repeated supporting sites.
+
+These targets are outside the EPROM and may be mirrored ROM, peripheral/FPGA
+bus behavior, external RAM overlays or another socketed ROM. `LCALL 0x8000`
+remains a distinct external-code launch after transfer/validation.
+""", encoding="utf-8")
+    (args.out / "U17_SERVICE_WINDOW.md").write_text("""# U17 FFE1/FFE3 service-window analysis
+
+Only MOVX instructions with a CFG-proven DPTR value are included in
+`u17-xdata-xrefs.tsv`. Instructions with unknown or merged DPTR state are
+listed in `u17-xdata-unknown.tsv` and are not assigned an address.
+
+`FFE1` is read at `30AA` and `3253`, and written by `3332` and `3348`.
+`FFE3` is read by `30C3` and written by `327E`. The conservative interpretation
+is a candidate FPGA/peripheral service-register window, possibly decoded or
+controlled by PAL logic. It is not proven to be a Macintosh protocol or a
+PAL-owned mailbox.
+""", encoding="utf-8")
     (args.out / "U17_STARTUP_STATE_MACHINE.md").write_text("""# U17 startup state machine
 
 ```text
@@ -197,57 +469,18 @@ indirect target is silently promoted to a protocol or peripheral assignment.
 The exact host-wait interpretation remains unresolved. `FFE1/FFE3` is a
 candidate FPGA/peripheral service-register window, possibly decoded or
 controlled by PAL logic; it is not proven to be Macintosh wire traffic.
-
-Accepted state-dependent values and effects are in
-`u17-state-transitions.tsv`.
 """, encoding="utf-8")
-
-    (args.out / "U17_EXTERNAL_CODE_DEPENDENCIES.md").write_text(f"""# U17 external CODE dependencies
-
-The reachable U17 image makes **{len(calls)}** literal external CODE call
-references. The full caller/target table is `u17-external-code-dependencies.tsv`.
-
-The repeated `0xFE00..0xFE6F` calls and `0xFEC1..0xFEF9` interrupt-service
-targets are outside the 32 KiB EPROM. Static evidence cannot distinguish
-mirrored ROM, FPGA/peripheral-provided bus behavior, external RAM overlays,
-or another socketed ROM. The two undumped socketed ROM candidates remain
-possible contributors, but no target-to-socket mapping is proven.
-
-`LCALL 0x8000` is a distinct external-code launch after the U17 transfer and
-validation path; it is not evidence that the external CODE service calls are
-ordinary registers.
-""", encoding="utf-8")
-
-    (args.out / "U17_SERVICE_WINDOW.md").write_text("""# U17 FFE1/FFE3 service-window analysis
-
-`FFE1` is read at `30AA` and `3253`, and written by `3332` and `3348`.
-`FFE3` is read by `30C3` and written by `327E`. The complete literal xref list
-is `u17-xdata-xrefs.tsv`.
-
-The strongest conservative interpretation is a candidate FPGA/peripheral
-service-register window, possibly decoded or controlled by PAL logic. The ROM
-does not prove that the PAL owns it, that it is a mailbox to a processor, or
-that it is the Macintosh protocol.
-
-The service values `01`, `02`, `06` and `FF` have state-dependent effects in
-the generated state table. Values `06` and `FF` enter the external-RAM transfer
-path and are not safe candidates for active control testing.
-""", encoding="utf-8")
-
     (args.out / "U17_SERIAL_AND_HOST_PROTOCOL.md").write_text("""# U17 serial and host-protocol boundary
 
 The SIO0 vector at `0023` reaches `3416`. That ISR reads XDATA `FED0`, loads
 PSW from the returned byte, calls external CODE `FED1`, restores context and
-returns `RETI`. Related interrupt shims use `FEC0/FEC4/FEC8/FECC/FED8..FEF8`
-and adjacent external CODE targets.
+returns `RETI`. The FE-page call-site ABI table is `u17-fe-abi.tsv`.
 
 U17 contains no reachable direct S0CON/S0BUF/TH1/TMOD setup in this pass.
-Therefore framing, buffers, escape bytes, lengths, checksums, command IDs,
-Z85230 channel selection and baud remain unproven. Passive capture or an
-external-bus trace is required; the local FFE1/FFE3 service window must not be
-used as a wire-protocol substitute.
+Framing, buffers, escape bytes, lengths, checksums, Z85230 channel selection
+and baud therefore remain unproven. Passive capture or an external-bus trace
+is required.
 """, encoding="utf-8")
-
     (args.out / "U17_STANDALONE_CAPABILITIES.md").write_text("""# U17 standalone capabilities
 
 Confirmed U17-local behavior includes reset/startup sequencing, external RAM
@@ -259,8 +492,7 @@ Standalone fader, LED and display activity is confirmed at the console level,
 but this U17 ROM alone does not contain a statically proven complete fader/LED
 driver loop. The XC3030 probably implements scanning/interface logic and the
 PAL likely supplies glue/decode/control logic; exact assignments remain partly
-inferential. Two socketed ROM candidates and external CODE services mean U17
-is not yet proven to contain the entire executable system.
+inferential.
 """, encoding="utf-8")
 
 def main():
@@ -268,7 +500,10 @@ def main():
     parser.add_argument("asm", type=Path)
     parser.add_argument("rom", type=Path)
     parser.add_argument("out", type=Path)
-    generate(parser.parse_args())
+    args = parser.parse_args()
+    if args.rom.stat().st_size != 32768:
+        raise SystemExit("U17 ROM must be exactly 32768 bytes")
+    generate(args)
 
 if __name__ == "__main__":
     main()

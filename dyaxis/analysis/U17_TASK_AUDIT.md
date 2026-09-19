@@ -6,9 +6,9 @@ from questions that require hardware evidence.
 
 | Area | Status | Evidence / remaining boundary |
 |---|---|---|
-| P80C552-aware vector disassembly | Complete | `generated/u17/u17.reachable.asm`, all configured vector entries, 1,831 valid instruction records |
+| P80C552-aware vector disassembly | Complete | `generated/u17/u17.reachable.asm`, all configured vector entries, 1,830 valid instruction records with ROM-derived exact addresses |
 | Reachable function/call inventory | Complete | Existing `functions.tsv`/`call-graph.tsv`; 146 discovered function labels and 71 call/jump callers |
-| Literal XDATA and external CODE separation | Complete | `u17-xdata-xrefs.tsv`, `u17-external-code-dependencies.tsv`; external bodies remain unavailable |
+| Literal XDATA and external CODE separation | Complete | Exact-address `u17-xdata-xrefs.tsv`, conservative unknown-DPTR table, and `u17-external-code-dependencies.tsv`; external bodies remain unavailable |
 | Indirect/table references | Partial | `u17-indirect-targets.tsv` records 13 valid references; targets are not promoted without data-flow or bus evidence |
 | Reset/startup state machine | Partial | Ordered ROM path is documented through service initialization and the `FFE1` wait; external service implementations are unresolved |
 | FFE1/FFE3 values and effects | Partial | `u17-state-transitions.tsv` captures static state predicates and effects; decoded hardware ownership is unknown |

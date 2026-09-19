@@ -1,18 +1,14 @@
-# U17 complete reachable program map
+# U17 current reachable-vector map
 
-Generated from `u17.reachable.asm` and the verified tracked ROM. The map covers
-**1831 valid instruction records** across **181 labeled regions**;
-it is a complete reachable-vector map, not a claim that unreachable ROM bytes
-are non-code. External CODE calls remain unresolved dependencies.
+Generated from `u17.reachable.asm` and the verified tracked ROM. The current
+pass reconstructs exact ROM addresses for **1830 valid instructions**
+covering **2950 bytes**. It is not a complete program map: bytes
+outside reachable vector paths, unresolved indirect control flow and external
+CODE bodies remain separate evidence domains.
 
-## Address-space boundaries
-
-- CODE: U17 physical ROM `0x0000..0x7FFF`; external CODE targets are listed in
-  `u17-external-code-dependencies.tsv`.
-- Internal RAM/SFR: P80C552 direct/register operations at valid instruction
-  boundaries only.
-- XDATA: literal DPTR references are listed in `u17-xdata-xrefs.tsv`; external
-  RAM/program window and service windows are not conflated.
+Referenced strings: **0**; printable candidates not
+referenced by a literal ROM pointer or resolved MOVC base: **66**.
+See `u17-code-classification.json` for complete byte coverage and percentages.
 
 ## Confirmed entry families
 
@@ -22,5 +18,5 @@ are non-code. External CODE calls remain unresolved dependencies.
 - Interrupt shims: `0x33F8`, `0x3416`, `0x3434`, `0x3452`, `0x3470`,
   `0x348E`, `0x34AC..0x357E`.
 
-Indirect/table references are preserved in `u17-indirect-targets.tsv`; no
-indirect target is silently promoted to a protocol or peripheral assignment.
+Exact instruction addresses are present in generated TSVs. MOVC tables are in
+`u17-movc-tables.tsv`; only bounded target sets are eligible for promotion.

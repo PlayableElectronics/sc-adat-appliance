@@ -35,7 +35,7 @@ def parse(path: Path):
         m = INS.match(line)
         if m:
             text = m.group("text").strip()
-            if text and not text.startswith(("db ", "org\t", "org ", "$", ";")):
+            if text and not text.startswith(("db ", "db\t", "org\t", "org ", "$", ";", "cseg")):
                 address = int(m.group("addr"), 16) if m.group("addr") else None
                 instructions.append((address, text, current))
     return instructions, labels

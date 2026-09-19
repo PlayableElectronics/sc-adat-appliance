@@ -8,23 +8,25 @@ all P80C552 interrupt-vector entries and the exact local `p80c552.mcu` SFR and
 vector definition.
 
 ```sh
-python3 -m venv .local/disasm51-venv
-.local/disasm51-venv/bin/python -m pip install --no-deps \
-  'git+https://github.com/OlekMazur/disasm51@a32d0adc80cfbf203745318900ced5ea94303b15'
-./dyaxis/analysis/run_u17_analysis.sh
-python3 -m unittest dyaxis.analysis.test_deep_u17_analysis
+./dyaxis/analysis/reproduce_u17.sh
 ```
+
+That one command creates `.local/disasm51-venv` when needed, installs the
+exact pinned disasm51 commit, verifies the installed commit, regenerates all
+artifacts and runs the analyzer regression tests. It fails clearly if the
+dependency cannot be installed or the requested commit is not present.
 
 The tracked assembly and reports are derived artifacts. They do not replace,
 rewrite, or normalize the canonical ROM.
 
 `run_u17_analysis.sh` runs the pinned control-flow disassembly, the existing
 P80C552 vector/SFR report, and `deep_u17_analysis.py`. The latter emits
-machine-readable XDATA cross-references, external-CODE dependencies, indirect
-references, string inventory, state transitions and a classification JSON file,
-plus the six generated U17 reports in `generated/u17/`. Literal XDATA accesses
-are tracked separately from external CODE calls; no high address is silently
-treated as a register or as executable code.
+machine-readable exact-address XDATA cross-references, unknown-DPTR records,
+external-CODE ABI context, MOVC table records, referenced/candidate string
+inventories, state transitions and coverage JSON, plus the generated U17
+reports in `generated/u17/`. Literal XDATA accesses are tracked separately
+from external CODE calls; no high address is silently treated as a register
+or as executable code.
 
 The deep pass can be reproduced directly from tracked files:
 
@@ -36,9 +38,9 @@ python3 dyaxis/analysis/deep_u17_analysis.py \
 ```
 
 The generated assembly is a reachable instruction map from all P80C552 vector
-entries. The disassembler output does not annotate every instruction with a
-numeric address, so generated tables identify a valid instruction by its
-containing function and ordinal when an exact byte offset is unavailable.
+entries. The deep artifacts reconstruct exact instruction addresses from the
+ROM and 8051 opcode lengths; any unresolved/merged DPTR state is explicitly
+excluded from claimed XDATA references.
 
 The U17 main-program reconstruction and high-address service-register map are in:
 

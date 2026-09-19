@@ -1,0 +1,68 @@
+rom_address	caller	target	family	confidence	inputs_before	outputs_after
+0x01ED	jump_01E0	0xFE00	FE-page service	low	mov IEN0, A; mov IEN1, A; mov R6, #24h; mov R7, #95h	mov A, R7; add A, #0FEh
+0x01F6	jump_01E0	0xFE21	FE-page service	low	mov R6, #24h; mov R7, #95h; lcall dptr_FE00	mov A, R7; add A, #0FEh; inc A
+0x0212	jump_0212	0xFE24	FE-page service	low	mov A, #01h; movx @DPTR, A; mov DPTR, #dptr_0035; mov A, #01h; movx @DPTR, A	clr A; mov R7, A; mov DPTR, #dptr_FEEE
+0x0217	jump_0212	0xFE3F	FE-page service	low	mov DPTR, #dptr_0035; mov A, #01h; movx @DPTR, A; clr A; mov R7, A	mov DPTR, #dptr_FEEE; mov A, #32h; movx @DPTR, A; inc DPTR
+0x021A	jump_0212	0xFE42	FE-page service	low	mov A, #01h; movx @DPTR, A; clr A; mov R7, A	mov DPTR, #dptr_FEEE; mov A, #32h; movx @DPTR, A; inc DPTR; mov A, #0C9h
+0x0244	jump_023A	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #04h; mov R3, #05h; mov R2, #03h; mov R1, #0C6h	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #03h; mov R1, #0EAh
+0x0251	jump_023A	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #03h; mov R1, #0EAh	mov DPTR, #dptr_0034; movx A, @DPTR; clr A
+0x0266	jump_0257	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #03h; mov R3, #05h; mov R2, #03h; mov R1, #0F9h	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh
+0x0273	jump_0257	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh	mov A, P5; clr A; mov R7, A
+0x028D	jump_027E	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #04h; mov R3, #05h; mov R2, #04h; mov R1, #29h	mov DPTR, #dptr_FDFE; movx A, @DPTR; mov R6, A; inc DPTR; movx A, @DPTR
+0x02B6	jump_02A1	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #04h; mov R3, #05h; mov R2, #04h; mov R1, #41h	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh
+0x02C3	jump_02A1	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh	clr A; mov R7, A; mov R5, #03h; mov R3, #05h; mov R2, #04h
+0x02D7	jump_02CD	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #03h; mov R3, #05h; mov R2, #04h; mov R1, #67h	mov R7, #00h; mov R6, #80h; mov A, #0FDh; mov R5, A; mov R4, A
+0x02FD	jump_02CD	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #04h; mov R3, #05h; mov R2, #04h; mov R1, #8Ah	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #9Bh
+0x030A	jump_02CD	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #9Bh	clr A; mov R7, A; mov R5, #04h; mov R3, #05h
+0x031B	jump_0311	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #04h; mov R3, #05h; mov R2, #04h; mov R1, #0A8h	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh
+0x0328	jump_0311	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #05h; mov R3, #05h; mov R2, #04h; mov R1, #1Eh	mov R0, #80h; inc R0
+0x0359	jump_034D	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #01h; mov R3, #05h; mov R2, #04h; mov R1, #0BBh	clr A; mov R7, A; mov R5, #02h; mov R3, #05h; mov R2, #04h; mov R1, #0E7h
+0x0366	jump_034D	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #02h; mov R3, #05h; mov R2, #04h; mov R1, #0E7h	clr A; mov R7, A; mov R5, #07h; mov R3, #05h; mov R2, #05h; mov R1, #15h
+0x0373	jump_034D	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #07h; mov R3, #05h; mov R2, #05h; mov R1, #15h	clr A; mov R7, A
+0x0378	jump_034D	0xFE51	FE-page service	low	mov R3, #05h; mov R2, #05h; mov R1, #15h; clr A; mov R7, A	clr A; mov R5, A; mov R4, A
+0x0E2E	jump_0E2C	0xFE54	FE-page service	low	movx A, @DPTR; inc A; movx @DPTR, A; clr A; mov R7, A	clr A; mov R7, A; clr A; mov DPTR, #dptr_005A; movx @DPTR, A
+0x0E33	jump_0E2C	0xFE54	FE-page service	low	clr A; mov R7, A; clr A; mov R7, A	clr A; mov DPTR, #dptr_005A; movx @DPTR, A; inc DPTR; movx @DPTR, A
+0x0EA8	jump_0EA2	0xFE45	FE-page service	low	inc A; movx @DPTR, A; mov R3, #02h; mov R2, #00h; mov R1, #5Ch	mov R3, #02h; mov R2, #00h; mov R1, #64h; clr A
+0x0EB1	jump_0EA2	0xFE48	FE-page service	low	mov R2, #00h; mov R1, #5Ch; mov R3, #02h; mov R2, #00h; mov R1, #64h	clr A; clr A; mov R7, A
+0x0EBA	jump_0EA2	0xFE1E	FE-page service	low	mov R2, #00h; mov R1, #64h; clr A	clr A; mov R7, A; mov R5, A; mov R4, A; mov R7, #01h
+0x0EC1	jump_0EA2	0xFE33	FE-page service	low	clr A; mov R7, A; mov R5, A; mov R4, A	mov R7, #01h; clr A; mov R5, A; mov R4, A; mov R7, #02h
+0x0EC9	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #01h; clr A; mov R5, A; mov R4, A	mov R7, #02h; clr A; mov R5, A; mov R4, A; mov R7, #03h
+0x0ED1	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #02h; clr A; mov R5, A; mov R4, A	mov R7, #03h; clr A; mov R5, A; mov R4, A; mov R7, #04h
+0x0ED9	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #03h; clr A; mov R5, A; mov R4, A	mov R7, #04h; clr A; mov R5, A; mov R4, A; mov R7, #05h
+0x0EE1	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #04h; clr A; mov R5, A; mov R4, A	mov R7, #05h; clr A; mov R5, A; mov R4, A; mov R7, #06h
+0x0EE9	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #05h; clr A; mov R5, A; mov R4, A	mov R7, #06h; clr A; mov R5, A; mov R4, A; mov R7, #07h
+0x0EF1	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #06h; clr A; mov R5, A; mov R4, A	mov R7, #07h; clr A; mov R5, A; mov R4, A
+0x0EF9	jump_0EA2	0xFE33	FE-page service	low	mov R4, A; mov R7, #07h; clr A; mov R5, A; mov R4, A	clr P4.4; mov R7, #02h
+0x0EFC	jump_0EA2	0xFE27	FE-page service	low	mov R7, #07h; clr A; mov R5, A; mov R4, A	clr P4.4; mov R7, #02h; mov DPTR, #dptr_0084
+0x0F03	jump_0EA2	0xFE3F	FE-page service	low	mov R5, A; mov R4, A; clr P4.4; mov R7, #02h	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR
+0x0F06	jump_0EA2	0xFE42	FE-page service	low	mov R4, A; clr P4.4; mov R7, #02h	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR; mov A, #10h
+0x0F09	jump_0EA2	0xFE4B	FE-page service	low	clr P4.4; mov R7, #02h	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR; mov A, #10h; movx @DPTR, A
+0x0F16	jump_0F16	0xFE6F	FE-page service	low	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR; mov A, #10h; movx @DPTR, A	mov A, R7; clr A; mov R7, A
+0x0F21	jump_0F1F	0xFE51	FE-page service	low	mov A, R7; clr A; mov R7, A	mov DPTR, #dptr_0084; mov A, #27h; movx @DPTR, A; inc DPTR; mov A, #10h; movx @DPTR, A
+0x0F30	jump_0F1F	0xFE6C	FE-page service	low	mov A, #27h; movx @DPTR, A; inc DPTR; mov A, #10h; movx @DPTR, A; clr IEN1.4	setb IEN1.4; mov A, R7; anl A, #07h; mov DPTR, #dptr_0057
+0x0F99	jump_0F84	0xFE48	FE-page service	low	mov DPH, A; mov A, R6; movx @DPTR, A; mov R3, #02h; mov R2, #00h; mov R1, #64h	mov DPTR, #dptr_0057; movx A, @DPTR; mov R7, A; add A, #5Ch; mov DPL, A
+0x0FE2	jump_0FCD	0xFE45	FE-page service	low	mov DPH, A; mov A, R6; movx @DPTR, A; mov R3, #02h; mov R2, #00h; mov R1, #5Ch	mov DPTR, #dptr_0179; movx A, @DPTR; clr A; movx @DPTR, A
+0x100E	jump_0FFA	0xFE51	FE-page service	low	orl A, B; mov DPTR, #dptr_0066; movx A, @DPTR; mov R7, #01h	mov R3, #02h; mov R2, #00h; mov R1, #70h; mov A, R7; anl A, #02h
+0x101C	jump_1016	0xFE5A	FE-page service	low	mov R7, #01h; mov R3, #02h; mov R2, #00h; mov R1, #70h	mov A, R7; anl A, #02h; mov DPTR, #dptr_006F; movx @DPTR, A; mov R3, #02h; mov R2, #00h
+0x102A	jump_1016	0xFE2A	FE-page service	low	anl A, #02h; mov DPTR, #dptr_006F; movx @DPTR, A; mov R3, #02h; mov R2, #00h; mov R1, #72h	mov A, R6; mov R5, A; mov DPTR, #dptr_006F; movx A, @DPTR
+0x10C4	jump_10B8	0xFE57	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R6, A; inc DPTR; movx A, @DPTR; mov R7, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; mov R7, A; mov DPTR, #dptr_006C; movx A, @DPTR
+0x10D8	jump_10CB	0xFE33	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R4, A; inc DPTR; movx A, @DPTR; mov R5, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; inc A; movx @DPTR, A; mov DPTR, #dptr_005A
+0x11A5	jump_119C	0xFE57	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R6, A; inc DPTR; movx A, @DPTR; mov R7, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; mov R7, A; mov DPTR, #dptr_006C; movx A, @DPTR
+0x11B8	jump_11AB	0xFE33	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R4, A; inc DPTR; movx A, @DPTR; mov R5, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; inc A; movx @DPTR, A; mov DPTR, #dptr_005A
+0x11CC	jump_11CC	0xFE27	FE-page service	low	mov DPTR, #dptr_005A; movx A, @DPTR; inc A; movx @DPTR, A	clr A; mov R6, A; mov A, R6
+0x31AF	jump_3176	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #06h; mov R3, #05h; mov R2, #33h; mov R1, #0CEh	mov R0, #0A8h; mov R0, #0A5h
+0x32A2	jump_328A	0x8000	external application launch	high	clr A; mov TM2CON, A; clr TM2IR.4	mov R7, #02h; clr A; mov R7, A
+0x3408	jump_33F8	0xFEC9	interrupt/service shim	medium	mov DPTR, #dptr_FEC8; movx A, @DPTR
+0x3426	SERIAL_ISR	0xFED1	interrupt/service shim	medium	mov DPTR, #dptr_FED0; movx A, @DPTR
+0x3444	jump_3434	0xFEED	interrupt/service shim	medium	mov DPTR, #dptr_FEEC; movx A, @DPTR
+0x3462	jump_3452	0xFEC1	interrupt/service shim	medium	mov DPTR, #dptr_FEC0; movx A, @DPTR
+0x3480	jump_3470	0xFEC5	interrupt/service shim	medium	mov DPTR, #dptr_FEC4; movx A, @DPTR
+0x349E	jump_348E	0xFECD	interrupt/service shim	medium	mov DPTR, #dptr_FECC; movx A, @DPTR
+0x34BC	jump_34AC	0xFED9	interrupt/service shim	medium	mov DPTR, #dptr_FED8; movx A, @DPTR
+0x34DA	jump_34CA	0xFEDD	interrupt/service shim	medium	mov DPTR, #dptr_FEDC; movx A, @DPTR
+0x34F8	jump_34E8	0xFEE1	interrupt/service shim	medium	mov DPTR, #dptr_FEE0; movx A, @DPTR
+0x3516	jump_3506	0xFEE5	interrupt/service shim	medium	mov DPTR, #dptr_FEE4; movx A, @DPTR
+0x3534	jump_3524	0xFEE9	interrupt/service shim	medium	mov DPTR, #dptr_FEE8; movx A, @DPTR
+0x3552	jump_3542	0xFEF1	interrupt/service shim	medium	mov DPTR, #dptr_FEF0; movx A, @DPTR
+0x3570	jump_3560	0xFEF5	interrupt/service shim	medium	mov DPTR, #dptr_FEF4; movx A, @DPTR
+0x358E	jump_357E	0xFEF9	interrupt/service shim	medium	mov DPTR, #dptr_FEF8; movx A, @DPTR

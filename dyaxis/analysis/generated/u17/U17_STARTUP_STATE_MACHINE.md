@@ -15,6 +15,3 @@
 The exact host-wait interpretation remains unresolved. `FFE1/FFE3` is a
 candidate FPGA/peripheral service-register window, possibly decoded or
 controlled by PAL logic; it is not proven to be Macintosh wire traffic.
-
-Accepted state-dependent values and effects are in
-`u17-state-transitions.tsv`.

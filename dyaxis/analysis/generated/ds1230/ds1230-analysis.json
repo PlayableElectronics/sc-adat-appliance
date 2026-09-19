@@ -616,6 +616,8 @@
   "signature": "0000",
   "signature_expected": "AA55",
   "signature_matches": false,
+  "startup_pair": "0000",
+  "startup_pair_matches": false,
   "stored_checksum": "0x0000",
   "checksum_matches": false
 }

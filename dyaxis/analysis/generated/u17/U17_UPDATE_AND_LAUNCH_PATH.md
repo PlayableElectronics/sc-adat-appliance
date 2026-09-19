@@ -10,8 +10,10 @@
    pointer held in internal RAM `9E:9F`; `321C` performs the `MOVX` write.
 5. `037C` sums bytes in half-open range `[8000,FDFD)`, i.e. through `FDFC`,
    with 16-bit carry and returns the bitwise-complement in `R6:R7`.
-6. Startup checks `FDFC/FDFD == AA 55`, then compares the complemented sum
-   with `FDFE/FDFF`.
+6. Startup checks `FDFE/FDFF == AA55`, then `FDFC/FDFD == AA55`; the failure
+   path at `02CD` computes and compares the complemented sum against the same
+   `FDFE/FDFF` pair. The dual use is unresolved and must not be used to build
+   another image.
 7. The success path calls `328A`, which disables services and executes
    `LCALL 8000`; the launched code is expected to return through the observed
    call frame before U17's reset-target call.

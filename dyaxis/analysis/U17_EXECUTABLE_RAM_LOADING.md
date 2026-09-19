@@ -30,10 +30,11 @@ The following are valid instructions in the control-flow-aware disassembly
    `jump_037C` sums that same range and returns the
    complemented 16-bit result in `R6:R7`. This is not a raw byte-pattern
    inference.
-4. **Validation gate:** the startup path at `jump_02CD` calls `jump_037C`,
-   reads external metadata at `0xFDFE`/`0xFDFF`, compares the computed result,
-   and calls `jump_328A` only on the matching branch. Earlier startup code also
-   checks `0xFDFC`–`0xFDFF` for `AA 55` markers.
+4. **Validation gate:** the startup code first checks `0xFDFE/0xFDFF == AA55`
+   and then `0xFDFC/0xFDFD == AA55`. Any failure branches to `jump_02CD`,
+   which calls `jump_037C`, reads `0xFDFE/0xFDFF` again, and compares those
+   same bytes against the complemented sum. The dual marker/checksum use is
+   unresolved; the prior image contract is falsified by the hardware test.
 5. **Transfer:** `jump_328A` disables interrupts, quiesces Timer 2/PWM state,
    and executes `LCALL 0x8000`. The external application therefore enters as
    a subroutine, not as a reset vector or `LJMP`.
@@ -43,9 +44,10 @@ The following are valid instructions in the control-flow-aware disassembly
 Confirmed ABI surface:
 
 - Load base: `0x8000` in external code/XDATA address space.
-- Validation input span: `0x8000`–`0xFDFC`, inclusive; `0xFDFC/FDFD` is
-  checked as an `AA 55` signature and `0xFDFE/FDFF` stores the complemented
-  sum. The clear/checksum endpoint is exclusive at `0xFDFD`.
+- Checksum input span: `0x8000`–`0xFDFC`, inclusive; the emulator confirms
+  the half-open file slice `image[:0x7DFD]`. Startup separately requires
+  `AA55` at both `FDFE/FDFF` and `FDFC/FDFD` before the failure/checksum path.
+  The clear/checksum endpoint is exclusive at `0xFDFD`.
 - Entry: `LCALL 0x8000`; application must eventually use `RET` to return to
   U17 `jump_328A`. A reset, `RETI`, or non-returning transfer is not supported
   by this observed call site.

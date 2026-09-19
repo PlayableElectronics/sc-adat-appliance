@@ -87,23 +87,24 @@ conservative and is not inferred from position alone.
 | `0x7EF8–0x7EF9` | 2 | persistent state/configuration candidate | low |
 | `0x7F00–0x7FFF` | 256 | unexplained retained/residual data | low |
 
-## U17 signature and checksum
+## U17 startup markers and checksum
 
 U17 sums file offsets `0000–7DFC` (CPU `8000–FDFC` inclusive), complements
 the 16-bit result, and compares it big-endian at file offsets `7DFE–7DFF`.
 The calculated sum is `0x0000` and complement is
 `0xFFFF`. Stored checksum: `0x0000`.
 
-Signature bytes at file offsets `7DFC–7DFD`: `0000`; expected
-`AA55`; match: **False**.
-Checksum match: **False**.
+Startup marker bytes at file offsets `7DFC–7DFD`: `0000`;
+expected `AA55`; match: **False**.
+The second startup marker/checksum pair at file offsets `7DFE–7DFF` is
+`0000`; startup expects `AA55`: **False**.
+The checksum comparison also reads `7DFE–7DFF`: **False**.
 
 The dumped contents therefore explain the console's `Checksum Failed` result:
-the signature is `0000` rather than `AA55`, the stored checksum is `0000`
-rather than the calculated complement, and the proposed application region is
-zero-filled. This is consistent with U17's NVRAM-clear path having erased or
-never received the application image. It does not prove when that clearing
-occurred.
+both startup marker pairs are `0000` rather than `AA55`, and the checksum
+comparison pair is also zero rather than the calculated complement. This is
+consistent with U17's NVRAM-clear path having erased or never received the
+application image. It does not prove when that clearing occurred.
 
 ## Mapping limits
 

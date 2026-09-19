@@ -70,6 +70,7 @@ def analyze(path: Path, u17_calls: Path | None = None):
     total = sum(data[:CHECKSUM_END]) & 0xFFFF
     complement = (~total) & 0xFFFF
     signature = data[0x7DFC:0x7DFE].hex().upper()
+    startup_pair = data[0x7DFE:0x7E00].hex().upper()
     stored = int.from_bytes(data[0x7DFE:0x7E00], "big")
     fe = data[FE_START:FE_END]
     trampolines = fe_trampolines(data)
@@ -109,6 +110,7 @@ def analyze(path: Path, u17_calls: Path | None = None):
         "checksum_complement": f"0x{complement:04X}",
         "signature": signature, "signature_expected": "AA55",
         "signature_matches": signature == "AA55",
+        "startup_pair": startup_pair, "startup_pair_matches": startup_pair == "AA55",
         "stored_checksum": f"0x{stored:04X}",
         "checksum_matches": stored == complement,
     }
@@ -164,23 +166,24 @@ conservative and is not inferred from position alone.
         for x in result["nonzero_regions"]
     ) + f"""
 
-## U17 signature and checksum
+## U17 startup markers and checksum
 
 U17 sums file offsets `0000–7DFC` (CPU `8000–FDFC` inclusive), complements
 the 16-bit result, and compares it big-endian at file offsets `7DFE–7DFF`.
 The calculated sum is `{result['checksum_sum_16bit']}` and complement is
 `{result['checksum_complement']}`. Stored checksum: `{result['stored_checksum']}`.
 
-Signature bytes at file offsets `7DFC–7DFD`: `{result['signature']}`; expected
-`AA55`; match: **{result['signature_matches']}**.
-Checksum match: **{result['checksum_matches']}**.
+Startup marker bytes at file offsets `7DFC–7DFD`: `{result['signature']}`;
+expected `AA55`; match: **{result['signature_matches']}**.
+The second startup marker/checksum pair at file offsets `7DFE–7DFF` is
+`{result['startup_pair']}`; startup expects `AA55`: **{result['startup_pair_matches']}**.
+The checksum comparison also reads `7DFE–7DFF`: **{result['checksum_matches']}**.
 
 The dumped contents therefore explain the console's `Checksum Failed` result:
-the signature is `0000` rather than `AA55`, the stored checksum is `0000`
-rather than the calculated complement, and the proposed application region is
-zero-filled. This is consistent with U17's NVRAM-clear path having erased or
-never received the application image. It does not prove when that clearing
-occurred.
+both startup marker pairs are `0000` rather than `AA55`, and the checksum
+comparison pair is also zero rather than the calculated complement. This is
+consistent with U17's NVRAM-clear path having erased or never received the
+application image. It does not prove when that clearing occurred.
 
 ## Mapping limits
 

@@ -170,7 +170,7 @@ jump_0108:
             ranges = (out / "u17-checksum-ranges.tsv").read_text()
             memory = (out / "u17-memory-ranges.tsv").read_text()
             self.assertIn("checksum_input\t0x8000\t0xFDFD\thalf-open", ranges)
-            self.assertIn("signature\t0xFDFC\t0xFDFD", ranges)
+            self.assertIn("startup_markers\t0xFDFC\t0xFDFF", ranges)
             self.assertIn("XDATA\t0xFE00\t0xFFFF\texternal service/peripheral window", memory)
             self.assertIn("CODE\t0xFE00\t0xFEF9\texternal service/shim code", memory)
             self.assertNotIn("CODE\t0xFFE1", memory)

@@ -529,8 +529,8 @@ def generate(args):
         ("CODE", "0x0000", "0x7FFF", "U17 EPROM", "confirmed physical device and address range"),
         ("XDATA", "0x0000", "0x7FFF", "working RAM", "confirmed startup clear; U18 assignment is strong hardware hypothesis"),
         ("XDATA", "0x8000", "0xFDFC", "persistent/application window", "confirmed checksum and transfer accesses; DS1230 assignment is hardware hypothesis"),
-        ("XDATA", "0xFDFD", "0xFDFD", "signature byte", "confirmed read by startup; not cleared by the observed clear loop"),
-        ("XDATA", "0xFDFE", "0xFDFF", "complemented checksum", "confirmed read/clear and compared with checksum result"),
+        ("XDATA", "0xFDFC", "0xFDFD", "startup marker AA55", "confirmed read by startup; first pair is checked before the failure path"),
+        ("XDATA", "0xFDFE", "0xFDFF", "startup marker and overloaded checksum pair", "confirmed AA55 marker check, then read/clear and compared with checksum result"),
         ("XDATA", "0xFE00", "0xFFFF", "external service/peripheral window", "confirmed separately cleared and accessed; not proven DS1230 storage"),
         ("CODE", "0x8000", "0x8000", "application entry", "confirmed LCALL after validation; provider is external to U17"),
         ("CODE", "0xFE00", "0xFEF9", "external service/shim code", "DS1230 FE trampoline table under proposed 8000 mapping; physical decode still requires bus evidence"),
@@ -538,8 +538,8 @@ def generate(args):
     write_tsv(args.out / "u17-memory-ranges.tsv", ["space", "start", "end", "observed_role", "evidence"], memory_ranges)
     checksum_ranges = [
         ("checksum_input", "0x8000", "0xFDFD", "half-open [start,end)", "sum bytes 0x8000..0xFDFC inclusive; complement in R6:R7"),
-        ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02D7..0x0304"),
-        ("signature", "0xFDFC", "0xFDFD", "AA 55", "startup gate at 0x0293..0x02AC"),
+        ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02D7..0x0304, after the same pair is checked as AA55"),
+        ("startup_markers", "0xFDFC", "0xFDFF", "AA 55 at both pairs", "startup gates at 0x0293..0x02AC; dual use remains unresolved"),
         ("clear_application", "0x8000", "0xFDFD", "half-open [start,end)", "clear loop 0x03A4..0x03BE"),
         ("clear_checksum", "0xFDFE", "0xFFFF", "half-open [start,end)", "two explicit zero writes at 0x03BE..0x03C5"),
     ]
@@ -694,7 +694,7 @@ does not prove the chip-select wiring or address decode.
 | Range | Evidence | Assessment |
 |---|---|---|
 | `8000..FDFC` | Reset clear, receive transfer writes, checksum input | Strong candidate for persistent application/data contents |
-| `FDFC..FDFF` | `AA 55` signature at `FDFC/FDFD`; complemented checksum compared at `FDFE/FDFF` | Candidate persistent header/trailer; exact ownership is not electrically proven |
+| `FDFC..FDFF` | Both pairs are checked as `AA55`; `FDFE/FDFF` is then compared with the checksum result | Overloaded marker/checksum region; prior simple image contract is falsified by hardware |
 | XDATA `FE00..FFFF` | Separately cleared at reset and used for service windows | Evidence weighs against mapping this entire XDATA range to DS1230 storage |
 | CODE `FE00..FE7F` | Dump contains 43 three-byte `LJMP` trampolines; `FE06 -> 075D`, `FE33 -> 2182`, `FE60 -> 037C` | Strong evidence DS1230 supplies the external CODE trampoline table under the proposed `8000` mapping |
 
@@ -727,8 +727,10 @@ preserving the raw captures separately from U17 executable code.
    pointer held in internal RAM `9E:9F`; `321C` performs the `MOVX` write.
 5. `037C` sums bytes in half-open range `[8000,FDFD)`, i.e. through `FDFC`,
    with 16-bit carry and returns the bitwise-complement in `R6:R7`.
-6. Startup checks `FDFC/FDFD == AA 55`, then compares the complemented sum
-   with `FDFE/FDFF`.
+6. Startup checks `FDFE/FDFF == AA55`, then `FDFC/FDFD == AA55`; the failure
+   path at `02CD` computes and compares the complemented sum against the same
+   `FDFE/FDFF` pair. The dual use is unresolved and must not be used to build
+   another image.
 7. The success path calls `328A`, which disables services and executes
    `LCALL 8000`; the launched code is expected to return through the observed
    call frame before U17's reset-target call.

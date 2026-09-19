@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline builder/validator for the U17 external application image.
+"""Offline arithmetic tool for the superseded U17 image hypothesis.
 
 This module never opens a serial device and never writes a source dump.  The
 builder requires a separately supplied trampoline/template image and copies
@@ -66,14 +66,14 @@ def main() -> None:
             for error in errors:
                 print(f"INVALID: {error}")
             raise SystemExit(1)
-        print("VALID: signature and complemented big-endian checksum")
+        print("VALID: arithmetic signature/checksum fields only; NOT a proven U17 startup image")
     else:
         output = build(args.payload.read_bytes(), args.trampoline_template.read_bytes())
         args.output.write_bytes(output)
         errors = validate(output)
         if errors:
             raise SystemExit("builder produced invalid image: " + "; ".join(errors))
-        print(f"WROTE {len(output)} bytes")
+        print(f"WROTE {len(output)} bytes; hardware startup contract remains unresolved; do not program")
 
 
 if __name__ == "__main__":

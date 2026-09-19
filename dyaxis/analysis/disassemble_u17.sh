@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-ROM=${1:-"$ROOT/.local/dyaxis/eprom-dumps/41.005.415.Z1-U17-V1.06/41.005.415.Z1-U17-V1.06-AM27C256.bin"}
+ROM=${1:-"$ROOT/dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin"}
 OUT=${2:-"$ROOT/dyaxis/analysis/generated/u17"}
 DISASM=${DISASM51_BIN:-"$ROOT/.local/disasm51-venv/bin/disasm51"}
 

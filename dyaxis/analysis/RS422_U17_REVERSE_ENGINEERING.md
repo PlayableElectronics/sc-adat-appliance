@@ -59,7 +59,8 @@ the wire framing or a usable host protocol.
 
 Strong inference: the serial-vector path is a thin interrupt shim around an
 external-memory/peripheral service at `0xFED0`/`0xFED1`. Separately, the
-`0xFFE1/0xFFE3` path is now more plausibly a local FPGA/PAL mailbox because
+`0xFFE1/0xFFE3` path is now more plausibly a local FPGA/peripheral service
+window, possibly decoded or controlled by the PAL, because
 new board trace evidence identifies the small device beside the XC3030 as
 `PALC22V10L-25PC` and associates it with the scanned controls.
 Those interfaces must not be combined. Repeated `MOVX` accesses and calls
@@ -109,7 +110,7 @@ Once framing is evidenced, keep the implementation boundary as:
 
 No daemon or protocol implementation is claimed by this report.
 
-For the U17 main-program reconstruction, including reset flow, mailbox
+For the U17 main-program reconstruction, including reset flow, service-window
 semantics, service-value state transitions and the PAL/FPGA responsibility
 boundary, see `U17_MAIN_PROGRAM_ARCHITECTURE.md` and
 `U17_HIGH_ADDRESS_MAILBOX.md`.

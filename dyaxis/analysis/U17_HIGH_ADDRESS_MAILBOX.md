@@ -12,7 +12,7 @@ the address is a Macintosh register.
 | `FFE0` | none found | — | No literal reachable access | Unresolved |
 | `FFE1` | R/W | `30AA`, `3253`, `3332`, `3348` | bit 0 gates service-byte availability; bit 2 gates timer/status return; `3332` writes `09`, `C0`, derived values; `3348` writes fixed init sequence | Candidate FPGA/peripheral service-register window, possibly decoded or controlled by PAL |
 | `FFE2` | none found | — | No literal reachable access | Unresolved |
-| `FFE3` | R/W | `30C3`, `327E` | read into internal `A5`; write `R7` after timeout/service routine | one-byte mailbox data/status register; exact producer is external |
+| `FFE3` | R/W | `30C3`, `327E` | read into internal `A5`; write `R7` after timeout/service routine | one-byte candidate service data/status register; exact external decoder and producer are unknown |
 | `FFE4..FFEF` | none found | — | No literal reachable access in this range | Unresolved |
 | `FFF0` | R | `1440` | after `FFF1=F0`, delay, `FFF1=47`; `05→1`, `0A→2`, otherwise `0` | startup peripheral identity/status response |
 | `FFF1` | W | `1440` | writes `F0`, then `47` | startup peripheral command/select register |
@@ -54,6 +54,6 @@ or host packet fields by themselves.
 - `8000..FDFD` is the external RAM/program window used by checksum, download
   and `LCALL 8000` launch logic.
 
-The highest-confidence mailbox interpretation is `FFE1/FFE3`; `FFF0/FFF1`
+The highest-confidence service-window interpretation is `FFE1/FFE3`; `FFF0/FFF1`
 looks like a separate startup identification exchange, and `FFF4/FFF5` is
 confined to the transfer path. None is a proven Macintosh wire interface.

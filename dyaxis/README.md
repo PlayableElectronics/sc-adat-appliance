@@ -37,7 +37,8 @@ repair and interoperability:
 - `firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin` — the Studer
   Dyaxis II Console Edit Panel U3 firmware from assembly 41.005.430.01.
 - `analysis/generated/u17/` — reproducible disasm51 reachable disassembly,
-  P80C552 vector/SFR cross-references, call graph and analysis metrics for U17.
+  P80C552 vector/SFR cross-references, deep U17 control-flow/XDATA reports,
+  call graph and analysis metrics for U17.
 
 The image is associated with the P80C552 controller board and rear RS-422
 interfaces. Local intermediate reads remain under ignored `.local/` paths;
@@ -97,9 +98,13 @@ wiring, first-recording timeline, and offline UART decoder are documented in
 `host/NANO_RS422_CAPTURE.md`.
 The FPGA and external-address reassessment is
 `analysis/U17_FPGA_ARCHITECTURE.md`.
-The U17 system-leader reconstruction and literal `0xFFE0..0xFFFF` mailbox map
+The U17 system-leader reconstruction and literal `0xFFE0..0xFFFF` service-register map
 are in `analysis/U17_MAIN_PROGRAM_ARCHITECTURE.md` and
 `analysis/U17_HIGH_ADDRESS_MAILBOX.md`.
+The deeper generated program map, startup state machine, external-CODE
+dependency list, conservative service-window report, serial boundary and
+standalone-capability report are under `analysis/generated/u17/`; unresolved
+hardware observations are prioritized in `analysis/U17_UNRESOLVED_OBSERVATIONS.md`.
 The executable-RAM loading verdict and application ABI are in
 `analysis/U17_EXECUTABLE_RAM_LOADING.md`; the non-transmitting planning
 skeleton is `host/u17_loader_skeleton.py`.

@@ -13,8 +13,9 @@ remain separate evidence domains.
 Confirmed from ROM: reset/startup control flow, XDATA addresses and access
 directions, state transitions, interrupt shim targets, external-memory writes,
 and the bytes written to the service ports. Strong architectural inference:
-U17 is the system leader and `FFE1/FFE3` is a mailbox or service-register
-window behind FPGA/peripheral glue, possibly decoded or controlled by the PAL.
+U17 is the strongest system-leader candidate and `FFE1/FFE3` is a candidate
+FPGA/peripheral service-register window, possibly decoded or controlled by the
+PAL. It is not proven to be a mailbox or Macintosh-host interface.
 Not proven: the exact PAL PCB reference, the
 electrical decode of the window, or whether any window is directly visible on
 the Macintosh RS-422 interface.
@@ -102,11 +103,11 @@ capture correlates them with hardware activity.
 
 | Interface | U17 evidence | Current interpretation |
 |---|---|---|
-| P80C552 ↔ PAL/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | local mailbox/status/service layer; strongest new architecture hypothesis |
+| P80C552 ↔ PAL/FPGA | `FFE1/FFE3`, `FFF0/FFF1`, `FEEE/FFEF`, external CODE/XDATA shims | candidate local service/status layer; strongest new architecture hypothesis |
 | P80C552 ↔ subordinate controllers | external RAM window `8000..FDFD`, transfer states `28/2B/63`, FE06 services | boot/launch and board-service paths; exact subordinate endpoint unresolved |
 | P80C552/Z85230 ↔ Macintosh host | serial ISR `3416` reads `FED0`, calls `FED1`; no direct SIO0 setup | separate external serial service path; no host framing proven |
 
-No U3 `FD/FE` meaning or U7 UART constant is imported into the U17 mailbox
+No U3 `FD/FE` meaning or U7 UART constant is imported into the U17 service-window
 interpretation.
 
 ## PAL/FPGA identity boundary
@@ -139,8 +140,8 @@ registers or another peripheral remain possible.
    surrounding trace destinations are readable; no removal is required.
 2. Capture the P80C552 external bus or use high-impedance probes on the
    decoded `FFE1`, `FFE3`, `FFF0/FFF1` and interrupt-service strobes during
-   power-up. This distinguishes PAL/FPGA mailbox logic from other registers.
+   power-up. This distinguishes PAL/FPGA service-window logic from other registers.
 3. Correlate one `FFE3` service event with the FPGA scan activity and one
    display/status update. Do not transmit on RS-422 during this step.
 4. Separately identify which external service window the Z85230 interrupt
-   shims expose; do not infer Macintosh framing from the local mailbox.
+   shims expose; do not infer Macintosh framing from the local service window.

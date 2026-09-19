@@ -2,7 +2,7 @@
 ; Copyright (c) 2022-2026 Aleksander Mazur
 ; https://github.com/OlekMazur/disasm51
 ;
-; Source file: <repository>/.local/dyaxis/eprom-dumps/41.005.415.Z1-U17-V1.06/41.005.415.Z1-U17-V1.06-AM27C256.bin
+; Source file: <repository>/dyaxis/firmware/original/41.005.415.Z1-U17-V1.06-AM27C256.bin
 
 $nomod51
 $include (<repository>/dyaxis/analysis/p80c552.mcu)

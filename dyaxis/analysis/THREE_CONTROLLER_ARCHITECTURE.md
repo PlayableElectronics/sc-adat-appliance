@@ -4,7 +4,7 @@
 
 | Board/device | Firmware/storage | Proven responsibility | Open boundary |
 |---|---|---|---|
-| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | Strongest system-leader candidate: main boot and supervisory firmware, checksum/NVRAM tests, FPGA/peripheral service initialization, main wait/event state machine, executable-RAM launch path | Exact mailbox decode, display service endpoint, Z85230/rear-port ownership; entire executable system not yet proven inside U17 |
+| Studer CPU board, assembly `41.005.430.01`, U17 | AMD AM27C256 U17, public SHA `22aa…e0dd` | Strongest system-leader candidate: main boot and supervisory firmware, checksum/NVRAM tests, FPGA/peripheral service initialization, main wait/event state machine, executable-RAM launch path | Exact service-window decode, display service endpoint, Z85230/rear-port ownership; entire executable system not yet proven inside U17 |
 | Same Edit Panel CPU board, U3 | AMD AM27C256 U3, public SHA `7de44a…f22b3` | SIO0 byte rings, Timer-0 panel scan, P4/P5 multiplex I/O, event queue, output update | Physical connector and exact display/LED/encoder assignments |
 | Uptown Automation fader board, U7 | ST M27C128, public SHA `a29a17…eb0c3` | PWM motor paths, ADC/fader feedback, P1/P4 scan/output, local SIO0 diagnostics | Board-link framing, transceiver and rear-port relationship |
 | Main-board programmable logic beside FPGA | `PALC22V10L-25PC`, `9353 000020`; PCB reference not legible | Current evidence places it in address-decoding, control, timing or glue logic around the XC3030 | Exact nets, programmed equations and any stateful role remain unknown |
@@ -19,7 +19,8 @@ sequence is:
 
 1. U17 reset/startup initializes board services and emits boot/checksum text
    through external service calls around `0xFE06`; its `FFE1/FFE3` loop is now
-   more plausibly a local FPGA/PAL mailbox than a Macintosh-host parser.
+   more plausibly a local FPGA/peripheral service window, possibly decoded or
+   controlled by the PAL, than a Macintosh-host parser.
 2. U3 runs its own reset path, starts SIO0 and Timer 0, scans P5 through P4,
    and maintains output buffers even without a host.
 3. U7 starts PWM/ADC and per-channel feedback loops, providing fader motion
@@ -44,7 +45,7 @@ three different communication roles, not one shared MCU packet parser.
 
 No static result proves that the rear `(RS422) SERIAL 1/2` connectors carry
 U3, U7, U17, Z85230, or more than one of those paths. The U17 `FFE1/FFE3`
-mailbox must not be treated as the Macintosh protocol. The rear-port
+service window must not be treated as the Macintosh protocol. The rear-port
 hypothesis must remain passive until transceivers and pairs are identified.
 
 The detailed U17 reconstruction and literal high-address map are in

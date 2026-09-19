@@ -1,0 +1,100 @@
+{
+  "method": "disasm51 reachable instruction boundaries plus literal ROM/XDATA analysis",
+  "instruction_count": 1831,
+  "labeled_regions": 158,
+  "external_code_call_count": 67,
+  "indirect_reference_count": 13,
+  "literal_high_xdata": {
+    "0xFFE1": {
+      "R": 3,
+      "W": 24,
+      "select": 0,
+      "locations": [
+        "jump_30B9+1211 jump_30B9: movx A, @DPTR",
+        "jump_326C+1457 jump_326C: movx A, @DPTR",
+        "jump_3332+1501 jump_3332: movx A, @DPTR",
+        "jump_3332+1504 jump_3332: movx @DPTR, A",
+        "jump_3332+1509 jump_3332: movx @DPTR, A",
+        "jump_3348+1521 jump_3348: movx @DPTR, A",
+        "jump_3348+1524 jump_3348: movx @DPTR, A",
+        "jump_3348+1527 jump_3348: movx @DPTR, A",
+        "jump_3348+1530 jump_3348: movx @DPTR, A",
+        "jump_3348+1533 jump_3348: movx @DPTR, A",
+        "jump_3348+1536 jump_3348: movx @DPTR, A",
+        "jump_3348+1539 jump_3348: movx @DPTR, A",
+        "jump_3348+1542 jump_3348: movx @DPTR, A",
+        "jump_3348+1545 jump_3348: movx @DPTR, A",
+        "jump_3348+1548 jump_3348: movx @DPTR, A",
+        "jump_3348+1551 jump_3348: movx @DPTR, A",
+        "jump_3348+1554 jump_3348: movx @DPTR, A",
+        "jump_3348+1557 jump_3348: movx @DPTR, A",
+        "jump_3348+1560 jump_3348: movx @DPTR, A",
+        "jump_3348+1563 jump_3348: movx @DPTR, A",
+        "jump_3348+1566 jump_3348: movx @DPTR, A",
+        "jump_3348+1569 jump_3348: movx @DPTR, A",
+        "jump_3348+1571 jump_3348: movx @DPTR, A",
+        "jump_3348+1574 jump_3348: movx @DPTR, A",
+        "jump_3348+1577 jump_3348: movx @DPTR, A",
+        "jump_3348+1580 jump_3348: movx @DPTR, A",
+        "jump_3348+1583 jump_3348: movx @DPTR, A"
+      ]
+    },
+    "0xFFE3": {
+      "R": 1,
+      "W": 1,
+      "select": 0,
+      "locations": [
+        "jump_30C3+1215 jump_30C3: movx A, @DPTR",
+        "jump_327E+1467 jump_327E: movx @DPTR, A"
+      ]
+    },
+    "0xFFF0": {
+      "R": 1,
+      "W": 0,
+      "select": 0,
+      "locations": [
+        "jump_1440+1035 jump_1440: movx A, @DPTR"
+      ]
+    },
+    "0xFFF1": {
+      "R": 0,
+      "W": 2,
+      "select": 0,
+      "locations": [
+        "jump_1440+1028 jump_1440: movx @DPTR, A",
+        "jump_1440+1033 jump_1440: movx @DPTR, A"
+      ]
+    },
+    "0xFFF4": {
+      "R": 0,
+      "W": 10,
+      "select": 0,
+      "locations": [
+        "jump_0593+362 jump_0593: movx @DPTR, A",
+        "jump_0593+365 jump_0593: movx @DPTR, A",
+        "jump_0593+369 jump_0593: movx @DPTR, A",
+        "jump_0593+372 jump_0593: movx @DPTR, A",
+        "jump_0593+376 jump_0593: movx @DPTR, A",
+        "jump_0646+409 jump_0646: movx @DPTR, A",
+        "jump_0646+412 jump_0646: movx @DPTR, A",
+        "jump_0646+416 jump_0646: movx @DPTR, A",
+        "jump_0646+419 jump_0646: movx @DPTR, A",
+        "jump_0646+422 jump_0646: movx @DPTR, A"
+      ]
+    },
+    "0xFFF5": {
+      "R": 0,
+      "W": 2,
+      "select": 0,
+      "locations": [
+        "jump_0593+359 jump_0593: movx @DPTR, A",
+        "jump_0646+405 jump_0646: movx @DPTR, A"
+      ]
+    }
+  },
+  "limits": [
+    "External CODE bodies are outside the U17 image.",
+    "Indirect dispatch tables are reported but not assigned without bus evidence.",
+    "String references through external FE06 services are not recoverable from U17 alone."
+  ]
+}

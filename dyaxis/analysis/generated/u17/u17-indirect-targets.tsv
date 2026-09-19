@@ -1,0 +1,14 @@
+rom_address	function	instruction
+jump_0F3C+616	jump_0F3C	movc A, @A + DPTR
+jump_1048+777	jump_1048	movc A, @A + DPTR
+jump_114A+949	jump_114A	movc A, @A + DPTR
+jump_114A+952	jump_114A	movc A, @A + DPTR
+jump_2F9A+1071	jump_2F9A	movc A, @A + DPTR
+jump_2F9E+1075	jump_2F9E	movc A, @A + DPTR
+jump_2FAC+1085	jump_2FAC	movc A, @A + DPTR
+jump_2FAC+1097	jump_2FAC	movc A, @A + PC
+jump_2FD5+1109	jump_2FD5	movc A, @A + DPTR
+jump_2FD5+1118	jump_2FD5	movc A, @A + DPTR
+jump_2FEB+1128	jump_2FEB	movc A, @A + DPTR
+jump_2FEB+1132	jump_2FEB	movc A, @A + DPTR
+jump_2FFC+1136	jump_2FFC	movc A, @A + DPTR

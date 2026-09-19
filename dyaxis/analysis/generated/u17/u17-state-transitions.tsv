@@ -1,0 +1,9 @@
+condition	code	effect	confidence
+A8=01	3109	A2=A5; increment A8	confirmed local state transition
+A8=02, A5=01	3138	finish phase; clear 017B/A8, or call 32A9 when A2=0	confirmed local effect
+A8=02, A5=06	314B	require A2 in 01..80; load A6/A7 and enter A8=28	confirmed transfer setup
+A8=D8, A5=02	30EE	set 017B=1, 017A=32; increment A8	confirmed local effect
+A8=28, A5!=FF	3176/31C1	decrement A2; compute external-RAM block address	confirmed download path
+A8=28, A5=FF	3176	terminal transfer handling; may reach 328A	confirmed transfer terminal
+A8=2B	321C	write A5 to external RAM at 9E:9F	confirmed external-RAM write
+A8=63	3246	decrement A2; clear 017B/A8 at zero	confirmed local effect

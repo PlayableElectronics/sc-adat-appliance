@@ -10,6 +10,21 @@ boundary in jump_032F	jump_032F	IEN1	setb IEN1.4
 boundary in jump_032F	jump_032F	TM2CON	mov TM2CON, #01h
 boundary in jump_0F1F	jump_0F1F	IEN1	clr IEN1.4
 boundary in jump_0F1F	jump_0F1F	IEN1	setb IEN1.4
+boundary in jump_1420	jump_1420	IEN1	clr IEN1.1
+boundary in jump_1420	jump_1420	IEN1	clr IEN1.2
+boundary in jump_1D68	jump_1D68	S1ADR	mov S1ADR, #63h
+boundary in jump_1D68	jump_1D68	IEN0	setb IEN0.7
+boundary in jump_1D68	jump_1D68	IP0	setb IP0.5
+boundary in jump_1D68	jump_1D68	IEN0	setb IEN0.5
+boundary in jump_1D68	jump_1D68	S1CON	mov S1CON, #47h
+boundary in jump_1D84	jump_1D84	S1CON	setb S1CON.5
+boundary in jump_1DB3	jump_1DB3	S1CON	setb S1CON.5
+boundary in jump_1DE2	jump_1DE2	S1CON	setb S1CON.5
+boundary in jump_1E1B	jump_1E1B	S1CON	setb S1CON.5
+boundary in jump_1E8F	jump_1E8F	S1CON	setb S1CON.5
+boundary in jump_1EC8	jump_1EC8	S1CON	mov S1CON, #47h
+boundary in jump_1EC8	jump_1EC8	S1CON	mov S1CON, #57h
+boundary in jump_1ED2	jump_1ED2	S1CON	mov S1CON, #57h
 boundary in jump_314B	jump_314B	IEN1	clr IEN1.4
 boundary in jump_314B	jump_314B	IEN1	setb IEN1.4
 boundary in jump_3253	jump_3253	IEN1	clr IEN1.4

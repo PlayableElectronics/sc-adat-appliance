@@ -89,7 +89,7 @@ def main():
         f"- Parsed valid instruction records: **{len(ins)}**\n"
         f"- Discovered labeled code/data regions used as function labels: **{len(funcs)}**\n"
         f"- Distinct call/jump callers: **{len(edges)}**\n"
-        "- Method: disasm51 reachable control-flow disassembly from all P80C552 vector entries; data bytes are not treated as code.\n")
+        "- Method: disasm51 recursive control-flow disassembly from all P80C552 vector entries plus all 43 valid DS1230 FE00..FE7F trampoline destinations; data bytes are not treated as code.\n")
 
 if __name__ == "__main__":
     main()

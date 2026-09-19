@@ -55,5 +55,8 @@ rom_address	caller	target	A	B	R0	R1	R2	R3	R4	R5	R6	R7	DPTR	R2_R1_CODE_POINTER	po
 0x3426	SERIAL_ISR	0xFED1	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFED0	?	pop PSW; pop DPL; pop DPH; pop B
 0x3444	jump_3434	0xFEED	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEEC	?	pop PSW; pop DPL; pop DPH; pop B
 0x34DA	jump_34CA	0xFEDD	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEDC	?	pop PSW; pop DPL; pop DPH; pop B
+0x34F8	jump_34E8	0xFEE1	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEE0	?	pop PSW; pop DPL; pop DPH; pop B
+0x3516	jump_3506	0xFEE5	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEE4	?	pop PSW; pop DPL; pop DPH; pop B
+0x3534	jump_3524	0xFEE9	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEE8	?	pop PSW; pop DPL; pop DPH; pop B
 0x3570	jump_3560	0xFEF5	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEF4	?	pop PSW; pop DPL; pop DPH; pop B
 0x358E	jump_357E	0xFEF9	A=?	B=?	R0=?	R1=?	R2=?	R3=?	R4=?	R5=?	R6=?	R7=?	0xFEF8	?	pop PSW; pop DPL; pop DPH; pop B

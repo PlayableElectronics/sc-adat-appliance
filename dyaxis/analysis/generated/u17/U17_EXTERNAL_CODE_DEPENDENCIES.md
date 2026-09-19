@@ -1,6 +1,6 @@
 # U17 external CODE dependencies
 
-The current reachable U17 image makes **67** literal external CODE
+The current reachable U17 image makes **77** literal external CODE
 call references. Exact call-site addresses and targets are in
 `u17-external-code-dependencies.tsv`; call-site register/memory context is in
 `u17-fe-abi.tsv`; grouped target/family counts are in `u17-fe-abi-summary.tsv`.

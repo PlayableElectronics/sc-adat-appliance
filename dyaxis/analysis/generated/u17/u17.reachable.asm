@@ -52,21 +52,54 @@ dptr_0037:
 org	38h
 dptr_0038:
 
+org	39h
+dptr_0039:
+
+org	3Ah
+dptr_003A:
+
 org	T2_CAPTURE1
+fwd_003B_jump_34CA:
 	ljmp jump_34CA
 
+dptr_003E:
+
+org	40h
+dptr_0040:
+
+org	42h
+dptr_0042:
 
 org	T2_CAPTURE2
 	ljmp jump_34E8
 
+dptr_0046:
+
+org	48h
+dptr_0048:
+
+org	4Ah
+dptr_004A:
 
 org	T2_CAPTURE3
 	ljmp jump_3506
 
+dptr_004E:
+
+org	4Fh
+dptr_004F:
+
+org	50h
+dptr_0050:
+
+org	52h
+dptr_0052:
 
 org	ADC_COMPLETE
+fwd_0053_jump_3524:
 	ljmp jump_3524
 
+dptr_0056:
 
 org	57h
 dptr_0057:
@@ -118,49 +151,62 @@ org	T2_OVERFLOW
 	ljmp jump_357E
 
 ;org	76h
-	db 8Fh	; [0076h] 143 -113
-	db 7Fh	; [0077h] 127
-	db 12h	; [0078h]  18
-	db 33h	; [0079h]  51 '3'
-	db 0D8h	; [007Ah] 216  -40 'Ø'
-	db 22h	; [007Bh]  34 '"'
-	db 0EFh	; [007Ch] 239  -17 'ï'
-	db 60h	; [007Dh]  96 '`'
-	db 06h	; [007Eh]   6
-	db 90h	; [007Fh] 144 -112
+	mov 7Fh, R7
+	lcall jump_33D8
+	ret
 
-org	81h
-	db 0F5h	; [0081h] 245  -11 'õ'
-	db 0E4h	; [0082h] 228  -28 'ä'
-	db 0F0h	; [0083h] 240  -16 'ð'
+;org	7Ch
+	mov A, R7
+	jz jump_0085
+	mov DPTR, #dptr_FFF5
+	clr A
+	movx @DPTR, A
 dptr_0084:
-	db 22h	; [0084h]  34 '"'
-	db 90h	; [0085h] 144 -112
-dptr_0086:
+	ret
 
-org	87h
-	db 0F5h	; [0087h] 245  -11 'õ'
-	db 74h	; [0088h] 116 't'
-	db 03h	; [0089h]   3
-	db 0F0h	; [008Ah] 240  -16 'ð'
-	db 22h	; [008Bh]  34 '"'
+jump_0085:
+	mov DPTR, #dptr_FFF5
+	mov A, #03h	;   3
+dptr_008A:
+	movx @DPTR, A
+	ret
+
+dptr_008C:
+
+org	8Fh
+dptr_008F:
 
 org	90h
 	db 78h	; [0090h] 120 'x'
+dptr_0091:
 	db 7Eh	; [0091h] 126 '~'
 	db 0D0h	; [0092h] 208  -48 'Ð'
 	db 0D0h	; [0093h] 208  -48 'Ð'
+dptr_0094:
 	db 32h	; [0094h]  50 '2'
+dptr_0095:
+
+org	96h
+dptr_0096:
 
 org	98h
 	db 75h	; [0098h] 117 'u'
+dptr_0099:
 	db 0D8h	; [0099h] 216  -40 'Ø'
+dptr_009A:
 	db 43h	; [009Ah]  67 'C'
+dptr_009B:
 	db 0D0h	; [009Bh] 208  -48 'Ð'
+dptr_009C:
 	db 0D0h	; [009Ch] 208  -48 'Ð'
+dptr_009D:
 	db 32h	; [009Dh]  50 '2'
 
+org	9Fh
+dptr_009F:
+
 org	0A0h
+dptr_00A0:
 	db 75h	; [00A0h] 117 'u'
 	db 0D0h	; [00A1h] 208  -48 'Ð'
 	db 18h	; [00A2h]  24
@@ -177,7 +223,9 @@ org	0A0h
 
 org	0B0h
 	db 75h	; [00B0h] 117 'u'
+dptr_00B1:
 	db 0D0h	; [00B1h] 208  -48 'Ð'
+dptr_00B2:
 	db 18h	; [00B2h]  24
 	db 87h	; [00B3h] 135 -121
 	db 0DAh	; [00B4h] 218  -38 'Ú'
@@ -216,12 +264,61 @@ org	0DAh
 	db 0D0h	; [00E0h] 208  -48 'Ð'
 	db 32h	; [00E1h]  50 '2'
 	db 75h	; [00E2h] 117 'u'
+dptr_00E3:
 	db 0D8h	; [00E3h] 216  -40 'Ø'
+dptr_00E4:
 	db 47h	; [00E4h]  71 'G'
 	db 08h	; [00E5h]   8
 	db 0D0h	; [00E6h] 208  -48 'Ð'
+dptr_00E7:
 	db 0D0h	; [00E7h] 208  -48 'Ð'
+dptr_00E8:
 	db 32h	; [00E8h]  50 '2'
+
+org	0EAh
+dptr_00EA:
+
+org	0EBh
+dptr_00EB:
+
+org	0ECh
+dptr_00EC:
+
+org	0EFh
+dptr_00EF:
+
+org	0F0h
+dptr_00F0:
+
+org	0F1h
+dptr_00F1:
+
+org	0F2h
+dptr_00F2:
+
+org	0F3h
+dptr_00F3:
+
+org	0F4h
+dptr_00F4:
+
+org	0F5h
+dptr_00F5:
+
+org	0F7h
+dptr_00F7:
+
+org	0F9h
+dptr_00F9:
+
+org	0FAh
+dptr_00FA:
+
+org	0FBh
+dptr_00FB:
+
+org	0FCh
+dptr_00FC:
 
 org	100h
 	db 75h	; [0100h] 117 'u'
@@ -237,6 +334,7 @@ org	108h
 	db 0DAh	; [010Ah] 218  -38 'Ú'
 	db 75h	; [010Bh] 117 'u'
 	db 0D8h	; [010Ch] 216  -40 'Ø'
+dptr_010D:
 	db 47h	; [010Dh]  71 'G'
 	db 01h	; [010Eh]   1
 	db 0A0h	; [010Fh] 160  -96
@@ -247,6 +345,7 @@ org	108h
 	db 0D8h	; [0114h] 216  -40 'Ø'
 	db 47h	; [0115h]  71 'G'
 	db 01h	; [0116h]   1
+dptr_0117:
 	db 0A0h	; [0117h] 160  -96
 	db 75h	; [0118h] 117 'u'
 	db 0D0h	; [0119h] 208  -48 'Ð'
@@ -257,6 +356,7 @@ org	108h
 	db 0B5h	; [011Eh] 181  -75 'µ'
 
 org	120h
+dptr_0120:
 	db 75h	; [0120h] 117 'u'
 	db 0D8h	; [0121h] 216  -40 'Ø'
 	db 57h	; [0122h]  87 'W'
@@ -266,15 +366,24 @@ org	120h
 
 org	128h
 	db 0D5h	; [0128h] 213  -43 'Õ'
+dptr_0129:
 	db 7Ch	; [0129h] 124 '|'
+dptr_012A:
 	db 85h	; [012Ah] 133 -123
 	db 75h	; [012Bh] 117 'u'
+dptr_012C:
 	db 0D8h	; [012Ch] 216  -40 'Ø'
+dptr_012D:
 	db 57h	; [012Dh]  87 'W'
+dptr_012E:
 	db 01h	; [012Eh]   1
+dptr_012F:
 	db 0B9h	; [012Fh] 185  -71 '¹'
+dptr_0130:
 	db 75h	; [0130h] 117 'u'
+dptr_0131:
 	db 0D8h	; [0131h] 216  -40 'Ø'
+dptr_0132:
 	db 57h	; [0132h]  87 'W'
 	db 0D0h	; [0133h] 208  -48 'Ð'
 	db 0D0h	; [0134h] 208  -48 'Ð'
@@ -1179,141 +1288,101 @@ jump_05C5:
 	ret
 
 ;org	5C6h
-	db 90h	; [05C6h] 144 -112
-	db 00h	; [05C7h]   0
-	db 39h	; [05C8h]  57 '9'
-	db 0EFh	; [05C9h] 239  -17 'ï'
-	db 0F0h	; [05CAh] 240  -16 'ð'
-	db 0A9h	; [05CBh] 169  -87 '©'
-	db 05h	; [05CCh]   5
-	db 0EAh	; [05CDh] 234  -22 'ê'
-	db 7Eh	; [05CEh] 126 '~'
-	db 00h	; [05CFh]   0
-	db 78h	; [05D0h] 120 'x'
-	db 03h	; [05D1h]   3
-	db 0C3h	; [05D2h] 195  -61 'Ã'
-	db 33h	; [05D3h]  51 '3'
-	db 0CEh	; [05D4h] 206  -50 'Î'
-	db 33h	; [05D5h]  51 '3'
-	db 0CEh	; [05D6h] 206  -50 'Î'
-	db 0D8h	; [05D7h] 216  -40 'Ø'
-	db 0F9h	; [05D8h] 249   -7 'ù'
-	db 24h	; [05D9h]  36 '$'
-	db 00h	; [05DAh]   0
+	mov DPTR, #dptr_0039
+	mov A, R7
+	movx @DPTR, A
+	mov R1, 05h
+	mov A, R2
+	mov R6, #00h	;   0
+	mov R0, #03h	;   3
+jump_05D2:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+	djnz R0, jump_05D2
+	add A, #00h	;   0
+	mov R7, A
+	mov A, R6
+	addc A, #18h	;  24
+	mov R6, A
+	mov A, R1
+	mov R5, A
+	mov R4, #00h	;   0
+	add A, R7
+	mov DPTR, #fwd_003B_jump_34CA
+	movx @DPTR, A
+	mov A, R4
+	addc A, R6
+	mov DPTR, #dptr_003A
+	movx @DPTR, A
+	mov R6, #00h	;   0
+	mov A, R3
+	mov R0, #03h	;   3
+jump_05F4:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+	djnz R0, jump_05F4
+	mov R7, A
+	add A, #00h	;   0
+	mov R7, A
+	mov A, R6
+	addc A, #18h	;  24
+	xch A, R7
+	add A, R5
+	xch A, R7
+	addc A, R4
+	mov R5, 07h
+	mov R4, A
+	mov DPTR, #dptr_003A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	mov R2, 06h
+jump_0613:
+	setb C
+	mov A, R3
+	subb A, R5
+	mov A, R2
+	subb A, R4
+	jnc jump_0645
+	mov DPTR, #dptr_FFF5
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov A, R3
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov A, R2
+	anl A, #1Fh	;  31
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	mov DPTR, #dptr_0039
+	movx A, @DPTR
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	mov A, #08h	;   8
+	add A, R3
+	mov R3, A
+	clr A
+	addc A, R2
+	mov R2, A
+	sjmp jump_0613
 
-org	5DCh
-	db 0EEh	; [05DCh] 238  -18 'î'
-	db 34h	; [05DDh]  52 '4'
-	db 18h	; [05DEh]  24
-	db 0FEh	; [05DFh] 254   -2 'þ'
-	db 0E9h	; [05E0h] 233  -23 'é'
-	db 0FDh	; [05E1h] 253   -3 'ý'
-	db 7Ch	; [05E2h] 124 '|'
-	db 00h	; [05E3h]   0
-	db 2Fh	; [05E4h]  47 '/'
-	db 90h	; [05E5h] 144 -112
-	db 00h	; [05E6h]   0
-	db 3Bh	; [05E7h]  59 ';'
-	db 0F0h	; [05E8h] 240  -16 'ð'
-	db 0ECh	; [05E9h] 236  -20 'ì'
-	db 3Eh	; [05EAh]  62 '>'
-	db 90h	; [05EBh] 144 -112
-	db 00h	; [05ECh]   0
-	db 3Ah	; [05EDh]  58 ':'
-	db 0F0h	; [05EEh] 240  -16 'ð'
-	db 7Eh	; [05EFh] 126 '~'
-	db 00h	; [05F0h]   0
-	db 0EBh	; [05F1h] 235  -21 'ë'
-	db 78h	; [05F2h] 120 'x'
-	db 03h	; [05F3h]   3
-	db 0C3h	; [05F4h] 195  -61 'Ã'
-	db 33h	; [05F5h]  51 '3'
-	db 0CEh	; [05F6h] 206  -50 'Î'
-	db 33h	; [05F7h]  51 '3'
-	db 0CEh	; [05F8h] 206  -50 'Î'
-	db 0D8h	; [05F9h] 216  -40 'Ø'
-	db 0F9h	; [05FAh] 249   -7 'ù'
+jump_0645:
+	ret
 
-org	5FCh
-	db 24h	; [05FCh]  36 '$'
-	db 00h	; [05FDh]   0
-
-org	5FFh
-	db 0EEh	; [05FFh] 238  -18 'î'
-	db 34h	; [0600h]  52 '4'
-	db 18h	; [0601h]  24
-	db 0CFh	; [0602h] 207  -49 'Ï'
-	db 2Dh	; [0603h]  45 '-'
-	db 0CFh	; [0604h] 207  -49 'Ï'
-	db 3Ch	; [0605h]  60 '<'
-	db 0ADh	; [0606h] 173  -83
-	db 07h	; [0607h]   7
-	db 0FCh	; [0608h] 252   -4 'ü'
-	db 90h	; [0609h] 144 -112
-	db 00h	; [060Ah]   0
-	db 3Ah	; [060Bh]  58 ':'
-	db 0E0h	; [060Ch] 224  -32 'à'
-	db 0FEh	; [060Dh] 254   -2 'þ'
-	db 0A3h	; [060Eh] 163  -93 '£'
-	db 0E0h	; [060Fh] 224  -32 'à'
-	db 0FBh	; [0610h] 251   -5 'û'
-	db 0AAh	; [0611h] 170  -86 'ª'
-	db 06h	; [0612h]   6
-	db 0D3h	; [0613h] 211  -45 'Ó'
-	db 0EBh	; [0614h] 235  -21 'ë'
-	db 9Dh	; [0615h] 157  -99
-	db 0EAh	; [0616h] 234  -22 'ê'
-	db 9Ch	; [0617h] 156 -100
-	db 50h	; [0618h]  80 'P'
-	db 2Bh	; [0619h]  43 '+'
-	db 90h	; [061Ah] 144 -112
-
-org	61Ch
-	db 0F5h	; [061Ch] 245  -11 'õ'
-	db 74h	; [061Dh] 116 't'
-	db 0Eh	; [061Eh]  14
-	db 0F0h	; [061Fh] 240  -16 'ð'
-	db 0EBh	; [0620h] 235  -21 'ë'
-	db 90h	; [0621h] 144 -112
-
-org	623h
-	db 0F4h	; [0623h] 244  -12 'ô'
-	db 0F0h	; [0624h] 240  -16 'ð'
-	db 0A3h	; [0625h] 163  -93 '£'
-	db 74h	; [0626h] 116 't'
-	db 0Fh	; [0627h]  15
-	db 0F0h	; [0628h] 240  -16 'ð'
-	db 0EAh	; [0629h] 234  -22 'ê'
-	db 54h	; [062Ah]  84 'T'
-	db 1Fh	; [062Bh]  31
-	db 90h	; [062Ch] 144 -112
-
-org	62Eh
-	db 0F4h	; [062Eh] 244  -12 'ô'
-	db 0F0h	; [062Fh] 240  -16 'ð'
-	db 0A3h	; [0630h] 163  -93 '£'
-	db 74h	; [0631h] 116 't'
-	db 08h	; [0632h]   8
-	db 0F0h	; [0633h] 240  -16 'ð'
-	db 90h	; [0634h] 144 -112
-	db 00h	; [0635h]   0
-	db 39h	; [0636h]  57 '9'
-	db 0E0h	; [0637h] 224  -32 'à'
-	db 90h	; [0638h] 144 -112
-
-org	63Ah
-	db 0F4h	; [063Ah] 244  -12 'ô'
-	db 0F0h	; [063Bh] 240  -16 'ð'
-	db 74h	; [063Ch] 116 't'
-	db 08h	; [063Dh]   8
-	db 2Bh	; [063Eh]  43 '+'
-	db 0FBh	; [063Fh] 251   -5 'û'
-	db 0E4h	; [0640h] 228  -28 'ä'
-	db 3Ah	; [0641h]  58 ':'
-	db 0FAh	; [0642h] 250   -6 'ú'
-	db 80h	; [0643h] 128 -128
-	db 0CEh	; [0644h] 206  -50 'Î'
-	db 22h	; [0645h]  34 '"'
 jump_0646:
 	mov R4, 07h
 	mov A, R5
@@ -1356,1613 +1425,1078 @@ jump_0646:
 	ret
 
 ;org	680h
-	db 0AAh	; [0680h] 170  -86 'ª'
-	db 07h	; [0681h]   7
-	db 0A9h	; [0682h] 169  -87 '©'
-	db 05h	; [0683h]   5
-	db 0EAh	; [0684h] 234  -22 'ê'
-	db 75h	; [0685h] 117 'u'
-	db 0F0h	; [0686h] 240  -16 'ð'
-	db 08h	; [0687h]   8
-	db 0A4h	; [0688h] 164  -92 '¤'
-	db 78h	; [0689h] 120 'x'
-	db 92h	; [068Ah] 146 -110
-	db 26h	; [068Bh]  38 '&'
+	mov R2, 07h
+	mov R1, 05h
+	mov A, R2
+	mov B, #08h	;   8
+	mul AB
+	mov R0, #92h	; 146 -110
+	add A, @R0
+	mov R7, A
+	mov A, B
+	dec R0
+	addc A, @R0
+	mov R6, A
+	mov R4, #00h	;   0
+	mov A, R7
+	add A, R5
+	mov DPTR, #dptr_003D
+	movx @DPTR, A
+	mov A, R4
+	addc A, R6
+	mov DPTR, #dptr_003C
+	movx @DPTR, A
+	mov A, R2
+	mov B, #08h	;   8
+	mul AB
+	inc R0
+	add A, @R0
+	mov R7, A
+	mov A, B
+	dec R0
+	addc A, @R0
+	mov R6, A
+	mov A, R7
+	add A, R3
+	mov R7, A
+	mov A, R4
+	addc A, R6
+	mov R5, 07h
+	mov R4, A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	mov R2, 06h
+jump_06BC:
+	setb C
+	mov A, R3
+	subb A, R5
+	mov A, R2
+	subb A, R4
+	jnc jump_06EA
+	mov DPTR, #dptr_FFF5
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov A, R3
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov A, R2
+	anl A, #1Fh	;  31
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	mov A, #0FFh	; 255   -1 'ÿ'
+	movx @DPTR, A
+	inc R3
+	mov A, R3
+	jnz fwd_06E8_jump_06BC
+	inc R2
+fwd_06E8_jump_06BC:
+	sjmp jump_06BC
 
-org	68Dh
-	db 0E5h	; [068Dh] 229  -27 'å'
-	db 0F0h	; [068Eh] 240  -16 'ð'
-	db 18h	; [068Fh]  24
-	db 36h	; [0690h]  54 '6'
-	db 0FEh	; [0691h] 254   -2 'þ'
-	db 7Ch	; [0692h] 124 '|'
-	db 00h	; [0693h]   0
-	db 0EFh	; [0694h] 239  -17 'ï'
-	db 2Dh	; [0695h]  45 '-'
-	db 90h	; [0696h] 144 -112
-	db 00h	; [0697h]   0
-	db 3Dh	; [0698h]  61 '='
-	db 0F0h	; [0699h] 240  -16 'ð'
-	db 0ECh	; [069Ah] 236  -20 'ì'
-	db 3Eh	; [069Bh]  62 '>'
-	db 90h	; [069Ch] 144 -112
-	db 00h	; [069Dh]   0
-	db 3Ch	; [069Eh]  60 '<'
-	db 0F0h	; [069Fh] 240  -16 'ð'
-	db 0EAh	; [06A0h] 234  -22 'ê'
-	db 75h	; [06A1h] 117 'u'
-	db 0F0h	; [06A2h] 240  -16 'ð'
-	db 08h	; [06A3h]   8
-	db 0A4h	; [06A4h] 164  -92 '¤'
-	db 08h	; [06A5h]   8
-	db 26h	; [06A6h]  38 '&'
+jump_06EA:
+	ret
 
-org	6A8h
-	db 0E5h	; [06A8h] 229  -27 'å'
-	db 0F0h	; [06A9h] 240  -16 'ð'
-	db 18h	; [06AAh]  24
-	db 36h	; [06ABh]  54 '6'
-	db 0FEh	; [06ACh] 254   -2 'þ'
-	db 0EFh	; [06ADh] 239  -17 'ï'
-	db 2Bh	; [06AEh]  43 '+'
+;org	6EBh
+	mov R1, 07h
+	mov A, R5
+	mov B, #08h	;   8
+	mul AB
+	mov R4, #00h	;   0
+	add A, R3
+	mov R7, A
+	mov A, R4
+	addc A, B
+	mov R6, A
+	mov A, R7
+	mov R0, #92h	; 146 -110
+	add A, @R0
+	mov R7, A
+	mov A, R6
+	dec R0
+	addc A, @R0
+	mov R5, 07h
+	mov R4, A
+	mov A, R1
+	mov B, #04h	;   4
+	mul AB
+	add A, #8Ah	; 138 -118
+	mov DPL, A
+	mov A, B
+	addc A, #0Ch	;  12
+	mov R7, DPL
+	mov DPTR, #dptr_003E
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	clr A
+	mov R3, A
+jump_071D:
+	mov A, R3
+	clr C
+	subb A, #04h	;   4
+	jnc jump_075C
+	mov DPTR, #dptr_FFF5
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov A, R5
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov A, R4
+	anl A, #1Fh	;  31
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	mov DPTR, #dptr_003E
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov DPL, B
+	mov DPH, A
+	clr A
+	movc A, @A + DPTR
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	mov A, #08h	;   8
+	add A, R5
+	mov R5, A
+	clr A
+	addc A, R4
+	mov R4, A
+	inc R3
+	sjmp jump_071D
 
-org	6B0h
-	db 0ECh	; [06B0h] 236  -20 'ì'
-	db 3Eh	; [06B1h]  62 '>'
-	db 0ADh	; [06B2h] 173  -83
-	db 07h	; [06B3h]   7
-	db 0FCh	; [06B4h] 252   -4 'ü'
-	db 0E0h	; [06B5h] 224  -32 'à'
-	db 0FEh	; [06B6h] 254   -2 'þ'
-	db 0A3h	; [06B7h] 163  -93 '£'
-	db 0E0h	; [06B8h] 224  -32 'à'
-	db 0FBh	; [06B9h] 251   -5 'û'
-	db 0AAh	; [06BAh] 170  -86 'ª'
-	db 06h	; [06BBh]   6
-	db 0D3h	; [06BCh] 211  -45 'Ó'
-	db 0EBh	; [06BDh] 235  -21 'ë'
-	db 9Dh	; [06BEh] 157  -99
-	db 0EAh	; [06BFh] 234  -22 'ê'
-	db 9Ch	; [06C0h] 156 -100
-	db 50h	; [06C1h]  80 'P'
-	db 27h	; [06C2h]  39 '''
-	db 90h	; [06C3h] 144 -112
+jump_075C:
+	ret
 
-org	6C5h
-	db 0F5h	; [06C5h] 245  -11 'õ'
-	db 74h	; [06C6h] 116 't'
-	db 0Eh	; [06C7h]  14
-	db 0F0h	; [06C8h] 240  -16 'ð'
-	db 0EBh	; [06C9h] 235  -21 'ë'
-	db 90h	; [06CAh] 144 -112
+;org	75Dh
+	mov DPTR, #dptr_0040
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	inc DPTR
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+jump_076E:
+	mov DPTR, #dptr_0042
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov R1, B
+	mov R2, A
+	lcall jump_35BE
+	mov DPTR, #dptr_0045
+	movx @DPTR, A
+	jz jump_07B7
+	movx A, @DPTR
+	clr C
+	subb A, #20h	;  32 ' '
+	jnc jump_079C
+	clr A
+	mov R7, A
+	mov DPTR, #dptr_0040
+	movx A, @DPTR
+	mov R5, A
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	lcall jump_FE03
+	sjmp jump_07AE
 
-org	6CCh
-	db 0F4h	; [06CCh] 244  -12 'ô'
-	db 0F0h	; [06CDh] 240  -16 'ð'
-	db 0A3h	; [06CEh] 163  -93 '£'
-	db 74h	; [06CFh] 116 't'
-	db 0Fh	; [06D0h]  15
-	db 0F0h	; [06D1h] 240  -16 'ð'
-	db 0EAh	; [06D2h] 234  -22 'ê'
-	db 54h	; [06D3h]  84 'T'
-	db 1Fh	; [06D4h]  31
-	db 90h	; [06D5h] 144 -112
+jump_079C:
+	mov DPTR, #dptr_0045
+	movx A, @DPTR
+	add A, #0E0h	; 224  -32 'à'
+	mov R7, A
+	mov DPTR, #dptr_0040
+	movx A, @DPTR
+	mov R5, A
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	lcall jump_FE03
+jump_07AE:
+	mov DPTR, #dptr_0040
+	movx A, @DPTR
+	add A, #05h	;   5
+	movx @DPTR, A
+	sjmp jump_076E
 
-org	6D7h
-	db 0F4h	; [06D7h] 244  -12 'ô'
-	db 0F0h	; [06D8h] 240  -16 'ð'
-	db 0A3h	; [06D9h] 163  -93 '£'
-	db 74h	; [06DAh] 116 't'
-	db 08h	; [06DBh]   8
-	db 0F0h	; [06DCh] 240  -16 'ð'
-	db 90h	; [06DDh] 144 -112
+jump_07B7:
+	ret
 
-org	6DFh
-	db 0F4h	; [06DFh] 244  -12 'ô'
-	db 74h	; [06E0h] 116 't'
+;org	7B8h
+	mov DPTR, #dptr_0046
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	mov R7, 03h
+	mov R6, #89h	; 137 -119
+	mov R0, #89h	; 137 -119
+	mov @R0, #20h	;  32 ' '
+	inc R0
+	mov @R0, #20h	;  32 ' '
+	inc R0
+	mov @R0, #20h	;  32 ' '
+	clr A
+	inc R0
+	mov @R0, A
+	mov A, R7
+	setb C
+	subb A, #63h	;  99 'c'
+	jc jump_07EA
+	mov A, R7
+	mov B, #64h	; 100 'd'
+	div AB
+	mov B, #0Ah	;  10
+	div AB
+	mov A, B
+	add A, #30h	;  48 '0'
+	mov R4, 06h
+	inc R6
+	mov R0, 04h
+	mov @R0, A
+jump_07EA:
+	mov A, R7
+	setb C
+	subb A, #09h	;   9
+	jc jump_0803
+	mov A, R7
+	mov B, #0Ah	;  10
+	div AB
+	mov B, #0Ah	;  10
+	div AB
+	mov A, B
+	add A, #30h	;  48 '0'
+	mov R4, 06h
+	inc R6
+	mov R0, 04h
+	mov @R0, A
+jump_0803:
+	mov A, R7
+	mov B, #0Ah	;  10
+	div AB
+	mov A, B
+	add A, #30h	;  48 '0'
+	mov R0, 06h
+	mov @R0, A
+	mov DPTR, #dptr_0046
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	mov R3, #01h	;   1
+	mov R2, #00h	;   0
+	mov R1, #89h	; 137 -119
+	lcall jump_FE06
+	ret
 
-org	6E2h
-	db 0F0h	; [06E2h] 240  -16 'ð'
-	db 0Bh	; [06E3h]  11
-	db 0EBh	; [06E4h] 235  -21 'ë'
-	db 70h	; [06E5h] 112 'p'
-	db 01h	; [06E6h]   1
-	db 0Ah	; [06E7h]  10
-	db 80h	; [06E8h] 128 -128
-	db 0D2h	; [06E9h] 210  -46 'Ò'
-	db 22h	; [06EAh]  34 '"'
-	db 0A9h	; [06EBh] 169  -87 '©'
-	db 07h	; [06ECh]   7
-	db 0EDh	; [06EDh] 237  -19 'í'
-	db 75h	; [06EEh] 117 'u'
-	db 0F0h	; [06EFh] 240  -16 'ð'
-	db 08h	; [06F0h]   8
-	db 0A4h	; [06F1h] 164  -92 '¤'
-	db 7Ch	; [06F2h] 124 '|'
-	db 00h	; [06F3h]   0
-	db 2Bh	; [06F4h]  43 '+'
+;org	821h
+	mov DPTR, #dptr_0048
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R3
+	movx @DPTR, A
+	mov R3, #89h	; 137 -119
+	mov DPTR, #dptr_004A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	subb A, #0Fh	;  15
+	mov A, R6
+	subb A, #27h	;  39 '''
+	jc jump_0857
+	mov R4, #27h	;  39 '''
+	mov R5, #10h	;  16
+	lcall jump_3630
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R0, 03h
+	mov @R0, A
+	sjmp jump_085B
 
-org	6F6h
-	db 0ECh	; [06F6h] 236  -20 'ì'
-	db 35h	; [06F7h]  53 '5'
-	db 0F0h	; [06F8h] 240  -16 'ð'
-	db 0FEh	; [06F9h] 254   -2 'þ'
-	db 0EFh	; [06FAh] 239  -17 'ï'
-	db 78h	; [06FBh] 120 'x'
-	db 92h	; [06FCh] 146 -110
-	db 26h	; [06FDh]  38 '&'
+jump_0857:
+	mov R0, 03h
+	mov @R0, #20h	;  32 ' '
+jump_085B:
+	inc R3
+	mov DPTR, #dptr_004A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	subb A, #0E7h	; 231  -25 'ç'
+	mov A, R6
+	subb A, #03h	;   3
+	jc jump_0882
+	mov R4, #03h	;   3
+	mov R5, #0E8h	; 232  -24 'è'
+	lcall jump_3630
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R0, 03h
+	mov @R0, A
+	sjmp jump_0886
 
-org	6FFh
-	db 0EEh	; [06FFh] 238  -18 'î'
-	db 18h	; [0700h]  24
-	db 36h	; [0701h]  54 '6'
-	db 0ADh	; [0702h] 173  -83
-	db 07h	; [0703h]   7
-	db 0FCh	; [0704h] 252   -4 'ü'
-	db 0E9h	; [0705h] 233  -23 'é'
-	db 75h	; [0706h] 117 'u'
-	db 0F0h	; [0707h] 240  -16 'ð'
-	db 04h	; [0708h]   4
-	db 0A4h	; [0709h] 164  -92 '¤'
-	db 24h	; [070Ah]  36 '$'
-	db 8Ah	; [070Bh] 138 -118
-	db 0F5h	; [070Ch] 245  -11 'õ'
-	db 82h	; [070Dh] 130 -126
-	db 0E5h	; [070Eh] 229  -27 'å'
-	db 0F0h	; [070Fh] 240  -16 'ð'
-	db 34h	; [0710h]  52 '4'
-	db 0Ch	; [0711h]  12
-	db 0AFh	; [0712h] 175  -81 '¯'
-	db 82h	; [0713h] 130 -126
-	db 90h	; [0714h] 144 -112
-	db 00h	; [0715h]   0
-	db 3Eh	; [0716h]  62 '>'
-	db 0F0h	; [0717h] 240  -16 'ð'
-	db 0A3h	; [0718h] 163  -93 '£'
-	db 0EFh	; [0719h] 239  -17 'ï'
-	db 0F0h	; [071Ah] 240  -16 'ð'
-	db 0E4h	; [071Bh] 228  -28 'ä'
-	db 0FBh	; [071Ch] 251   -5 'û'
-	db 0EBh	; [071Dh] 235  -21 'ë'
-	db 0C3h	; [071Eh] 195  -61 'Ã'
-	db 94h	; [071Fh] 148 -108
-	db 04h	; [0720h]   4
-	db 50h	; [0721h]  80 'P'
-	db 39h	; [0722h]  57 '9'
-	db 90h	; [0723h] 144 -112
+jump_0882:
+	mov R0, 03h
+	mov @R0, #20h	;  32 ' '
+jump_0886:
+	inc R3
+	mov DPTR, #dptr_004A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	subb A, #63h	;  99 'c'
+	mov A, R6
+	subb A, #00h	;   0
+	jc jump_08AD
+	mov R4, #00h	;   0
+	mov R5, #64h	; 100 'd'
+	lcall jump_3630
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R0, 03h
+	mov @R0, A
+	sjmp jump_08B1
 
-org	725h
-	db 0F5h	; [0725h] 245  -11 'õ'
-	db 74h	; [0726h] 116 't'
-	db 0Eh	; [0727h]  14
-	db 0F0h	; [0728h] 240  -16 'ð'
-	db 0EDh	; [0729h] 237  -19 'í'
-	db 90h	; [072Ah] 144 -112
+jump_08AD:
+	mov R0, 03h
+	mov @R0, #20h	;  32 ' '
+jump_08B1:
+	inc R3
+	mov DPTR, #dptr_004A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	subb A, #09h	;   9
+	mov A, R6
+	subb A, #00h	;   0
+	jc jump_08D8
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R0, 03h
+	mov @R0, A
+	sjmp jump_08DC
 
-org	72Ch
-	db 0F4h	; [072Ch] 244  -12 'ô'
-	db 0F0h	; [072Dh] 240  -16 'ð'
-	db 0A3h	; [072Eh] 163  -93 '£'
-	db 74h	; [072Fh] 116 't'
-	db 0Fh	; [0730h]  15
-	db 0F0h	; [0731h] 240  -16 'ð'
-	db 0ECh	; [0732h] 236  -20 'ì'
-	db 54h	; [0733h]  84 'T'
-	db 1Fh	; [0734h]  31
-	db 90h	; [0735h] 144 -112
+jump_08D8:
+	mov R0, 03h
+	mov @R0, #20h	;  32 ' '
+jump_08DC:
+	inc R3
+	mov DPTR, #dptr_004A
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3630
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R6, 03h
+	inc R3
+	mov R0, 06h
+	mov @R0, A
+	mov R7, 03h
+	mov R0, 07h
+	clr A
+	mov @R0, A
+	mov DPTR, #dptr_0048
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	mov R3, #01h	;   1
+	mov R2, #00h	;   0
+	mov R1, #89h	; 137 -119
+	lcall jump_FE06
+	ret
 
-org	737h
-	db 0F4h	; [0737h] 244  -12 'ô'
-	db 0F0h	; [0738h] 240  -16 'ð'
-	db 0A3h	; [0739h] 163  -93 '£'
-	db 74h	; [073Ah] 116 't'
-	db 08h	; [073Bh]   8
-	db 0F0h	; [073Ch] 240  -16 'ð'
-	db 90h	; [073Dh] 144 -112
-	db 00h	; [073Eh]   0
-	db 3Eh	; [073Fh]  62 '>'
-	db 0E4h	; [0740h] 228  -28 'ä'
-	db 75h	; [0741h] 117 'u'
-	db 0F0h	; [0742h] 240  -16 'ð'
-	db 01h	; [0743h]   1
-	db 12h	; [0744h]  18
-	db 36h	; [0745h]  54 '6'
-	db 0D1h	; [0746h] 209  -47 'Ñ'
-	db 85h	; [0747h] 133 -123
-	db 0F0h	; [0748h] 240  -16 'ð'
-	db 82h	; [0749h] 130 -126
-	db 0F5h	; [074Ah] 245  -11 'õ'
-	db 83h	; [074Bh] 131 -125
-	db 0E4h	; [074Ch] 228  -28 'ä'
-	db 93h	; [074Dh] 147 -109
-	db 90h	; [074Eh] 144 -112
+;org	90Dh
+	mov DPTR, #dptr_004C
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov DPTR, #dptr_004F
+	mov A, R7
+	movx @DPTR, A
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov R7, 05h
+	clr C
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_095C
+	mov DPTR, #dptr_004E
+	mov A, #01h	;   1
+	movx @DPTR, A
+	inc DPTR
+	movx A, @DPTR
+	mov R6, A
+	clr C
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_094E
+	mov A, R6
+	cpl A
+	inc A
+	movx @DPTR, A
+jump_094E:
+	clr C
+	mov A, R7
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_0961
+	mov A, R7
+	cpl A
+	inc A
+	mov R7, A
+	sjmp jump_0961
 
-org	750h
-	db 0F4h	; [0750h] 244  -12 'ô'
-	db 0F0h	; [0751h] 240  -16 'ð'
-	db 74h	; [0752h] 116 't'
-	db 08h	; [0753h]   8
-	db 2Dh	; [0754h]  45 '-'
-	db 0FDh	; [0755h] 253   -3 'ý'
-	db 0E4h	; [0756h] 228  -28 'ä'
-	db 3Ch	; [0757h]  60 '<'
-	db 0FCh	; [0758h] 252   -4 'ü'
-	db 0Bh	; [0759h]  11
-	db 80h	; [075Ah] 128 -128
-	db 0C1h	; [075Bh] 193  -63 'Á'
-	db 22h	; [075Ch]  34 '"'
-	db 90h	; [075Dh] 144 -112
-	db 00h	; [075Eh]   0
-	db 40h	; [075Fh]  64 '@'
-	db 0EFh	; [0760h] 239  -17 'ï'
-	db 0F0h	; [0761h] 240  -16 'ð'
-	db 0A3h	; [0762h] 163  -93 '£'
-	db 0EDh	; [0763h] 237  -19 'í'
-	db 0F0h	; [0764h] 240  -16 'ð'
-	db 0A3h	; [0765h] 163  -93 '£'
-	db 0EBh	; [0766h] 235  -21 'ë'
-	db 0F0h	; [0767h] 240  -16 'ð'
-	db 0A3h	; [0768h] 163  -93 '£'
-	db 0EAh	; [0769h] 234  -22 'ê'
-	db 0F0h	; [076Ah] 240  -16 'ð'
-	db 0A3h	; [076Bh] 163  -93 '£'
-	db 0E9h	; [076Ch] 233  -23 'é'
-	db 0F0h	; [076Dh] 240  -16 'ð'
-	db 90h	; [076Eh] 144 -112
-	db 00h	; [076Fh]   0
-	db 42h	; [0770h]  66 'B'
-	db 0E0h	; [0771h] 224  -32 'à'
-	db 0FBh	; [0772h] 251   -5 'û'
-	db 0A3h	; [0773h] 163  -93 '£'
-	db 0E4h	; [0774h] 228  -28 'ä'
-	db 75h	; [0775h] 117 'u'
-	db 0F0h	; [0776h] 240  -16 'ð'
-	db 01h	; [0777h]   1
-	db 12h	; [0778h]  18
-	db 36h	; [0779h]  54 '6'
-	db 0D1h	; [077Ah] 209  -47 'Ñ'
-	db 0A9h	; [077Bh] 169  -87 '©'
-	db 0F0h	; [077Ch] 240  -16 'ð'
-	db 0FAh	; [077Dh] 250   -6 'ú'
-	db 12h	; [077Eh]  18
-	db 35h	; [077Fh]  53 '5'
-	db 0BEh	; [0780h] 190  -66 '¾'
-	db 90h	; [0781h] 144 -112
-	db 00h	; [0782h]   0
-	db 45h	; [0783h]  69 'E'
-	db 0F0h	; [0784h] 240  -16 'ð'
-	db 60h	; [0785h]  96 '`'
-	db 30h	; [0786h]  48 '0'
-	db 0E0h	; [0787h] 224  -32 'à'
-	db 0C3h	; [0788h] 195  -61 'Ã'
-	db 94h	; [0789h] 148 -108
-	db 20h	; [078Ah]  32 ' '
-	db 50h	; [078Bh]  80 'P'
-	db 0Fh	; [078Ch]  15
-	db 0E4h	; [078Dh] 228  -28 'ä'
+jump_095C:
+	clr A
+	mov DPTR, #dptr_004E
+	movx @DPTR, A
+jump_0961:
+	mov R6, #89h	; 137 -119
+	mov DPTR, #dptr_004F
+	movx A, @DPTR
+	mov R5, A
+	jnz jump_0973
+	mov A, R7
+	jnz jump_0973
+	mov R0, 06h
+	mov @R0, #20h	;  32 ' '
+	sjmp jump_0983
 
-org	78Fh
-	db 90h	; [078Fh] 144 -112
-	db 00h	; [0790h]   0
-	db 40h	; [0791h]  64 '@'
-	db 0E0h	; [0792h] 224  -32 'à'
-	db 0FDh	; [0793h] 253   -3 'ý'
-	db 0A3h	; [0794h] 163  -93 '£'
-	db 0E0h	; [0795h] 224  -32 'à'
-	db 0FBh	; [0796h] 251   -5 'û'
-	db 12h	; [0797h]  18
-	db 0FEh	; [0798h] 254   -2 'þ'
-	db 03h	; [0799h]   3
-	db 80h	; [079Ah] 128 -128
-	db 12h	; [079Bh]  18
-	db 90h	; [079Ch] 144 -112
-	db 00h	; [079Dh]   0
-	db 45h	; [079Eh]  69 'E'
-	db 0E0h	; [079Fh] 224  -32 'à'
-	db 24h	; [07A0h]  36 '$'
-	db 0E0h	; [07A1h] 224  -32 'à'
+jump_0973:
+	mov DPTR, #dptr_004E
+	movx A, @DPTR
+	jz jump_097F
+	mov R0, 06h
+	mov @R0, #2Dh	;  45 '-'
+	sjmp jump_0983
 
-org	7A3h
-	db 90h	; [07A3h] 144 -112
-	db 00h	; [07A4h]   0
-	db 40h	; [07A5h]  64 '@'
-	db 0E0h	; [07A6h] 224  -32 'à'
-	db 0FDh	; [07A7h] 253   -3 'ý'
-	db 0A3h	; [07A8h] 163  -93 '£'
-	db 0E0h	; [07A9h] 224  -32 'à'
-	db 0FBh	; [07AAh] 251   -5 'û'
-	db 12h	; [07ABh]  18
-	db 0FEh	; [07ACh] 254   -2 'þ'
-	db 03h	; [07ADh]   3
-	db 90h	; [07AEh] 144 -112
-	db 00h	; [07AFh]   0
-	db 40h	; [07B0h]  64 '@'
-	db 0E0h	; [07B1h] 224  -32 'à'
-	db 24h	; [07B2h]  36 '$'
-	db 05h	; [07B3h]   5
-	db 0F0h	; [07B4h] 240  -16 'ð'
-	db 80h	; [07B5h] 128 -128
-	db 0B7h	; [07B6h] 183  -73 '·'
-	db 22h	; [07B7h]  34 '"'
-	db 90h	; [07B8h] 144 -112
-	db 00h	; [07B9h]   0
-	db 46h	; [07BAh]  70 'F'
-	db 0EFh	; [07BBh] 239  -17 'ï'
-	db 0F0h	; [07BCh] 240  -16 'ð'
-	db 0A3h	; [07BDh] 163  -93 '£'
-	db 0EDh	; [07BEh] 237  -19 'í'
-	db 0F0h	; [07BFh] 240  -16 'ð'
-	db 0AFh	; [07C0h] 175  -81 '¯'
-	db 03h	; [07C1h]   3
-	db 7Eh	; [07C2h] 126 '~'
-	db 89h	; [07C3h] 137 -119
-	db 78h	; [07C4h] 120 'x'
-	db 89h	; [07C5h] 137 -119
-	db 76h	; [07C6h] 118 'v'
-	db 20h	; [07C7h]  32 ' '
-	db 08h	; [07C8h]   8
-	db 76h	; [07C9h] 118 'v'
-	db 20h	; [07CAh]  32 ' '
-	db 08h	; [07CBh]   8
-	db 76h	; [07CCh] 118 'v'
-	db 20h	; [07CDh]  32 ' '
-	db 0E4h	; [07CEh] 228  -28 'ä'
-	db 08h	; [07CFh]   8
-	db 0F6h	; [07D0h] 246  -10 'ö'
-	db 0EFh	; [07D1h] 239  -17 'ï'
-	db 0D3h	; [07D2h] 211  -45 'Ó'
-	db 94h	; [07D3h] 148 -108
-	db 63h	; [07D4h]  99 'c'
-	db 40h	; [07D5h]  64 '@'
-	db 13h	; [07D6h]  19
-	db 0EFh	; [07D7h] 239  -17 'ï'
-	db 75h	; [07D8h] 117 'u'
-	db 0F0h	; [07D9h] 240  -16 'ð'
-	db 64h	; [07DAh] 100 'd'
-	db 84h	; [07DBh] 132 -124
-	db 75h	; [07DCh] 117 'u'
-	db 0F0h	; [07DDh] 240  -16 'ð'
-	db 0Ah	; [07DEh]  10
-	db 84h	; [07DFh] 132 -124
-	db 0E5h	; [07E0h] 229  -27 'å'
-	db 0F0h	; [07E1h] 240  -16 'ð'
-	db 24h	; [07E2h]  36 '$'
-	db 30h	; [07E3h]  48 '0'
-	db 0ACh	; [07E4h] 172  -84 '¬'
-	db 06h	; [07E5h]   6
-	db 0Eh	; [07E6h]  14
-	db 0A8h	; [07E7h] 168  -88 '¨'
-	db 04h	; [07E8h]   4
-	db 0F6h	; [07E9h] 246  -10 'ö'
-	db 0EFh	; [07EAh] 239  -17 'ï'
-	db 0D3h	; [07EBh] 211  -45 'Ó'
-	db 94h	; [07ECh] 148 -108
-	db 09h	; [07EDh]   9
-	db 40h	; [07EEh]  64 '@'
-	db 13h	; [07EFh]  19
-	db 0EFh	; [07F0h] 239  -17 'ï'
-	db 75h	; [07F1h] 117 'u'
-	db 0F0h	; [07F2h] 240  -16 'ð'
-	db 0Ah	; [07F3h]  10
-	db 84h	; [07F4h] 132 -124
-	db 75h	; [07F5h] 117 'u'
-	db 0F0h	; [07F6h] 240  -16 'ð'
-	db 0Ah	; [07F7h]  10
-	db 84h	; [07F8h] 132 -124
-	db 0E5h	; [07F9h] 229  -27 'å'
-	db 0F0h	; [07FAh] 240  -16 'ð'
-	db 24h	; [07FBh]  36 '$'
-	db 30h	; [07FCh]  48 '0'
-	db 0ACh	; [07FDh] 172  -84 '¬'
-	db 06h	; [07FEh]   6
-	db 0Eh	; [07FFh]  14
-	db 0A8h	; [0800h] 168  -88 '¨'
-	db 04h	; [0801h]   4
-	db 0F6h	; [0802h] 246  -10 'ö'
-	db 0EFh	; [0803h] 239  -17 'ï'
-	db 75h	; [0804h] 117 'u'
-	db 0F0h	; [0805h] 240  -16 'ð'
-	db 0Ah	; [0806h]  10
-	db 84h	; [0807h] 132 -124
-	db 0E5h	; [0808h] 229  -27 'å'
-	db 0F0h	; [0809h] 240  -16 'ð'
-	db 24h	; [080Ah]  36 '$'
-	db 30h	; [080Bh]  48 '0'
-	db 0A8h	; [080Ch] 168  -88 '¨'
-	db 06h	; [080Dh]   6
-	db 0F6h	; [080Eh] 246  -10 'ö'
-	db 90h	; [080Fh] 144 -112
-	db 00h	; [0810h]   0
-	db 46h	; [0811h]  70 'F'
-	db 0E0h	; [0812h] 224  -32 'à'
+jump_097F:
+	mov R0, 06h
+	mov @R0, #2Bh	;  43 '+'
+jump_0983:
+	inc R6
+	setb C
+	mov A, R5
+	xrl A, #80h	; 128 -128
+	subb A, #89h	; 137 -119
+	jc jump_09A4
+	mov A, R5
+	mov B, #0Ah	;  10
+	lcall jump_359C
+	mov R4, A
+	mov B, #0Ah	;  10
+	lcall jump_359C
+	mov R4, B
+	mov A, R4
+	add A, #30h	;  48 '0'
+	mov R0, 06h
+	mov @R0, A
+	sjmp jump_09A8
 
-org	814h
-	db 0A3h	; [0814h] 163  -93 '£'
-	db 0E0h	; [0815h] 224  -32 'à'
-	db 0FDh	; [0816h] 253   -3 'ý'
-	db 7Bh	; [0817h] 123 '{'
-	db 01h	; [0818h]   1
-	db 7Ah	; [0819h] 122 'z'
-	db 00h	; [081Ah]   0
-	db 79h	; [081Bh] 121 'y'
-	db 89h	; [081Ch] 137 -119
-	db 12h	; [081Dh]  18
-	db 0FEh	; [081Eh] 254   -2 'þ'
-	db 06h	; [081Fh]   6
-	db 22h	; [0820h]  34 '"'
-	db 90h	; [0821h] 144 -112
-	db 00h	; [0822h]   0
-	db 48h	; [0823h]  72 'H'
-	db 0EFh	; [0824h] 239  -17 'ï'
-	db 0F0h	; [0825h] 240  -16 'ð'
-	db 0A3h	; [0826h] 163  -93 '£'
-	db 0EDh	; [0827h] 237  -19 'í'
-	db 0F0h	; [0828h] 240  -16 'ð'
-	db 0A3h	; [0829h] 163  -93 '£'
-	db 0EAh	; [082Ah] 234  -22 'ê'
-	db 0F0h	; [082Bh] 240  -16 'ð'
-	db 0A3h	; [082Ch] 163  -93 '£'
-	db 0EBh	; [082Dh] 235  -21 'ë'
-	db 0F0h	; [082Eh] 240  -16 'ð'
-	db 7Bh	; [082Fh] 123 '{'
-	db 89h	; [0830h] 137 -119
-	db 90h	; [0831h] 144 -112
-	db 00h	; [0832h]   0
-	db 4Ah	; [0833h]  74 'J'
-	db 0E0h	; [0834h] 224  -32 'à'
-	db 0FEh	; [0835h] 254   -2 'þ'
-	db 0A3h	; [0836h] 163  -93 '£'
-	db 0E0h	; [0837h] 224  -32 'à'
+jump_09A4:
+	mov R0, 06h
+	mov @R0, #20h	;  32 ' '
+jump_09A8:
+	inc R6
+	mov A, R5
+	mov B, #0Ah	;  10
+	lcall jump_359C
+	mov R5, B
+	mov A, R5
+	add A, #30h	;  48 '0'
+	mov R4, 06h
+	inc R6
+	mov R0, 04h
+	mov @R0, A
+	mov R5, 06h
+	inc R6
+	mov R0, 05h
+	mov @R0, #2Eh	;  46 '.'
+	mov A, R7
+	add A, #30h	;  48 '0'
+	mov R5, 06h
+	inc R6
+	mov R0, 05h
+	mov @R0, A
+	mov R7, 06h
+	mov R0, 07h
+	clr A
+	mov @R0, A
+	mov DPTR, #dptr_004C
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	mov R3, #01h	;   1
+	mov R2, #00h	;   0
+	mov R1, #89h	; 137 -119
+	lcall jump_FE06
+	ret
 
-org	839h
-	db 0D3h	; [0839h] 211  -45 'Ó'
-	db 94h	; [083Ah] 148 -108
-	db 0Fh	; [083Bh]  15
-	db 0EEh	; [083Ch] 238  -18 'î'
-	db 94h	; [083Dh] 148 -108
-	db 27h	; [083Eh]  39 '''
-	db 40h	; [083Fh]  64 '@'
-	db 16h	; [0840h]  22
-	db 7Ch	; [0841h] 124 '|'
-	db 27h	; [0842h]  39 '''
-	db 7Dh	; [0843h] 125 '}'
-	db 10h	; [0844h]  16
-	db 12h	; [0845h]  18
-	db 36h	; [0846h]  54 '6'
-	db 30h	; [0847h]  48 '0'
-	db 7Ch	; [0848h] 124 '|'
-	db 00h	; [0849h]   0
-	db 7Dh	; [084Ah] 125 '}'
-	db 0Ah	; [084Bh]  10
-	db 12h	; [084Ch]  18
-	db 36h	; [084Dh]  54 '6'
-	db 30h	; [084Eh]  48 '0'
-	db 0EDh	; [084Fh] 237  -19 'í'
-	db 24h	; [0850h]  36 '$'
-	db 30h	; [0851h]  48 '0'
-	db 0A8h	; [0852h] 168  -88 '¨'
-	db 03h	; [0853h]   3
-	db 0F6h	; [0854h] 246  -10 'ö'
-	db 80h	; [0855h] 128 -128
-	db 04h	; [0856h]   4
-	db 0A8h	; [0857h] 168  -88 '¨'
-	db 03h	; [0858h]   3
-	db 76h	; [0859h] 118 'v'
-	db 20h	; [085Ah]  32 ' '
-	db 0Bh	; [085Bh]  11
-	db 90h	; [085Ch] 144 -112
-	db 00h	; [085Dh]   0
-	db 4Ah	; [085Eh]  74 'J'
-	db 0E0h	; [085Fh] 224  -32 'à'
-	db 0FEh	; [0860h] 254   -2 'þ'
-	db 0A3h	; [0861h] 163  -93 '£'
-	db 0E0h	; [0862h] 224  -32 'à'
+;org	9E3h
+	mov DPTR, #dptr_0050
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	clr C
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_09F8
+	clr A
+	mov R2, A
+	mov R3, A
+	sjmp jump_0A07
 
-org	864h
-	db 0D3h	; [0864h] 211  -45 'Ó'
-	db 94h	; [0865h] 148 -108
-	db 0E7h	; [0866h] 231  -25 'ç'
-	db 0EEh	; [0867h] 238  -18 'î'
-	db 94h	; [0868h] 148 -108
-	db 03h	; [0869h]   3
-	db 40h	; [086Ah]  64 '@'
-	db 16h	; [086Bh]  22
-	db 7Ch	; [086Ch] 124 '|'
-	db 03h	; [086Dh]   3
-	db 7Dh	; [086Eh] 125 '}'
-	db 0E8h	; [086Fh] 232  -24 'è'
-	db 12h	; [0870h]  18
-	db 36h	; [0871h]  54 '6'
-	db 30h	; [0872h]  48 '0'
-	db 7Ch	; [0873h] 124 '|'
-	db 00h	; [0874h]   0
-	db 7Dh	; [0875h] 125 '}'
-	db 0Ah	; [0876h]  10
-	db 12h	; [0877h]  18
-	db 36h	; [0878h]  54 '6'
-	db 30h	; [0879h]  48 '0'
-	db 0EDh	; [087Ah] 237  -19 'í'
-	db 24h	; [087Bh]  36 '$'
-	db 30h	; [087Ch]  48 '0'
-	db 0A8h	; [087Dh] 168  -88 '¨'
-	db 03h	; [087Eh]   3
-	db 0F6h	; [087Fh] 246  -10 'ö'
-	db 80h	; [0880h] 128 -128
-	db 04h	; [0881h]   4
-	db 0A8h	; [0882h] 168  -88 '¨'
-	db 03h	; [0883h]   3
-	db 76h	; [0884h] 118 'v'
-	db 20h	; [0885h]  32 ' '
-	db 0Bh	; [0886h]  11
-	db 90h	; [0887h] 144 -112
-	db 00h	; [0888h]   0
-	db 4Ah	; [0889h]  74 'J'
-	db 0E0h	; [088Ah] 224  -32 'à'
-	db 0FEh	; [088Bh] 254   -2 'þ'
-	db 0A3h	; [088Ch] 163  -93 '£'
-	db 0E0h	; [088Dh] 224  -32 'à'
+jump_09F8:
+	setb C
+	mov A, R3
+	subb A, #63h	;  99 'c'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jc jump_0A07
+	mov R2, #00h	;   0
+	mov R3, #63h	;  99 'c'
+jump_0A07:
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov DPTR, #dptr_0052
+	mov A, R7
+	movx @DPTR, A
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov R7, 05h
+	mov R6, #89h	; 137 -119
+	movx A, @DPTR
+	add A, #30h	;  48 '0'
+	mov R4, 06h
+	inc R6
+	mov R0, 04h
+	mov @R0, A
+	mov R5, 06h
+	inc R6
+	mov R0, 05h
+	mov @R0, #2Eh	;  46 '.'
+	mov A, R7
+	add A, #30h	;  48 '0'
+	mov R5, 06h
+	inc R6
+	mov R0, 05h
+	mov @R0, A
+	mov R0, 06h
+	clr A
+	mov @R0, A
+	mov DPTR, #dptr_0050
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	mov R3, #01h	;   1
+	mov R2, #00h	;   0
+	mov R1, #89h	; 137 -119
+	lcall jump_FE06
+	ret
 
-org	88Fh
-	db 0D3h	; [088Fh] 211  -45 'Ó'
-	db 94h	; [0890h] 148 -108
-	db 63h	; [0891h]  99 'c'
-	db 0EEh	; [0892h] 238  -18 'î'
-	db 94h	; [0893h] 148 -108
-	db 00h	; [0894h]   0
-	db 40h	; [0895h]  64 '@'
-	db 16h	; [0896h]  22
-	db 7Ch	; [0897h] 124 '|'
-	db 00h	; [0898h]   0
-	db 7Dh	; [0899h] 125 '}'
-	db 64h	; [089Ah] 100 'd'
-	db 12h	; [089Bh]  18
-	db 36h	; [089Ch]  54 '6'
-	db 30h	; [089Dh]  48 '0'
-	db 7Ch	; [089Eh] 124 '|'
-	db 00h	; [089Fh]   0
-	db 7Dh	; [08A0h] 125 '}'
-	db 0Ah	; [08A1h]  10
-	db 12h	; [08A2h]  18
-	db 36h	; [08A3h]  54 '6'
-	db 30h	; [08A4h]  48 '0'
-	db 0EDh	; [08A5h] 237  -19 'í'
-	db 24h	; [08A6h]  36 '$'
-	db 30h	; [08A7h]  48 '0'
-	db 0A8h	; [08A8h] 168  -88 '¨'
-	db 03h	; [08A9h]   3
-	db 0F6h	; [08AAh] 246  -10 'ö'
-	db 80h	; [08ABh] 128 -128
-	db 04h	; [08ACh]   4
-	db 0A8h	; [08ADh] 168  -88 '¨'
-	db 03h	; [08AEh]   3
-	db 76h	; [08AFh] 118 'v'
-	db 20h	; [08B0h]  32 ' '
-	db 0Bh	; [08B1h]  11
-	db 90h	; [08B2h] 144 -112
-	db 00h	; [08B3h]   0
-	db 4Ah	; [08B4h]  74 'J'
-	db 0E0h	; [08B5h] 224  -32 'à'
-	db 0FEh	; [08B6h] 254   -2 'þ'
-	db 0A3h	; [08B7h] 163  -93 '£'
-	db 0E0h	; [08B8h] 224  -32 'à'
+;org	0A55h
+	mov R3, 07h
+	mov A, #80h	; 128 -128
+	add A, R3
+	mov R3, A
+	rrc A
+	rrc A
+	rrc A
+	anl A, #1Fh	;  31
+	mov R3, A
+	mov A, R5
+	add A, #20h	;  32 ' '
+	mov DPTR, #dptr_0054
+	movx @DPTR, A
+	clr A
+	addc A, R4
+	mov DPTR, #fwd_0053_jump_3524
+	movx @DPTR, A
+	mov R6, 04h
+	mov A, R5
+	mov R0, #03h	;   3
+jump_0A73:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+	djnz R0, jump_0A73
+	add A, #06h	;   6
+	mov R7, A
+	clr A
+	addc A, R6
+	mov R5, 07h
+	mov R4, A
+	mov DPTR, #fwd_0053_jump_3524
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R0, #03h	;   3
+jump_0A8B:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+	djnz R0, jump_0A8B
+	add A, #06h	;   6
+	mov DPTR, #dptr_0056
+	movx @DPTR, A
+	clr A
+	addc A, R6
+	mov DPTR, #dptr_0055
+	movx @DPTR, A
+	mov A, R3
+	jnz jump_0AA3
+	mov R3, #01h	;   1
+jump_0AA3:
+	clr A
+	mov 28h, A
+	mov R6, 04h
+	mov R7, 05h
+	mov 29h, R6
+	mov 2Ah, R7
+jump_0AAE:
+	mov DPTR, #dptr_0055
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	mov A, 2Ah
+	subb A, R7
+	mov A, 29h
+	subb A, R6
+	jc jump_0AC2
+	ljmp jump_0B4C
 
-org	8BAh
-	db 0D3h	; [08BAh] 211  -45 'Ó'
-	db 94h	; [08BBh] 148 -108
-	db 09h	; [08BCh]   9
-	db 0EEh	; [08BDh] 238  -18 'î'
-	db 94h	; [08BEh] 148 -108
-	db 00h	; [08BFh]   0
-	db 40h	; [08C0h]  64 '@'
-	db 16h	; [08C1h]  22
-	db 7Ch	; [08C2h] 124 '|'
-	db 00h	; [08C3h]   0
-	db 7Dh	; [08C4h] 125 '}'
-	db 0Ah	; [08C5h]  10
-	db 12h	; [08C6h]  18
-	db 36h	; [08C7h]  54 '6'
-	db 30h	; [08C8h]  48 '0'
-	db 7Ch	; [08C9h] 124 '|'
-	db 00h	; [08CAh]   0
-	db 7Dh	; [08CBh] 125 '}'
-	db 0Ah	; [08CCh]  10
-	db 12h	; [08CDh]  18
-	db 36h	; [08CEh]  54 '6'
-	db 30h	; [08CFh]  48 '0'
-	db 0EDh	; [08D0h] 237  -19 'í'
-	db 24h	; [08D1h]  36 '$'
-	db 30h	; [08D2h]  48 '0'
-	db 0A8h	; [08D3h] 168  -88 '¨'
-	db 03h	; [08D4h]   3
-	db 0F6h	; [08D5h] 246  -10 'ö'
-	db 80h	; [08D6h] 128 -128
-	db 04h	; [08D7h]   4
-	db 0A8h	; [08D8h] 168  -88 '¨'
-	db 03h	; [08D9h]   3
-	db 76h	; [08DAh] 118 'v'
-	db 20h	; [08DBh]  32 ' '
-	db 0Bh	; [08DCh]  11
-	db 90h	; [08DDh] 144 -112
-	db 00h	; [08DEh]   0
-	db 4Ah	; [08DFh]  74 'J'
-	db 0E0h	; [08E0h] 224  -32 'à'
-	db 0FEh	; [08E1h] 254   -2 'þ'
-	db 0A3h	; [08E2h] 163  -93 '£'
-	db 0E0h	; [08E3h] 224  -32 'à'
+jump_0AC2:
+	mov DPTR, #dptr_FFF5
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov A, 2Ah
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov A, 29h
+	anl A, #1Fh	;  31
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	mov A, 28h
+	cjne A, #10h, jump_0AE9	;  16
+	mov R0, #82h	; 130 -126
+	mov @R0, #24h	;  36 '$'
+	sjmp jump_0AF9
 
-org	8E5h
-	db 7Ch	; [08E5h] 124 '|'
-	db 00h	; [08E6h]   0
-	db 7Dh	; [08E7h] 125 '}'
-	db 0Ah	; [08E8h]  10
-	db 12h	; [08E9h]  18
-	db 36h	; [08EAh]  54 '6'
-	db 30h	; [08EBh]  48 '0'
-	db 0EDh	; [08ECh] 237  -19 'í'
-	db 24h	; [08EDh]  36 '$'
-	db 30h	; [08EEh]  48 '0'
-	db 0AEh	; [08EFh] 174  -82 '®'
-	db 03h	; [08F0h]   3
-	db 0Bh	; [08F1h]  11
-	db 0A8h	; [08F2h] 168  -88 '¨'
-	db 06h	; [08F3h]   6
-	db 0F6h	; [08F4h] 246  -10 'ö'
-	db 0AFh	; [08F5h] 175  -81 '¯'
-	db 03h	; [08F6h]   3
-	db 0A8h	; [08F7h] 168  -88 '¨'
-	db 07h	; [08F8h]   7
-	db 0E4h	; [08F9h] 228  -28 'ä'
-	db 0F6h	; [08FAh] 246  -10 'ö'
-	db 90h	; [08FBh] 144 -112
-	db 00h	; [08FCh]   0
-	db 48h	; [08FDh]  72 'H'
-	db 0E0h	; [08FEh] 224  -32 'à'
+jump_0AE9:
+	mov A, 28h
+	anl A, #03h	;   3
+	jnz jump_0AF5
+	mov R0, #82h	; 130 -126
+	mov @R0, #3Ch	;  60 '<'
+	sjmp jump_0AF9
 
-org	900h
-	db 0A3h	; [0900h] 163  -93 '£'
-	db 0E0h	; [0901h] 224  -32 'à'
-	db 0FDh	; [0902h] 253   -3 'ý'
-	db 7Bh	; [0903h] 123 '{'
-	db 01h	; [0904h]   1
-	db 7Ah	; [0905h] 122 'z'
-	db 00h	; [0906h]   0
-	db 79h	; [0907h] 121 'y'
-	db 89h	; [0908h] 137 -119
-	db 12h	; [0909h]  18
-	db 0FEh	; [090Ah] 254   -2 'þ'
-	db 06h	; [090Bh]   6
-	db 22h	; [090Ch]  34 '"'
-	db 90h	; [090Dh] 144 -112
-	db 00h	; [090Eh]   0
-	db 4Ch	; [090Fh]  76 'L'
-	db 0EFh	; [0910h] 239  -17 'ï'
-	db 0F0h	; [0911h] 240  -16 'ð'
-	db 0A3h	; [0912h] 163  -93 '£'
-	db 0EDh	; [0913h] 237  -19 'í'
-	db 0F0h	; [0914h] 240  -16 'ð'
-	db 0AEh	; [0915h] 174  -82 '®'
-	db 02h	; [0916h]   2
-	db 0AFh	; [0917h] 175  -81 '¯'
-	db 03h	; [0918h]   3
-	db 7Ch	; [0919h] 124 '|'
-	db 00h	; [091Ah]   0
-	db 7Dh	; [091Bh] 125 '}'
-	db 0Ah	; [091Ch]  10
-	db 12h	; [091Dh]  18
-	db 36h	; [091Eh]  54 '6'
-	db 85h	; [091Fh] 133 -123
-	db 90h	; [0920h] 144 -112
-	db 00h	; [0921h]   0
-	db 4Fh	; [0922h]  79 'O'
-	db 0EFh	; [0923h] 239  -17 'ï'
-	db 0F0h	; [0924h] 240  -16 'ð'
-	db 0AEh	; [0925h] 174  -82 '®'
-	db 02h	; [0926h]   2
-	db 0AFh	; [0927h] 175  -81 '¯'
-	db 03h	; [0928h]   3
-	db 7Ch	; [0929h] 124 '|'
-	db 00h	; [092Ah]   0
-	db 7Dh	; [092Bh] 125 '}'
-	db 0Ah	; [092Ch]  10
-	db 12h	; [092Dh]  18
-	db 36h	; [092Eh]  54 '6'
-	db 85h	; [092Fh] 133 -123
-	db 0AFh	; [0930h] 175  -81 '¯'
-	db 05h	; [0931h]   5
-	db 0C3h	; [0932h] 195  -61 'Ã'
-	db 0EAh	; [0933h] 234  -22 'ê'
-	db 64h	; [0934h] 100 'd'
-	db 80h	; [0935h] 128 -128
-	db 94h	; [0936h] 148 -108
-	db 80h	; [0937h] 128 -128
-	db 50h	; [0938h]  80 'P'
-	db 22h	; [0939h]  34 '"'
-	db 90h	; [093Ah] 144 -112
-	db 00h	; [093Bh]   0
-	db 4Eh	; [093Ch]  78 'N'
-	db 74h	; [093Dh] 116 't'
-	db 01h	; [093Eh]   1
-	db 0F0h	; [093Fh] 240  -16 'ð'
-	db 0A3h	; [0940h] 163  -93 '£'
-	db 0E0h	; [0941h] 224  -32 'à'
-	db 0FEh	; [0942h] 254   -2 'þ'
-	db 0C3h	; [0943h] 195  -61 'Ã'
-	db 64h	; [0944h] 100 'd'
-	db 80h	; [0945h] 128 -128
-	db 94h	; [0946h] 148 -108
-	db 80h	; [0947h] 128 -128
-	db 50h	; [0948h]  80 'P'
-	db 04h	; [0949h]   4
-	db 0EEh	; [094Ah] 238  -18 'î'
-	db 0F4h	; [094Bh] 244  -12 'ô'
-	db 04h	; [094Ch]   4
-	db 0F0h	; [094Dh] 240  -16 'ð'
-	db 0C3h	; [094Eh] 195  -61 'Ã'
-	db 0EFh	; [094Fh] 239  -17 'ï'
-	db 64h	; [0950h] 100 'd'
-	db 80h	; [0951h] 128 -128
-	db 94h	; [0952h] 148 -108
-	db 80h	; [0953h] 128 -128
-	db 50h	; [0954h]  80 'P'
-	db 0Bh	; [0955h]  11
-	db 0EFh	; [0956h] 239  -17 'ï'
-	db 0F4h	; [0957h] 244  -12 'ô'
-	db 04h	; [0958h]   4
+jump_0AF5:
+	mov R0, #82h	; 130 -126
+	mov @R0, #18h	;  24
+jump_0AF9:
+	mov A, 28h
+	cjne A, 03h, jump_0B14
+	mov A, R3
+	cjne A, #10h, jump_0B0A	;  16
+	mov DPTR, #dptr_FFF4
+	mov A, #0E7h	; 231  -25 'ç'
+	movx @DPTR, A
+	sjmp jump_0B3C
 
-org	95Ah
-	db 80h	; [095Ah] 128 -128
-	db 05h	; [095Bh]   5
-	db 0E4h	; [095Ch] 228  -28 'ä'
-	db 90h	; [095Dh] 144 -112
-	db 00h	; [095Eh]   0
-	db 4Eh	; [095Fh]  78 'N'
-	db 0F0h	; [0960h] 240  -16 'ð'
-	db 7Eh	; [0961h] 126 '~'
-	db 89h	; [0962h] 137 -119
-	db 90h	; [0963h] 144 -112
-	db 00h	; [0964h]   0
-	db 4Fh	; [0965h]  79 'O'
-	db 0E0h	; [0966h] 224  -32 'à'
-	db 0FDh	; [0967h] 253   -3 'ý'
-	db 70h	; [0968h] 112 'p'
-	db 09h	; [0969h]   9
-	db 0EFh	; [096Ah] 239  -17 'ï'
-	db 70h	; [096Bh] 112 'p'
-	db 06h	; [096Ch]   6
-	db 0A8h	; [096Dh] 168  -88 '¨'
-	db 06h	; [096Eh]   6
-	db 76h	; [096Fh] 118 'v'
-	db 20h	; [0970h]  32 ' '
-	db 80h	; [0971h] 128 -128
-	db 10h	; [0972h]  16
-	db 90h	; [0973h] 144 -112
-	db 00h	; [0974h]   0
-	db 4Eh	; [0975h]  78 'N'
-	db 0E0h	; [0976h] 224  -32 'à'
-	db 60h	; [0977h]  96 '`'
-	db 06h	; [0978h]   6
-	db 0A8h	; [0979h] 168  -88 '¨'
-	db 06h	; [097Ah]   6
-	db 76h	; [097Bh] 118 'v'
-	db 2Dh	; [097Ch]  45 '-'
-	db 80h	; [097Dh] 128 -128
-	db 04h	; [097Eh]   4
-	db 0A8h	; [097Fh] 168  -88 '¨'
-	db 06h	; [0980h]   6
-	db 76h	; [0981h] 118 'v'
-	db 2Bh	; [0982h]  43 '+'
-	db 0Eh	; [0983h]  14
-	db 0D3h	; [0984h] 211  -45 'Ó'
-	db 0EDh	; [0985h] 237  -19 'í'
-	db 64h	; [0986h] 100 'd'
-	db 80h	; [0987h] 128 -128
-	db 94h	; [0988h] 148 -108
-	db 89h	; [0989h] 137 -119
-	db 40h	; [098Ah]  64 '@'
-	db 18h	; [098Bh]  24
-	db 0EDh	; [098Ch] 237  -19 'í'
-	db 75h	; [098Dh] 117 'u'
-	db 0F0h	; [098Eh] 240  -16 'ð'
-	db 0Ah	; [098Fh]  10
-	db 12h	; [0990h]  18
-	db 35h	; [0991h]  53 '5'
-	db 9Ch	; [0992h] 156 -100
-	db 0FCh	; [0993h] 252   -4 'ü'
-	db 75h	; [0994h] 117 'u'
-	db 0F0h	; [0995h] 240  -16 'ð'
-	db 0Ah	; [0996h]  10
-	db 12h	; [0997h]  18
-	db 35h	; [0998h]  53 '5'
-	db 9Ch	; [0999h] 156 -100
-	db 0ACh	; [099Ah] 172  -84 '¬'
-	db 0F0h	; [099Bh] 240  -16 'ð'
-	db 0ECh	; [099Ch] 236  -20 'ì'
-	db 24h	; [099Dh]  36 '$'
-	db 30h	; [099Eh]  48 '0'
-	db 0A8h	; [099Fh] 168  -88 '¨'
-	db 06h	; [09A0h]   6
-	db 0F6h	; [09A1h] 246  -10 'ö'
-	db 80h	; [09A2h] 128 -128
-	db 04h	; [09A3h]   4
-	db 0A8h	; [09A4h] 168  -88 '¨'
-	db 06h	; [09A5h]   6
-	db 76h	; [09A6h] 118 'v'
-	db 20h	; [09A7h]  32 ' '
-	db 0Eh	; [09A8h]  14
-	db 0EDh	; [09A9h] 237  -19 'í'
-	db 75h	; [09AAh] 117 'u'
-	db 0F0h	; [09ABh] 240  -16 'ð'
-	db 0Ah	; [09ACh]  10
-	db 12h	; [09ADh]  18
-	db 35h	; [09AEh]  53 '5'
-	db 9Ch	; [09AFh] 156 -100
-	db 0ADh	; [09B0h] 173  -83
-	db 0F0h	; [09B1h] 240  -16 'ð'
-	db 0EDh	; [09B2h] 237  -19 'í'
-	db 24h	; [09B3h]  36 '$'
-	db 30h	; [09B4h]  48 '0'
-	db 0ACh	; [09B5h] 172  -84 '¬'
-	db 06h	; [09B6h]   6
-	db 0Eh	; [09B7h]  14
-	db 0A8h	; [09B8h] 168  -88 '¨'
-	db 04h	; [09B9h]   4
-	db 0F6h	; [09BAh] 246  -10 'ö'
-	db 0ADh	; [09BBh] 173  -83
-	db 06h	; [09BCh]   6
-	db 0Eh	; [09BDh]  14
-	db 0A8h	; [09BEh] 168  -88 '¨'
-	db 05h	; [09BFh]   5
-	db 76h	; [09C0h] 118 'v'
-	db 2Eh	; [09C1h]  46 '.'
-	db 0EFh	; [09C2h] 239  -17 'ï'
-	db 24h	; [09C3h]  36 '$'
-	db 30h	; [09C4h]  48 '0'
-	db 0ADh	; [09C5h] 173  -83
-	db 06h	; [09C6h]   6
-	db 0Eh	; [09C7h]  14
-	db 0A8h	; [09C8h] 168  -88 '¨'
-	db 05h	; [09C9h]   5
-	db 0F6h	; [09CAh] 246  -10 'ö'
-	db 0AFh	; [09CBh] 175  -81 '¯'
-	db 06h	; [09CCh]   6
-	db 0A8h	; [09CDh] 168  -88 '¨'
-	db 07h	; [09CEh]   7
-	db 0E4h	; [09CFh] 228  -28 'ä'
-	db 0F6h	; [09D0h] 246  -10 'ö'
-	db 90h	; [09D1h] 144 -112
-	db 00h	; [09D2h]   0
-	db 4Ch	; [09D3h]  76 'L'
-	db 0E0h	; [09D4h] 224  -32 'à'
+jump_0B0A:
+	mov R0, #82h	; 130 -126
+	mov A, #0FFh	; 255   -1 'ÿ'
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	sjmp jump_0B3C
 
-org	9D6h
-	db 0A3h	; [09D6h] 163  -93 '£'
-	db 0E0h	; [09D7h] 224  -32 'à'
-	db 0FDh	; [09D8h] 253   -3 'ý'
-	db 7Bh	; [09D9h] 123 '{'
-	db 01h	; [09DAh]   1
-	db 7Ah	; [09DBh] 122 'z'
-	db 00h	; [09DCh]   0
-	db 79h	; [09DDh] 121 'y'
-	db 89h	; [09DEh] 137 -119
-	db 12h	; [09DFh]  18
-	db 0FEh	; [09E0h] 254   -2 'þ'
-	db 06h	; [09E1h]   6
-	db 22h	; [09E2h]  34 '"'
-	db 90h	; [09E3h] 144 -112
-	db 00h	; [09E4h]   0
-	db 50h	; [09E5h]  80 'P'
-	db 0EFh	; [09E6h] 239  -17 'ï'
-	db 0F0h	; [09E7h] 240  -16 'ð'
-	db 0A3h	; [09E8h] 163  -93 '£'
-	db 0EDh	; [09E9h] 237  -19 'í'
-	db 0F0h	; [09EAh] 240  -16 'ð'
-	db 0C3h	; [09EBh] 195  -61 'Ã'
-	db 0EAh	; [09ECh] 234  -22 'ê'
-	db 64h	; [09EDh] 100 'd'
-	db 80h	; [09EEh] 128 -128
-	db 94h	; [09EFh] 148 -108
-	db 80h	; [09F0h] 128 -128
-	db 50h	; [09F1h]  80 'P'
-	db 05h	; [09F2h]   5
-	db 0E4h	; [09F3h] 228  -28 'ä'
-	db 0FAh	; [09F4h] 250   -6 'ú'
-	db 0FBh	; [09F5h] 251   -5 'û'
-	db 80h	; [09F6h] 128 -128
-	db 0Fh	; [09F7h]  15
-	db 0D3h	; [09F8h] 211  -45 'Ó'
-	db 0EBh	; [09F9h] 235  -21 'ë'
-	db 94h	; [09FAh] 148 -108
-	db 63h	; [09FBh]  99 'c'
-	db 0EAh	; [09FCh] 234  -22 'ê'
-	db 64h	; [09FDh] 100 'd'
-	db 80h	; [09FEh] 128 -128
-	db 94h	; [09FFh] 148 -108
-	db 80h	; [0A00h] 128 -128
-	db 40h	; [0A01h]  64 '@'
-	db 04h	; [0A02h]   4
-	db 7Ah	; [0A03h] 122 'z'
-	db 00h	; [0A04h]   0
-	db 7Bh	; [0A05h] 123 '{'
-	db 63h	; [0A06h]  99 'c'
-	db 0AEh	; [0A07h] 174  -82 '®'
-	db 02h	; [0A08h]   2
-	db 0AFh	; [0A09h] 175  -81 '¯'
-	db 03h	; [0A0Ah]   3
-	db 7Ch	; [0A0Bh] 124 '|'
-	db 00h	; [0A0Ch]   0
-	db 7Dh	; [0A0Dh] 125 '}'
-	db 0Ah	; [0A0Eh]  10
-	db 12h	; [0A0Fh]  18
-	db 36h	; [0A10h]  54 '6'
-	db 85h	; [0A11h] 133 -123
-	db 90h	; [0A12h] 144 -112
-	db 00h	; [0A13h]   0
-	db 52h	; [0A14h]  82 'R'
-	db 0EFh	; [0A15h] 239  -17 'ï'
-	db 0F0h	; [0A16h] 240  -16 'ð'
-	db 0AEh	; [0A17h] 174  -82 '®'
-	db 02h	; [0A18h]   2
-	db 0AFh	; [0A19h] 175  -81 '¯'
-	db 03h	; [0A1Ah]   3
-	db 7Ch	; [0A1Bh] 124 '|'
-	db 00h	; [0A1Ch]   0
-	db 7Dh	; [0A1Dh] 125 '}'
-	db 0Ah	; [0A1Eh]  10
-	db 12h	; [0A1Fh]  18
-	db 36h	; [0A20h]  54 '6'
-	db 85h	; [0A21h] 133 -123
-	db 0AFh	; [0A22h] 175  -81 '¯'
-	db 05h	; [0A23h]   5
-	db 7Eh	; [0A24h] 126 '~'
-	db 89h	; [0A25h] 137 -119
-	db 0E0h	; [0A26h] 224  -32 'à'
-	db 24h	; [0A27h]  36 '$'
-	db 30h	; [0A28h]  48 '0'
-	db 0ACh	; [0A29h] 172  -84 '¬'
-	db 06h	; [0A2Ah]   6
-	db 0Eh	; [0A2Bh]  14
-	db 0A8h	; [0A2Ch] 168  -88 '¨'
-	db 04h	; [0A2Dh]   4
-	db 0F6h	; [0A2Eh] 246  -10 'ö'
-	db 0ADh	; [0A2Fh] 173  -83
-	db 06h	; [0A30h]   6
-	db 0Eh	; [0A31h]  14
-	db 0A8h	; [0A32h] 168  -88 '¨'
-	db 05h	; [0A33h]   5
-	db 76h	; [0A34h] 118 'v'
-	db 2Eh	; [0A35h]  46 '.'
-	db 0EFh	; [0A36h] 239  -17 'ï'
-	db 24h	; [0A37h]  36 '$'
-	db 30h	; [0A38h]  48 '0'
-	db 0ADh	; [0A39h] 173  -83
-	db 06h	; [0A3Ah]   6
-	db 0Eh	; [0A3Bh]  14
-	db 0A8h	; [0A3Ch] 168  -88 '¨'
-	db 05h	; [0A3Dh]   5
-	db 0F6h	; [0A3Eh] 246  -10 'ö'
-	db 0A8h	; [0A3Fh] 168  -88 '¨'
-	db 06h	; [0A40h]   6
-	db 0E4h	; [0A41h] 228  -28 'ä'
-	db 0F6h	; [0A42h] 246  -10 'ö'
-	db 90h	; [0A43h] 144 -112
-	db 00h	; [0A44h]   0
-	db 50h	; [0A45h]  80 'P'
-	db 0E0h	; [0A46h] 224  -32 'à'
+jump_0B14:
+	mov A, R3
+	dec A
+	xrl A, 28h
+	jz jump_0B2A
+	mov A, R3
+	add A, #01h	;   1
+	mov R7, A
+	clr A
+	rlc A
+	mov R6, A
+	mov A, 28h
+	cjne A, 07h, jump_0B35
+	clr A
+	cjne A, 06h, jump_0B35
+jump_0B2A:
+	mov R0, #82h	; 130 -126
+	mov A, @R0
+	orl A, #81h	; 129 -127
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	sjmp jump_0B3C
 
-org	0A48h
-	db 0A3h	; [0A48h] 163  -93 '£'
-	db 0E0h	; [0A49h] 224  -32 'à'
-	db 0FDh	; [0A4Ah] 253   -3 'ý'
-	db 7Bh	; [0A4Bh] 123 '{'
-	db 01h	; [0A4Ch]   1
-	db 7Ah	; [0A4Dh] 122 'z'
-	db 00h	; [0A4Eh]   0
-	db 79h	; [0A4Fh] 121 'y'
-	db 89h	; [0A50h] 137 -119
-	db 12h	; [0A51h]  18
-	db 0FEh	; [0A52h] 254   -2 'þ'
-	db 06h	; [0A53h]   6
-	db 22h	; [0A54h]  34 '"'
-	db 0ABh	; [0A55h] 171  -85 '«'
-	db 07h	; [0A56h]   7
-	db 74h	; [0A57h] 116 't'
-	db 80h	; [0A58h] 128 -128
-	db 2Bh	; [0A59h]  43 '+'
-	db 0FBh	; [0A5Ah] 251   -5 'û'
-	db 13h	; [0A5Bh]  19
-	db 13h	; [0A5Ch]  19
-	db 13h	; [0A5Dh]  19
-	db 54h	; [0A5Eh]  84 'T'
-	db 1Fh	; [0A5Fh]  31
-	db 0FBh	; [0A60h] 251   -5 'û'
-	db 0EDh	; [0A61h] 237  -19 'í'
-	db 24h	; [0A62h]  36 '$'
-	db 20h	; [0A63h]  32 ' '
-	db 90h	; [0A64h] 144 -112
-	db 00h	; [0A65h]   0
-	db 54h	; [0A66h]  84 'T'
-	db 0F0h	; [0A67h] 240  -16 'ð'
-	db 0E4h	; [0A68h] 228  -28 'ä'
-	db 3Ch	; [0A69h]  60 '<'
-	db 90h	; [0A6Ah] 144 -112
-	db 00h	; [0A6Bh]   0
-	db 53h	; [0A6Ch]  83 'S'
-	db 0F0h	; [0A6Dh] 240  -16 'ð'
-	db 0AEh	; [0A6Eh] 174  -82 '®'
-	db 04h	; [0A6Fh]   4
-	db 0EDh	; [0A70h] 237  -19 'í'
-	db 78h	; [0A71h] 120 'x'
-	db 03h	; [0A72h]   3
-	db 0C3h	; [0A73h] 195  -61 'Ã'
-	db 33h	; [0A74h]  51 '3'
-	db 0CEh	; [0A75h] 206  -50 'Î'
-	db 33h	; [0A76h]  51 '3'
-	db 0CEh	; [0A77h] 206  -50 'Î'
-	db 0D8h	; [0A78h] 216  -40 'Ø'
-	db 0F9h	; [0A79h] 249   -7 'ù'
-	db 24h	; [0A7Ah]  36 '$'
-	db 06h	; [0A7Bh]   6
+jump_0B35:
+	mov R0, #82h	; 130 -126
+	mov A, @R0
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+jump_0B3C:
+	inc 28h
+	mov A, #08h	;   8
+	add A, 2Ah
+	mov 2Ah, A
+	clr A
+	addc A, 29h
+	mov 29h, A
+	ljmp jump_0AAE
 
-org	0A7Dh
-	db 0E4h	; [0A7Dh] 228  -28 'ä'
-	db 3Eh	; [0A7Eh]  62 '>'
-	db 0ADh	; [0A7Fh] 173  -83
-	db 07h	; [0A80h]   7
-	db 0FCh	; [0A81h] 252   -4 'ü'
-	db 90h	; [0A82h] 144 -112
-	db 00h	; [0A83h]   0
-	db 53h	; [0A84h]  83 'S'
-	db 0E0h	; [0A85h] 224  -32 'à'
-	db 0FEh	; [0A86h] 254   -2 'þ'
-	db 0A3h	; [0A87h] 163  -93 '£'
-	db 0E0h	; [0A88h] 224  -32 'à'
-	db 78h	; [0A89h] 120 'x'
-	db 03h	; [0A8Ah]   3
-	db 0C3h	; [0A8Bh] 195  -61 'Ã'
-	db 33h	; [0A8Ch]  51 '3'
-	db 0CEh	; [0A8Dh] 206  -50 'Î'
-	db 33h	; [0A8Eh]  51 '3'
-	db 0CEh	; [0A8Fh] 206  -50 'Î'
-	db 0D8h	; [0A90h] 216  -40 'Ø'
-	db 0F9h	; [0A91h] 249   -7 'ù'
-	db 24h	; [0A92h]  36 '$'
-	db 06h	; [0A93h]   6
-	db 90h	; [0A94h] 144 -112
-	db 00h	; [0A95h]   0
-	db 56h	; [0A96h]  86 'V'
-	db 0F0h	; [0A97h] 240  -16 'ð'
-	db 0E4h	; [0A98h] 228  -28 'ä'
-	db 3Eh	; [0A99h]  62 '>'
-	db 90h	; [0A9Ah] 144 -112
-	db 00h	; [0A9Bh]   0
-	db 55h	; [0A9Ch]  85 'U'
-	db 0F0h	; [0A9Dh] 240  -16 'ð'
-	db 0EBh	; [0A9Eh] 235  -21 'ë'
-	db 70h	; [0A9Fh] 112 'p'
-	db 02h	; [0AA0h]   2
-	db 7Bh	; [0AA1h] 123 '{'
-	db 01h	; [0AA2h]   1
-	db 0E4h	; [0AA3h] 228  -28 'ä'
-	db 0F5h	; [0AA4h] 245  -11 'õ'
-	db 28h	; [0AA5h]  40 '('
-	db 0AEh	; [0AA6h] 174  -82 '®'
-	db 04h	; [0AA7h]   4
-	db 0AFh	; [0AA8h] 175  -81 '¯'
-	db 05h	; [0AA9h]   5
-	db 8Eh	; [0AAAh] 142 -114
-	db 29h	; [0AABh]  41 ')'
-	db 8Fh	; [0AACh] 143 -113
-	db 2Ah	; [0AADh]  42 '*'
-	db 90h	; [0AAEh] 144 -112
-	db 00h	; [0AAFh]   0
-	db 55h	; [0AB0h]  85 'U'
-	db 0E0h	; [0AB1h] 224  -32 'à'
-	db 0FEh	; [0AB2h] 254   -2 'þ'
-	db 0A3h	; [0AB3h] 163  -93 '£'
-	db 0E0h	; [0AB4h] 224  -32 'à'
+jump_0B4C:
+	ret
 
-org	0AB6h
-	db 0D3h	; [0AB6h] 211  -45 'Ó'
-	db 0E5h	; [0AB7h] 229  -27 'å'
-	db 2Ah	; [0AB8h]  42 '*'
-	db 9Fh	; [0AB9h] 159  -97
-	db 0E5h	; [0ABAh] 229  -27 'å'
-	db 29h	; [0ABBh]  41 ')'
-	db 9Eh	; [0ABCh] 158  -98
-	db 40h	; [0ABDh]  64 '@'
-	db 03h	; [0ABEh]   3
-	db 02h	; [0ABFh]   2
-	db 0Bh	; [0AC0h]  11
-	db 4Ch	; [0AC1h]  76 'L'
-	db 90h	; [0AC2h] 144 -112
+;org	0B4Dh
+	mov A, R7
+	dec A
+	jz jump_0B61
+	dec A
+	jz jump_0B6C
+	add A, #02h	;   2
+	jnz jump_0B75
+	clr A
+	mov R0, #91h	; 145 -111
+	mov @R0, A
+	inc R0
+	mov @R0, A
+	mov R6, A
+	sjmp jump_0B75
 
-org	0AC4h
-	db 0F5h	; [0AC4h] 245  -11 'õ'
-	db 74h	; [0AC5h] 116 't'
-	db 0Eh	; [0AC6h]  14
-	db 0F0h	; [0AC7h] 240  -16 'ð'
-	db 0E5h	; [0AC8h] 229  -27 'å'
-	db 2Ah	; [0AC9h]  42 '*'
-	db 90h	; [0ACAh] 144 -112
+jump_0B61:
+	mov R0, #91h	; 145 -111
+	mov @R0, #08h	;   8
+	inc R0
+	mov @R0, #00h	;   0
+	mov R6, #08h	;   8
+	sjmp jump_0B75
 
-org	0ACCh
-	db 0F4h	; [0ACCh] 244  -12 'ô'
-	db 0F0h	; [0ACDh] 240  -16 'ð'
-	db 0A3h	; [0ACEh] 163  -93 '£'
-	db 74h	; [0ACFh] 116 't'
-	db 0Fh	; [0AD0h]  15
-	db 0F0h	; [0AD1h] 240  -16 'ð'
-	db 0E5h	; [0AD2h] 229  -27 'å'
-	db 29h	; [0AD3h]  41 ')'
-	db 54h	; [0AD4h]  84 'T'
-	db 1Fh	; [0AD5h]  31
-	db 90h	; [0AD6h] 144 -112
+jump_0B6C:
+	mov R0, #91h	; 145 -111
+	mov @R0, #10h	;  16
+	inc R0
+	mov @R0, #00h	;   0
+	mov R6, #10h	;  16
+jump_0B75:
+	mov DPTR, #dptr_FFF5
+	mov A, #0Ah	;  10
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Bh	;  11
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Ch	;  12
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Dh	;  13
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	mov A, #18h	;  24
+	movx @DPTR, A
+	inc DPTR
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	mov A, #18h	;  24
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	clr A
+	mov R0, #83h	; 131 -125
+	mov @R0, A
+	inc R0
+	mov @R0, A
+jump_0BBC:
+	clr C
+	mov R0, #83h	; 131 -125
+	mov A, @R0
+	subb A, #08h	;   8
+	jnc jump_0BD2
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc R0
+	inc @R0
+	mov A, @R0
+	jnz fwd_0BD0_jump_0BBC
+	dec R0
+	inc @R0
+fwd_0BD0_jump_0BBC:
+	sjmp jump_0BBC
 
-org	0AD8h
-	db 0F4h	; [0AD8h] 244  -12 'ô'
-	db 0F0h	; [0AD9h] 240  -16 'ð'
-	db 0A3h	; [0ADAh] 163  -93 '£'
-	db 74h	; [0ADBh] 116 't'
-	db 08h	; [0ADCh]   8
-	db 0F0h	; [0ADDh] 240  -16 'ð'
-	db 0E5h	; [0ADEh] 229  -27 'å'
-	db 28h	; [0ADFh]  40 '('
-	db 0B4h	; [0AE0h] 180  -76 '´'
-	db 10h	; [0AE1h]  16
-	db 06h	; [0AE2h]   6
-	db 78h	; [0AE3h] 120 'x'
-	db 82h	; [0AE4h] 130 -126
-	db 76h	; [0AE5h] 118 'v'
-	db 24h	; [0AE6h]  36 '$'
-	db 80h	; [0AE7h] 128 -128
-	db 10h	; [0AE8h]  16
-	db 0E5h	; [0AE9h] 229  -27 'å'
-	db 28h	; [0AEAh]  40 '('
-	db 54h	; [0AEBh]  84 'T'
-	db 03h	; [0AECh]   3
-	db 70h	; [0AEDh] 112 'p'
-	db 06h	; [0AEEh]   6
-	db 78h	; [0AEFh] 120 'x'
-	db 82h	; [0AF0h] 130 -126
-	db 76h	; [0AF1h] 118 'v'
-	db 3Ch	; [0AF2h]  60 '<'
-	db 80h	; [0AF3h] 128 -128
-	db 04h	; [0AF4h]   4
-	db 78h	; [0AF5h] 120 'x'
-	db 82h	; [0AF6h] 130 -126
-	db 76h	; [0AF7h] 118 'v'
-	db 18h	; [0AF8h]  24
-	db 0E5h	; [0AF9h] 229  -27 'å'
-	db 28h	; [0AFAh]  40 '('
-	db 0B5h	; [0AFBh] 181  -75 'µ'
-	db 03h	; [0AFCh]   3
-	db 16h	; [0AFDh]  22
-	db 0EBh	; [0AFEh] 235  -21 'ë'
-	db 0B4h	; [0AFFh] 180  -76 '´'
-	db 10h	; [0B00h]  16
-	db 08h	; [0B01h]   8
-	db 90h	; [0B02h] 144 -112
+jump_0BD2:
+	mov DPTR, #dptr_FFF5
+	mov A, #05h	;   5
+	movx @DPTR, A
+	ret
 
-org	0B04h
-	db 0F4h	; [0B04h] 244  -12 'ô'
-	db 74h	; [0B05h] 116 't'
-	db 0E7h	; [0B06h] 231  -25 'ç'
-	db 0F0h	; [0B07h] 240  -16 'ð'
-	db 80h	; [0B08h] 128 -128
-	db 32h	; [0B09h]  50 '2'
-	db 78h	; [0B0Ah] 120 'x'
-	db 82h	; [0B0Bh] 130 -126
-	db 74h	; [0B0Ch] 116 't'
+;org	0BD9h
+	mov DPTR, #dptr_FFF5
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov R0, #91h	; 145 -111
+	mov A, @R0
+	anl A, #1Fh	;  31
+	mov DPTR, #dptr_FFF4
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	clr A
+	mov R7, A
+	mov R6, A
+jump_0BFB:
+	clr C
+	mov A, R6
+	subb A, #08h	;   8
+	jnc jump_0C0D
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc R7
+	mov A, R7
+	jnz fwd_0C0B_jump_0BFB
+	inc R6
+fwd_0C0B_jump_0BFB:
+	sjmp jump_0BFB
 
-org	0B0Eh
-	db 90h	; [0B0Eh] 144 -112
+jump_0C0D:
+	mov DPTR, #dptr_FFF5
+	mov A, #05h	;   5
+	movx @DPTR, A
+	ret
 
-org	0B10h
-	db 0F4h	; [0B10h] 244  -12 'ô'
-	db 0F0h	; [0B11h] 240  -16 'ð'
-	db 80h	; [0B12h] 128 -128
-	db 28h	; [0B13h]  40 '('
-	db 0EBh	; [0B14h] 235  -21 'ë'
-	db 14h	; [0B15h]  20
-	db 65h	; [0B16h] 101 'e'
-	db 28h	; [0B17h]  40 '('
-	db 60h	; [0B18h]  96 '`'
-	db 10h	; [0B19h]  16
-	db 0EBh	; [0B1Ah] 235  -21 'ë'
-	db 24h	; [0B1Bh]  36 '$'
-	db 01h	; [0B1Ch]   1
+;org	0C14h
+	mov DPTR, #dptr_FFF5
+	clr A
+	movx @DPTR, A
+	mov A, #07h	;   7
+	movx @DPTR, A
+	mov A, #11h	;  17
+	movx @DPTR, A
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #18h	;  24
+	movx @DPTR, A
+	mov A, #08h	;   8
+	movx @DPTR, A
+	clr A
+	mov R0, #85h	; 133 -123
+	mov @R0, A
+	inc R0
+	mov @R0, A
+jump_0C2E:
+	clr C
+	mov R0, #85h	; 133 -123
+	mov A, @R0
+	subb A, #20h	;  32 ' '
+	jnc jump_0C44
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc R0
+	inc @R0
+	mov A, @R0
+	jnz fwd_0C42_jump_0C2E
+	dec R0
+	inc @R0
+fwd_0C42_jump_0C2E:
+	sjmp jump_0C2E
 
-org	0B1Eh
-	db 0E4h	; [0B1Eh] 228  -28 'ä'
-	db 33h	; [0B1Fh]  51 '3'
-	db 0FEh	; [0B20h] 254   -2 'þ'
-	db 0E5h	; [0B21h] 229  -27 'å'
-	db 28h	; [0B22h]  40 '('
-	db 0B5h	; [0B23h] 181  -75 'µ'
-	db 07h	; [0B24h]   7
-	db 0Fh	; [0B25h]  15
-	db 0E4h	; [0B26h] 228  -28 'ä'
-	db 0B5h	; [0B27h] 181  -75 'µ'
-	db 06h	; [0B28h]   6
-	db 0Bh	; [0B29h]  11
-	db 78h	; [0B2Ah] 120 'x'
-	db 82h	; [0B2Bh] 130 -126
-	db 0E6h	; [0B2Ch] 230  -26 'æ'
-	db 44h	; [0B2Dh]  68 'D'
-	db 81h	; [0B2Eh] 129 -127
-	db 90h	; [0B2Fh] 144 -112
+jump_0C44:
+	mov DPTR, #dptr_FFF5
+	mov A, #05h	;   5
+	movx @DPTR, A
+	ret
 
-org	0B31h
-	db 0F4h	; [0B31h] 244  -12 'ô'
-	db 0F0h	; [0B32h] 240  -16 'ð'
-	db 80h	; [0B33h] 128 -128
-	db 07h	; [0B34h]   7
-	db 78h	; [0B35h] 120 'x'
-	db 82h	; [0B36h] 130 -126
-	db 0E6h	; [0B37h] 230  -26 'æ'
-	db 90h	; [0B38h] 144 -112
+;org	0C4Bh
+	mov DPTR, #dptr_FFF5
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #0Eh	;  14
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0Fh	;  15
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF4
+	inc A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #08h	;   8
+	movx @DPTR, A
+	clr A
+	mov R0, #87h	; 135 -121
+	mov @R0, A
+	inc R0
+	mov @R0, A
+jump_0C6C:
+	clr C
+	mov R0, #87h	; 135 -121
+	mov A, @R0
+	subb A, #08h	;   8
+	jnc jump_0C83
+	mov DPTR, #dptr_FFF4
+	mov A, #0FFh	; 255   -1 'ÿ'
+	movx @DPTR, A
+	inc R0
+	inc @R0
+	mov A, @R0
+	jnz fwd_0C81_jump_0C6C
+	dec R0
+	inc @R0
+fwd_0C81_jump_0C6C:
+	sjmp jump_0C6C
 
-org	0B3Ah
-	db 0F4h	; [0B3Ah] 244  -12 'ô'
-	db 0F0h	; [0B3Bh] 240  -16 'ð'
-	db 05h	; [0B3Ch]   5
-	db 28h	; [0B3Dh]  40 '('
-	db 74h	; [0B3Eh] 116 't'
-	db 08h	; [0B3Fh]   8
-	db 25h	; [0B40h]  37 '%'
-	db 2Ah	; [0B41h]  42 '*'
-	db 0F5h	; [0B42h] 245  -11 'õ'
-	db 2Ah	; [0B43h]  42 '*'
-	db 0E4h	; [0B44h] 228  -28 'ä'
-	db 35h	; [0B45h]  53 '5'
-	db 29h	; [0B46h]  41 ')'
-	db 0F5h	; [0B47h] 245  -11 'õ'
-	db 29h	; [0B48h]  41 ')'
-	db 02h	; [0B49h]   2
-	db 0Ah	; [0B4Ah]  10
-	db 0AEh	; [0B4Bh] 174  -82 '®'
-	db 22h	; [0B4Ch]  34 '"'
-	db 0EFh	; [0B4Dh] 239  -17 'ï'
-	db 14h	; [0B4Eh]  20
-	db 60h	; [0B4Fh]  96 '`'
-	db 10h	; [0B50h]  16
-	db 14h	; [0B51h]  20
-	db 60h	; [0B52h]  96 '`'
-	db 18h	; [0B53h]  24
-	db 24h	; [0B54h]  36 '$'
-	db 02h	; [0B55h]   2
-	db 70h	; [0B56h] 112 'p'
-	db 1Dh	; [0B57h]  29
-	db 0E4h	; [0B58h] 228  -28 'ä'
-	db 78h	; [0B59h] 120 'x'
-	db 91h	; [0B5Ah] 145 -111
-	db 0F6h	; [0B5Bh] 246  -10 'ö'
-	db 08h	; [0B5Ch]   8
-	db 0F6h	; [0B5Dh] 246  -10 'ö'
-	db 0FEh	; [0B5Eh] 254   -2 'þ'
-	db 80h	; [0B5Fh] 128 -128
-	db 14h	; [0B60h]  20
-	db 78h	; [0B61h] 120 'x'
-	db 91h	; [0B62h] 145 -111
-	db 76h	; [0B63h] 118 'v'
-	db 08h	; [0B64h]   8
-	db 08h	; [0B65h]   8
-	db 76h	; [0B66h] 118 'v'
-	db 00h	; [0B67h]   0
-	db 7Eh	; [0B68h] 126 '~'
-	db 08h	; [0B69h]   8
-	db 80h	; [0B6Ah] 128 -128
-	db 09h	; [0B6Bh]   9
-	db 78h	; [0B6Ch] 120 'x'
-	db 91h	; [0B6Dh] 145 -111
-	db 76h	; [0B6Eh] 118 'v'
-	db 10h	; [0B6Fh]  16
-	db 08h	; [0B70h]   8
-	db 76h	; [0B71h] 118 'v'
-	db 00h	; [0B72h]   0
-	db 7Eh	; [0B73h] 126 '~'
-	db 10h	; [0B74h]  16
-	db 90h	; [0B75h] 144 -112
+jump_0C83:
+	mov DPTR, #dptr_FFF5
+	mov A, #05h	;   5
+	movx @DPTR, A
+	ret
 
-org	0B77h
-	db 0F5h	; [0B77h] 245  -11 'õ'
-	db 74h	; [0B78h] 116 't'
-	db 0Ah	; [0B79h]  10
-	db 0F0h	; [0B7Ah] 240  -16 'ð'
-	db 90h	; [0B7Bh] 144 -112
-
-org	0B7Dh
-	db 0F4h	; [0B7Dh] 244  -12 'ô'
-	db 0E4h	; [0B7Eh] 228  -28 'ä'
-	db 0F0h	; [0B7Fh] 240  -16 'ð'
-	db 0A3h	; [0B80h] 163  -93 '£'
-	db 74h	; [0B81h] 116 't'
-	db 0Bh	; [0B82h]  11
-	db 0F0h	; [0B83h] 240  -16 'ð'
-	db 90h	; [0B84h] 144 -112
-
-org	0B86h
-	db 0F4h	; [0B86h] 244  -12 'ô'
-	db 0EEh	; [0B87h] 238  -18 'î'
-	db 0F0h	; [0B88h] 240  -16 'ð'
-	db 0A3h	; [0B89h] 163  -93 '£'
-	db 74h	; [0B8Ah] 116 't'
-	db 0Ch	; [0B8Bh]  12
-	db 0F0h	; [0B8Ch] 240  -16 'ð'
-	db 90h	; [0B8Dh] 144 -112
-
-org	0B8Fh
-	db 0F4h	; [0B8Fh] 244  -12 'ô'
-	db 0E4h	; [0B90h] 228  -28 'ä'
-	db 0F0h	; [0B91h] 240  -16 'ð'
-	db 0A3h	; [0B92h] 163  -93 '£'
-	db 74h	; [0B93h] 116 't'
-	db 0Dh	; [0B94h]  13
-	db 0F0h	; [0B95h] 240  -16 'ð'
-	db 90h	; [0B96h] 144 -112
-
-org	0B98h
-	db 0F4h	; [0B98h] 244  -12 'ô'
-	db 74h	; [0B99h] 116 't'
-	db 18h	; [0B9Ah]  24
-	db 0F0h	; [0B9Bh] 240  -16 'ð'
-	db 0A3h	; [0B9Ch] 163  -93 '£'
-	db 74h	; [0B9Dh] 116 't'
-	db 04h	; [0B9Eh]   4
-	db 0F0h	; [0B9Fh] 240  -16 'ð'
-	db 74h	; [0BA0h] 116 't'
-	db 0Eh	; [0BA1h]  14
-	db 0F0h	; [0BA2h] 240  -16 'ð'
-	db 90h	; [0BA3h] 144 -112
-
-org	0BA5h
-	db 0F4h	; [0BA5h] 244  -12 'ô'
-	db 0E4h	; [0BA6h] 228  -28 'ä'
-	db 0F0h	; [0BA7h] 240  -16 'ð'
-	db 0A3h	; [0BA8h] 163  -93 '£'
-	db 74h	; [0BA9h] 116 't'
-	db 0Fh	; [0BAAh]  15
-	db 0F0h	; [0BABh] 240  -16 'ð'
-	db 90h	; [0BACh] 144 -112
-
-org	0BAEh
-	db 0F4h	; [0BAEh] 244  -12 'ô'
-	db 74h	; [0BAFh] 116 't'
-	db 18h	; [0BB0h]  24
-	db 0F0h	; [0BB1h] 240  -16 'ð'
-	db 0A3h	; [0BB2h] 163  -93 '£'
-	db 74h	; [0BB3h] 116 't'
-	db 08h	; [0BB4h]   8
-	db 0F0h	; [0BB5h] 240  -16 'ð'
-	db 0E4h	; [0BB6h] 228  -28 'ä'
-	db 78h	; [0BB7h] 120 'x'
-	db 83h	; [0BB8h] 131 -125
-	db 0F6h	; [0BB9h] 246  -10 'ö'
-	db 08h	; [0BBAh]   8
-	db 0F6h	; [0BBBh] 246  -10 'ö'
-	db 0C3h	; [0BBCh] 195  -61 'Ã'
-	db 78h	; [0BBDh] 120 'x'
-	db 83h	; [0BBEh] 131 -125
-	db 0E6h	; [0BBFh] 230  -26 'æ'
-	db 94h	; [0BC0h] 148 -108
-	db 08h	; [0BC1h]   8
-	db 50h	; [0BC2h]  80 'P'
-	db 0Eh	; [0BC3h]  14
-	db 90h	; [0BC4h] 144 -112
-
-org	0BC6h
-	db 0F4h	; [0BC6h] 244  -12 'ô'
-	db 0E4h	; [0BC7h] 228  -28 'ä'
-	db 0F0h	; [0BC8h] 240  -16 'ð'
-	db 08h	; [0BC9h]   8
-	db 06h	; [0BCAh]   6
-	db 0E6h	; [0BCBh] 230  -26 'æ'
-	db 70h	; [0BCCh] 112 'p'
-	db 02h	; [0BCDh]   2
-	db 18h	; [0BCEh]  24
-	db 06h	; [0BCFh]   6
-	db 80h	; [0BD0h] 128 -128
-	db 0EAh	; [0BD1h] 234  -22 'ê'
-	db 90h	; [0BD2h] 144 -112
-
-org	0BD4h
-	db 0F5h	; [0BD4h] 245  -11 'õ'
-	db 74h	; [0BD5h] 116 't'
-	db 05h	; [0BD6h]   5
-	db 0F0h	; [0BD7h] 240  -16 'ð'
-	db 22h	; [0BD8h]  34 '"'
-	db 90h	; [0BD9h] 144 -112
-
-org	0BDBh
-	db 0F5h	; [0BDBh] 245  -11 'õ'
-	db 74h	; [0BDCh] 116 't'
-	db 04h	; [0BDDh]   4
-	db 0F0h	; [0BDEh] 240  -16 'ð'
-	db 74h	; [0BDFh] 116 't'
-	db 0Eh	; [0BE0h]  14
-	db 0F0h	; [0BE1h] 240  -16 'ð'
-	db 90h	; [0BE2h] 144 -112
-
-org	0BE4h
-	db 0F4h	; [0BE4h] 244  -12 'ô'
-	db 0E4h	; [0BE5h] 228  -28 'ä'
-	db 0F0h	; [0BE6h] 240  -16 'ð'
-	db 0A3h	; [0BE7h] 163  -93 '£'
-	db 74h	; [0BE8h] 116 't'
-	db 0Fh	; [0BE9h]  15
-	db 0F0h	; [0BEAh] 240  -16 'ð'
-	db 78h	; [0BEBh] 120 'x'
-	db 91h	; [0BECh] 145 -111
-	db 0E6h	; [0BEDh] 230  -26 'æ'
-	db 54h	; [0BEEh]  84 'T'
-	db 1Fh	; [0BEFh]  31
-	db 90h	; [0BF0h] 144 -112
-
-org	0BF2h
-	db 0F4h	; [0BF2h] 244  -12 'ô'
-	db 0F0h	; [0BF3h] 240  -16 'ð'
-	db 0A3h	; [0BF4h] 163  -93 '£'
-	db 74h	; [0BF5h] 116 't'
-	db 08h	; [0BF6h]   8
-	db 0F0h	; [0BF7h] 240  -16 'ð'
-	db 0E4h	; [0BF8h] 228  -28 'ä'
-
-org	0BFAh
-	db 0FEh	; [0BFAh] 254   -2 'þ'
-	db 0C3h	; [0BFBh] 195  -61 'Ã'
-	db 0EEh	; [0BFCh] 238  -18 'î'
-	db 94h	; [0BFDh] 148 -108
-	db 08h	; [0BFEh]   8
-	db 50h	; [0BFFh]  80 'P'
-	db 0Ch	; [0C00h]  12
-	db 90h	; [0C01h] 144 -112
-
-org	0C03h
-	db 0F4h	; [0C03h] 244  -12 'ô'
-	db 0E4h	; [0C04h] 228  -28 'ä'
-	db 0F0h	; [0C05h] 240  -16 'ð'
-	db 0Fh	; [0C06h]  15
-	db 0EFh	; [0C07h] 239  -17 'ï'
-	db 70h	; [0C08h] 112 'p'
-	db 01h	; [0C09h]   1
-	db 0Eh	; [0C0Ah]  14
-	db 80h	; [0C0Bh] 128 -128
-	db 0EEh	; [0C0Ch] 238  -18 'î'
-	db 90h	; [0C0Dh] 144 -112
-
-org	0C0Fh
-	db 0F5h	; [0C0Fh] 245  -11 'õ'
-	db 74h	; [0C10h] 116 't'
-	db 05h	; [0C11h]   5
-	db 0F0h	; [0C12h] 240  -16 'ð'
-	db 22h	; [0C13h]  34 '"'
-	db 90h	; [0C14h] 144 -112
-
-org	0C16h
-	db 0F5h	; [0C16h] 245  -11 'õ'
-	db 0E4h	; [0C17h] 228  -28 'ä'
-	db 0F0h	; [0C18h] 240  -16 'ð'
-	db 74h	; [0C19h] 116 't'
-	db 07h	; [0C1Ah]   7
-	db 0F0h	; [0C1Bh] 240  -16 'ð'
-	db 74h	; [0C1Ch] 116 't'
-	db 11h	; [0C1Dh]  17
-	db 0F0h	; [0C1Eh] 240  -16 'ð'
-	db 74h	; [0C1Fh] 116 't'
-	db 04h	; [0C20h]   4
-	db 0F0h	; [0C21h] 240  -16 'ð'
-	db 74h	; [0C22h] 116 't'
-	db 18h	; [0C23h]  24
-	db 0F0h	; [0C24h] 240  -16 'ð'
-	db 74h	; [0C25h] 116 't'
-	db 08h	; [0C26h]   8
-	db 0F0h	; [0C27h] 240  -16 'ð'
-	db 0E4h	; [0C28h] 228  -28 'ä'
-	db 78h	; [0C29h] 120 'x'
-	db 85h	; [0C2Ah] 133 -123
-	db 0F6h	; [0C2Bh] 246  -10 'ö'
-	db 08h	; [0C2Ch]   8
-	db 0F6h	; [0C2Dh] 246  -10 'ö'
-	db 0C3h	; [0C2Eh] 195  -61 'Ã'
-	db 78h	; [0C2Fh] 120 'x'
-	db 85h	; [0C30h] 133 -123
-	db 0E6h	; [0C31h] 230  -26 'æ'
-	db 94h	; [0C32h] 148 -108
-	db 20h	; [0C33h]  32 ' '
-	db 50h	; [0C34h]  80 'P'
-	db 0Eh	; [0C35h]  14
-	db 90h	; [0C36h] 144 -112
-
-org	0C38h
-	db 0F4h	; [0C38h] 244  -12 'ô'
-	db 0E4h	; [0C39h] 228  -28 'ä'
-	db 0F0h	; [0C3Ah] 240  -16 'ð'
-	db 08h	; [0C3Bh]   8
-	db 06h	; [0C3Ch]   6
-	db 0E6h	; [0C3Dh] 230  -26 'æ'
-	db 70h	; [0C3Eh] 112 'p'
-	db 02h	; [0C3Fh]   2
-	db 18h	; [0C40h]  24
-	db 06h	; [0C41h]   6
-	db 80h	; [0C42h] 128 -128
-	db 0EAh	; [0C43h] 234  -22 'ê'
-	db 90h	; [0C44h] 144 -112
-
-org	0C46h
-	db 0F5h	; [0C46h] 245  -11 'õ'
-	db 74h	; [0C47h] 116 't'
-	db 05h	; [0C48h]   5
-	db 0F0h	; [0C49h] 240  -16 'ð'
-	db 22h	; [0C4Ah]  34 '"'
-	db 90h	; [0C4Bh] 144 -112
-
-org	0C4Dh
-	db 0F5h	; [0C4Dh] 245  -11 'õ'
-	db 74h	; [0C4Eh] 116 't'
-	db 04h	; [0C4Fh]   4
-	db 0F0h	; [0C50h] 240  -16 'ð'
-	db 74h	; [0C51h] 116 't'
-	db 0Eh	; [0C52h]  14
-	db 0F0h	; [0C53h] 240  -16 'ð'
-	db 90h	; [0C54h] 144 -112
-
-org	0C56h
-	db 0F4h	; [0C56h] 244  -12 'ô'
-	db 0E4h	; [0C57h] 228  -28 'ä'
-	db 0F0h	; [0C58h] 240  -16 'ð'
-	db 0A3h	; [0C59h] 163  -93 '£'
-	db 74h	; [0C5Ah] 116 't'
-	db 0Fh	; [0C5Bh]  15
-	db 0F0h	; [0C5Ch] 240  -16 'ð'
-	db 90h	; [0C5Dh] 144 -112
-
-org	0C5Fh
-	db 0F4h	; [0C5Fh] 244  -12 'ô'
-	db 04h	; [0C60h]   4
-	db 0F0h	; [0C61h] 240  -16 'ð'
-	db 0A3h	; [0C62h] 163  -93 '£'
-	db 74h	; [0C63h] 116 't'
-	db 08h	; [0C64h]   8
-	db 0F0h	; [0C65h] 240  -16 'ð'
-	db 0E4h	; [0C66h] 228  -28 'ä'
-	db 78h	; [0C67h] 120 'x'
-	db 87h	; [0C68h] 135 -121
-	db 0F6h	; [0C69h] 246  -10 'ö'
-	db 08h	; [0C6Ah]   8
-	db 0F6h	; [0C6Bh] 246  -10 'ö'
-	db 0C3h	; [0C6Ch] 195  -61 'Ã'
-	db 78h	; [0C6Dh] 120 'x'
-	db 87h	; [0C6Eh] 135 -121
-	db 0E6h	; [0C6Fh] 230  -26 'æ'
-	db 94h	; [0C70h] 148 -108
-	db 08h	; [0C71h]   8
-	db 50h	; [0C72h]  80 'P'
-	db 0Fh	; [0C73h]  15
-	db 90h	; [0C74h] 144 -112
-
-org	0C76h
-	db 0F4h	; [0C76h] 244  -12 'ô'
-	db 74h	; [0C77h] 116 't'
-
-org	0C79h
-	db 0F0h	; [0C79h] 240  -16 'ð'
-	db 08h	; [0C7Ah]   8
-	db 06h	; [0C7Bh]   6
-	db 0E6h	; [0C7Ch] 230  -26 'æ'
-	db 70h	; [0C7Dh] 112 'p'
-	db 02h	; [0C7Eh]   2
-	db 18h	; [0C7Fh]  24
-	db 06h	; [0C80h]   6
-	db 80h	; [0C81h] 128 -128
-	db 0E9h	; [0C82h] 233  -23 'é'
-	db 90h	; [0C83h] 144 -112
-
-org	0C85h
-	db 0F5h	; [0C85h] 245  -11 'õ'
-	db 74h	; [0C86h] 116 't'
-	db 05h	; [0C87h]   5
-	db 0F0h	; [0C88h] 240  -16 'ð'
-	db 22h	; [0C89h]  34 '"'
+;org	0C8Ah
 	db 00h	; [0C8Ah]   0
 	db 00h	; [0C8Bh]   0
 	db 00h	; [0C8Ch]   0
@@ -4154,475 +3688,313 @@ org	1238h
 	db 9Fh	; [1275h] 159  -97
 	db 01h	; [1276h]   1
 	db 0CFh	; [1277h] 207  -49 'Ï'
-	db 78h	; [1278h] 120 'x'
-	db 94h	; [1279h] 148 -108
-	db 0E6h	; [127Ah] 230  -26 'æ'
-	db 60h	; [127Bh]  96 '`'
-	db 04h	; [127Ch]   4
-	db 7Fh	; [127Dh] 127
-	db 01h	; [127Eh]   1
-	db 80h	; [127Fh] 128 -128
-	db 02h	; [1280h]   2
-	db 7Fh	; [1281h] 127
-	db 00h	; [1282h]   0
-	db 22h	; [1283h]  34 '"'
-	db 0C0h	; [1284h] 192  -64 'À'
-	db 0D0h	; [1285h] 208  -48 'Ð'
-	db 75h	; [1286h] 117 'u'
-	db 0D0h	; [1287h] 208  -48 'Ð'
-	db 10h	; [1288h]  16
-	db 78h	; [1289h] 120 'x'
-	db 94h	; [128Ah] 148 -108
-	db 0E6h	; [128Bh] 230  -26 'æ'
-	db 0C3h	; [128Ch] 195  -61 'Ã'
-	db 94h	; [128Dh] 148 -108
-	db 10h	; [128Eh]  16
-	db 50h	; [128Fh]  80 'P'
-	db 17h	; [1290h]  23
-	db 06h	; [1291h]   6
-	db 08h	; [1292h]   8
-	db 0E6h	; [1293h] 230  -26 'æ'
-	db 24h	; [1294h]  36 '$'
-	db 0B3h	; [1295h] 179  -77 '³'
-	db 0F5h	; [1296h] 245  -11 'õ'
-	db 82h	; [1297h] 130 -126
-	db 0E4h	; [1298h] 228  -28 'ä'
-	db 34h	; [1299h]  52 '4'
-	db 00h	; [129Ah]   0
-	db 0F5h	; [129Bh] 245  -11 'õ'
-	db 83h	; [129Ch] 131 -125
-	db 0EFh	; [129Dh] 239  -17 'ï'
-	db 0F0h	; [129Eh] 240  -16 'ð'
-	db 06h	; [129Fh]   6
-	db 0E6h	; [12A0h] 230  -26 'æ'
-	db 0D3h	; [12A1h] 211  -45 'Ó'
-	db 94h	; [12A2h] 148 -108
-	db 0Fh	; [12A3h]  15
-	db 40h	; [12A4h]  64 '@'
-	db 02h	; [12A5h]   2
-	db 0E4h	; [12A6h] 228  -28 'ä'
-	db 0F6h	; [12A7h] 246  -10 'ö'
-	db 0D0h	; [12A8h] 208  -48 'Ð'
-	db 0D0h	; [12A9h] 208  -48 'Ð'
-	db 22h	; [12AAh]  34 '"'
-	db 0E4h	; [12ABh] 228  -28 'ä'
-	db 78h	; [12ACh] 120 'x'
-	db 93h	; [12ADh] 147 -109
-	db 0F6h	; [12AEh] 246  -10 'ö'
-	db 78h	; [12AFh] 120 'x'
-	db 94h	; [12B0h] 148 -108
-	db 0E6h	; [12B1h] 230  -26 'æ'
-	db 60h	; [12B2h]  96 '`'
-	db 1Ch	; [12B3h]  28
-	db 16h	; [12B4h]  22
-	db 78h	; [12B5h] 120 'x'
-	db 96h	; [12B6h] 150 -106
-	db 0E6h	; [12B7h] 230  -26 'æ'
-	db 24h	; [12B8h]  36 '$'
-	db 0B3h	; [12B9h] 179  -77 '³'
-	db 0F5h	; [12BAh] 245  -11 'õ'
-	db 82h	; [12BBh] 130 -126
-	db 0E4h	; [12BCh] 228  -28 'ä'
-	db 34h	; [12BDh]  52 '4'
-	db 00h	; [12BEh]   0
-	db 0F5h	; [12BFh] 245  -11 'õ'
-	db 83h	; [12C0h] 131 -125
-	db 0E0h	; [12C1h] 224  -32 'à'
-	db 78h	; [12C2h] 120 'x'
-	db 93h	; [12C3h] 147 -109
-	db 0F6h	; [12C4h] 246  -10 'ö'
-	db 78h	; [12C5h] 120 'x'
-	db 96h	; [12C6h] 150 -106
-	db 06h	; [12C7h]   6
-	db 0E6h	; [12C8h] 230  -26 'æ'
-	db 0D3h	; [12C9h] 211  -45 'Ó'
-	db 94h	; [12CAh] 148 -108
-	db 0Fh	; [12CBh]  15
-	db 40h	; [12CCh]  64 '@'
-	db 02h	; [12CDh]   2
-	db 0E4h	; [12CEh] 228  -28 'ä'
-	db 0F6h	; [12CFh] 246  -10 'ö'
-	db 78h	; [12D0h] 120 'x'
-	db 93h	; [12D1h] 147 -109
-	db 0E6h	; [12D2h] 230  -26 'æ'
+;org	1278h
+	mov R0, #94h	; 148 -108
+	mov A, @R0
+	jz jump_1281
+	mov R7, #01h	;   1
+	sjmp jump_1283
 
-org	12D4h
-	db 22h	; [12D4h]  34 '"'
-	db 0C0h	; [12D5h] 192  -64 'À'
-	db 0D0h	; [12D6h] 208  -48 'Ð'
-	db 75h	; [12D7h] 117 'u'
-	db 0D0h	; [12D8h] 208  -48 'Ð'
-	db 10h	; [12D9h]  16
-	db 0E4h	; [12DAh] 228  -28 'ä'
-	db 0F5h	; [12DBh] 245  -11 'õ'
-	db 32h	; [12DCh]  50 '2'
-	db 0E5h	; [12DDh] 229  -27 'å'
-	db 32h	; [12DEh]  50 '2'
-	db 0C3h	; [12DFh] 195  -61 'Ã'
-	db 94h	; [12E0h] 148 -108
-	db 08h	; [12E1h]   8
-	db 40h	; [12E2h]  64 '@'
-	db 03h	; [12E3h]   3
-	db 02h	; [12E4h]   2
-	db 13h	; [12E5h]  19
-	db 78h	; [12E6h] 120 'x'
-	db 0E5h	; [12E7h] 229  -27 'å'
-	db 32h	; [12E8h]  50 '2'
-	db 44h	; [12E9h]  68 'D'
-	db 40h	; [12EAh]  64 '@'
-	db 90h	; [12EBh] 144 -112
+jump_1281:
+	mov R7, #00h	;   0
+jump_1283:
+	ret
 
-org	12EDh
-	db 0F3h	; [12EDh] 243  -13 'ó'
-	db 0F0h	; [12EEh] 240  -16 'ð'
-	db 90h	; [12EFh] 144 -112
+jump_1284:
+	push PSW
+	mov PSW, #10h	;  16
+	mov R0, #94h	; 148 -108
+	mov A, @R0
+	clr C
+	subb A, #10h	;  16
+	jnc jump_12A8
+	inc @R0
+	inc R0
+	mov A, @R0
+	add A, #0B3h	; 179  -77 '³'
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	mov A, R7
+	movx @DPTR, A
+	inc @R0
+	mov A, @R0
+	setb C
+	subb A, #0Fh	;  15
+	jc jump_12A8
+	clr A
+	mov @R0, A
+jump_12A8:
+	pop PSW
+	ret
 
-org	12F1h
-	db 0F2h	; [12F1h] 242  -14 'ò'
-	db 0E0h	; [12F2h] 224  -32 'à'
-	db 0F5h	; [12F3h] 245  -11 'õ'
-	db 2Eh	; [12F4h]  46 '.'
-	db 74h	; [12F5h] 116 't'
-	db 0A1h	; [12F6h] 161  -95 '¡'
-	db 25h	; [12F7h]  37 '%'
-	db 32h	; [12F8h]  50 '2'
-	db 0F5h	; [12F9h] 245  -11 'õ'
-	db 82h	; [12FAh] 130 -126
-	db 0E4h	; [12FBh] 228  -28 'ä'
-	db 34h	; [12FCh]  52 '4'
-	db 00h	; [12FDh]   0
-	db 0F5h	; [12FEh] 245  -11 'õ'
-	db 83h	; [12FFh] 131 -125
-	db 0E0h	; [1300h] 224  -32 'à'
-	db 65h	; [1301h] 101 'e'
-	db 2Eh	; [1302h]  46 '.'
-	db 0F5h	; [1303h] 245  -11 'õ'
-	db 30h	; [1304h]  48 '0'
-	db 74h	; [1305h] 116 't'
-	db 0D3h	; [1306h] 211  -45 'Ó'
-	db 25h	; [1307h]  37 '%'
-	db 32h	; [1308h]  50 '2'
-	db 0F5h	; [1309h] 245  -11 'õ'
-	db 82h	; [130Ah] 130 -126
-	db 0E4h	; [130Bh] 228  -28 'ä'
-	db 34h	; [130Ch]  52 '4'
-	db 00h	; [130Dh]   0
-	db 0F5h	; [130Eh] 245  -11 'õ'
-	db 83h	; [130Fh] 131 -125
-	db 0E0h	; [1310h] 224  -32 'à'
+;org	12ABh
+	clr A
+	mov R0, #93h	; 147 -109
+	mov @R0, A
+	mov R0, #94h	; 148 -108
+	mov A, @R0
+	jz jump_12D0
+	dec @R0
+	mov R0, #96h	; 150 -106
+	mov A, @R0
+	add A, #0B3h	; 179  -77 '³'
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R0, #93h	; 147 -109
+	mov @R0, A
+	mov R0, #96h	; 150 -106
+	inc @R0
+	mov A, @R0
+	setb C
+	subb A, #0Fh	;  15
+	jc jump_12D0
+	clr A
+	mov @R0, A
+jump_12D0:
+	mov R0, #93h	; 147 -109
+	mov A, @R0
+	mov R7, A
+	ret
 
-org	1312h
-	db 65h	; [1312h] 101 'e'
-	db 30h	; [1313h]  48 '0'
-	db 0FEh	; [1314h] 254   -2 'þ'
-	db 0EFh	; [1315h] 239  -17 'ï'
-	db 5Eh	; [1316h]  94 '^'
-	db 0F5h	; [1317h] 245  -11 'õ'
-	db 2Fh	; [1318h]  47 '/'
-	db 0E5h	; [1319h] 229  -27 'å'
-	db 30h	; [131Ah]  48 '0'
-	db 0F0h	; [131Bh] 240  -16 'ð'
-	db 74h	; [131Ch] 116 't'
-	db 0A1h	; [131Dh] 161  -95 '¡'
-	db 25h	; [131Eh]  37 '%'
-	db 32h	; [131Fh]  50 '2'
-	db 0F5h	; [1320h] 245  -11 'õ'
-	db 82h	; [1321h] 130 -126
-	db 0E4h	; [1322h] 228  -28 'ä'
-	db 34h	; [1323h]  52 '4'
-	db 00h	; [1324h]   0
-	db 0F5h	; [1325h] 245  -11 'õ'
-	db 83h	; [1326h] 131 -125
-	db 0E5h	; [1327h] 229  -27 'å'
-	db 2Eh	; [1328h]  46 '.'
-	db 0F0h	; [1329h] 240  -16 'ð'
-	db 0E5h	; [132Ah] 229  -27 'å'
-	db 2Fh	; [132Bh]  47 '/'
-	db 60h	; [132Ch]  96 '`'
-	db 45h	; [132Dh]  69 'E'
-	db 0E4h	; [132Eh] 228  -28 'ä'
-	db 0F5h	; [132Fh] 245  -11 'õ'
-	db 33h	; [1330h]  51 '3'
-	db 75h	; [1331h] 117 'u'
-	db 31h	; [1332h]  49 '1'
-	db 01h	; [1333h]   1
-	db 0E5h	; [1334h] 229  -27 'å'
-	db 33h	; [1335h]  51 '3'
-	db 0C3h	; [1336h] 195  -61 'Ã'
-	db 94h	; [1337h] 148 -108
-	db 08h	; [1338h]   8
-	db 50h	; [1339h]  80 'P'
-	db 38h	; [133Ah]  56 '8'
-	db 0E5h	; [133Bh] 229  -27 'å'
-	db 2Fh	; [133Ch]  47 '/'
-	db 55h	; [133Dh]  85 'U'
-	db 31h	; [133Eh]  49 '1'
-	db 0FEh	; [133Fh] 254   -2 'þ'
-	db 0E5h	; [1340h] 229  -27 'å'
-	db 2Eh	; [1341h]  46 '.'
-	db 0F4h	; [1342h] 244  -12 'ô'
-	db 5Eh	; [1343h]  94 '^'
-	db 60h	; [1344h]  96 '`'
-	db 11h	; [1345h]  17
-	db 0E5h	; [1346h] 229  -27 'å'
-	db 32h	; [1347h]  50 '2'
-	db 33h	; [1348h]  51 '3'
-	db 33h	; [1349h]  51 '3'
-	db 33h	; [134Ah]  51 '3'
-	db 54h	; [134Bh]  84 'T'
-	db 0F8h	; [134Ch] 248   -8 'ø'
-	db 25h	; [134Dh]  37 '%'
-	db 33h	; [134Eh]  51 '3'
-	db 44h	; [134Fh]  68 'D'
-	db 80h	; [1350h] 128 -128
+;org	12D5h
+	push PSW
+	mov PSW, #10h	;  16
+	clr A
+	mov 32h, A
+jump_12DD:
+	mov A, 32h
+	clr C
+	subb A, #08h	;   8
+	jc jump_12E7
+	ljmp jump_1378
 
-org	1352h
-	db 12h	; [1352h]  18
-	db 12h	; [1353h]  18
-	db 84h	; [1354h] 132 -124
-	db 80h	; [1355h] 128 -128
-	db 12h	; [1356h]  18
-	db 0E5h	; [1357h] 229  -27 'å'
-	db 2Eh	; [1358h]  46 '.'
-	db 5Eh	; [1359h]  94 '^'
-	db 60h	; [135Ah]  96 '`'
-	db 0Dh	; [135Bh]  13
-	db 0E5h	; [135Ch] 229  -27 'å'
-	db 32h	; [135Dh]  50 '2'
-	db 33h	; [135Eh]  51 '3'
-	db 33h	; [135Fh]  51 '3'
-	db 33h	; [1360h]  51 '3'
-	db 54h	; [1361h]  84 'T'
-	db 0F8h	; [1362h] 248   -8 'ø'
-	db 25h	; [1363h]  37 '%'
-	db 33h	; [1364h]  51 '3'
+jump_12E7:
+	mov A, 32h
+	orl A, #40h	;  64 '@'
+	mov DPTR, #dptr_FFF3
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF2
+	movx A, @DPTR
+	mov 2Eh, A
+	mov A, #0A1h	; 161  -95 '¡'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	xrl A, 2Eh
+	mov 30h, A
+	mov A, #0D3h	; 211  -45 'Ó'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R7, A
+	xrl A, 30h
+	mov R6, A
+	mov A, R7
+	anl A, R6
+	mov 2Fh, A
+	mov A, 30h
+	movx @DPTR, A
+	mov A, #0A1h	; 161  -95 '¡'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	mov A, 2Eh
+	movx @DPTR, A
+	mov A, 2Fh
+	jz jump_1373
+	clr A
+	mov 33h, A
+	mov 31h, #01h	;   1
+jump_1334:
+	mov A, 33h
+	clr C
+	subb A, #08h	;   8
+	jnc jump_1373
+	mov A, 2Fh
+	anl A, 31h
+	mov R6, A
+	mov A, 2Eh
+	cpl A
+	anl A, R6
+	jz jump_1357
+	mov A, 32h
+	rlc A
+	rlc A
+	rlc A
+	anl A, #0F8h	; 248   -8 'ø'
+	add A, 33h
+	orl A, #80h	; 128 -128
+	mov R7, A
+	lcall jump_1284
+	sjmp jump_1369
 
-org	1366h
-	db 12h	; [1366h]  18
-	db 12h	; [1367h]  18
-	db 84h	; [1368h] 132 -124
-	db 05h	; [1369h]   5
-	db 33h	; [136Ah]  51 '3'
-	db 0E5h	; [136Bh] 229  -27 'å'
-	db 31h	; [136Ch]  49 '1'
-	db 25h	; [136Dh]  37 '%'
-	db 0E0h	; [136Eh] 224  -32 'à'
-	db 0F5h	; [136Fh] 245  -11 'õ'
-	db 31h	; [1370h]  49 '1'
-	db 80h	; [1371h] 128 -128
-	db 0C1h	; [1372h] 193  -63 'Á'
-	db 05h	; [1373h]   5
-	db 32h	; [1374h]  50 '2'
-	db 02h	; [1375h]   2
-	db 12h	; [1376h]  18
-	db 0DDh	; [1377h] 221  -35 'Ý'
-	db 0D0h	; [1378h] 208  -48 'Ð'
-	db 0D0h	; [1379h] 208  -48 'Ð'
-	db 22h	; [137Ah]  34 '"'
-	db 0C0h	; [137Bh] 192  -64 'À'
-	db 0D0h	; [137Ch] 208  -48 'Ð'
-	db 75h	; [137Dh] 117 'u'
-	db 0D0h	; [137Eh] 208  -48 'Ð'
-	db 10h	; [137Fh]  16
-	db 0E4h	; [1380h] 228  -28 'ä'
-	db 0F5h	; [1381h] 245  -11 'õ'
-	db 32h	; [1382h]  50 '2'
-	db 0E5h	; [1383h] 229  -27 'å'
-	db 32h	; [1384h]  50 '2'
-	db 0C3h	; [1385h] 195  -61 'Ã'
-	db 94h	; [1386h] 148 -108
-	db 08h	; [1387h]   8
-	db 40h	; [1388h]  64 '@'
-	db 03h	; [1389h]   3
-	db 02h	; [138Ah]   2
-	db 14h	; [138Bh]  20
-	db 20h	; [138Ch]  32 ' '
-	db 0E5h	; [138Dh] 229  -27 'å'
-	db 32h	; [138Eh]  50 '2'
-	db 44h	; [138Fh]  68 'D'
-	db 40h	; [1390h]  64 '@'
-	db 90h	; [1391h] 144 -112
+jump_1357:
+	mov A, 2Eh
+	anl A, R6
+	jz jump_1369
+	mov A, 32h
+	rlc A
+	rlc A
+	rlc A
+	anl A, #0F8h	; 248   -8 'ø'
+	add A, 33h
+	mov R7, A
+	lcall jump_1284
+jump_1369:
+	inc 33h
+	mov A, 31h
+	add A, ACC
+	mov 31h, A
+	sjmp jump_1334
 
-org	1393h
-	db 0F1h	; [1393h] 241  -15 'ñ'
-	db 0F0h	; [1394h] 240  -16 'ð'
-	db 90h	; [1395h] 144 -112
+jump_1373:
+	inc 32h
+	ljmp jump_12DD
 
-org	1397h
-	db 0F0h	; [1397h] 240  -16 'ð'
-	db 0E0h	; [1398h] 224  -32 'à'
-	db 0F5h	; [1399h] 245  -11 'õ'
-	db 2Eh	; [139Ah]  46 '.'
-	db 74h	; [139Bh] 116 't'
-	db 0A9h	; [139Ch] 169  -87 '©'
-	db 25h	; [139Dh]  37 '%'
-	db 32h	; [139Eh]  50 '2'
-	db 0F5h	; [139Fh] 245  -11 'õ'
-	db 82h	; [13A0h] 130 -126
-	db 0E4h	; [13A1h] 228  -28 'ä'
-	db 34h	; [13A2h]  52 '4'
-	db 00h	; [13A3h]   0
-	db 0F5h	; [13A4h] 245  -11 'õ'
-	db 83h	; [13A5h] 131 -125
-	db 0E0h	; [13A6h] 224  -32 'à'
-	db 65h	; [13A7h] 101 'e'
-	db 2Eh	; [13A8h]  46 '.'
-	db 0F5h	; [13A9h] 245  -11 'õ'
-	db 30h	; [13AAh]  48 '0'
-	db 74h	; [13ABh] 116 't'
-	db 0DBh	; [13ACh] 219  -37 'Û'
-	db 25h	; [13ADh]  37 '%'
-	db 32h	; [13AEh]  50 '2'
-	db 0F5h	; [13AFh] 245  -11 'õ'
-	db 82h	; [13B0h] 130 -126
-	db 0E4h	; [13B1h] 228  -28 'ä'
-	db 34h	; [13B2h]  52 '4'
-	db 00h	; [13B3h]   0
-	db 0F5h	; [13B4h] 245  -11 'õ'
-	db 83h	; [13B5h] 131 -125
-	db 0E0h	; [13B6h] 224  -32 'à'
+jump_1378:
+	pop PSW
+	ret
 
-org	13B8h
-	db 65h	; [13B8h] 101 'e'
-	db 30h	; [13B9h]  48 '0'
-	db 0FEh	; [13BAh] 254   -2 'þ'
-	db 0EFh	; [13BBh] 239  -17 'ï'
-	db 5Eh	; [13BCh]  94 '^'
-	db 0F5h	; [13BDh] 245  -11 'õ'
-	db 2Fh	; [13BEh]  47 '/'
-	db 0E5h	; [13BFh] 229  -27 'å'
-	db 30h	; [13C0h]  48 '0'
-	db 0F0h	; [13C1h] 240  -16 'ð'
-	db 74h	; [13C2h] 116 't'
-	db 0A9h	; [13C3h] 169  -87 '©'
-	db 25h	; [13C4h]  37 '%'
-	db 32h	; [13C5h]  50 '2'
-	db 0F5h	; [13C6h] 245  -11 'õ'
-	db 82h	; [13C7h] 130 -126
-	db 0E4h	; [13C8h] 228  -28 'ä'
-	db 34h	; [13C9h]  52 '4'
-	db 00h	; [13CAh]   0
-	db 0F5h	; [13CBh] 245  -11 'õ'
-	db 83h	; [13CCh] 131 -125
-	db 0E5h	; [13CDh] 229  -27 'å'
-	db 2Eh	; [13CEh]  46 '.'
-	db 0F0h	; [13CFh] 240  -16 'ð'
-	db 0E5h	; [13D0h] 229  -27 'å'
-	db 2Fh	; [13D1h]  47 '/'
-	db 60h	; [13D2h]  96 '`'
-	db 47h	; [13D3h]  71 'G'
-	db 0E4h	; [13D4h] 228  -28 'ä'
-	db 0F5h	; [13D5h] 245  -11 'õ'
-	db 33h	; [13D6h]  51 '3'
-	db 75h	; [13D7h] 117 'u'
-	db 31h	; [13D8h]  49 '1'
-	db 01h	; [13D9h]   1
-	db 0E5h	; [13DAh] 229  -27 'å'
-	db 33h	; [13DBh]  51 '3'
-	db 0C3h	; [13DCh] 195  -61 'Ã'
-	db 94h	; [13DDh] 148 -108
-	db 08h	; [13DEh]   8
-	db 50h	; [13DFh]  80 'P'
-	db 3Ah	; [13E0h]  58 ':'
-	db 0E5h	; [13E1h] 229  -27 'å'
-	db 2Fh	; [13E2h]  47 '/'
-	db 55h	; [13E3h]  85 'U'
-	db 31h	; [13E4h]  49 '1'
-	db 0FEh	; [13E5h] 254   -2 'þ'
-	db 0E5h	; [13E6h] 229  -27 'å'
-	db 2Eh	; [13E7h]  46 '.'
-	db 0F4h	; [13E8h] 244  -12 'ô'
-	db 5Eh	; [13E9h]  94 '^'
-	db 60h	; [13EAh]  96 '`'
-	db 11h	; [13EBh]  17
-	db 0E5h	; [13ECh] 229  -27 'å'
-	db 32h	; [13EDh]  50 '2'
-	db 33h	; [13EEh]  51 '3'
-	db 33h	; [13EFh]  51 '3'
-	db 33h	; [13F0h]  51 '3'
-	db 54h	; [13F1h]  84 'T'
-	db 0F8h	; [13F2h] 248   -8 'ø'
-	db 25h	; [13F3h]  37 '%'
-	db 33h	; [13F4h]  51 '3'
-	db 44h	; [13F5h]  68 'D'
-	db 0C0h	; [13F6h] 192  -64 'À'
+;org	137Bh
+	push PSW
+	mov PSW, #10h	;  16
+	clr A
+	mov 32h, A
+jump_1383:
+	mov A, 32h
+	clr C
+	subb A, #08h	;   8
+	jc jump_138D
+	ljmp jump_1420
 
-org	13F8h
-	db 12h	; [13F8h]  18
-	db 12h	; [13F9h]  18
-	db 84h	; [13FAh] 132 -124
-	db 80h	; [13FBh] 128 -128
-	db 14h	; [13FCh]  20
-	db 0E5h	; [13FDh] 229  -27 'å'
-	db 2Eh	; [13FEh]  46 '.'
-	db 5Eh	; [13FFh]  94 '^'
-	db 60h	; [1400h]  96 '`'
-	db 0Fh	; [1401h]  15
-	db 0E5h	; [1402h] 229  -27 'å'
-	db 32h	; [1403h]  50 '2'
-	db 33h	; [1404h]  51 '3'
-	db 33h	; [1405h]  51 '3'
-	db 33h	; [1406h]  51 '3'
-	db 54h	; [1407h]  84 'T'
-	db 0F8h	; [1408h] 248   -8 'ø'
-	db 25h	; [1409h]  37 '%'
-	db 33h	; [140Ah]  51 '3'
-	db 44h	; [140Bh]  68 'D'
-	db 40h	; [140Ch]  64 '@'
+jump_138D:
+	mov A, 32h
+	orl A, #40h	;  64 '@'
+	mov DPTR, #dptr_FFF1
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF0
+	movx A, @DPTR
+	mov 2Eh, A
+	mov A, #0A9h	; 169  -87 '©'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	xrl A, 2Eh
+	mov 30h, A
+	mov A, #0DBh	; 219  -37 'Û'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R7, A
+	xrl A, 30h
+	mov R6, A
+	mov A, R7
+	anl A, R6
+	mov 2Fh, A
+	mov A, 30h
+	movx @DPTR, A
+	mov A, #0A9h	; 169  -87 '©'
+	add A, 32h
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	mov A, 2Eh
+	movx @DPTR, A
+	mov A, 2Fh
+	jz jump_141B
+	clr A
+	mov 33h, A
+	mov 31h, #01h	;   1
+jump_13DA:
+	mov A, 33h
+	clr C
+	subb A, #08h	;   8
+	jnc jump_141B
+	mov A, 2Fh
+	anl A, 31h
+	mov R6, A
+	mov A, 2Eh
+	cpl A
+	anl A, R6
+	jz jump_13FD
+	mov A, 32h
+	rlc A
+	rlc A
+	rlc A
+	anl A, #0F8h	; 248   -8 'ø'
+	add A, 33h
+	orl A, #0C0h	; 192  -64 'À'
+	mov R7, A
+	lcall jump_1284
+	sjmp jump_1411
 
-org	140Eh
-	db 12h	; [140Eh]  18
-	db 12h	; [140Fh]  18
-	db 84h	; [1410h] 132 -124
-	db 05h	; [1411h]   5
-	db 33h	; [1412h]  51 '3'
-	db 0E5h	; [1413h] 229  -27 'å'
-	db 31h	; [1414h]  49 '1'
-	db 25h	; [1415h]  37 '%'
-	db 0E0h	; [1416h] 224  -32 'à'
-	db 0F5h	; [1417h] 245  -11 'õ'
-	db 31h	; [1418h]  49 '1'
-	db 80h	; [1419h] 128 -128
-	db 0BFh	; [141Ah] 191  -65 '¿'
-	db 05h	; [141Bh]   5
-	db 32h	; [141Ch]  50 '2'
-	db 02h	; [141Dh]   2
-	db 13h	; [141Eh]  19
-	db 83h	; [141Fh] 131 -125
-	db 0D0h	; [1420h] 208  -48 'Ð'
-	db 0D0h	; [1421h] 208  -48 'Ð'
-	db 22h	; [1422h]  34 '"'
-	db 0C2h	; [1423h] 194  -62 'Â'
-	db 0E9h	; [1424h] 233  -23 'é'
-	db 0C2h	; [1425h] 194  -62 'Â'
-	db 0EAh	; [1426h] 234  -22 'ê'
-	db 90h	; [1427h] 144 -112
+jump_13FD:
+	mov A, 2Eh
+	anl A, R6
+	jz jump_1411
+	mov A, 32h
+	rlc A
+	rlc A
+	rlc A
+	anl A, #0F8h	; 248   -8 'ø'
+	add A, 33h
+	orl A, #40h	;  64 '@'
+	mov R7, A
+	lcall jump_1284
+jump_1411:
+	inc 33h
+	mov A, 31h
+	add A, ACC
+	mov 31h, A
+	sjmp jump_13DA
 
-org	1429h
-	db 0F3h	; [1429h] 243  -13 'ó'
-	db 74h	; [142Ah] 116 't'
-	db 04h	; [142Bh]   4
-	db 0F0h	; [142Ch] 240  -16 'ð'
-	db 74h	; [142Dh] 116 't'
-	db 2Eh	; [142Eh]  46 '.'
-	db 0F0h	; [142Fh] 240  -16 'ð'
-	db 74h	; [1430h] 116 't'
-	db 0C1h	; [1431h] 193  -63 'Á'
-	db 0F0h	; [1432h] 240  -16 'ð'
-	db 90h	; [1433h] 144 -112
+jump_141B:
+	inc 32h
+	ljmp jump_1383
 
-org	1435h
-	db 0F1h	; [1435h] 241  -15 'ñ'
-	db 74h	; [1436h] 116 't'
-	db 04h	; [1437h]   4
-	db 0F0h	; [1438h] 240  -16 'ð'
-	db 74h	; [1439h] 116 't'
-	db 2Eh	; [143Ah]  46 '.'
-	db 0F0h	; [143Bh] 240  -16 'ð'
-	db 74h	; [143Ch] 116 't'
-	db 0C1h	; [143Dh] 193  -63 'Á'
-	db 0F0h	; [143Eh] 240  -16 'ð'
-	db 22h	; [143Fh]  34 '"'
+jump_1420:
+	pop PSW
+	ret
+
+;org	1423h
+	clr IEN1.1
+	clr IEN1.2
+	mov DPTR, #dptr_FFF3
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #2Eh	;  46 '.'
+	movx @DPTR, A
+	mov A, #0C1h	; 193  -63 'Á'
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF1
+	mov A, #04h	;   4
+	movx @DPTR, A
+	mov A, #2Eh	;  46 '.'
+	movx @DPTR, A
+	mov A, #0C1h	; 193  -63 'Á'
+	movx @DPTR, A
+	ret
+
 jump_1440:
 	mov DPTR, #dptr_FFF1
 	mov A, #0F0h	; 240  -16 'ð'
@@ -4652,3573 +4024,2445 @@ jump_1466:
 	mov R7, #02h	;   2
 	ret
 
-;org	1469h
-	db 90h	; [1469h] 144 -112
-	db 00h	; [146Ah]   0
-	db 87h	; [146Bh] 135 -121
-	db 0EBh	; [146Ch] 235  -21 'ë'
-	db 0F0h	; [146Dh] 240  -16 'ð'
-	db 0A3h	; [146Eh] 163  -93 '£'
-	db 0EAh	; [146Fh] 234  -22 'ê'
-	db 0F0h	; [1470h] 240  -16 'ð'
-	db 0A3h	; [1471h] 163  -93 '£'
-	db 0E9h	; [1472h] 233  -23 'é'
-	db 0F0h	; [1473h] 240  -16 'ð'
-	db 0A3h	; [1474h] 163  -93 '£'
-	db 74h	; [1475h] 116 't'
-	db 00h	; [1476h]   0
-	db 0F0h	; [1477h] 240  -16 'ð'
-	db 0A3h	; [1478h] 163  -93 '£'
-	db 74h	; [1479h] 116 't'
-	db 0C3h	; [147Ah] 195  -61 'Ã'
-	db 0F0h	; [147Bh] 240  -16 'ð'
-	db 0D2h	; [147Ch] 210  -46 'Ò'
-	db 00h	; [147Dh]   0
-	db 0E4h	; [147Eh] 228  -28 'ä'
-
-org	1480h
-	db 0EFh	; [1480h] 239  -17 'ï'
-	db 0C3h	; [1481h] 195  -61 'Ã'
-	db 94h	; [1482h] 148 -108
-	db 08h	; [1483h]   8
-	db 50h	; [1484h]  80 'P'
-	db 28h	; [1485h]  40 '('
-	db 90h	; [1486h] 144 -112
-	db 00h	; [1487h]   0
-	db 87h	; [1488h] 135 -121
-	db 0E0h	; [1489h] 224  -32 'à'
-	db 0FBh	; [148Ah] 251   -5 'û'
-	db 0A3h	; [148Bh] 163  -93 '£'
-	db 0E4h	; [148Ch] 228  -28 'ä'
-	db 75h	; [148Dh] 117 'u'
-	db 0F0h	; [148Eh] 240  -16 'ð'
-	db 01h	; [148Fh]   1
-	db 12h	; [1490h]  18
-	db 36h	; [1491h]  54 '6'
-	db 0D1h	; [1492h] 209  -47 'Ñ'
-	db 0A9h	; [1493h] 169  -87 '©'
-	db 0F0h	; [1494h] 240  -16 'ð'
-	db 0FAh	; [1495h] 250   -6 'ú'
-	db 12h	; [1496h]  18
-	db 35h	; [1497h]  53 '5'
-	db 0BEh	; [1498h] 190  -66 '¾'
-	db 0FEh	; [1499h] 254   -2 'þ'
-	db 90h	; [149Ah] 144 -112
-	db 00h	; [149Bh]   0
-	db 8Ah	; [149Ch] 138 -118
-	db 0E4h	; [149Dh] 228  -28 'ä'
-	db 75h	; [149Eh] 117 'u'
-	db 0F0h	; [149Fh] 240  -16 'ð'
-	db 01h	; [14A0h]   1
-	db 12h	; [14A1h]  18
-	db 36h	; [14A2h]  54 '6'
-	db 0D1h	; [14A3h] 209  -47 'Ñ'
-	db 85h	; [14A4h] 133 -123
-	db 0F0h	; [14A5h] 240  -16 'ð'
-	db 82h	; [14A6h] 130 -126
-	db 0F5h	; [14A7h] 245  -11 'õ'
-	db 83h	; [14A8h] 131 -125
-	db 0EEh	; [14A9h] 238  -18 'î'
-	db 0F0h	; [14AAh] 240  -16 'ð'
-	db 0Fh	; [14ABh]  15
-	db 80h	; [14ACh] 128 -128
-	db 0D2h	; [14ADh] 210  -46 'Ò'
-	db 0D2h	; [14AEh] 210  -46 'Ò'
-	db 02h	; [14AFh]   2
-	db 0C2h	; [14B0h] 194  -62 'Â'
-	db 00h	; [14B1h]   0
-	db 22h	; [14B2h]  34 '"'
-	db 90h	; [14B3h] 144 -112
-	db 00h	; [14B4h]   0
-	db 8Ch	; [14B5h] 140 -116
-	db 0EBh	; [14B6h] 235  -21 'ë'
-	db 0F0h	; [14B7h] 240  -16 'ð'
-	db 0A3h	; [14B8h] 163  -93 '£'
-	db 0EAh	; [14B9h] 234  -22 'ê'
-	db 0F0h	; [14BAh] 240  -16 'ð'
-	db 0A3h	; [14BBh] 163  -93 '£'
-	db 0E9h	; [14BCh] 233  -23 'é'
-	db 0F0h	; [14BDh] 240  -16 'ð'
-	db 0A3h	; [14BEh] 163  -93 '£'
-	db 74h	; [14BFh] 116 't'
-	db 00h	; [14C0h]   0
-	db 0F0h	; [14C1h] 240  -16 'ð'
-	db 0A3h	; [14C2h] 163  -93 '£'
-	db 74h	; [14C3h] 116 't'
-	db 0CBh	; [14C4h] 203  -53 'Ë'
-	db 0F0h	; [14C5h] 240  -16 'ð'
-	db 0D2h	; [14C6h] 210  -46 'Ò'
-	db 01h	; [14C7h]   1
-	db 0E4h	; [14C8h] 228  -28 'ä'
-
-org	14CAh
-	db 0EFh	; [14CAh] 239  -17 'ï'
-	db 0C3h	; [14CBh] 195  -61 'Ã'
-	db 94h	; [14CCh] 148 -108
-	db 08h	; [14CDh]   8
-	db 50h	; [14CEh]  80 'P'
-	db 28h	; [14CFh]  40 '('
-	db 90h	; [14D0h] 144 -112
-	db 00h	; [14D1h]   0
-	db 8Ch	; [14D2h] 140 -116
-	db 0E0h	; [14D3h] 224  -32 'à'
-	db 0FBh	; [14D4h] 251   -5 'û'
-	db 0A3h	; [14D5h] 163  -93 '£'
-	db 0E4h	; [14D6h] 228  -28 'ä'
-	db 75h	; [14D7h] 117 'u'
-	db 0F0h	; [14D8h] 240  -16 'ð'
-	db 01h	; [14D9h]   1
-	db 12h	; [14DAh]  18
-	db 36h	; [14DBh]  54 '6'
-	db 0D1h	; [14DCh] 209  -47 'Ñ'
-	db 0A9h	; [14DDh] 169  -87 '©'
-	db 0F0h	; [14DEh] 240  -16 'ð'
-	db 0FAh	; [14DFh] 250   -6 'ú'
-	db 12h	; [14E0h]  18
-	db 35h	; [14E1h]  53 '5'
-	db 0BEh	; [14E2h] 190  -66 '¾'
-	db 0FEh	; [14E3h] 254   -2 'þ'
-	db 90h	; [14E4h] 144 -112
-	db 00h	; [14E5h]   0
-	db 8Fh	; [14E6h] 143 -113
-	db 0E4h	; [14E7h] 228  -28 'ä'
-	db 75h	; [14E8h] 117 'u'
-	db 0F0h	; [14E9h] 240  -16 'ð'
-	db 01h	; [14EAh]   1
-	db 12h	; [14EBh]  18
-	db 36h	; [14ECh]  54 '6'
-	db 0D1h	; [14EDh] 209  -47 'Ñ'
-	db 85h	; [14EEh] 133 -123
-	db 0F0h	; [14EFh] 240  -16 'ð'
-	db 82h	; [14F0h] 130 -126
-	db 0F5h	; [14F1h] 245  -11 'õ'
-	db 83h	; [14F2h] 131 -125
-	db 0EEh	; [14F3h] 238  -18 'î'
-	db 0F0h	; [14F4h] 240  -16 'ð'
-	db 0Fh	; [14F5h]  15
-	db 80h	; [14F6h] 128 -128
-	db 0D2h	; [14F7h] 210  -46 'Ò'
-	db 0D2h	; [14F8h] 210  -46 'Ò'
-	db 03h	; [14F9h]   3
-	db 0C2h	; [14FAh] 194  -62 'Â'
-	db 01h	; [14FBh]   1
-	db 22h	; [14FCh]  34 '"'
-	db 0C0h	; [14FDh] 192  -64 'À'
-	db 0D0h	; [14FEh] 208  -48 'Ð'
-	db 75h	; [14FFh] 117 'u'
-	db 0D0h	; [1500h] 208  -48 'Ð'
-	db 10h	; [1501h]  16
-	db 0E4h	; [1502h] 228  -28 'ä'
-
-org	1504h
-	db 0EFh	; [1504h] 239  -17 'ï'
-	db 0C3h	; [1505h] 195  -61 'Ã'
-	db 94h	; [1506h] 148 -108
-	db 08h	; [1507h]   8
-	db 50h	; [1508h]  80 'P'
-	db 19h	; [1509h]  25
-	db 0EFh	; [150Ah] 239  -17 'ï'
-	db 44h	; [150Bh]  68 'D'
-	db 80h	; [150Ch] 128 -128
-	db 90h	; [150Dh] 144 -112
-
-org	150Fh
-	db 0F3h	; [150Fh] 243  -13 'ó'
-	db 0F0h	; [1510h] 240  -16 'ð'
-	db 74h	; [1511h] 116 't'
-	db 0C3h	; [1512h] 195  -61 'Ã'
-	db 2Fh	; [1513h]  47 '/'
-	db 0F5h	; [1514h] 245  -11 'õ'
-	db 82h	; [1515h] 130 -126
-	db 0E4h	; [1516h] 228  -28 'ä'
-	db 34h	; [1517h]  52 '4'
-	db 00h	; [1518h]   0
-	db 0F5h	; [1519h] 245  -11 'õ'
-	db 83h	; [151Ah] 131 -125
-	db 0E0h	; [151Bh] 224  -32 'à'
-	db 90h	; [151Ch] 144 -112
-
-org	151Eh
-	db 0F2h	; [151Eh] 242  -14 'ò'
-	db 0F0h	; [151Fh] 240  -16 'ð'
-	db 0Fh	; [1520h]  15
-	db 80h	; [1521h] 128 -128
-	db 0E1h	; [1522h] 225  -31 'á'
-	db 0D0h	; [1523h] 208  -48 'Ð'
-	db 0D0h	; [1524h] 208  -48 'Ð'
-	db 22h	; [1525h]  34 '"'
-	db 0C0h	; [1526h] 192  -64 'À'
-	db 0D0h	; [1527h] 208  -48 'Ð'
-	db 0E4h	; [1528h] 228  -28 'ä'
-	db 0F5h	; [1529h] 245  -11 'õ'
-	db 2Bh	; [152Ah]  43 '+'
-	db 0E5h	; [152Bh] 229  -27 'å'
-	db 2Bh	; [152Ch]  43 '+'
-	db 0C3h	; [152Dh] 195  -61 'Ã'
-	db 94h	; [152Eh] 148 -108
-	db 08h	; [152Fh]   8
-	db 50h	; [1530h]  80 'P'
-	db 1Ch	; [1531h]  28
-	db 0E5h	; [1532h] 229  -27 'å'
-	db 2Bh	; [1533h]  43 '+'
-	db 44h	; [1534h]  68 'D'
-	db 80h	; [1535h] 128 -128
-	db 90h	; [1536h] 144 -112
-
-org	1538h
-	db 0F1h	; [1538h] 241  -15 'ñ'
-	db 0F0h	; [1539h] 240  -16 'ð'
-	db 74h	; [153Ah] 116 't'
-	db 0CBh	; [153Bh] 203  -53 'Ë'
-	db 25h	; [153Ch]  37 '%'
-	db 2Bh	; [153Dh]  43 '+'
-	db 0F5h	; [153Eh] 245  -11 'õ'
-	db 82h	; [153Fh] 130 -126
-	db 0E4h	; [1540h] 228  -28 'ä'
-	db 34h	; [1541h]  52 '4'
-	db 00h	; [1542h]   0
-	db 0F5h	; [1543h] 245  -11 'õ'
-	db 83h	; [1544h] 131 -125
-	db 0E0h	; [1545h] 224  -32 'à'
-	db 90h	; [1546h] 144 -112
-
-org	1548h
-	db 0F0h	; [1548h] 240  -16 'ð'
-	db 0F0h	; [1549h] 240  -16 'ð'
-	db 05h	; [154Ah]   5
-	db 2Bh	; [154Bh]  43 '+'
-	db 80h	; [154Ch] 128 -128
-	db 0DDh	; [154Dh] 221  -35 'Ý'
-	db 0D0h	; [154Eh] 208  -48 'Ð'
-	db 0D0h	; [154Fh] 208  -48 'Ð'
-	db 22h	; [1550h]  34 '"'
-	db 0C0h	; [1551h] 192  -64 'À'
-	db 0D0h	; [1552h] 208  -48 'Ð'
-	db 75h	; [1553h] 117 'u'
-	db 0D0h	; [1554h] 208  -48 'Ð'
-	db 10h	; [1555h]  16
-	db 30h	; [1556h]  48 '0'
-	db 02h	; [1557h]   2
-	db 08h	; [1558h]   8
-	db 20h	; [1559h]  32 ' '
-	db 00h	; [155Ah]   0
-	db 05h	; [155Bh]   5
-	db 12h	; [155Ch]  18
-	db 14h	; [155Dh]  20
-	db 0FDh	; [155Eh] 253   -3 'ý'
-	db 0C2h	; [155Fh] 194  -62 'Â'
-	db 02h	; [1560h]   2
-	db 30h	; [1561h]  48 '0'
-	db 03h	; [1562h]   3
-	db 08h	; [1563h]   8
-	db 20h	; [1564h]  32 ' '
-	db 01h	; [1565h]   1
-	db 05h	; [1566h]   5
-	db 12h	; [1567h]  18
-	db 15h	; [1568h]  21
-	db 26h	; [1569h]  38 '&'
-	db 0C2h	; [156Ah] 194  -62 'Â'
-	db 03h	; [156Bh]   3
-	db 0D0h	; [156Ch] 208  -48 'Ð'
-	db 0D0h	; [156Dh] 208  -48 'Ð'
-	db 22h	; [156Eh]  34 '"'
-	db 0C0h	; [156Fh] 192  -64 'À'
-	db 0D0h	; [1570h] 208  -48 'Ð'
-	db 75h	; [1571h] 117 'u'
-	db 0D0h	; [1572h] 208  -48 'Ð'
-	db 10h	; [1573h]  16
-	db 90h	; [1574h] 144 -112
-	db 00h	; [1575h]   0
-	db 91h	; [1576h] 145 -111
-	db 0EBh	; [1577h] 235  -21 'ë'
-	db 0F0h	; [1578h] 240  -16 'ð'
-	db 0A3h	; [1579h] 163  -93 '£'
-	db 0EAh	; [157Ah] 234  -22 'ê'
-	db 0F0h	; [157Bh] 240  -16 'ð'
-	db 0A3h	; [157Ch] 163  -93 '£'
-	db 0E9h	; [157Dh] 233  -23 'é'
-	db 0F0h	; [157Eh] 240  -16 'ð'
-	db 20h	; [157Fh]  32 ' '
-	db 00h	; [1580h]   0
-	db 03h	; [1581h]   3
-	db 30h	; [1582h]  48 '0'
-	db 01h	; [1583h]   1
-	db 05h	; [1584h]   5
-	db 7Fh	; [1585h] 127
-	db 00h	; [1586h]   0
-	db 02h	; [1587h]   2
-	db 16h	; [1588h]  22
-	db 29h	; [1589h]  41 ')'
-	db 90h	; [158Ah] 144 -112
-	db 00h	; [158Bh]   0
-	db 0B1h	; [158Ch] 177  -79 '±'
-	db 0E0h	; [158Dh] 224  -32 'à'
-	db 60h	; [158Eh]  96 '`'
-	db 09h	; [158Fh]   9
-	db 12h	; [1590h]  18
-	db 14h	; [1591h]  20
-	db 0FDh	; [1592h] 253   -3 'ý'
-	db 12h	; [1593h]  18
-	db 15h	; [1594h]  21
-	db 26h	; [1595h]  38 '&'
-	db 02h	; [1596h]   2
-	db 16h	; [1597h]  22
-	db 27h	; [1598h]  39 '''
-	db 0E4h	; [1599h] 228  -28 'ä'
-	db 0F5h	; [159Ah] 245  -11 'õ'
-	db 2Ch	; [159Bh]  44 ','
-	db 0E5h	; [159Ch] 229  -27 'å'
-	db 2Ch	; [159Dh]  44 ','
-	db 0C3h	; [159Eh] 195  -61 'Ã'
-	db 94h	; [159Fh] 148 -108
-	db 08h	; [15A0h]   8
-	db 50h	; [15A1h]  80 'P'
-	db 3Ah	; [15A2h]  58 ':'
-	db 90h	; [15A3h] 144 -112
-	db 00h	; [15A4h]   0
-	db 91h	; [15A5h] 145 -111
-	db 0E0h	; [15A6h] 224  -32 'à'
-	db 0FBh	; [15A7h] 251   -5 'û'
-	db 0A3h	; [15A8h] 163  -93 '£'
-	db 0E0h	; [15A9h] 224  -32 'à'
-	db 0FAh	; [15AAh] 250   -6 'ú'
-	db 0A3h	; [15ABh] 163  -93 '£'
-	db 0E0h	; [15ACh] 224  -32 'à'
-	db 0F9h	; [15ADh] 249   -7 'ù'
-	db 85h	; [15AEh] 133 -123
-	db 2Ch	; [15AFh]  44 ','
-	db 82h	; [15B0h] 130 -126
-	db 75h	; [15B1h] 117 'u'
-	db 83h	; [15B2h] 131 -125
-	db 00h	; [15B3h]   0
-	db 12h	; [15B4h]  18
-	db 35h	; [15B5h]  53 '5'
-	db 0D9h	; [15B6h] 217  -39 'Ù'
-	db 0F5h	; [15B7h] 245  -11 'õ'
-	db 2Dh	; [15B8h]  45 '-'
-	db 60h	; [15B9h]  96 '`'
-	db 1Eh	; [15BAh]  30
-	db 74h	; [15BBh] 116 't'
-	db 0C3h	; [15BCh] 195  -61 'Ã'
-	db 25h	; [15BDh]  37 '%'
-	db 2Ch	; [15BEh]  44 ','
-	db 0F5h	; [15BFh] 245  -11 'õ'
-	db 82h	; [15C0h] 130 -126
-	db 0E4h	; [15C1h] 228  -28 'ä'
-	db 34h	; [15C2h]  52 '4'
-	db 00h	; [15C3h]   0
-	db 0F5h	; [15C4h] 245  -11 'õ'
-	db 83h	; [15C5h] 131 -125
-	db 0E0h	; [15C6h] 224  -32 'à'
-
-org	15C8h
-	db 52h	; [15C8h]  82 'R'
-	db 2Dh	; [15C9h]  45 '-'
-	db 0E5h	; [15CAh] 229  -27 'å'
-	db 2Ch	; [15CBh]  44 ','
-	db 44h	; [15CCh]  68 'D'
-	db 80h	; [15CDh] 128 -128
-	db 90h	; [15CEh] 144 -112
-
-org	15D0h
-	db 0F3h	; [15D0h] 243  -13 'ó'
-	db 0F0h	; [15D1h] 240  -16 'ð'
-	db 0E5h	; [15D2h] 229  -27 'å'
-	db 2Dh	; [15D3h]  45 '-'
-	db 6Fh	; [15D4h] 111 'o'
-	db 90h	; [15D5h] 144 -112
-
-org	15D7h
-	db 0F2h	; [15D7h] 242  -14 'ò'
-	db 0F0h	; [15D8h] 240  -16 'ð'
-	db 05h	; [15D9h]   5
-	db 2Ch	; [15DAh]  44 ','
-	db 80h	; [15DBh] 128 -128
-	db 0BFh	; [15DCh] 191  -65 '¿'
-	db 0E4h	; [15DDh] 228  -28 'ä'
-	db 0F5h	; [15DEh] 245  -11 'õ'
-	db 2Ch	; [15DFh]  44 ','
-	db 0E5h	; [15E0h] 229  -27 'å'
-	db 2Ch	; [15E1h]  44 ','
-	db 0C3h	; [15E2h] 195  -61 'Ã'
-	db 94h	; [15E3h] 148 -108
-	db 08h	; [15E4h]   8
-	db 50h	; [15E5h]  80 'P'
-	db 40h	; [15E6h]  64 '@'
-	db 0E5h	; [15E7h] 229  -27 'å'
-	db 2Ch	; [15E8h]  44 ','
-	db 24h	; [15E9h]  36 '$'
-	db 08h	; [15EAh]   8
-
-org	15ECh
-	db 0E4h	; [15ECh] 228  -28 'ä'
-	db 33h	; [15EDh]  51 '3'
-	db 0FEh	; [15EEh] 254   -2 'þ'
-	db 90h	; [15EFh] 144 -112
-	db 00h	; [15F0h]   0
-	db 91h	; [15F1h] 145 -111
-	db 0E0h	; [15F2h] 224  -32 'à'
-	db 0FBh	; [15F3h] 251   -5 'û'
-	db 0A3h	; [15F4h] 163  -93 '£'
-	db 0E0h	; [15F5h] 224  -32 'à'
-	db 0FAh	; [15F6h] 250   -6 'ú'
-	db 0A3h	; [15F7h] 163  -93 '£'
-	db 0E0h	; [15F8h] 224  -32 'à'
-	db 0F9h	; [15F9h] 249   -7 'ù'
-	db 8Fh	; [15FAh] 143 -113
-	db 82h	; [15FBh] 130 -126
-	db 8Eh	; [15FCh] 142 -114
-	db 83h	; [15FDh] 131 -125
-	db 12h	; [15FEh]  18
-	db 35h	; [15FFh]  53 '5'
-	db 0D9h	; [1600h] 217  -39 'Ù'
-	db 0F5h	; [1601h] 245  -11 'õ'
-	db 2Dh	; [1602h]  45 '-'
-	db 60h	; [1603h]  96 '`'
-	db 1Eh	; [1604h]  30
-	db 74h	; [1605h] 116 't'
-	db 0CBh	; [1606h] 203  -53 'Ë'
-	db 25h	; [1607h]  37 '%'
-	db 2Ch	; [1608h]  44 ','
-	db 0F5h	; [1609h] 245  -11 'õ'
-	db 82h	; [160Ah] 130 -126
-	db 0E4h	; [160Bh] 228  -28 'ä'
-	db 34h	; [160Ch]  52 '4'
-	db 00h	; [160Dh]   0
-	db 0F5h	; [160Eh] 245  -11 'õ'
-	db 83h	; [160Fh] 131 -125
-	db 0E0h	; [1610h] 224  -32 'à'
-
-org	1612h
-	db 52h	; [1612h]  82 'R'
-	db 2Dh	; [1613h]  45 '-'
-	db 0E5h	; [1614h] 229  -27 'å'
-	db 2Ch	; [1615h]  44 ','
-	db 44h	; [1616h]  68 'D'
-	db 80h	; [1617h] 128 -128
-	db 90h	; [1618h] 144 -112
-
-org	161Ah
-	db 0F1h	; [161Ah] 241  -15 'ñ'
-	db 0F0h	; [161Bh] 240  -16 'ð'
-	db 0E5h	; [161Ch] 229  -27 'å'
-	db 2Dh	; [161Dh]  45 '-'
-	db 6Fh	; [161Eh] 111 'o'
-	db 90h	; [161Fh] 144 -112
-
-org	1621h
-	db 0F0h	; [1621h] 240  -16 'ð'
-	db 0F0h	; [1622h] 240  -16 'ð'
-	db 05h	; [1623h]   5
-	db 2Ch	; [1624h]  44 ','
-	db 80h	; [1625h] 128 -128
-	db 0B9h	; [1626h] 185  -71 '¹'
-	db 7Fh	; [1627h] 127
-	db 01h	; [1628h]   1
-	db 0D0h	; [1629h] 208  -48 'Ð'
-	db 0D0h	; [162Ah] 208  -48 'Ð'
-	db 22h	; [162Bh]  34 '"'
-	db 0C0h	; [162Ch] 192  -64 'À'
-	db 0D0h	; [162Dh] 208  -48 'Ð'
-	db 75h	; [162Eh] 117 'u'
-	db 0D0h	; [162Fh] 208  -48 'Ð'
-	db 10h	; [1630h]  16
-	db 90h	; [1631h] 144 -112
-	db 00h	; [1632h]   0
-	db 0B2h	; [1633h] 178  -78 '²'
-	db 0E0h	; [1634h] 224  -32 'à'
-	db 14h	; [1635h]  20
-	db 0F0h	; [1636h] 240  -16 'ð'
-	db 0C3h	; [1637h] 195  -61 'Ã'
-	db 64h	; [1638h] 100 'd'
-	db 80h	; [1639h] 128 -128
-	db 94h	; [163Ah] 148 -108
-	db 80h	; [163Bh] 128 -128
-	db 50h	; [163Ch]  80 'P'
-	db 30h	; [163Dh]  48 '0'
-	db 90h	; [163Eh] 144 -112
-	db 00h	; [163Fh]   0
-	db 0B1h	; [1640h] 177  -79 '±'
-	db 0E0h	; [1641h] 224  -32 'à'
-	db 60h	; [1642h]  96 '`'
-	db 06h	; [1643h]   6
-	db 0A3h	; [1644h] 163  -93 '£'
-	db 74h	; [1645h] 116 't'
-	db 1Bh	; [1646h]  27
-	db 0F0h	; [1647h] 240  -16 'ð'
-	db 80h	; [1648h] 128 -128
-	db 06h	; [1649h]   6
-	db 90h	; [164Ah] 144 -112
-	db 00h	; [164Bh]   0
-	db 0B2h	; [164Ch] 178  -78 '²'
-	db 74h	; [164Dh] 116 't'
-	db 06h	; [164Eh]   6
-	db 0F0h	; [164Fh] 240  -16 'ð'
-	db 12h	; [1650h]  18
-	db 15h	; [1651h]  21
-	db 6Fh	; [1652h] 111 'o'
-	db 0EFh	; [1653h] 239  -17 'ï'
-	db 60h	; [1654h]  96 '`'
-	db 13h	; [1655h]  19
-	db 90h	; [1656h] 144 -112
-	db 00h	; [1657h]   0
-	db 0B1h	; [1658h] 177  -79 '±'
-	db 0E0h	; [1659h] 224  -32 'à'
-	db 70h	; [165Ah] 112 'p'
-	db 04h	; [165Bh]   4
-	db 7Fh	; [165Ch] 127
-	db 01h	; [165Dh]   1
-	db 80h	; [165Eh] 128 -128
-	db 02h	; [165Fh]   2
-	db 7Fh	; [1660h] 127
-	db 00h	; [1661h]   0
-	db 90h	; [1662h] 144 -112
-	db 00h	; [1663h]   0
-	db 0B1h	; [1664h] 177  -79 '±'
-	db 0EFh	; [1665h] 239  -17 'ï'
-	db 0F0h	; [1666h] 240  -16 'ð'
-	db 80h	; [1667h] 128 -128
-	db 05h	; [1668h]   5
-	db 0E4h	; [1669h] 228  -28 'ä'
-	db 90h	; [166Ah] 144 -112
-	db 00h	; [166Bh]   0
-	db 0B2h	; [166Ch] 178  -78 '²'
-	db 0F0h	; [166Dh] 240  -16 'ð'
-	db 0D0h	; [166Eh] 208  -48 'Ð'
-	db 0D0h	; [166Fh] 208  -48 'Ð'
-	db 22h	; [1670h]  34 '"'
-	db 0EFh	; [1671h] 239  -17 'ï'
-	db 60h	; [1672h]  96 '`'
-	db 0Bh	; [1673h]  11
-	db 90h	; [1674h] 144 -112
-
-org	1676h
-	db 0F3h	; [1676h] 243  -13 'ó'
-	db 74h	; [1677h] 116 't'
-	db 0A3h	; [1678h] 163  -93 '£'
-	db 0F0h	; [1679h] 240  -16 'ð'
-	db 90h	; [167Ah] 144 -112
-
-org	167Ch
-	db 0F1h	; [167Ch] 241  -15 'ñ'
-	db 0F0h	; [167Dh] 240  -16 'ð'
-	db 22h	; [167Eh]  34 '"'
-	db 90h	; [167Fh] 144 -112
-
-org	1681h
-	db 0F3h	; [1681h] 243  -13 'ó'
-	db 74h	; [1682h] 116 't'
-	db 0A0h	; [1683h] 160  -96
-	db 0F0h	; [1684h] 240  -16 'ð'
-	db 90h	; [1685h] 144 -112
-
-org	1687h
-	db 0F1h	; [1687h] 241  -15 'ñ'
-	db 0F0h	; [1688h] 240  -16 'ð'
-	db 22h	; [1689h]  34 '"'
-	db 90h	; [168Ah] 144 -112
-	db 00h	; [168Bh]   0
-	db 94h	; [168Ch] 148 -108
-	db 0EFh	; [168Dh] 239  -17 'ï'
-	db 0F0h	; [168Eh] 240  -16 'ð'
-	db 0A3h	; [168Fh] 163  -93 '£'
-	db 0EDh	; [1690h] 237  -19 'í'
-	db 0F0h	; [1691h] 240  -16 'ð'
-	db 0ADh	; [1692h] 173  -83
-	db 03h	; [1693h]   3
-	db 0ACh	; [1694h] 172  -84 '¬'
-	db 02h	; [1695h]   2
-	db 0EDh	; [1696h] 237  -19 'í'
-	db 24h	; [1697h]  36 '$'
-	db 08h	; [1698h]   8
-
-org	169Ah
-	db 0E4h	; [169Ah] 228  -28 'ä'
-	db 3Ch	; [169Bh]  60 '<'
-	db 0FAh	; [169Ch] 250   -6 'ú'
-	db 0A9h	; [169Dh] 169  -87 '©'
-	db 07h	; [169Eh]   7
-	db 0A3h	; [169Fh] 163  -93 '£'
-	db 74h	; [16A0h] 116 't'
-	db 02h	; [16A1h]   2
-	db 0F0h	; [16A2h] 240  -16 'ð'
-	db 0A3h	; [16A3h] 163  -93 '£'
-	db 0EAh	; [16A4h] 234  -22 'ê'
-	db 0F0h	; [16A5h] 240  -16 'ð'
-	db 0A3h	; [16A6h] 163  -93 '£'
-	db 0E9h	; [16A7h] 233  -23 'é'
-	db 0F0h	; [16A8h] 240  -16 'ð'
-	db 90h	; [16A9h] 144 -112
-	db 00h	; [16AAh]   0
-	db 94h	; [16ABh] 148 -108
-	db 0E0h	; [16ACh] 224  -32 'à'
-	db 24h	; [16ADh]  36 '$'
-	db 0FEh	; [16AEh] 254   -2 'þ'
-	db 60h	; [16AFh]  96 '`'
-	db 64h	; [16B0h] 100 'd'
-	db 14h	; [16B1h]  20
-	db 70h	; [16B2h] 112 'p'
-	db 03h	; [16B3h]   3
-	db 02h	; [16B4h]   2
-	db 17h	; [16B5h]  23
-	db 5Ah	; [16B6h]  90 'Z'
-	db 14h	; [16B7h]  20
-	db 70h	; [16B8h] 112 'p'
-	db 03h	; [16B9h]   3
-	db 02h	; [16BAh]   2
-	db 17h	; [16BBh]  23
-	db 86h	; [16BCh] 134 -122
-	db 14h	; [16BDh]  20
-	db 70h	; [16BEh] 112 'p'
-	db 03h	; [16BFh]   3
-	db 02h	; [16C0h]   2
-	db 17h	; [16C1h]  23
-	db 0B2h	; [16C2h] 178  -78 '²'
-	db 14h	; [16C3h]  20
-	db 70h	; [16C4h] 112 'p'
-	db 03h	; [16C5h]   3
-	db 02h	; [16C6h]   2
-	db 17h	; [16C7h]  23
-	db 0DEh	; [16C8h] 222  -34 'Þ'
-	db 24h	; [16C9h]  36 '$'
-	db 05h	; [16CAh]   5
-	db 60h	; [16CBh]  96 '`'
-	db 03h	; [16CCh]   3
-	db 02h	; [16CDh]   2
-	db 18h	; [16CEh]  24
-	db 0Dh	; [16CFh]  13
-	db 90h	; [16D0h] 144 -112
-	db 00h	; [16D1h]   0
-	db 95h	; [16D2h] 149 -107
-	db 0E0h	; [16D3h] 224  -32 'à'
-	db 60h	; [16D4h]  96 '`'
-	db 18h	; [16D5h]  24
-	db 0A3h	; [16D6h] 163  -93 '£'
-	db 0E0h	; [16D7h] 224  -32 'à'
-	db 0FBh	; [16D8h] 251   -5 'û'
-	db 0A3h	; [16D9h] 163  -93 '£'
-	db 0E0h	; [16DAh] 224  -32 'à'
-	db 0FAh	; [16DBh] 250   -6 'ú'
-	db 0A3h	; [16DCh] 163  -93 '£'
-	db 0E0h	; [16DDh] 224  -32 'à'
-	db 24h	; [16DEh]  36 '$'
-	db 06h	; [16DFh]   6
-	db 0F9h	; [16E0h] 249   -7 'ù'
-	db 0E4h	; [16E1h] 228  -28 'ä'
-	db 3Ah	; [16E2h]  58 ':'
-	db 0FAh	; [16E3h] 250   -6 'ú'
-	db 12h	; [16E4h]  18
-	db 35h	; [16E5h]  53 '5'
-	db 0BEh	; [16E6h] 190  -66 '¾'
-	db 44h	; [16E7h]  68 'D'
-	db 80h	; [16E8h] 128 -128
-	db 12h	; [16E9h]  18
-	db 36h	; [16EAh]  54 '6'
-	db 08h	; [16EBh]   8
-	db 80h	; [16ECh] 128 -128
-	db 18h	; [16EDh]  24
-	db 90h	; [16EEh] 144 -112
-	db 00h	; [16EFh]   0
-	db 96h	; [16F0h] 150 -106
-	db 0E0h	; [16F1h] 224  -32 'à'
-	db 0FBh	; [16F2h] 251   -5 'û'
-	db 0A3h	; [16F3h] 163  -93 '£'
-	db 0E0h	; [16F4h] 224  -32 'à'
-	db 0FAh	; [16F5h] 250   -6 'ú'
-	db 0A3h	; [16F6h] 163  -93 '£'
-	db 0E0h	; [16F7h] 224  -32 'à'
-	db 24h	; [16F8h]  36 '$'
-	db 06h	; [16F9h]   6
-	db 0F9h	; [16FAh] 249   -7 'ù'
-	db 0E4h	; [16FBh] 228  -28 'ä'
-	db 3Ah	; [16FCh]  58 ':'
-	db 0FAh	; [16FDh] 250   -6 'ú'
-	db 12h	; [16FEh]  18
-	db 35h	; [16FFh]  53 '5'
-	db 0BEh	; [1700h] 190  -66 '¾'
-	db 54h	; [1701h]  84 'T'
-	db 7Fh	; [1702h] 127
-	db 12h	; [1703h]  18
-	db 36h	; [1704h]  54 '6'
-	db 08h	; [1705h]   8
-	db 90h	; [1706h] 144 -112
-	db 00h	; [1707h]   0
-	db 96h	; [1708h] 150 -106
-	db 0E0h	; [1709h] 224  -32 'à'
-	db 0FBh	; [170Ah] 251   -5 'û'
-	db 0A3h	; [170Bh] 163  -93 '£'
-	db 0E0h	; [170Ch] 224  -32 'à'
-	db 0FAh	; [170Dh] 250   -6 'ú'
-	db 0A3h	; [170Eh] 163  -93 '£'
-	db 0E0h	; [170Fh] 224  -32 'à'
-	db 0F9h	; [1710h] 249   -7 'ù'
-	db 12h	; [1711h]  18
-	db 14h	; [1712h]  20
-	db 0B3h	; [1713h] 179  -77 '³'
-	db 22h	; [1714h]  34 '"'
-	db 90h	; [1715h] 144 -112
-	db 00h	; [1716h]   0
-	db 95h	; [1717h] 149 -107
-	db 0E0h	; [1718h] 224  -32 'à'
-	db 60h	; [1719h]  96 '`'
-	db 18h	; [171Ah]  24
-	db 0A3h	; [171Bh] 163  -93 '£'
-	db 0E0h	; [171Ch] 224  -32 'à'
-	db 0FBh	; [171Dh] 251   -5 'û'
-	db 0A3h	; [171Eh] 163  -93 '£'
-	db 0E0h	; [171Fh] 224  -32 'à'
-	db 0FAh	; [1720h] 250   -6 'ú'
-	db 0A3h	; [1721h] 163  -93 '£'
-	db 0E0h	; [1722h] 224  -32 'à'
-	db 24h	; [1723h]  36 '$'
-	db 07h	; [1724h]   7
-	db 0F9h	; [1725h] 249   -7 'ù'
-	db 0E4h	; [1726h] 228  -28 'ä'
-	db 3Ah	; [1727h]  58 ':'
-	db 0FAh	; [1728h] 250   -6 'ú'
-	db 12h	; [1729h]  18
-	db 35h	; [172Ah]  53 '5'
-	db 0BEh	; [172Bh] 190  -66 '¾'
-	db 44h	; [172Ch]  68 'D'
-	db 80h	; [172Dh] 128 -128
-	db 12h	; [172Eh]  18
-	db 36h	; [172Fh]  54 '6'
-	db 08h	; [1730h]   8
-	db 80h	; [1731h] 128 -128
-	db 18h	; [1732h]  24
-	db 90h	; [1733h] 144 -112
-	db 00h	; [1734h]   0
-	db 96h	; [1735h] 150 -106
-	db 0E0h	; [1736h] 224  -32 'à'
-	db 0FBh	; [1737h] 251   -5 'û'
-	db 0A3h	; [1738h] 163  -93 '£'
-	db 0E0h	; [1739h] 224  -32 'à'
-	db 0FAh	; [173Ah] 250   -6 'ú'
-	db 0A3h	; [173Bh] 163  -93 '£'
-	db 0E0h	; [173Ch] 224  -32 'à'
-	db 24h	; [173Dh]  36 '$'
-	db 07h	; [173Eh]   7
-	db 0F9h	; [173Fh] 249   -7 'ù'
-	db 0E4h	; [1740h] 228  -28 'ä'
-	db 3Ah	; [1741h]  58 ':'
-	db 0FAh	; [1742h] 250   -6 'ú'
-	db 12h	; [1743h]  18
-	db 35h	; [1744h]  53 '5'
-	db 0BEh	; [1745h] 190  -66 '¾'
-	db 54h	; [1746h]  84 'T'
-	db 7Fh	; [1747h] 127
-	db 12h	; [1748h]  18
-	db 36h	; [1749h]  54 '6'
-	db 08h	; [174Ah]   8
-	db 90h	; [174Bh] 144 -112
-	db 00h	; [174Ch]   0
-	db 96h	; [174Dh] 150 -106
-	db 0E0h	; [174Eh] 224  -32 'à'
-	db 0FBh	; [174Fh] 251   -5 'û'
-	db 0A3h	; [1750h] 163  -93 '£'
-	db 0E0h	; [1751h] 224  -32 'à'
-	db 0FAh	; [1752h] 250   -6 'ú'
-	db 0A3h	; [1753h] 163  -93 '£'
-	db 0E0h	; [1754h] 224  -32 'à'
-	db 0F9h	; [1755h] 249   -7 'ù'
-	db 12h	; [1756h]  18
-	db 14h	; [1757h]  20
-	db 0B3h	; [1758h] 179  -77 '³'
-	db 22h	; [1759h]  34 '"'
-	db 90h	; [175Ah] 144 -112
-	db 00h	; [175Bh]   0
-	db 95h	; [175Ch] 149 -107
-	db 0E0h	; [175Dh] 224  -32 'à'
-	db 60h	; [175Eh]  96 '`'
-	db 0Fh	; [175Fh]  15
-	db 0EDh	; [1760h] 237  -19 'í'
-	db 24h	; [1761h]  36 '$'
-	db 06h	; [1762h]   6
-	db 0F5h	; [1763h] 245  -11 'õ'
-	db 82h	; [1764h] 130 -126
-	db 0E4h	; [1765h] 228  -28 'ä'
-	db 3Ch	; [1766h]  60 '<'
-	db 0F5h	; [1767h] 245  -11 'õ'
-	db 83h	; [1768h] 131 -125
-	db 0E0h	; [1769h] 224  -32 'à'
-	db 44h	; [176Ah]  68 'D'
-	db 40h	; [176Bh]  64 '@'
-	db 0F0h	; [176Ch] 240  -16 'ð'
-	db 80h	; [176Dh] 128 -128
-	db 0Dh	; [176Eh]  13
-	db 0EDh	; [176Fh] 237  -19 'í'
-	db 24h	; [1770h]  36 '$'
-	db 06h	; [1771h]   6
-	db 0F5h	; [1772h] 245  -11 'õ'
-	db 82h	; [1773h] 130 -126
-	db 0E4h	; [1774h] 228  -28 'ä'
-	db 3Ch	; [1775h]  60 '<'
-	db 0F5h	; [1776h] 245  -11 'õ'
-	db 83h	; [1777h] 131 -125
-	db 0E0h	; [1778h] 224  -32 'à'
-	db 54h	; [1779h]  84 'T'
-	db 0BFh	; [177Ah] 191  -65 '¿'
-	db 0F0h	; [177Bh] 240  -16 'ð'
-	db 0AAh	; [177Ch] 170  -86 'ª'
-	db 04h	; [177Dh]   4
-	db 0A9h	; [177Eh] 169  -87 '©'
-	db 05h	; [177Fh]   5
-	db 7Bh	; [1780h] 123 '{'
-	db 02h	; [1781h]   2
-	db 12h	; [1782h]  18
-	db 14h	; [1783h]  20
-	db 69h	; [1784h] 105 'i'
-	db 22h	; [1785h]  34 '"'
-	db 90h	; [1786h] 144 -112
-	db 00h	; [1787h]   0
-	db 95h	; [1788h] 149 -107
-	db 0E0h	; [1789h] 224  -32 'à'
-	db 60h	; [178Ah]  96 '`'
-	db 0Fh	; [178Bh]  15
-	db 0EDh	; [178Ch] 237  -19 'í'
-	db 24h	; [178Dh]  36 '$'
-	db 07h	; [178Eh]   7
-	db 0F5h	; [178Fh] 245  -11 'õ'
-	db 82h	; [1790h] 130 -126
-	db 0E4h	; [1791h] 228  -28 'ä'
-	db 3Ch	; [1792h]  60 '<'
-	db 0F5h	; [1793h] 245  -11 'õ'
-	db 83h	; [1794h] 131 -125
-	db 0E0h	; [1795h] 224  -32 'à'
-	db 44h	; [1796h]  68 'D'
-	db 40h	; [1797h]  64 '@'
-	db 0F0h	; [1798h] 240  -16 'ð'
-	db 80h	; [1799h] 128 -128
-	db 0Dh	; [179Ah]  13
-	db 0EDh	; [179Bh] 237  -19 'í'
-	db 24h	; [179Ch]  36 '$'
-	db 07h	; [179Dh]   7
-	db 0F5h	; [179Eh] 245  -11 'õ'
-	db 82h	; [179Fh] 130 -126
-	db 0E4h	; [17A0h] 228  -28 'ä'
-	db 3Ch	; [17A1h]  60 '<'
-	db 0F5h	; [17A2h] 245  -11 'õ'
-	db 83h	; [17A3h] 131 -125
-	db 0E0h	; [17A4h] 224  -32 'à'
-	db 54h	; [17A5h]  84 'T'
-	db 0BFh	; [17A6h] 191  -65 '¿'
-	db 0F0h	; [17A7h] 240  -16 'ð'
-	db 0AAh	; [17A8h] 170  -86 'ª'
-	db 04h	; [17A9h]   4
-	db 0A9h	; [17AAh] 169  -87 '©'
-	db 05h	; [17ABh]   5
-	db 7Bh	; [17ACh] 123 '{'
-	db 02h	; [17ADh]   2
-	db 12h	; [17AEh]  18
-	db 14h	; [17AFh]  20
-	db 69h	; [17B0h] 105 'i'
-	db 22h	; [17B1h]  34 '"'
-	db 90h	; [17B2h] 144 -112
-	db 00h	; [17B3h]   0
-	db 95h	; [17B4h] 149 -107
-	db 0E0h	; [17B5h] 224  -32 'à'
-	db 60h	; [17B6h]  96 '`'
-	db 0Fh	; [17B7h]  15
-	db 0EDh	; [17B8h] 237  -19 'í'
-	db 24h	; [17B9h]  36 '$'
-	db 06h	; [17BAh]   6
-	db 0F5h	; [17BBh] 245  -11 'õ'
-	db 82h	; [17BCh] 130 -126
-	db 0E4h	; [17BDh] 228  -28 'ä'
-	db 3Ch	; [17BEh]  60 '<'
-	db 0F5h	; [17BFh] 245  -11 'õ'
-	db 83h	; [17C0h] 131 -125
-	db 0E0h	; [17C1h] 224  -32 'à'
-	db 44h	; [17C2h]  68 'D'
-	db 80h	; [17C3h] 128 -128
-	db 0F0h	; [17C4h] 240  -16 'ð'
-	db 80h	; [17C5h] 128 -128
-	db 0Dh	; [17C6h]  13
-	db 0EDh	; [17C7h] 237  -19 'í'
-	db 24h	; [17C8h]  36 '$'
-	db 06h	; [17C9h]   6
-	db 0F5h	; [17CAh] 245  -11 'õ'
-	db 82h	; [17CBh] 130 -126
-	db 0E4h	; [17CCh] 228  -28 'ä'
-	db 3Ch	; [17CDh]  60 '<'
-	db 0F5h	; [17CEh] 245  -11 'õ'
-	db 83h	; [17CFh] 131 -125
-	db 0E0h	; [17D0h] 224  -32 'à'
-	db 54h	; [17D1h]  84 'T'
-	db 7Fh	; [17D2h] 127
-	db 0F0h	; [17D3h] 240  -16 'ð'
-	db 0AAh	; [17D4h] 170  -86 'ª'
-	db 04h	; [17D5h]   4
-	db 0A9h	; [17D6h] 169  -87 '©'
-	db 05h	; [17D7h]   5
-	db 7Bh	; [17D8h] 123 '{'
-	db 02h	; [17D9h]   2
-	db 12h	; [17DAh]  18
-	db 14h	; [17DBh]  20
-	db 69h	; [17DCh] 105 'i'
-	db 22h	; [17DDh]  34 '"'
-	db 90h	; [17DEh] 144 -112
-	db 00h	; [17DFh]   0
-	db 95h	; [17E0h] 149 -107
-	db 0E0h	; [17E1h] 224  -32 'à'
-	db 60h	; [17E2h]  96 '`'
-	db 0Fh	; [17E3h]  15
-	db 0EDh	; [17E4h] 237  -19 'í'
-	db 24h	; [17E5h]  36 '$'
-	db 07h	; [17E6h]   7
-	db 0F5h	; [17E7h] 245  -11 'õ'
-	db 82h	; [17E8h] 130 -126
-	db 0E4h	; [17E9h] 228  -28 'ä'
-	db 3Ch	; [17EAh]  60 '<'
-	db 0F5h	; [17EBh] 245  -11 'õ'
-	db 83h	; [17ECh] 131 -125
-	db 0E0h	; [17EDh] 224  -32 'à'
-	db 44h	; [17EEh]  68 'D'
-	db 80h	; [17EFh] 128 -128
-	db 0F0h	; [17F0h] 240  -16 'ð'
-	db 80h	; [17F1h] 128 -128
-	db 0Dh	; [17F2h]  13
-	db 0EDh	; [17F3h] 237  -19 'í'
-	db 24h	; [17F4h]  36 '$'
-	db 07h	; [17F5h]   7
-	db 0F5h	; [17F6h] 245  -11 'õ'
-	db 82h	; [17F7h] 130 -126
-	db 0E4h	; [17F8h] 228  -28 'ä'
-	db 3Ch	; [17F9h]  60 '<'
-	db 0F5h	; [17FAh] 245  -11 'õ'
-	db 83h	; [17FBh] 131 -125
-	db 0E0h	; [17FCh] 224  -32 'à'
-	db 54h	; [17FDh]  84 'T'
-	db 7Fh	; [17FEh] 127
-	db 0F0h	; [17FFh] 240  -16 'ð'
-	db 0AEh	; [1800h] 174  -82 '®'
-	db 04h	; [1801h]   4
-	db 0AFh	; [1802h] 175  -81 '¯'
-	db 05h	; [1803h]   5
-	db 0AAh	; [1804h] 170  -86 'ª'
-	db 06h	; [1805h]   6
-	db 0A9h	; [1806h] 169  -87 '©'
-	db 07h	; [1807h]   7
-	db 7Bh	; [1808h] 123 '{'
-	db 02h	; [1809h]   2
-	db 12h	; [180Ah]  18
-	db 14h	; [180Bh]  20
-	db 69h	; [180Ch] 105 'i'
-	db 22h	; [180Dh]  34 '"'
-	db 0A9h	; [180Eh] 169  -87 '©'
-	db 07h	; [180Fh]   7
-	db 8Dh	; [1810h] 141 -115
-	db 82h	; [1811h] 130 -126
-	db 8Ch	; [1812h] 140 -116
-	db 83h	; [1813h] 131 -125
-	db 0E0h	; [1814h] 224  -32 'à'
-	db 54h	; [1815h]  84 'T'
-	db 7Fh	; [1816h] 127
-	db 0F0h	; [1817h] 240  -16 'ð'
-	db 0A3h	; [1818h] 163  -93 '£'
-	db 0E0h	; [1819h] 224  -32 'à'
-	db 54h	; [181Ah]  84 'T'
-	db 7Fh	; [181Bh] 127
-	db 0F0h	; [181Ch] 240  -16 'ð'
-	db 7Fh	; [181Dh] 127
-	db 01h	; [181Eh]   1
-	db 0E4h	; [181Fh] 228  -28 'ä'
-	db 0FEh	; [1820h] 254   -2 'þ'
-	db 0EEh	; [1821h] 238  -18 'î'
-	db 0C3h	; [1822h] 195  -61 'Ã'
-	db 94h	; [1823h] 148 -108
-	db 08h	; [1824h]   8
-	db 50h	; [1825h]  80 'P'
-	db 34h	; [1826h]  52 '4'
-	db 0EDh	; [1827h] 237  -19 'í'
-	db 2Eh	; [1828h]  46 '.'
-	db 0F5h	; [1829h] 245  -11 'õ'
-	db 82h	; [182Ah] 130 -126
-	db 0E4h	; [182Bh] 228  -28 'ä'
-	db 3Ch	; [182Ch]  60 '<'
-	db 0F5h	; [182Dh] 245  -11 'õ'
-	db 83h	; [182Eh] 131 -125
-	db 0E0h	; [182Fh] 224  -32 'à'
-	db 90h	; [1830h] 144 -112
-	db 00h	; [1831h]   0
-	db 99h	; [1832h] 153 -103
-	db 0F0h	; [1833h] 240  -16 'ð'
-	db 0E9h	; [1834h] 233  -23 'é'
-	db 5Fh	; [1835h]  95 '_'
-	db 60h	; [1836h]  96 '`'
-	db 06h	; [1837h]   6
-	db 0E0h	; [1838h] 224  -32 'à'
-	db 44h	; [1839h]  68 'D'
-	db 40h	; [183Ah]  64 '@'
-	db 0F0h	; [183Bh] 240  -16 'ð'
-	db 80h	; [183Ch] 128 -128
-	db 07h	; [183Dh]   7
-	db 90h	; [183Eh] 144 -112
-	db 00h	; [183Fh]   0
-	db 99h	; [1840h] 153 -103
-	db 0E0h	; [1841h] 224  -32 'à'
-	db 54h	; [1842h]  84 'T'
-	db 0BFh	; [1843h] 191  -65 '¿'
-	db 0F0h	; [1844h] 240  -16 'ð'
-	db 90h	; [1845h] 144 -112
-	db 00h	; [1846h]   0
-	db 99h	; [1847h] 153 -103
-	db 0E0h	; [1848h] 224  -32 'à'
-	db 0FBh	; [1849h] 251   -5 'û'
-	db 0EDh	; [184Ah] 237  -19 'í'
-	db 2Eh	; [184Bh]  46 '.'
-	db 0F5h	; [184Ch] 245  -11 'õ'
-	db 82h	; [184Dh] 130 -126
-	db 0E4h	; [184Eh] 228  -28 'ä'
-	db 3Ch	; [184Fh]  60 '<'
-	db 0F5h	; [1850h] 245  -11 'õ'
-	db 83h	; [1851h] 131 -125
-	db 0EBh	; [1852h] 235  -21 'ë'
-	db 0F0h	; [1853h] 240  -16 'ð'
-	db 0Eh	; [1854h]  14
-	db 0EFh	; [1855h] 239  -17 'ï'
-	db 25h	; [1856h]  37 '%'
-	db 0E0h	; [1857h] 224  -32 'à'
-
-org	1859h
-	db 80h	; [1859h] 128 -128
-	db 0C6h	; [185Ah] 198  -58 'Æ'
-	db 0AEh	; [185Bh] 174  -82 '®'
-	db 04h	; [185Ch]   4
-	db 0AFh	; [185Dh] 175  -81 '¯'
-	db 05h	; [185Eh]   5
-	db 0AAh	; [185Fh] 170  -86 'ª'
-	db 06h	; [1860h]   6
-	db 0A9h	; [1861h] 169  -87 '©'
-	db 07h	; [1862h]   7
-	db 7Bh	; [1863h] 123 '{'
-	db 02h	; [1864h]   2
-	db 12h	; [1865h]  18
-	db 0FEh	; [1866h] 254   -2 'þ'
-	db 48h	; [1867h]  72 'H'
-	db 22h	; [1868h]  34 '"'
-	db 90h	; [1869h] 144 -112
-	db 00h	; [186Ah]   0
-	db 9Ah	; [186Bh] 154 -102
-	db 0EFh	; [186Ch] 239  -17 'ï'
-	db 0F0h	; [186Dh] 240  -16 'ð'
-	db 79h	; [186Eh] 121 'y'
-	db 01h	; [186Fh]   1
-	db 7Fh	; [1870h] 127
-	db 07h	; [1871h]   7
-	db 0EFh	; [1872h] 239  -17 'ï'
-	db 0D3h	; [1873h] 211  -45 'Ó'
-	db 94h	; [1874h] 148 -108
-	db 05h	; [1875h]   5
-	db 40h	; [1876h]  64 '@'
-	db 5Dh	; [1877h]  93 ']'
-	db 0E4h	; [1878h] 228  -28 'ä'
-	db 0FEh	; [1879h] 254   -2 'þ'
-	db 0EEh	; [187Ah] 238  -18 'î'
-	db 0C3h	; [187Bh] 195  -61 'Ã'
-	db 94h	; [187Ch] 148 -108
-	db 02h	; [187Dh]   2
-	db 50h	; [187Eh]  80 'P'
-	db 52h	; [187Fh]  82 'R'
-	db 0EDh	; [1880h] 237  -19 'í'
-	db 2Eh	; [1881h]  46 '.'
-	db 0F5h	; [1882h] 245  -11 'õ'
-	db 82h	; [1883h] 130 -126
-	db 0E4h	; [1884h] 228  -28 'ä'
-	db 3Ch	; [1885h]  60 '<'
-	db 0F5h	; [1886h] 245  -11 'õ'
-	db 83h	; [1887h] 131 -125
-	db 0E0h	; [1888h] 224  -32 'à'
-	db 90h	; [1889h] 144 -112
-	db 00h	; [188Ah]   0
-	db 9Bh	; [188Bh] 155 -101
-	db 0F0h	; [188Ch] 240  -16 'ð'
-	db 90h	; [188Dh] 144 -112
-	db 00h	; [188Eh]   0
-	db 9Ah	; [188Fh] 154 -102
-	db 0E0h	; [1890h] 224  -32 'à'
-	db 59h	; [1891h]  89 'Y'
-	db 60h	; [1892h]  96 '`'
-	db 14h	; [1893h]  20
-	db 0EFh	; [1894h] 239  -17 'ï'
-	db 0B4h	; [1895h] 180  -76 '´'
-	db 07h	; [1896h]   7
-	db 07h	; [1897h]   7
-	db 0A3h	; [1898h] 163  -93 '£'
-	db 0E0h	; [1899h] 224  -32 'à'
-	db 44h	; [189Ah]  68 'D'
-	db 80h	; [189Bh] 128 -128
-	db 0F0h	; [189Ch] 240  -16 'ð'
-	db 80h	; [189Dh] 128 -128
-	db 1Dh	; [189Eh]  29
-	db 90h	; [189Fh] 144 -112
-	db 00h	; [18A0h]   0
-	db 9Bh	; [18A1h] 155 -101
-	db 0E0h	; [18A2h] 224  -32 'à'
-	db 44h	; [18A3h]  68 'D'
-	db 40h	; [18A4h]  64 '@'
-	db 0F0h	; [18A5h] 240  -16 'ð'
-	db 80h	; [18A6h] 128 -128
-	db 14h	; [18A7h]  20
-	db 0EFh	; [18A8h] 239  -17 'ï'
-	db 0B4h	; [18A9h] 180  -76 '´'
-	db 07h	; [18AAh]   7
-	db 09h	; [18ABh]   9
-	db 90h	; [18ACh] 144 -112
-	db 00h	; [18ADh]   0
-	db 9Bh	; [18AEh] 155 -101
-	db 0E0h	; [18AFh] 224  -32 'à'
-	db 54h	; [18B0h]  84 'T'
-	db 7Fh	; [18B1h] 127
-	db 0F0h	; [18B2h] 240  -16 'ð'
-	db 80h	; [18B3h] 128 -128
-	db 07h	; [18B4h]   7
-	db 90h	; [18B5h] 144 -112
-	db 00h	; [18B6h]   0
-	db 9Bh	; [18B7h] 155 -101
-	db 0E0h	; [18B8h] 224  -32 'à'
-	db 54h	; [18B9h]  84 'T'
-	db 0BFh	; [18BAh] 191  -65 '¿'
-	db 0F0h	; [18BBh] 240  -16 'ð'
-	db 90h	; [18BCh] 144 -112
-	db 00h	; [18BDh]   0
-	db 9Bh	; [18BEh] 155 -101
-	db 0E0h	; [18BFh] 224  -32 'à'
-	db 0FBh	; [18C0h] 251   -5 'û'
-	db 0EDh	; [18C1h] 237  -19 'í'
-	db 2Eh	; [18C2h]  46 '.'
-	db 0F5h	; [18C3h] 245  -11 'õ'
-	db 82h	; [18C4h] 130 -126
-	db 0E4h	; [18C5h] 228  -28 'ä'
-	db 3Ch	; [18C6h]  60 '<'
-	db 0F5h	; [18C7h] 245  -11 'õ'
-	db 83h	; [18C8h] 131 -125
-	db 0EBh	; [18C9h] 235  -21 'ë'
-	db 0F0h	; [18CAh] 240  -16 'ð'
-	db 0Eh	; [18CBh]  14
-	db 0E9h	; [18CCh] 233  -23 'é'
-	db 25h	; [18CDh]  37 '%'
-	db 0E0h	; [18CEh] 224  -32 'à'
-	db 0F9h	; [18CFh] 249   -7 'ù'
-	db 80h	; [18D0h] 128 -128
-	db 0A8h	; [18D1h] 168  -88 '¨'
-	db 1Fh	; [18D2h]  31
-	db 80h	; [18D3h] 128 -128
-	db 9Dh	; [18D4h] 157  -99
-	db 7Fh	; [18D5h] 127
-	db 02h	; [18D6h]   2
-	db 0EFh	; [18D7h] 239  -17 'ï'
-	db 0C3h	; [18D8h] 195  -61 'Ã'
-	db 94h	; [18D9h] 148 -108
-	db 06h	; [18DAh]   6
-	db 50h	; [18DBh]  80 'P'
-	db 1Eh	; [18DCh]  30
-	db 0EDh	; [18DDh] 237  -19 'í'
-	db 2Fh	; [18DEh]  47 '/'
-	db 0F5h	; [18DFh] 245  -11 'õ'
-	db 82h	; [18E0h] 130 -126
-	db 0E4h	; [18E1h] 228  -28 'ä'
-	db 3Ch	; [18E2h]  60 '<'
-	db 0F5h	; [18E3h] 245  -11 'õ'
-	db 83h	; [18E4h] 131 -125
-	db 0E0h	; [18E5h] 224  -32 'à'
-	db 90h	; [18E6h] 144 -112
-	db 00h	; [18E7h]   0
-	db 9Bh	; [18E8h] 155 -101
-	db 0F0h	; [18E9h] 240  -16 'ð'
-	db 54h	; [18EAh]  84 'T'
-	db 0BFh	; [18EBh] 191  -65 '¿'
-	db 0FEh	; [18ECh] 254   -2 'þ'
-	db 0F0h	; [18EDh] 240  -16 'ð'
-	db 0EDh	; [18EEh] 237  -19 'í'
-	db 2Fh	; [18EFh]  47 '/'
-	db 0F5h	; [18F0h] 245  -11 'õ'
-	db 82h	; [18F1h] 130 -126
-	db 0E4h	; [18F2h] 228  -28 'ä'
-	db 3Ch	; [18F3h]  60 '<'
-	db 0F5h	; [18F4h] 245  -11 'õ'
-	db 83h	; [18F5h] 131 -125
-	db 0EEh	; [18F6h] 238  -18 'î'
-	db 0F0h	; [18F7h] 240  -16 'ð'
-	db 0Fh	; [18F8h]  15
-	db 80h	; [18F9h] 128 -128
-	db 0DCh	; [18FAh] 220  -36 'Ü'
-	db 0AEh	; [18FBh] 174  -82 '®'
-	db 04h	; [18FCh]   4
-	db 0AFh	; [18FDh] 175  -81 '¯'
-	db 05h	; [18FEh]   5
-	db 0AAh	; [18FFh] 170  -86 'ª'
-	db 06h	; [1900h]   6
-	db 0A9h	; [1901h] 169  -87 '©'
-	db 07h	; [1902h]   7
-	db 7Bh	; [1903h] 123 '{'
-	db 02h	; [1904h]   2
-	db 12h	; [1905h]  18
-	db 0FEh	; [1906h] 254   -2 'þ'
-	db 48h	; [1907h]  72 'H'
-	db 22h	; [1908h]  34 '"'
-	db 90h	; [1909h] 144 -112
-	db 00h	; [190Ah]   0
-	db 9Ch	; [190Bh] 156 -100
-	db 0EFh	; [190Ch] 239  -17 'ï'
-	db 0F0h	; [190Dh] 240  -16 'ð'
-	db 0A3h	; [190Eh] 163  -93 '£'
-	db 0EAh	; [190Fh] 234  -22 'ê'
-	db 0F0h	; [1910h] 240  -16 'ð'
-	db 0A3h	; [1911h] 163  -93 '£'
-	db 0EBh	; [1912h] 235  -21 'ë'
-	db 0F0h	; [1913h] 240  -16 'ð'
-	db 0A9h	; [1914h] 169  -87 '©'
-	db 05h	; [1915h]   5
-	db 7Fh	; [1916h] 127
-	db 01h	; [1917h]   1
-	db 0EFh	; [1918h] 239  -17 'ï'
-	db 0C3h	; [1919h] 195  -61 'Ã'
-	db 94h	; [191Ah] 148 -108
-	db 06h	; [191Bh]   6
-	db 50h	; [191Ch]  80 'P'
-	db 40h	; [191Dh]  64 '@'
-	db 90h	; [191Eh] 144 -112
-	db 00h	; [191Fh]   0
-	db 9Dh	; [1920h] 157  -99
-	db 0E0h	; [1921h] 224  -32 'à'
-	db 0FCh	; [1922h] 252   -4 'ü'
-	db 0A3h	; [1923h] 163  -93 '£'
-	db 0E0h	; [1924h] 224  -32 'à'
-	db 0FDh	; [1925h] 253   -3 'ý'
-	db 2Fh	; [1926h]  47 '/'
-	db 0F5h	; [1927h] 245  -11 'õ'
-	db 82h	; [1928h] 130 -126
-	db 0E4h	; [1929h] 228  -28 'ä'
-	db 3Ch	; [192Ah]  60 '<'
-	db 0F5h	; [192Bh] 245  -11 'õ'
-	db 83h	; [192Ch] 131 -125
-	db 0E0h	; [192Dh] 224  -32 'à'
-	db 90h	; [192Eh] 144 -112
-	db 00h	; [192Fh]   0
-	db 9Fh	; [1930h] 159  -97
-	db 0F0h	; [1931h] 240  -16 'ð'
-	db 0EFh	; [1932h] 239  -17 'ï'
-	db 14h	; [1933h]  20
-	db 0FEh	; [1934h] 254   -2 'þ'
-	db 90h	; [1935h] 144 -112
-	db 00h	; [1936h]   0
-	db 9Ch	; [1937h] 156 -100
-	db 0E0h	; [1938h] 224  -32 'à'
-	db 0B5h	; [1939h] 181  -75 'µ'
-	db 06h	; [193Ah]   6
-	db 09h	; [193Bh]   9
-	db 90h	; [193Ch] 144 -112
-	db 00h	; [193Dh]   0
-	db 9Fh	; [193Eh] 159  -97
-	db 0E0h	; [193Fh] 224  -32 'à'
-	db 44h	; [1940h]  68 'D'
-	db 40h	; [1941h]  64 '@'
-	db 0F0h	; [1942h] 240  -16 'ð'
-	db 80h	; [1943h] 128 -128
-	db 07h	; [1944h]   7
-	db 90h	; [1945h] 144 -112
-	db 00h	; [1946h]   0
-	db 9Fh	; [1947h] 159  -97
-	db 0E0h	; [1948h] 224  -32 'à'
-	db 54h	; [1949h]  84 'T'
-	db 0BFh	; [194Ah] 191  -65 '¿'
-	db 0F0h	; [194Bh] 240  -16 'ð'
-	db 90h	; [194Ch] 144 -112
-	db 00h	; [194Dh]   0
-	db 9Fh	; [194Eh] 159  -97
-	db 0E0h	; [194Fh] 224  -32 'à'
-	db 0FEh	; [1950h] 254   -2 'þ'
-	db 0EDh	; [1951h] 237  -19 'í'
-	db 2Fh	; [1952h]  47 '/'
-	db 0F5h	; [1953h] 245  -11 'õ'
-	db 82h	; [1954h] 130 -126
-	db 0E4h	; [1955h] 228  -28 'ä'
-	db 3Ch	; [1956h]  60 '<'
-	db 0F5h	; [1957h] 245  -11 'õ'
-	db 83h	; [1958h] 131 -125
-	db 0EEh	; [1959h] 238  -18 'î'
-	db 0F0h	; [195Ah] 240  -16 'ð'
-	db 0Fh	; [195Bh]  15
-	db 80h	; [195Ch] 128 -128
-	db 0BAh	; [195Dh] 186  -70 'º'
-	db 0E4h	; [195Eh] 228  -28 'ä'
-
-org	1960h
-	db 0EFh	; [1960h] 239  -17 'ï'
-	db 0C3h	; [1961h] 195  -61 'Ã'
-	db 94h	; [1962h] 148 -108
-	db 02h	; [1963h]   2
-	db 50h	; [1964h]  80 'P'
-	db 47h	; [1965h]  71 'G'
-	db 90h	; [1966h] 144 -112
-	db 00h	; [1967h]   0
-	db 9Dh	; [1968h] 157  -99
-	db 0E0h	; [1969h] 224  -32 'à'
-	db 0FCh	; [196Ah] 252   -4 'ü'
-	db 0A3h	; [196Bh] 163  -93 '£'
-	db 0E0h	; [196Ch] 224  -32 'à'
-	db 2Fh	; [196Dh]  47 '/'
-	db 0F5h	; [196Eh] 245  -11 'õ'
-	db 82h	; [196Fh] 130 -126
-	db 0E4h	; [1970h] 228  -28 'ä'
-	db 3Ch	; [1971h]  60 '<'
-	db 0F5h	; [1972h] 245  -11 'õ'
-	db 83h	; [1973h] 131 -125
-	db 0E0h	; [1974h] 224  -32 'à'
-	db 90h	; [1975h] 144 -112
-	db 00h	; [1976h]   0
-	db 9Fh	; [1977h] 159  -97
-	db 0F0h	; [1978h] 240  -16 'ð'
-	db 0EFh	; [1979h] 239  -17 'ï'
-	db 24h	; [197Ah]  36 '$'
-	db 01h	; [197Bh]   1
-	db 0FDh	; [197Ch] 253   -3 'ý'
-	db 0E4h	; [197Dh] 228  -28 'ä'
-	db 33h	; [197Eh]  51 '3'
-	db 0FCh	; [197Fh] 252   -4 'ü'
-	db 0E9h	; [1980h] 233  -23 'é'
-	db 0B5h	; [1981h] 181  -75 'µ'
-	db 05h	; [1982h]   5
-	db 0Ah	; [1983h]  10
-	db 0E4h	; [1984h] 228  -28 'ä'
-	db 0B5h	; [1985h] 181  -75 'µ'
-	db 04h	; [1986h]   4
-	db 06h	; [1987h]   6
-	db 0E0h	; [1988h] 224  -32 'à'
-	db 44h	; [1989h]  68 'D'
-	db 80h	; [198Ah] 128 -128
-	db 0F0h	; [198Bh] 240  -16 'ð'
-	db 80h	; [198Ch] 128 -128
-	db 07h	; [198Dh]   7
-	db 90h	; [198Eh] 144 -112
-	db 00h	; [198Fh]   0
-	db 9Fh	; [1990h] 159  -97
-	db 0E0h	; [1991h] 224  -32 'à'
-	db 54h	; [1992h]  84 'T'
-	db 7Fh	; [1993h] 127
-	db 0F0h	; [1994h] 240  -16 'ð'
-	db 90h	; [1995h] 144 -112
-	db 00h	; [1996h]   0
-	db 9Fh	; [1997h] 159  -97
-	db 0E0h	; [1998h] 224  -32 'à'
-	db 0FEh	; [1999h] 254   -2 'þ'
-	db 90h	; [199Ah] 144 -112
-	db 00h	; [199Bh]   0
-	db 9Dh	; [199Ch] 157  -99
-	db 0E0h	; [199Dh] 224  -32 'à'
-	db 0FCh	; [199Eh] 252   -4 'ü'
-	db 0A3h	; [199Fh] 163  -93 '£'
-	db 0E0h	; [19A0h] 224  -32 'à'
-	db 2Fh	; [19A1h]  47 '/'
-	db 0F5h	; [19A2h] 245  -11 'õ'
-	db 82h	; [19A3h] 130 -126
-	db 0E4h	; [19A4h] 228  -28 'ä'
-	db 3Ch	; [19A5h]  60 '<'
-	db 0F5h	; [19A6h] 245  -11 'õ'
-	db 83h	; [19A7h] 131 -125
-	db 0EEh	; [19A8h] 238  -18 'î'
-	db 0F0h	; [19A9h] 240  -16 'ð'
-	db 0Fh	; [19AAh]  15
-	db 80h	; [19ABh] 128 -128
-	db 0B3h	; [19ACh] 179  -77 '³'
-	db 90h	; [19ADh] 144 -112
-	db 00h	; [19AEh]   0
-	db 9Dh	; [19AFh] 157  -99
-	db 0E0h	; [19B0h] 224  -32 'à'
-	db 0FEh	; [19B1h] 254   -2 'þ'
-	db 0A3h	; [19B2h] 163  -93 '£'
-	db 0E0h	; [19B3h] 224  -32 'à'
-
-org	19B5h
-	db 0F5h	; [19B5h] 245  -11 'õ'
-	db 82h	; [19B6h] 130 -126
-	db 8Eh	; [19B7h] 142 -114
-	db 83h	; [19B8h] 131 -125
-	db 0E0h	; [19B9h] 224  -32 'à'
-	db 90h	; [19BAh] 144 -112
-	db 00h	; [19BBh]   0
-	db 9Fh	; [19BCh] 159  -97
-	db 0F0h	; [19BDh] 240  -16 'ð'
-	db 0E9h	; [19BEh] 233  -23 'é'
-	db 0B4h	; [19BFh] 180  -76 '´'
-	db 03h	; [19C0h]   3
-	db 06h	; [19C1h]   6
-	db 0E0h	; [19C2h] 224  -32 'à'
-	db 44h	; [19C3h]  68 'D'
-	db 40h	; [19C4h]  64 '@'
-	db 0F0h	; [19C5h] 240  -16 'ð'
-	db 80h	; [19C6h] 128 -128
-	db 07h	; [19C7h]   7
-	db 90h	; [19C8h] 144 -112
-	db 00h	; [19C9h]   0
-	db 9Fh	; [19CAh] 159  -97
-	db 0E0h	; [19CBh] 224  -32 'à'
-	db 54h	; [19CCh]  84 'T'
-	db 0BFh	; [19CDh] 191  -65 '¿'
-	db 0F0h	; [19CEh] 240  -16 'ð'
-	db 90h	; [19CFh] 144 -112
-	db 00h	; [19D0h]   0
-	db 9Fh	; [19D1h] 159  -97
-	db 0E0h	; [19D2h] 224  -32 'à'
-	db 8Fh	; [19D3h] 143 -113
-	db 82h	; [19D4h] 130 -126
-	db 8Eh	; [19D5h] 142 -114
-	db 83h	; [19D6h] 131 -125
-	db 0F0h	; [19D7h] 240  -16 'ð'
-	db 0AAh	; [19D8h] 170  -86 'ª'
-	db 06h	; [19D9h]   6
-	db 0A9h	; [19DAh] 169  -87 '©'
-	db 07h	; [19DBh]   7
-	db 7Bh	; [19DCh] 123 '{'
-	db 02h	; [19DDh]   2
-	db 12h	; [19DEh]  18
-	db 0FEh	; [19DFh] 254   -2 'þ'
-	db 48h	; [19E0h]  72 'H'
-	db 22h	; [19E1h]  34 '"'
-	db 7Eh	; [19E2h] 126 '~'
-	db 02h	; [19E3h]   2
-	db 0EEh	; [19E4h] 238  -18 'î'
-	db 0C3h	; [19E5h] 195  -61 'Ã'
-	db 94h	; [19E6h] 148 -108
-	db 06h	; [19E7h]   6
-	db 50h	; [19E8h]  80 'P'
-	db 32h	; [19E9h]  50 '2'
-	db 0EDh	; [19EAh] 237  -19 'í'
-	db 2Eh	; [19EBh]  46 '.'
-	db 0F5h	; [19ECh] 245  -11 'õ'
-	db 82h	; [19EDh] 130 -126
-	db 0E4h	; [19EEh] 228  -28 'ä'
-	db 3Ch	; [19EFh]  60 '<'
-	db 0F5h	; [19F0h] 245  -11 'õ'
-	db 83h	; [19F1h] 131 -125
-	db 0E0h	; [19F2h] 224  -32 'à'
-	db 90h	; [19F3h] 144 -112
-	db 00h	; [19F4h]   0
-	db 0A0h	; [19F5h] 160  -96
-	db 0F0h	; [19F6h] 240  -16 'ð'
-	db 0EEh	; [19F7h] 238  -18 'î'
-	db 24h	; [19F8h]  36 '$'
-	db 0FEh	; [19F9h] 254   -2 'þ'
-	db 0B5h	; [19FAh] 181  -75 'µ'
-	db 07h	; [19FBh]   7
-	db 06h	; [19FCh]   6
-	db 0E0h	; [19FDh] 224  -32 'à'
-	db 44h	; [19FEh]  68 'D'
-	db 80h	; [19FFh] 128 -128
-	db 0F0h	; [1A00h] 240  -16 'ð'
-	db 80h	; [1A01h] 128 -128
-	db 07h	; [1A02h]   7
-	db 90h	; [1A03h] 144 -112
-	db 00h	; [1A04h]   0
-	db 0A0h	; [1A05h] 160  -96
-	db 0E0h	; [1A06h] 224  -32 'à'
-	db 54h	; [1A07h]  84 'T'
-	db 7Fh	; [1A08h] 127
-	db 0F0h	; [1A09h] 240  -16 'ð'
-	db 90h	; [1A0Ah] 144 -112
-	db 00h	; [1A0Bh]   0
-	db 0A0h	; [1A0Ch] 160  -96
-	db 0E0h	; [1A0Dh] 224  -32 'à'
-	db 0FBh	; [1A0Eh] 251   -5 'û'
-	db 0EDh	; [1A0Fh] 237  -19 'í'
-	db 2Eh	; [1A10h]  46 '.'
-	db 0F5h	; [1A11h] 245  -11 'õ'
-	db 82h	; [1A12h] 130 -126
-	db 0E4h	; [1A13h] 228  -28 'ä'
-	db 3Ch	; [1A14h]  60 '<'
-	db 0F5h	; [1A15h] 245  -11 'õ'
-	db 83h	; [1A16h] 131 -125
-	db 0EBh	; [1A17h] 235  -21 'ë'
-	db 0F0h	; [1A18h] 240  -16 'ð'
-	db 0Eh	; [1A19h]  14
-	db 80h	; [1A1Ah] 128 -128
-	db 0C8h	; [1A1Bh] 200  -56 'È'
-	db 0AEh	; [1A1Ch] 174  -82 '®'
-	db 04h	; [1A1Dh]   4
-	db 0AFh	; [1A1Eh] 175  -81 '¯'
-	db 05h	; [1A1Fh]   5
-	db 0AAh	; [1A20h] 170  -86 'ª'
-	db 06h	; [1A21h]   6
-	db 0A9h	; [1A22h] 169  -87 '©'
-	db 07h	; [1A23h]   7
-	db 7Bh	; [1A24h] 123 '{'
-	db 02h	; [1A25h]   2
-	db 12h	; [1A26h]  18
-	db 0FEh	; [1A27h] 254   -2 'þ'
-	db 48h	; [1A28h]  72 'H'
-	db 22h	; [1A29h]  34 '"'
-	db 12h	; [1A2Ah]  18
-	db 1Dh	; [1A2Bh]  29
-	db 68h	; [1A2Ch] 104 'h'
-	db 7Fh	; [1A2Dh] 127
-	db 01h	; [1A2Eh]   1
-	db 12h	; [1A2Fh]  18
-	db 1Eh	; [1A30h]  30
-	db 4Bh	; [1A31h]  75 'K'
-	db 0E4h	; [1A32h] 228  -28 'ä'
-	db 0F5h	; [1A33h] 245  -11 'õ'
-	db 7Fh	; [1A34h] 127
-	db 12h	; [1A35h]  18
-	db 33h	; [1A36h]  51 '3'
-	db 0D8h	; [1A37h] 216  -40 'Ø'
-	db 0E4h	; [1A38h] 228  -28 'ä'
-	db 0F5h	; [1A39h] 245  -11 'õ'
-	db 7Fh	; [1A3Ah] 127
-	db 12h	; [1A3Bh]  18
-	db 33h	; [1A3Ch]  51 '3'
-	db 0D8h	; [1A3Dh] 216  -40 'Ø'
-	db 0E4h	; [1A3Eh] 228  -28 'ä'
-	db 0F5h	; [1A3Fh] 245  -11 'õ'
-	db 7Fh	; [1A40h] 127
-	db 12h	; [1A41h]  18
-	db 33h	; [1A42h]  51 '3'
-	db 0D8h	; [1A43h] 216  -40 'Ø'
-	db 7Fh	; [1A44h] 127
-	db 50h	; [1A45h]  80 'P'
-	db 12h	; [1A46h]  18
-	db 1Dh	; [1A47h]  29
-	db 0DAh	; [1A48h] 218  -38 'Ú'
-	db 75h	; [1A49h] 117 'u'
-	db 7Fh	; [1A4Ah] 127
-	db 0Ah	; [1A4Bh]  10
-	db 12h	; [1A4Ch]  18
-	db 33h	; [1A4Dh]  51 '3'
-	db 0D8h	; [1A4Eh] 216  -40 'Ø'
-	db 75h	; [1A4Fh] 117 'u'
-	db 7Fh	; [1A50h] 127
-	db 0Ah	; [1A51h]  10
-	db 12h	; [1A52h]  18
-	db 33h	; [1A53h]  51 '3'
-	db 0D8h	; [1A54h] 216  -40 'Ø'
-	db 7Fh	; [1A55h] 127
-	db 72h	; [1A56h] 114 'r'
-	db 12h	; [1A57h]  18
-	db 1Dh	; [1A58h]  29
-	db 0DAh	; [1A59h] 218  -38 'Ú'
-	db 75h	; [1A5Ah] 117 'u'
-	db 7Fh	; [1A5Bh] 127
-	db 0Ah	; [1A5Ch]  10
-	db 12h	; [1A5Dh]  18
-	db 33h	; [1A5Eh]  51 '3'
-	db 0D8h	; [1A5Fh] 216  -40 'Ø'
-	db 75h	; [1A60h] 117 'u'
-	db 7Fh	; [1A61h] 127
-	db 0Ah	; [1A62h]  10
-	db 12h	; [1A63h]  18
-	db 33h	; [1A64h]  51 '3'
-	db 0D8h	; [1A65h] 216  -40 'Ø'
-	db 7Fh	; [1A66h] 127
-	db 60h	; [1A67h]  96 '`'
-	db 12h	; [1A68h]  18
-	db 1Dh	; [1A69h]  29
-	db 0DAh	; [1A6Ah] 218  -38 'Ú'
-	db 0E4h	; [1A6Bh] 228  -28 'ä'
-	db 0F5h	; [1A6Ch] 245  -11 'õ'
-	db 7Fh	; [1A6Dh] 127
-	db 12h	; [1A6Eh]  18
-	db 33h	; [1A6Fh]  51 '3'
-	db 0D8h	; [1A70h] 216  -40 'Ø'
-	db 0E4h	; [1A71h] 228  -28 'ä'
-	db 0F5h	; [1A72h] 245  -11 'õ'
-	db 7Fh	; [1A73h] 127
-	db 12h	; [1A74h]  18
-	db 33h	; [1A75h]  51 '3'
-	db 0D8h	; [1A76h] 216  -40 'Ø'
-	db 0E4h	; [1A77h] 228  -28 'ä'
-	db 0F5h	; [1A78h] 245  -11 'õ'
-	db 7Fh	; [1A79h] 127
-	db 12h	; [1A7Ah]  18
-	db 33h	; [1A7Bh]  51 '3'
-	db 0D8h	; [1A7Ch] 216  -40 'Ø'
-	db 0E4h	; [1A7Dh] 228  -28 'ä'
-	db 0F5h	; [1A7Eh] 245  -11 'õ'
-	db 7Fh	; [1A7Fh] 127
-	db 12h	; [1A80h]  18
-	db 33h	; [1A81h]  51 '3'
-	db 0D8h	; [1A82h] 216  -40 'Ø'
-	db 0E4h	; [1A83h] 228  -28 'ä'
-	db 0F5h	; [1A84h] 245  -11 'õ'
-	db 7Fh	; [1A85h] 127
-	db 12h	; [1A86h]  18
-	db 33h	; [1A87h]  51 '3'
-	db 0D8h	; [1A88h] 216  -40 'Ø'
-	db 7Fh	; [1A89h] 127
-	db 80h	; [1A8Ah] 128 -128
-	db 12h	; [1A8Bh]  18
-	db 1Dh	; [1A8Ch]  29
-	db 0DAh	; [1A8Dh] 218  -38 'Ú'
-	db 75h	; [1A8Eh] 117 'u'
-	db 7Fh	; [1A8Fh] 127
-	db 0Ah	; [1A90h]  10
-	db 12h	; [1A91h]  18
-	db 33h	; [1A92h]  51 '3'
-	db 0D8h	; [1A93h] 216  -40 'Ø'
-	db 75h	; [1A94h] 117 'u'
-	db 7Fh	; [1A95h] 127
-	db 0Ah	; [1A96h]  10
-	db 12h	; [1A97h]  18
-	db 33h	; [1A98h]  51 '3'
-	db 0D8h	; [1A99h] 216  -40 'Ø'
-	db 0E4h	; [1A9Ah] 228  -28 'ä'
-	db 0F5h	; [1A9Bh] 245  -11 'õ'
-	db 52h	; [1A9Ch]  82 'R'
-	db 0F5h	; [1A9Dh] 245  -11 'õ'
-	db 53h	; [1A9Eh]  83 'S'
-	db 90h	; [1A9Fh] 144 -112
-	db 00h	; [1AA0h]   0
-	db 0E3h	; [1AA1h] 227  -29 'ã'
-	db 0F0h	; [1AA2h] 240  -16 'ð'
-	db 90h	; [1AA3h] 144 -112
-	db 00h	; [1AA4h]   0
-	db 0E3h	; [1AA5h] 227  -29 'ã'
-	db 0E0h	; [1AA6h] 224  -32 'à'
-
-org	1AA8h
-	db 0C3h	; [1AA8h] 195  -61 'Ã'
-	db 94h	; [1AA9h] 148 -108
-	db 08h	; [1AAAh]   8
-	db 50h	; [1AABh]  80 'P'
-	db 0Bh	; [1AACh]  11
-	db 74h	; [1AADh] 116 't'
-	db 5Ch	; [1AAEh]  92 '\'
-	db 2Fh	; [1AAFh]  47 '/'
-	db 0F8h	; [1AB0h] 248   -8 'ø'
-	db 0E4h	; [1AB1h] 228  -28 'ä'
-	db 0F6h	; [1AB2h] 246  -10 'ö'
-	db 0E0h	; [1AB3h] 224  -32 'à'
-	db 04h	; [1AB4h]   4
-	db 0F0h	; [1AB5h] 240  -16 'ð'
-	db 80h	; [1AB6h] 128 -128
-	db 0EBh	; [1AB7h] 235  -21 'ë'
-	db 0E4h	; [1AB8h] 228  -28 'ä'
-	db 0F5h	; [1AB9h] 245  -11 'õ'
-	db 64h	; [1ABAh] 100 'd'
-	db 0F5h	; [1ABBh] 245  -11 'õ'
-	db 65h	; [1ABCh] 101 'e'
-	db 0F5h	; [1ABDh] 245  -11 'õ'
-	db 66h	; [1ABEh] 102 'f'
-	db 90h	; [1ABFh] 144 -112
-	db 00h	; [1AC0h]   0
-	db 0E3h	; [1AC1h] 227  -29 'ã'
-	db 0F0h	; [1AC2h] 240  -16 'ð'
-	db 90h	; [1AC3h] 144 -112
-	db 00h	; [1AC4h]   0
-	db 0E3h	; [1AC5h] 227  -29 'ã'
-	db 0E0h	; [1AC6h] 224  -32 'à'
-
-org	1AC8h
-	db 0D3h	; [1AC8h] 211  -45 'Ó'
-	db 94h	; [1AC9h] 148 -108
-	db 07h	; [1ACAh]   7
-	db 50h	; [1ACBh]  80 'P'
-	db 0Eh	; [1ACCh]  14
-	db 0E4h	; [1ACDh] 228  -28 'ä'
-	db 0FDh	; [1ACEh] 253   -3 'ý'
-	db 0FCh	; [1ACFh] 252   -4 'ü'
-	db 12h	; [1AD0h]  18
-	db 21h	; [1AD1h]  33 '!'
-	db 82h	; [1AD2h] 130 -126
-	db 90h	; [1AD3h] 144 -112
-	db 00h	; [1AD4h]   0
-	db 0E3h	; [1AD5h] 227  -29 'ã'
-	db 0E0h	; [1AD6h] 224  -32 'à'
-	db 04h	; [1AD7h]   4
-	db 0F0h	; [1AD8h] 240  -16 'ð'
-	db 80h	; [1AD9h] 128 -128
-	db 0E8h	; [1ADAh] 232  -24 'è'
-	db 22h	; [1ADBh]  34 '"'
-	db 90h	; [1ADCh] 144 -112
-	db 00h	; [1ADDh]   0
-	db 0E4h	; [1ADEh] 228  -28 'ä'
-	db 0EBh	; [1ADFh] 235  -21 'ë'
-	db 0F0h	; [1AE0h] 240  -16 'ð'
-	db 0A3h	; [1AE1h] 163  -93 '£'
-	db 0EAh	; [1AE2h] 234  -22 'ê'
-	db 0F0h	; [1AE3h] 240  -16 'ð'
-	db 0A3h	; [1AE4h] 163  -93 '£'
-	db 0E9h	; [1AE5h] 233  -23 'é'
-	db 0F0h	; [1AE6h] 240  -16 'ð'
-	db 12h	; [1AE7h]  18
-	db 1Dh	; [1AE8h]  29
-	db 0ADh	; [1AE9h] 173  -83
-	db 0EFh	; [1AEAh] 239  -17 'ï'
-	db 60h	; [1AEBh]  96 '`'
-	db 05h	; [1AECh]   5
-	db 7Eh	; [1AEDh] 126 '~'
-	db 00h	; [1AEEh]   0
-	db 7Fh	; [1AEFh] 127
-	db 00h	; [1AF0h]   0
-	db 22h	; [1AF1h]  34 '"'
-	db 0E4h	; [1AF2h] 228  -28 'ä'
-	db 0F5h	; [1AF3h] 245  -11 'õ'
-	db 08h	; [1AF4h]   8
-	db 90h	; [1AF5h] 144 -112
-	db 00h	; [1AF6h]   0
-	db 0EAh	; [1AF7h] 234  -22 'ê'
-	db 0F0h	; [1AF8h] 240  -16 'ð'
-	db 0A3h	; [1AF9h] 163  -93 '£'
-	db 04h	; [1AFAh]   4
-	db 0F0h	; [1AFBh] 240  -16 'ð'
-	db 90h	; [1AFCh] 144 -112
-	db 00h	; [1AFDh]   0
-	db 0EAh	; [1AFEh] 234  -22 'ê'
-	db 0E0h	; [1AFFh] 224  -32 'à'
-
-org	1B01h
-	db 0C3h	; [1B01h] 195  -61 'Ã'
-	db 94h	; [1B02h] 148 -108
-	db 08h	; [1B03h]   8
-	db 40h	; [1B04h]  64 '@'
-	db 03h	; [1B05h]   3
-	db 02h	; [1B06h]   2
-	db 1Ch	; [1B07h]  28
-	db 6Ch	; [1B08h] 108 'l'
-	db 0A3h	; [1B09h] 163  -93 '£'
-	db 0E0h	; [1B0Ah] 224  -32 'à'
-	db 55h	; [1B0Bh]  85 'U'
-	db 7Ah	; [1B0Ch] 122 'z'
-	db 70h	; [1B0Dh] 112 'p'
-	db 0Fh	; [1B0Eh]  15
-	db 74h	; [1B0Fh] 116 't'
-	db 18h	; [1B10h]  24
-	db 2Fh	; [1B11h]  47 '/'
-	db 0F5h	; [1B12h] 245  -11 'õ'
-	db 82h	; [1B13h] 130 -126
-	db 0E4h	; [1B14h] 228  -28 'ä'
-	db 34h	; [1B15h]  52 '4'
-	db 01h	; [1B16h]   1
-	db 0F5h	; [1B17h] 245  -11 'õ'
-	db 83h	; [1B18h] 131 -125
-	db 0E4h	; [1B19h] 228  -28 'ä'
-	db 0F0h	; [1B1Ah] 240  -16 'ð'
-	db 02h	; [1B1Bh]   2
-	db 1Ch	; [1B1Ch]  28
-	db 5Dh	; [1B1Dh]  93 ']'
-	db 0EFh	; [1B1Eh] 239  -17 'ï'
-	db 0C3h	; [1B1Fh] 195  -61 'Ã'
-	db 94h	; [1B20h] 148 -108
-	db 04h	; [1B21h]   4
-	db 50h	; [1B22h]  80 'P'
-	db 15h	; [1B23h]  21
-	db 0EFh	; [1B24h] 239  -17 'ï'
-	db 25h	; [1B25h]  37 '%'
-	db 0E0h	; [1B26h] 224  -32 'à'
-	db 0FEh	; [1B27h] 254   -2 'þ'
-	db 0E5h	; [1B28h] 229  -27 'å'
-	db 78h	; [1B29h] 120 'x'
-	db 0A8h	; [1B2Ah] 168  -88 '¨'
-	db 06h	; [1B2Bh]   6
-	db 08h	; [1B2Ch]   8
-	db 80h	; [1B2Dh] 128 -128
-	db 02h	; [1B2Eh]   2
-	db 0C3h	; [1B2Fh] 195  -61 'Ã'
-	db 13h	; [1B30h]  19
-	db 0D8h	; [1B31h] 216  -40 'Ø'
-	db 0FCh	; [1B32h] 252   -4 'ü'
-	db 90h	; [1B33h] 144 -112
-	db 00h	; [1B34h]   0
-	db 0E7h	; [1B35h] 231  -25 'ç'
-	db 0F0h	; [1B36h] 240  -16 'ð'
-	db 80h	; [1B37h] 128 -128
-	db 16h	; [1B38h]  22
-	db 0EFh	; [1B39h] 239  -17 'ï'
-	db 54h	; [1B3Ah]  84 'T'
-	db 03h	; [1B3Bh]   3
-
-org	1B3Dh
-	db 25h	; [1B3Dh]  37 '%'
-	db 0E0h	; [1B3Eh] 224  -32 'à'
-
-org	1B40h
-	db 0E5h	; [1B40h] 229  -27 'å'
-	db 79h	; [1B41h] 121 'y'
-	db 0A8h	; [1B42h] 168  -88 '¨'
-	db 07h	; [1B43h]   7
-	db 08h	; [1B44h]   8
-	db 80h	; [1B45h] 128 -128
-	db 02h	; [1B46h]   2
-	db 0C3h	; [1B47h] 195  -61 'Ã'
-	db 13h	; [1B48h]  19
-	db 0D8h	; [1B49h] 216  -40 'Ø'
-	db 0FCh	; [1B4Ah] 252   -4 'ü'
-	db 90h	; [1B4Bh] 144 -112
-	db 00h	; [1B4Ch]   0
-	db 0E7h	; [1B4Dh] 231  -25 'ç'
-	db 0F0h	; [1B4Eh] 240  -16 'ð'
-	db 90h	; [1B4Fh] 144 -112
-	db 00h	; [1B50h]   0
-	db 0EAh	; [1B51h] 234  -22 'ê'
-	db 0E0h	; [1B52h] 224  -32 'à'
-	db 0FDh	; [1B53h] 253   -3 'ý'
-	db 24h	; [1B54h]  36 '$'
-	db 67h	; [1B55h] 103 'g'
-	db 0F8h	; [1B56h] 248   -8 'ø'
-	db 0E6h	; [1B57h] 230  -26 'æ'
-	db 75h	; [1B58h] 117 'u'
-	db 0F0h	; [1B59h] 240  -16 'ð'
-	db 04h	; [1B5Ah]   4
-	db 0A4h	; [1B5Bh] 164  -92 '¤'
-
-org	1B5Dh
-	db 90h	; [1B5Dh] 144 -112
-	db 00h	; [1B5Eh]   0
-	db 0E7h	; [1B5Fh] 231  -25 'ç'
-	db 0E0h	; [1B60h] 224  -32 'à'
-	db 54h	; [1B61h]  84 'T'
-	db 03h	; [1B62h]   3
-	db 7Ah	; [1B63h] 122 'z'
-	db 00h	; [1B64h]   0
-	db 2Fh	; [1B65h]  47 '/'
-
-org	1B67h
-	db 0EAh	; [1B67h] 234  -22 'ê'
-	db 35h	; [1B68h]  53 '5'
-	db 0F0h	; [1B69h] 240  -16 'ð'
-	db 0FEh	; [1B6Ah] 254   -2 'þ'
-	db 0A3h	; [1B6Bh] 163  -93 '£'
-	db 0F0h	; [1B6Ch] 240  -16 'ð'
-	db 0A3h	; [1B6Dh] 163  -93 '£'
-	db 0EFh	; [1B6Eh] 239  -17 'ï'
-	db 0F0h	; [1B6Fh] 240  -16 'ð'
-	db 0C3h	; [1B70h] 195  -61 'Ã'
-	db 74h	; [1B71h] 116 't'
-
-org	1B73h
-	db 9Fh	; [1B73h] 159  -97
-	db 0F0h	; [1B74h] 240  -16 'ð'
-	db 74h	; [1B75h] 116 't'
-	db 03h	; [1B76h]   3
-	db 9Eh	; [1B77h] 158  -98
-	db 90h	; [1B78h] 144 -112
-	db 00h	; [1B79h]   0
-	db 0E8h	; [1B7Ah] 232  -24 'è'
-	db 0F0h	; [1B7Bh] 240  -16 'ð'
-	db 74h	; [1B7Ch] 116 't'
-	db 18h	; [1B7Dh]  24
-	db 2Dh	; [1B7Eh]  45 '-'
-	db 0F5h	; [1B7Fh] 245  -11 'õ'
-	db 82h	; [1B80h] 130 -126
-	db 0E4h	; [1B81h] 228  -28 'ä'
-	db 34h	; [1B82h]  52 '4'
-	db 01h	; [1B83h]   1
-	db 0F5h	; [1B84h] 245  -11 'õ'
-	db 83h	; [1B85h] 131 -125
-	db 0E0h	; [1B86h] 224  -32 'à'
-	db 70h	; [1B87h] 112 'p'
-	db 38h	; [1B88h]  56 '8'
-	db 90h	; [1B89h] 144 -112
-	db 00h	; [1B8Ah]   0
-	db 0E8h	; [1B8Bh] 232  -24 'è'
-	db 0E0h	; [1B8Ch] 224  -32 'à'
-	db 0FEh	; [1B8Dh] 254   -2 'þ'
-	db 0A3h	; [1B8Eh] 163  -93 '£'
-	db 0E0h	; [1B8Fh] 224  -32 'à'
-
-org	1B91h
-	db 0A3h	; [1B91h] 163  -93 '£'
-	db 0E0h	; [1B92h] 224  -32 'à'
-	db 0FCh	; [1B93h] 252   -4 'ü'
-	db 25h	; [1B94h]  37 '%'
-	db 0E0h	; [1B95h] 224  -32 'à'
-	db 24h	; [1B96h]  36 '$'
-	db 0FDh	; [1B97h] 253   -3 'ý'
-	db 0F5h	; [1B98h] 245  -11 'õ'
-	db 82h	; [1B99h] 130 -126
-	db 0E4h	; [1B9Ah] 228  -28 'ä'
-	db 34h	; [1B9Bh]  52 '4'
-	db 00h	; [1B9Ch]   0
-	db 0F5h	; [1B9Dh] 245  -11 'õ'
-	db 83h	; [1B9Eh] 131 -125
-	db 0EEh	; [1B9Fh] 238  -18 'î'
-	db 0F0h	; [1BA0h] 240  -16 'ð'
-	db 0A3h	; [1BA1h] 163  -93 '£'
-	db 0EFh	; [1BA2h] 239  -17 'ï'
-	db 0F0h	; [1BA3h] 240  -16 'ð'
-	db 74h	; [1BA4h] 116 't'
-	db 18h	; [1BA5h]  24
-	db 2Ch	; [1BA6h]  44 ','
-	db 0F5h	; [1BA7h] 245  -11 'õ'
-	db 82h	; [1BA8h] 130 -126
-	db 0E4h	; [1BA9h] 228  -28 'ä'
-	db 34h	; [1BAAh]  52 '4'
-	db 01h	; [1BABh]   1
-	db 0F5h	; [1BACh] 245  -11 'õ'
-	db 83h	; [1BADh] 131 -125
-	db 74h	; [1BAEh] 116 't'
-	db 01h	; [1BAFh]   1
-	db 0F0h	; [1BB0h] 240  -16 'ð'
-	db 74h	; [1BB1h] 116 't'
-	db 21h	; [1BB2h]  33 '!'
-	db 2Ch	; [1BB3h]  44 ','
-	db 0F5h	; [1BB4h] 245  -11 'õ'
-	db 82h	; [1BB5h] 130 -126
-	db 0E4h	; [1BB6h] 228  -28 'ä'
-	db 34h	; [1BB7h]  52 '4'
-	db 01h	; [1BB8h]   1
-	db 0F5h	; [1BB9h] 245  -11 'õ'
-	db 83h	; [1BBAh] 131 -125
-	db 74h	; [1BBBh] 116 't'
-	db 01h	; [1BBCh]   1
-	db 0F0h	; [1BBDh] 240  -16 'ð'
-	db 02h	; [1BBEh]   2
-	db 1Ch	; [1BBFh]  28
-	db 5Dh	; [1BC0h]  93 ']'
-	db 74h	; [1BC1h] 116 't'
-	db 21h	; [1BC2h]  33 '!'
-	db 2Dh	; [1BC3h]  45 '-'
-	db 0F5h	; [1BC4h] 245  -11 'õ'
-	db 82h	; [1BC5h] 130 -126
-	db 0E4h	; [1BC6h] 228  -28 'ä'
-	db 34h	; [1BC7h]  52 '4'
-	db 01h	; [1BC8h]   1
-	db 0F5h	; [1BC9h] 245  -11 'õ'
-	db 83h	; [1BCAh] 131 -125
-	db 0E0h	; [1BCBh] 224  -32 'à'
-	db 64h	; [1BCCh] 100 'd'
-	db 01h	; [1BCDh]   1
-	db 70h	; [1BCEh] 112 'p'
-	db 61h	; [1BCFh]  97 'a'
-	db 90h	; [1BD0h] 144 -112
-	db 00h	; [1BD1h]   0
-	db 0E8h	; [1BD2h] 232  -24 'è'
-	db 0E0h	; [1BD3h] 224  -32 'à'
-	db 0FEh	; [1BD4h] 254   -2 'þ'
-	db 0A3h	; [1BD5h] 163  -93 '£'
-	db 0E0h	; [1BD6h] 224  -32 'à'
-
-org	1BD8h
-	db 0A3h	; [1BD8h] 163  -93 '£'
-	db 0E0h	; [1BD9h] 224  -32 'à'
-	db 25h	; [1BDAh]  37 '%'
-	db 0E0h	; [1BDBh] 224  -32 'à'
-	db 24h	; [1BDCh]  36 '$'
-	db 0FDh	; [1BDDh] 253   -3 'ý'
-	db 0F5h	; [1BDEh] 245  -11 'õ'
-	db 82h	; [1BDFh] 130 -126
-	db 0E4h	; [1BE0h] 228  -28 'ä'
-	db 34h	; [1BE1h]  52 '4'
-	db 00h	; [1BE2h]   0
-	db 0F5h	; [1BE3h] 245  -11 'õ'
-	db 83h	; [1BE4h] 131 -125
-	db 0E0h	; [1BE5h] 224  -32 'à'
-	db 0FCh	; [1BE6h] 252   -4 'ü'
-	db 0A3h	; [1BE7h] 163  -93 '£'
-	db 0E0h	; [1BE8h] 224  -32 'à'
-	db 0FDh	; [1BE9h] 253   -3 'ý'
-	db 12h	; [1BEAh]  18
-	db 1Fh	; [1BEBh]  31
-	db 2Bh	; [1BECh]  43 '+'
-	db 0C3h	; [1BEDh] 195  -61 'Ã'
-	db 0EFh	; [1BEEh] 239  -17 'ï'
-	db 94h	; [1BEFh] 148 -108
-	db 03h	; [1BF0h]   3
-	db 0EEh	; [1BF1h] 238  -18 'î'
-	db 94h	; [1BF2h] 148 -108
-	db 00h	; [1BF3h]   0
-	db 40h	; [1BF4h]  64 '@'
-	db 67h	; [1BF5h] 103 'g'
-	db 90h	; [1BF6h] 144 -112
-	db 00h	; [1BF7h]   0
-	db 0E8h	; [1BF8h] 232  -24 'è'
-	db 0E0h	; [1BF9h] 224  -32 'à'
-	db 0FEh	; [1BFAh] 254   -2 'þ'
-	db 0A3h	; [1BFBh] 163  -93 '£'
-	db 0E0h	; [1BFCh] 224  -32 'à'
-
-org	1BFEh
-	db 90h	; [1BFEh] 144 -112
-	db 00h	; [1BFFh]   0
-	db 0E4h	; [1C00h] 228  -28 'ä'
-	db 0E0h	; [1C01h] 224  -32 'à'
-	db 0FBh	; [1C02h] 251   -5 'û'
-	db 0A3h	; [1C03h] 163  -93 '£'
-	db 0E0h	; [1C04h] 224  -32 'à'
-	db 0FAh	; [1C05h] 250   -6 'ú'
-	db 0A3h	; [1C06h] 163  -93 '£'
-	db 0E0h	; [1C07h] 224  -32 'à'
-	db 0F9h	; [1C08h] 249   -7 'ù'
-	db 90h	; [1C09h] 144 -112
-	db 00h	; [1C0Ah]   0
-	db 0EAh	; [1C0Bh] 234  -22 'ê'
-	db 0E0h	; [1C0Ch] 224  -32 'à'
-	db 0FDh	; [1C0Dh] 253   -3 'ý'
-	db 75h	; [1C0Eh] 117 'u'
-	db 0F0h	; [1C0Fh] 240  -16 'ð'
-	db 02h	; [1C10h]   2
-	db 0A4h	; [1C11h] 164  -92 '¤'
-	db 0F5h	; [1C12h] 245  -11 'õ'
-	db 82h	; [1C13h] 130 -126
-	db 85h	; [1C14h] 133 -123
-	db 0F0h	; [1C15h] 240  -16 'ð'
-	db 83h	; [1C16h] 131 -125
-	db 0EEh	; [1C17h] 238  -18 'î'
-	db 8Fh	; [1C18h] 143 -113
-	db 0F0h	; [1C19h] 240  -16 'ð'
-	db 12h	; [1C1Ah]  18
-	db 37h	; [1C1Bh]  55 '7'
-	db 08h	; [1C1Ch]   8
-	db 74h	; [1C1Dh] 116 't'
-	db 21h	; [1C1Eh]  33 '!'
-	db 2Dh	; [1C1Fh]  45 '-'
-	db 0F5h	; [1C20h] 245  -11 'õ'
-	db 82h	; [1C21h] 130 -126
-	db 0E4h	; [1C22h] 228  -28 'ä'
-	db 34h	; [1C23h]  52 '4'
-	db 01h	; [1C24h]   1
-	db 0F5h	; [1C25h] 245  -11 'õ'
-	db 83h	; [1C26h] 131 -125
-	db 0E4h	; [1C27h] 228  -28 'ä'
-	db 0F0h	; [1C28h] 240  -16 'ð'
-	db 90h	; [1C29h] 144 -112
-	db 00h	; [1C2Ah]   0
-	db 0EBh	; [1C2Bh] 235  -21 'ë'
-	db 0E0h	; [1C2Ch] 224  -32 'à'
-	db 42h	; [1C2Dh]  66 'B'
-	db 08h	; [1C2Eh]   8
-	db 80h	; [1C2Fh] 128 -128
-	db 2Ch	; [1C30h]  44 ','
-	db 90h	; [1C31h] 144 -112
-	db 00h	; [1C32h]   0
-	db 0E8h	; [1C33h] 232  -24 'è'
-	db 0E0h	; [1C34h] 224  -32 'à'
-	db 0FEh	; [1C35h] 254   -2 'þ'
-	db 0A3h	; [1C36h] 163  -93 '£'
-	db 0E0h	; [1C37h] 224  -32 'à'
-
-org	1C39h
-	db 90h	; [1C39h] 144 -112
-	db 00h	; [1C3Ah]   0
-	db 0E4h	; [1C3Bh] 228  -28 'ä'
-	db 0E0h	; [1C3Ch] 224  -32 'à'
-	db 0FBh	; [1C3Dh] 251   -5 'û'
-	db 0A3h	; [1C3Eh] 163  -93 '£'
-	db 0E0h	; [1C3Fh] 224  -32 'à'
-	db 0FAh	; [1C40h] 250   -6 'ú'
-	db 0A3h	; [1C41h] 163  -93 '£'
-	db 0E0h	; [1C42h] 224  -32 'à'
-	db 0F9h	; [1C43h] 249   -7 'ù'
-	db 90h	; [1C44h] 144 -112
-	db 00h	; [1C45h]   0
-	db 0EAh	; [1C46h] 234  -22 'ê'
-	db 0E0h	; [1C47h] 224  -32 'à'
-	db 75h	; [1C48h] 117 'u'
-	db 0F0h	; [1C49h] 240  -16 'ð'
-	db 02h	; [1C4Ah]   2
-	db 0A4h	; [1C4Bh] 164  -92 '¤'
-	db 0F5h	; [1C4Ch] 245  -11 'õ'
-	db 82h	; [1C4Dh] 130 -126
-	db 85h	; [1C4Eh] 133 -123
-	db 0F0h	; [1C4Fh] 240  -16 'ð'
-	db 83h	; [1C50h] 131 -125
-	db 0EEh	; [1C51h] 238  -18 'î'
-	db 8Fh	; [1C52h] 143 -113
-	db 0F0h	; [1C53h] 240  -16 'ð'
-	db 12h	; [1C54h]  18
-	db 37h	; [1C55h]  55 '7'
-	db 08h	; [1C56h]   8
-	db 90h	; [1C57h] 144 -112
-	db 00h	; [1C58h]   0
-	db 0EBh	; [1C59h] 235  -21 'ë'
-	db 0E0h	; [1C5Ah] 224  -32 'à'
-	db 42h	; [1C5Bh]  66 'B'
-	db 08h	; [1C5Ch]   8
-	db 90h	; [1C5Dh] 144 -112
-	db 00h	; [1C5Eh]   0
-	db 0EAh	; [1C5Fh] 234  -22 'ê'
-	db 0E0h	; [1C60h] 224  -32 'à'
-	db 04h	; [1C61h]   4
-	db 0F0h	; [1C62h] 240  -16 'ð'
-	db 0A3h	; [1C63h] 163  -93 '£'
-	db 0E0h	; [1C64h] 224  -32 'à'
-
-org	1C66h
-	db 25h	; [1C66h]  37 '%'
-	db 0E0h	; [1C67h] 224  -32 'à'
-	db 0F0h	; [1C68h] 240  -16 'ð'
-	db 02h	; [1C69h]   2
-	db 1Ah	; [1C6Ah]  26
-	db 0FCh	; [1C6Bh] 252   -4 'ü'
-	db 0ADh	; [1C6Ch] 173  -83
-	db 08h	; [1C6Dh]   8
-	db 7Ch	; [1C6Eh] 124 '|'
-	db 00h	; [1C6Fh]   0
-	db 0EDh	; [1C70h] 237  -19 'í'
-	db 7Dh	; [1C71h] 125 '}'
-	db 00h	; [1C72h]   0
-	db 0FCh	; [1C73h] 252   -4 'ü'
-	db 0E5h	; [1C74h] 229  -27 'å'
-	db 7Ah	; [1C75h] 122 'z'
-	db 0FDh	; [1C76h] 253   -3 'ý'
-	db 0AEh	; [1C77h] 174  -82 '®'
-	db 04h	; [1C78h]   4
-
-org	1C7Ah
-	db 22h	; [1C7Ah]  34 '"'
-	db 90h	; [1C7Bh] 144 -112
-	db 00h	; [1C7Ch]   0
-	db 0ECh	; [1C7Dh] 236  -20 'ì'
-	db 0EBh	; [1C7Eh] 235  -21 'ë'
-	db 0F0h	; [1C7Fh] 240  -16 'ð'
-	db 0A3h	; [1C80h] 163  -93 '£'
-	db 0EAh	; [1C81h] 234  -22 'ê'
-	db 0F0h	; [1C82h] 240  -16 'ð'
-	db 0A3h	; [1C83h] 163  -93 '£'
-	db 0E9h	; [1C84h] 233  -23 'é'
-	db 0F0h	; [1C85h] 240  -16 'ð'
-	db 0E4h	; [1C86h] 228  -28 'ä'
-	db 90h	; [1C87h] 144 -112
-	db 00h	; [1C88h]   0
-	db 0F1h	; [1C89h] 241  -15 'ñ'
-	db 0F0h	; [1C8Ah] 240  -16 'ð'
-	db 30h	; [1C8Bh]  48 '0'
-	db 94h	; [1C8Ch] 148 -108
-	db 03h	; [1C8Dh]   3
-	db 02h	; [1C8Eh]   2
-	db 1Dh	; [1C8Fh]  29
-	db 5Bh	; [1C90h]  91 '['
-	db 04h	; [1C91h]   4
-	db 0F0h	; [1C92h] 240  -16 'ð'
-	db 0D2h	; [1C93h] 210  -46 'Ò'
-	db 0C4h	; [1C94h] 196  -60 'Ä'
-	db 75h	; [1C95h] 117 'u'
-	db 0C5h	; [1C96h] 197  -59 'Å'
-	db 08h	; [1C97h]   8
-	db 0E5h	; [1C98h] 229  -27 'å'
-	db 0C5h	; [1C99h] 197  -59 'Å'
-	db 30h	; [1C9Ah]  48 '0'
-	db 0E4h	; [1C9Bh] 228  -28 'ä'
-	db 0FBh	; [1C9Ch] 251   -5 'û'
-	db 0AFh	; [1C9Dh] 175  -81 '¯'
-	db 0C6h	; [1C9Eh] 198  -58 'Æ'
-	db 75h	; [1C9Fh] 117 'u'
-	db 09h	; [1CA0h]   9
-	db 00h	; [1CA1h]   0
-	db 8Fh	; [1CA2h] 143 -113
-	db 0Ah	; [1CA3h]  10
-	db 0E5h	; [1CA4h] 229  -27 'å'
-	db 0Ah	; [1CA5h]  10
-	db 0AEh	; [1CA6h] 174  -82 '®'
-	db 09h	; [1CA7h]   9
-	db 78h	; [1CA8h] 120 'x'
-	db 02h	; [1CA9h]   2
-	db 0C3h	; [1CAAh] 195  -61 'Ã'
-	db 33h	; [1CABh]  51 '3'
-	db 0CEh	; [1CACh] 206  -50 'Î'
-	db 33h	; [1CADh]  51 '3'
-	db 0CEh	; [1CAEh] 206  -50 'Î'
-	db 0D8h	; [1CAFh] 216  -40 'Ø'
-	db 0F9h	; [1CB0h] 249   -7 'ù'
-	db 0F5h	; [1CB1h] 245  -11 'õ'
-	db 0Ah	; [1CB2h]  10
-	db 8Eh	; [1CB3h] 142 -114
-	db 09h	; [1CB4h]   9
-	db 0E5h	; [1CB5h] 229  -27 'å'
-	db 0C5h	; [1CB6h] 197  -59 'Å'
-	db 0C4h	; [1CB7h] 196  -60 'Ä'
-	db 13h	; [1CB8h]  19
-	db 13h	; [1CB9h]  19
-	db 54h	; [1CBAh]  84 'T'
-	db 03h	; [1CBBh]   3
-	db 54h	; [1CBCh]  84 'T'
-	db 03h	; [1CBDh]   3
-	db 42h	; [1CBEh]  66 'B'
-	db 0Ah	; [1CBFh]  10
-	db 0E4h	; [1CC0h] 228  -28 'ä'
-	db 0C3h	; [1CC1h] 195  -61 'Ã'
-	db 74h	; [1CC2h] 116 't'
-	db 02h	; [1CC3h]   2
-	db 95h	; [1CC4h] 149 -107
-	db 0Ah	; [1CC5h]  10
-	db 90h	; [1CC6h] 144 -112
-	db 00h	; [1CC7h]   0
-	db 0F0h	; [1CC8h] 240  -16 'ð'
-	db 0F0h	; [1CC9h] 240  -16 'ð'
-	db 74h	; [1CCAh] 116 't'
-	db 04h	; [1CCBh]   4
-	db 95h	; [1CCCh] 149 -107
-	db 09h	; [1CCDh]   9
-	db 90h	; [1CCEh] 144 -112
-	db 00h	; [1CCFh]   0
-	db 0EFh	; [1CD0h] 239  -17 'ï'
-	db 0F0h	; [1CD1h] 240  -16 'ð'
-	db 90h	; [1CD2h] 144 -112
-	db 01h	; [1CD3h]   1
-	db 20h	; [1CD4h]  32 ' '
-	db 0E0h	; [1CD5h] 224  -32 'à'
-	db 70h	; [1CD6h] 112 'p'
-	db 1Bh	; [1CD7h]  27
-	db 90h	; [1CD8h] 144 -112
-	db 00h	; [1CD9h]   0
-	db 0EFh	; [1CDAh] 239  -17 'ï'
-	db 0E0h	; [1CDBh] 224  -32 'à'
-
-org	1CDDh
-	db 0A3h	; [1CDDh] 163  -93 '£'
-	db 0E0h	; [1CDEh] 224  -32 'à'
-	db 90h	; [1CDFh] 144 -112
-	db 01h	; [1CE0h]   1
-	db 0Dh	; [1CE1h]  13
-	db 0CFh	; [1CE2h] 207  -49 'Ï'
-	db 0F0h	; [1CE3h] 240  -16 'ð'
-	db 0A3h	; [1CE4h] 163  -93 '£'
-	db 0EFh	; [1CE5h] 239  -17 'ï'
-	db 0F0h	; [1CE6h] 240  -16 'ð'
-	db 90h	; [1CE7h] 144 -112
-	db 01h	; [1CE8h]   1
-	db 20h	; [1CE9h]  32 ' '
-	db 74h	; [1CEAh] 116 't'
-	db 01h	; [1CEBh]   1
-	db 0F0h	; [1CECh] 240  -16 'ð'
-	db 90h	; [1CEDh] 144 -112
-	db 01h	; [1CEEh]   1
-	db 29h	; [1CEFh]  41 ')'
-	db 0F0h	; [1CF0h] 240  -16 'ð'
-	db 80h	; [1CF1h] 128 -128
-	db 6Fh	; [1CF2h] 111 'o'
-	db 90h	; [1CF3h] 144 -112
-	db 01h	; [1CF4h]   1
-	db 29h	; [1CF5h]  41 ')'
-	db 0E0h	; [1CF6h] 224  -32 'à'
-	db 0B4h	; [1CF7h] 180  -76 '´'
-	db 01h	; [1CF8h]   1
-	db 41h	; [1CF9h]  65 'A'
-	db 90h	; [1CFAh] 144 -112
-	db 00h	; [1CFBh]   0
-	db 0EFh	; [1CFCh] 239  -17 'ï'
-	db 0E0h	; [1CFDh] 224  -32 'à'
-	db 0FEh	; [1CFEh] 254   -2 'þ'
-	db 0A3h	; [1CFFh] 163  -93 '£'
-	db 0E0h	; [1D00h] 224  -32 'à'
-
-org	1D02h
-	db 90h	; [1D02h] 144 -112
-	db 01h	; [1D03h]   1
-	db 0Dh	; [1D04h]  13
-	db 0E0h	; [1D05h] 224  -32 'à'
-	db 0FCh	; [1D06h] 252   -4 'ü'
-	db 0A3h	; [1D07h] 163  -93 '£'
-	db 0E0h	; [1D08h] 224  -32 'à'
-	db 0FDh	; [1D09h] 253   -3 'ý'
-	db 12h	; [1D0Ah]  18
-	db 1Fh	; [1D0Bh]  31
-	db 2Bh	; [1D0Ch]  43 '+'
-	db 0C3h	; [1D0Dh] 195  -61 'Ã'
-	db 0EFh	; [1D0Eh] 239  -17 'ï'
-	db 94h	; [1D0Fh] 148 -108
-	db 03h	; [1D10h]   3
-	db 0EEh	; [1D11h] 238  -18 'î'
-	db 94h	; [1D12h] 148 -108
-	db 00h	; [1D13h]   0
-	db 40h	; [1D14h]  64 '@'
-	db 4Ch	; [1D15h]  76 'L'
-	db 90h	; [1D16h] 144 -112
-	db 00h	; [1D17h]   0
-	db 0EFh	; [1D18h] 239  -17 'ï'
-	db 0E0h	; [1D19h] 224  -32 'à'
-	db 0F9h	; [1D1Ah] 249   -7 'ù'
-	db 0A3h	; [1D1Bh] 163  -93 '£'
-	db 0E0h	; [1D1Ch] 224  -32 'à'
-
-org	1D1Eh
-	db 90h	; [1D1Eh] 144 -112
-	db 00h	; [1D1Fh]   0
-	db 0ECh	; [1D20h] 236  -20 'ì'
-	db 0E0h	; [1D21h] 224  -32 'à'
-	db 0FBh	; [1D22h] 251   -5 'û'
-	db 0A3h	; [1D23h] 163  -93 '£'
-	db 0E0h	; [1D24h] 224  -32 'à'
-	db 0FAh	; [1D25h] 250   -6 'ú'
-	db 0A3h	; [1D26h] 163  -93 '£'
-	db 0E0h	; [1D27h] 224  -32 'à'
-	db 0C9h	; [1D28h] 201  -55 'É'
-	db 8Fh	; [1D29h] 143 -113
-	db 0F0h	; [1D2Ah] 240  -16 'ð'
-	db 12h	; [1D2Bh]  18
-	db 36h	; [1D2Ch]  54 '6'
-	db 0E7h	; [1D2Dh] 231  -25 'ç'
-	db 0E4h	; [1D2Eh] 228  -28 'ä'
-	db 90h	; [1D2Fh] 144 -112
-	db 01h	; [1D30h]   1
-	db 29h	; [1D31h]  41 ')'
-	db 0F0h	; [1D32h] 240  -16 'ð'
-	db 90h	; [1D33h] 144 -112
-	db 00h	; [1D34h]   0
-	db 0F1h	; [1D35h] 241  -15 'ñ'
-	db 74h	; [1D36h] 116 't'
-	db 03h	; [1D37h]   3
-	db 0F0h	; [1D38h] 240  -16 'ð'
-	db 80h	; [1D39h] 128 -128
-	db 27h	; [1D3Ah]  39 '''
-	db 90h	; [1D3Bh] 144 -112
-	db 00h	; [1D3Ch]   0
-	db 0EFh	; [1D3Dh] 239  -17 'ï'
-	db 0E0h	; [1D3Eh] 224  -32 'à'
-	db 0F9h	; [1D3Fh] 249   -7 'ù'
-	db 0A3h	; [1D40h] 163  -93 '£'
-	db 0E0h	; [1D41h] 224  -32 'à'
-
-org	1D43h
-	db 90h	; [1D43h] 144 -112
-	db 00h	; [1D44h]   0
-	db 0ECh	; [1D45h] 236  -20 'ì'
-	db 0E0h	; [1D46h] 224  -32 'à'
-	db 0FBh	; [1D47h] 251   -5 'û'
-	db 0A3h	; [1D48h] 163  -93 '£'
-	db 0E0h	; [1D49h] 224  -32 'à'
-	db 0FAh	; [1D4Ah] 250   -6 'ú'
-	db 0A3h	; [1D4Bh] 163  -93 '£'
-	db 0E0h	; [1D4Ch] 224  -32 'à'
-	db 0C9h	; [1D4Dh] 201  -55 'É'
-	db 8Fh	; [1D4Eh] 143 -113
-	db 0F0h	; [1D4Fh] 240  -16 'ð'
-	db 12h	; [1D50h]  18
-	db 36h	; [1D51h]  54 '6'
-	db 0E7h	; [1D52h] 231  -25 'ç'
-	db 90h	; [1D53h] 144 -112
-	db 00h	; [1D54h]   0
-	db 0F1h	; [1D55h] 241  -15 'ñ'
-	db 74h	; [1D56h] 116 't'
-	db 03h	; [1D57h]   3
-	db 0F0h	; [1D58h] 240  -16 'ð'
-	db 80h	; [1D59h] 128 -128
-	db 07h	; [1D5Ah]   7
-	db 0E4h	; [1D5Bh] 228  -28 'ä'
-	db 90h	; [1D5Ch] 144 -112
-	db 01h	; [1D5Dh]   1
-	db 20h	; [1D5Eh]  32 ' '
-	db 0F0h	; [1D5Fh] 240  -16 'ð'
-	db 0C2h	; [1D60h] 194  -62 'Â'
-	db 0C4h	; [1D61h] 196  -60 'Ä'
-	db 90h	; [1D62h] 144 -112
-	db 00h	; [1D63h]   0
-	db 0F1h	; [1D64h] 241  -15 'ñ'
-	db 0E0h	; [1D65h] 224  -32 'à'
-
-org	1D67h
-	db 22h	; [1D67h]  34 '"'
-	db 75h	; [1D68h] 117 'u'
-	db 0DBh	; [1D69h] 219  -37 'Û'
-	db 63h	; [1D6Ah]  99 'c'
-	db 75h	; [1D6Bh] 117 'u'
-	db 0Bh	; [1D6Ch]  11
-	db 01h	; [1D6Dh]   1
-	db 0E4h	; [1D6Eh] 228  -28 'ä'
-	db 0F5h	; [1D6Fh] 245  -11 'õ'
-	db 7Ch	; [1D70h] 124 '|'
-	db 0D2h	; [1D71h] 210  -46 'Ò'
-	db 0AFh	; [1D72h] 175  -81 '¯'
-	db 0D2h	; [1D73h] 210  -46 'Ò'
-	db 0BDh	; [1D74h] 189  -67 '½'
-	db 0D2h	; [1D75h] 210  -46 'Ò'
-	db 0ADh	; [1D76h] 173  -83
-	db 12h	; [1D77h]  18
-	db 1Eh	; [1D78h]  30
-	db 0D2h	; [1D79h] 210  -46 'Ò'
-	db 75h	; [1D7Ah] 117 'u'
-	db 0D8h	; [1D7Bh] 216  -40 'Ø'
-	db 47h	; [1D7Ch]  71 'G'
-	db 22h	; [1D7Dh]  34 '"'
-	db 20h	; [1D7Eh]  32 ' '
-	db 05h	; [1D7Fh]   5
-	db 03h	; [1D80h]   3
-	db 7Fh	; [1D81h] 127
-	db 00h	; [1D82h]   0
-	db 22h	; [1D83h]  34 '"'
-	db 75h	; [1D84h] 117 'u'
-	db 53h	; [1D85h]  83 'S'
-	db 08h	; [1D86h]   8
-	db 75h	; [1D87h] 117 'u'
-	db 7Ch	; [1D88h] 124 '|'
-	db 15h	; [1D89h]  21
-	db 75h	; [1D8Ah] 117 'u'
-	db 7Dh	; [1D8Bh] 125 '}'
-	db 80h	; [1D8Ch] 128 -128
-	db 7Fh	; [1D8Dh] 127
-	db 0F4h	; [1D8Eh] 244  -12 'ô'
-	db 7Eh	; [1D8Fh] 126 '~'
-	db 01h	; [1D90h]   1
-	db 0D2h	; [1D91h] 210  -46 'Ò'
-	db 0DDh	; [1D92h] 221  -35 'Ý'
-	db 0E5h	; [1D93h] 229  -27 'å'
-	db 7Ch	; [1D94h] 124 '|'
-	db 60h	; [1D95h]  96 '`'
-	db 09h	; [1D96h]   9
-	db 0EFh	; [1D97h] 239  -17 'ï'
-	db 1Fh	; [1D98h]  31
-	db 70h	; [1D99h] 112 'p'
-	db 01h	; [1D9Ah]   1
-	db 1Eh	; [1D9Bh]  30
-	db 14h	; [1D9Ch]  20
-	db 4Eh	; [1D9Dh]  78 'N'
-	db 70h	; [1D9Eh] 112 'p'
-	db 0F3h	; [1D9Fh] 243  -13 'ó'
-	db 0EFh	; [1DA0h] 239  -17 'ï'
-	db 4Eh	; [1DA1h]  78 'N'
-	db 60h	; [1DA2h]  96 '`'
-	db 03h	; [1DA3h]   3
-	db 7Fh	; [1DA4h] 127
-	db 00h	; [1DA5h]   0
-	db 22h	; [1DA6h]  34 '"'
-	db 12h	; [1DA7h]  18
-	db 1Eh	; [1DA8h]  30
-	db 0D2h	; [1DA9h] 210  -46 'Ò'
-	db 7Fh	; [1DAAh] 127
-	db 01h	; [1DABh]   1
-	db 22h	; [1DACh]  34 '"'
-	db 20h	; [1DADh]  32 ' '
-	db 05h	; [1DAEh]   5
-	db 03h	; [1DAFh]   3
-	db 7Fh	; [1DB0h] 127
-	db 01h	; [1DB1h]   1
-	db 22h	; [1DB2h]  34 '"'
-	db 75h	; [1DB3h] 117 'u'
-	db 7Ch	; [1DB4h] 124 '|'
-	db 13h	; [1DB5h]  19
-	db 75h	; [1DB6h] 117 'u'
-	db 7Dh	; [1DB7h] 125 '}'
-	db 81h	; [1DB8h] 129 -127
-	db 7Fh	; [1DB9h] 127
-	db 0F4h	; [1DBAh] 244  -12 'ô'
-	db 7Eh	; [1DBBh] 126 '~'
-	db 01h	; [1DBCh]   1
-	db 0D2h	; [1DBDh] 210  -46 'Ò'
-	db 0DDh	; [1DBEh] 221  -35 'Ý'
-	db 0E5h	; [1DBFh] 229  -27 'å'
-	db 7Ch	; [1DC0h] 124 '|'
-	db 0F4h	; [1DC1h] 244  -12 'ô'
-	db 60h	; [1DC2h]  96 '`'
-	db 09h	; [1DC3h]   9
-	db 0EFh	; [1DC4h] 239  -17 'ï'
-	db 1Fh	; [1DC5h]  31
-	db 70h	; [1DC6h] 112 'p'
-	db 01h	; [1DC7h]   1
-	db 1Eh	; [1DC8h]  30
-	db 14h	; [1DC9h]  20
-	db 4Eh	; [1DCAh]  78 'N'
-	db 70h	; [1DCBh] 112 'p'
-	db 0F2h	; [1DCCh] 242  -14 'ò'
-	db 0EFh	; [1DCDh] 239  -17 'ï'
-	db 4Eh	; [1DCEh]  78 'N'
-	db 60h	; [1DCFh]  96 '`'
-	db 03h	; [1DD0h]   3
-	db 7Fh	; [1DD1h] 127
-	db 00h	; [1DD2h]   0
-	db 22h	; [1DD3h]  34 '"'
-	db 12h	; [1DD4h]  18
-	db 1Eh	; [1DD5h]  30
-	db 0D2h	; [1DD6h] 210  -46 'Ò'
-	db 7Fh	; [1DD7h] 127
-	db 01h	; [1DD8h]   1
-	db 22h	; [1DD9h]  34 '"'
-	db 0AEh	; [1DDAh] 174  -82 '®'
-	db 07h	; [1DDBh]   7
-	db 20h	; [1DDCh]  32 ' '
-	db 05h	; [1DDDh]   5
-	db 03h	; [1DDEh]   3
-	db 7Fh	; [1DDFh] 127
-	db 00h	; [1DE0h]   0
-	db 22h	; [1DE1h]  34 '"'
-	db 0E4h	; [1DE2h] 228  -28 'ä'
-	db 0F5h	; [1DE3h] 245  -11 'õ'
-	db 52h	; [1DE4h]  82 'R'
-	db 0EEh	; [1DE5h] 238  -18 'î'
-	db 54h	; [1DE6h]  84 'T'
-	db 0F7h	; [1DE7h] 247   -9 '÷'
-	db 0F5h	; [1DE8h] 245  -11 'õ'
-	db 53h	; [1DE9h]  83 'S'
-	db 75h	; [1DEAh] 117 'u'
-	db 7Ch	; [1DEBh] 124 '|'
-	db 02h	; [1DECh]   2
-	db 75h	; [1DEDh] 117 'u'
-	db 7Dh	; [1DEEh] 125 '}'
-	db 80h	; [1DEFh] 128 -128
-	db 7Fh	; [1DF0h] 127
-	db 0FAh	; [1DF1h] 250   -6 'ú'
-	db 7Eh	; [1DF2h] 126 '~'
-	db 00h	; [1DF3h]   0
-	db 0D2h	; [1DF4h] 210  -46 'Ò'
-	db 0DDh	; [1DF5h] 221  -35 'Ý'
-	db 0E5h	; [1DF6h] 229  -27 'å'
-	db 7Ch	; [1DF7h] 124 '|'
-	db 60h	; [1DF8h]  96 '`'
-	db 09h	; [1DF9h]   9
-	db 0EFh	; [1DFAh] 239  -17 'ï'
-	db 1Fh	; [1DFBh]  31
-	db 70h	; [1DFCh] 112 'p'
-	db 01h	; [1DFDh]   1
-	db 1Eh	; [1DFEh]  30
-	db 14h	; [1DFFh]  20
-	db 4Eh	; [1E00h]  78 'N'
-	db 70h	; [1E01h] 112 'p'
-	db 0F3h	; [1E02h] 243  -13 'ó'
-	db 0EFh	; [1E03h] 239  -17 'ï'
-	db 4Eh	; [1E04h]  78 'N'
-	db 60h	; [1E05h]  96 '`'
-	db 03h	; [1E06h]   3
-	db 7Fh	; [1E07h] 127
-	db 00h	; [1E08h]   0
-	db 22h	; [1E09h]  34 '"'
-	db 12h	; [1E0Ah]  18
-	db 1Eh	; [1E0Bh]  30
-	db 0D2h	; [1E0Ch] 210  -46 'Ò'
-	db 7Fh	; [1E0Dh] 127
-	db 01h	; [1E0Eh]   1
-	db 22h	; [1E0Fh]  34 '"'
-	db 0AEh	; [1E10h] 174  -82 '®'
-	db 07h	; [1E11h]   7
-	db 0EDh	; [1E12h] 237  -19 'í'
-	db 60h	; [1E13h]  96 '`'
-	db 06h	; [1E14h]   6
-	db 20h	; [1E15h]  32 ' '
-	db 05h	; [1E16h]   5
-	db 03h	; [1E17h]   3
-	db 7Fh	; [1E18h] 127
-	db 00h	; [1E19h]   0
-	db 22h	; [1E1Ah]  34 '"'
-	db 0AFh	; [1E1Bh] 175  -81 '¯'
-	db 06h	; [1E1Ch]   6
-	db 8Fh	; [1E1Dh] 143 -113
-	db 52h	; [1E1Eh]  82 'R'
-	db 75h	; [1E1Fh] 117 'u'
-	db 7Ch	; [1E20h] 124 '|'
-	db 01h	; [1E21h]   1
-	db 0E4h	; [1E22h] 228  -28 'ä'
-	db 0F5h	; [1E23h] 245  -11 'õ'
-	db 7Dh	; [1E24h] 125 '}'
-	db 7Fh	; [1E25h] 127
-	db 0FAh	; [1E26h] 250   -6 'ú'
-	db 0FEh	; [1E27h] 254   -2 'þ'
-	db 0D2h	; [1E28h] 210  -46 'Ò'
-	db 0DDh	; [1E29h] 221  -35 'Ý'
-	db 0E5h	; [1E2Ah] 229  -27 'å'
-	db 7Ch	; [1E2Bh] 124 '|'
-	db 60h	; [1E2Ch]  96 '`'
-	db 09h	; [1E2Dh]   9
-	db 0EFh	; [1E2Eh] 239  -17 'ï'
-	db 1Fh	; [1E2Fh]  31
-	db 70h	; [1E30h] 112 'p'
-	db 01h	; [1E31h]   1
-	db 1Eh	; [1E32h]  30
-	db 14h	; [1E33h]  20
-	db 4Eh	; [1E34h]  78 'N'
-	db 70h	; [1E35h] 112 'p'
-	db 0F3h	; [1E36h] 243  -13 'ó'
-	db 0EFh	; [1E37h] 239  -17 'ï'
-	db 4Eh	; [1E38h]  78 'N'
-	db 60h	; [1E39h]  96 '`'
-	db 03h	; [1E3Ah]   3
-	db 7Fh	; [1E3Bh] 127
-	db 00h	; [1E3Ch]   0
-	db 22h	; [1E3Dh]  34 '"'
-	db 12h	; [1E3Eh]  18
-	db 1Eh	; [1E3Fh]  30
-	db 0D2h	; [1E40h] 210  -46 'Ò'
-	db 7Fh	; [1E41h] 127
-	db 01h	; [1E42h]   1
-	db 22h	; [1E43h]  34 '"'
-	db 75h	; [1E44h] 117 'u'
-	db 7Fh	; [1E45h] 127
-	db 0Ah	; [1E46h]  10
-	db 12h	; [1E47h]  18
-	db 33h	; [1E48h]  51 '3'
-	db 0D8h	; [1E49h] 216  -40 'Ø'
-	db 22h	; [1E4Ah]  34 '"'
-	db 90h	; [1E4Bh] 144 -112
-	db 00h	; [1E4Ch]   0
-	db 0F2h	; [1E4Dh] 242  -14 'ò'
-	db 0EFh	; [1E4Eh] 239  -17 'ï'
-	db 0F0h	; [1E4Fh] 240  -16 'ð'
-	db 0E4h	; [1E50h] 228  -28 'ä'
-	db 90h	; [1E51h] 144 -112
-	db 01h	; [1E52h]   1
-	db 17h	; [1E53h]  23
-	db 0F0h	; [1E54h] 240  -16 'ð'
-	db 12h	; [1E55h]  18
-	db 1Eh	; [1E56h]  30
-	db 0D2h	; [1E57h] 210  -46 'Ò'
-	db 90h	; [1E58h] 144 -112
-	db 00h	; [1E59h]   0
-	db 0F2h	; [1E5Ah] 242  -14 'ò'
-	db 0E0h	; [1E5Bh] 224  -32 'à'
-	db 60h	; [1E5Ch]  96 '`'
-	db 1Ch	; [1E5Dh]  28
-	db 12h	; [1E5Eh]  18
-	db 1Fh	; [1E5Fh]  31
-	db 23h	; [1E60h]  35 '#'
-	db 0E4h	; [1E61h] 228  -28 'ä'
-	db 90h	; [1E62h] 144 -112
-	db 00h	; [1E63h]   0
-	db 0F3h	; [1E64h] 243  -13 'ó'
-	db 0F0h	; [1E65h] 240  -16 'ð'
-	db 90h	; [1E66h] 144 -112
-	db 00h	; [1E67h]   0
-	db 0F3h	; [1E68h] 243  -13 'ó'
-	db 0E0h	; [1E69h] 224  -32 'à'
-	db 0C3h	; [1E6Ah] 195  -61 'Ã'
-	db 94h	; [1E6Bh] 148 -108
-	db 64h	; [1E6Ch] 100 'd'
-	db 50h	; [1E6Dh]  80 'P'
-	db 0Bh	; [1E6Eh]  11
-	db 12h	; [1E6Fh]  18
-	db 1Eh	; [1E70h]  30
-	db 44h	; [1E71h]  68 'D'
-	db 90h	; [1E72h] 144 -112
-	db 00h	; [1E73h]   0
-	db 0F3h	; [1E74h] 243  -13 'ó'
-	db 0E0h	; [1E75h] 224  -32 'à'
-	db 04h	; [1E76h]   4
-	db 0F0h	; [1E77h] 240  -16 'ð'
-	db 80h	; [1E78h] 128 -128
-	db 0ECh	; [1E79h] 236  -20 'ì'
-	db 12h	; [1E7Ah]  18
-	db 1Eh	; [1E7Bh]  30
-	db 8Fh	; [1E7Ch] 143 -113
-	db 12h	; [1E7Dh]  18
-	db 1Eh	; [1E7Eh]  30
-	db 44h	; [1E7Fh]  68 'D'
-	db 12h	; [1E80h]  18
-	db 1Eh	; [1E81h]  30
-	db 44h	; [1E82h]  68 'D'
-	db 90h	; [1E83h] 144 -112
-	db 00h	; [1E84h]   0
-	db 0F2h	; [1E85h] 242  -14 'ò'
-	db 0E0h	; [1E86h] 224  -32 'à'
-	db 60h	; [1E87h]  96 '`'
-	db 05h	; [1E88h]   5
-	db 7Fh	; [1E89h] 127
-	db 50h	; [1E8Ah]  80 'P'
-	db 12h	; [1E8Bh]  18
-	db 1Dh	; [1E8Ch]  29
-	db 0DAh	; [1E8Dh] 218  -38 'Ú'
-	db 22h	; [1E8Eh]  34 '"'
-	db 0E4h	; [1E8Fh] 228  -28 'ä'
-	db 90h	; [1E90h] 144 -112
-	db 01h	; [1E91h]   1
-	db 17h	; [1E92h]  23
-	db 0F0h	; [1E93h] 240  -16 'ð'
-	db 0F5h	; [1E94h] 245  -11 'õ'
-	db 52h	; [1E95h]  82 'R'
-	db 75h	; [1E96h] 117 'u'
-	db 53h	; [1E97h]  83 'S'
-	db 70h	; [1E98h] 112 'p'
-	db 75h	; [1E99h] 117 'u'
-	db 7Ch	; [1E9Ah] 124 '|'
-	db 01h	; [1E9Bh]   1
-	db 75h	; [1E9Ch] 117 'u'
-	db 7Dh	; [1E9Dh] 125 '}'
-	db 81h	; [1E9Eh] 129 -127
-	db 0D2h	; [1E9Fh] 210  -46 'Ò'
-	db 0DDh	; [1EA0h] 221  -35 'Ý'
-	db 7Fh	; [1EA1h] 127
-	db 0FAh	; [1EA2h] 250   -6 'ú'
-	db 0FEh	; [1EA3h] 254   -2 'þ'
-	db 0EFh	; [1EA4h] 239  -17 'ï'
-	db 1Fh	; [1EA5h]  31
-	db 0ACh	; [1EA6h] 172  -84 '¬'
-	db 06h	; [1EA7h]   6
-	db 70h	; [1EA8h] 112 'p'
-	db 01h	; [1EA9h]   1
-	db 1Eh	; [1EAAh]  30
-	db 4Ch	; [1EABh]  76 'L'
-	db 60h	; [1EACh]  96 '`'
-	db 0Bh	; [1EADh]  11
-	db 0E5h	; [1EAEh] 229  -27 'å'
-	db 7Ch	; [1EAFh] 124 '|'
-	db 0B4h	; [1EB0h] 180  -76 '´'
-
-org	1EB2h
-	db 0F1h	; [1EB2h] 241  -15 'ñ'
-	db 90h	; [1EB3h] 144 -112
-	db 01h	; [1EB4h]   1
-	db 17h	; [1EB5h]  23
-	db 0E5h	; [1EB6h] 229  -27 'å'
-	db 68h	; [1EB7h] 104 'h'
-	db 0F0h	; [1EB8h] 240  -16 'ð'
-	db 90h	; [1EB9h] 144 -112
-	db 01h	; [1EBAh]   1
-	db 17h	; [1EBBh]  23
-	db 0E0h	; [1EBCh] 224  -32 'à'
-	db 0D3h	; [1EBDh] 211  -45 'Ó'
-	db 94h	; [1EBEh] 148 -108
-	db 00h	; [1EBFh]   0
-	db 40h	; [1EC0h]  64 '@'
-	db 04h	; [1EC1h]   4
-	db 0D2h	; [1EC2h] 210  -46 'Ò'
-	db 05h	; [1EC3h]   5
-	db 80h	; [1EC4h] 128 -128
-	db 02h	; [1EC5h]   2
-	db 0C2h	; [1EC6h] 194  -62 'Â'
-	db 05h	; [1EC7h]   5
-	db 75h	; [1EC8h] 117 'u'
-	db 0D8h	; [1EC9h] 216  -40 'Ø'
-	db 47h	; [1ECAh]  71 'G'
-	db 75h	; [1ECBh] 117 'u'
-	db 0D8h	; [1ECCh] 216  -40 'Ø'
-	db 57h	; [1ECDh]  87 'W'
-	db 0E4h	; [1ECEh] 228  -28 'ä'
-	db 0F5h	; [1ECFh] 245  -11 'õ'
-	db 7Ch	; [1ED0h] 124 '|'
-	db 22h	; [1ED1h]  34 '"'
-	db 75h	; [1ED2h] 117 'u'
-	db 0D8h	; [1ED3h] 216  -40 'Ø'
-	db 57h	; [1ED4h]  87 'W'
-	db 0E4h	; [1ED5h] 228  -28 'ä'
-	db 0F5h	; [1ED6h] 245  -11 'õ'
-	db 7Ch	; [1ED7h] 124 '|'
-	db 0F5h	; [1ED8h] 245  -11 'õ'
-	db 52h	; [1ED9h]  82 'R'
-	db 0F5h	; [1EDAh] 245  -11 'õ'
-	db 53h	; [1EDBh]  83 'S'
-	db 0F5h	; [1EDCh] 245  -11 'õ'
-	db 77h	; [1EDDh] 119 'w'
-	db 90h	; [1EDEh] 144 -112
-	db 00h	; [1EDFh]   0
-	db 0F4h	; [1EE0h] 244  -12 'ô'
-	db 0F0h	; [1EE1h] 240  -16 'ð'
-	db 90h	; [1EE2h] 144 -112
-	db 00h	; [1EE3h]   0
-	db 0F4h	; [1EE4h] 244  -12 'ô'
-	db 0E0h	; [1EE5h] 224  -32 'à'
-
-org	1EE7h
-	db 0C3h	; [1EE7h] 195  -61 'Ã'
-	db 94h	; [1EE8h] 148 -108
-	db 08h	; [1EE9h]   8
-	db 50h	; [1EEAh]  80 'P'
-	db 1Dh	; [1EEBh]  29
-	db 74h	; [1EECh] 116 't'
-	db 54h	; [1EEDh]  84 'T'
-	db 2Fh	; [1EEEh]  47 '/'
-	db 0F8h	; [1EEFh] 248   -8 'ø'
-	db 0E4h	; [1EF0h] 228  -28 'ä'
-	db 0F6h	; [1EF1h] 246  -10 'ö'
-	db 74h	; [1EF2h] 116 't'
-	db 5Ch	; [1EF3h]  92 '\'
-	db 2Fh	; [1EF4h]  47 '/'
-	db 0F8h	; [1EF5h] 248   -8 'ø'
-	db 0E4h	; [1EF6h] 228  -28 'ä'
-	db 0F6h	; [1EF7h] 246  -10 'ö'
-	db 74h	; [1EF8h] 116 't'
-	db 67h	; [1EF9h] 103 'g'
-	db 2Fh	; [1EFAh]  47 '/'
-	db 0F8h	; [1EFBh] 248   -8 'ø'
-	db 0E4h	; [1EFCh] 228  -28 'ä'
-	db 0F6h	; [1EFDh] 246  -10 'ö'
-	db 74h	; [1EFEh] 116 't'
-	db 6Fh	; [1EFFh] 111 'o'
-	db 2Fh	; [1F00h]  47 '/'
-	db 0F8h	; [1F01h] 248   -8 'ø'
-	db 0E4h	; [1F02h] 228  -28 'ä'
-	db 0F6h	; [1F03h] 246  -10 'ö'
-	db 0E0h	; [1F04h] 224  -32 'à'
-	db 04h	; [1F05h]   4
-	db 0F0h	; [1F06h] 240  -16 'ð'
-	db 80h	; [1F07h] 128 -128
-	db 0D9h	; [1F08h] 217  -39 'Ù'
-	db 0E4h	; [1F09h] 228  -28 'ä'
-	db 90h	; [1F0Ah] 144 -112
-	db 00h	; [1F0Bh]   0
-	db 0F4h	; [1F0Ch] 244  -12 'ô'
-	db 0F0h	; [1F0Dh] 240  -16 'ð'
-	db 90h	; [1F0Eh] 144 -112
-	db 00h	; [1F0Fh]   0
-	db 0F4h	; [1F10h] 244  -12 'ô'
-	db 0E0h	; [1F11h] 224  -32 'à'
-	db 0C3h	; [1F12h] 195  -61 'Ã'
-	db 94h	; [1F13h] 148 -108
-	db 14h	; [1F14h]  20
-	db 50h	; [1F15h]  80 'P'
-	db 0Bh	; [1F16h]  11
-	db 12h	; [1F17h]  18
-	db 1Eh	; [1F18h]  30
-	db 44h	; [1F19h]  68 'D'
-	db 90h	; [1F1Ah] 144 -112
-	db 00h	; [1F1Bh]   0
-	db 0F4h	; [1F1Ch] 244  -12 'ô'
-	db 0E0h	; [1F1Dh] 224  -32 'à'
-	db 04h	; [1F1Eh]   4
-	db 0F0h	; [1F1Fh] 240  -16 'ð'
-	db 80h	; [1F20h] 128 -128
-	db 0ECh	; [1F21h] 236  -20 'ì'
-	db 22h	; [1F22h]  34 '"'
-	db 7Fh	; [1F23h] 127
-	db 01h	; [1F24h]   1
-	db 0E4h	; [1F25h] 228  -28 'ä'
-	db 0FDh	; [1F26h] 253   -3 'ý'
-	db 12h	; [1F27h]  18
-	db 1Eh	; [1F28h]  30
-	db 10h	; [1F29h]  16
-	db 22h	; [1F2Ah]  34 '"'
-	db 90h	; [1F2Bh] 144 -112
-	db 00h	; [1F2Ch]   0
-	db 0F5h	; [1F2Dh] 245  -11 'õ'
-	db 0EEh	; [1F2Eh] 238  -18 'î'
-	db 0F0h	; [1F2Fh] 240  -16 'ð'
-	db 0A3h	; [1F30h] 163  -93 '£'
-	db 0EFh	; [1F31h] 239  -17 'ï'
-	db 0F0h	; [1F32h] 240  -16 'ð'
-	db 90h	; [1F33h] 144 -112
-	db 00h	; [1F34h]   0
-	db 0F5h	; [1F35h] 245  -11 'õ'
-	db 0E0h	; [1F36h] 224  -32 'à'
-	db 0FAh	; [1F37h] 250   -6 'ú'
-	db 0A3h	; [1F38h] 163  -93 '£'
-	db 0E0h	; [1F39h] 224  -32 'à'
-	db 0FBh	; [1F3Ah] 251   -5 'û'
-	db 0D3h	; [1F3Bh] 211  -45 'Ó'
-	db 9Dh	; [1F3Ch] 157  -99
-	db 0EAh	; [1F3Dh] 234  -22 'ê'
-	db 9Ch	; [1F3Eh] 156 -100
-	db 40h	; [1F3Fh]  64 '@'
-	db 08h	; [1F40h]   8
-	db 0C3h	; [1F41h] 195  -61 'Ã'
-	db 0EBh	; [1F42h] 235  -21 'ë'
-	db 9Dh	; [1F43h] 157  -99
-
-org	1F45h
-	db 0EAh	; [1F45h] 234  -22 'ê'
-	db 9Ch	; [1F46h] 156 -100
-	db 0FEh	; [1F47h] 254   -2 'þ'
-	db 22h	; [1F48h]  34 '"'
-	db 0C3h	; [1F49h] 195  -61 'Ã'
-	db 0EDh	; [1F4Ah] 237  -19 'í'
-	db 9Bh	; [1F4Bh] 155 -101
-
-org	1F4Dh
-	db 0ECh	; [1F4Dh] 236  -20 'ì'
-	db 9Ah	; [1F4Eh] 154 -102
-	db 0FEh	; [1F4Fh] 254   -2 'þ'
-	db 22h	; [1F50h]  34 '"'
-	db 0ABh	; [1F51h] 171  -85 '«'
-	db 07h	; [1F52h]   7
-	db 0AAh	; [1F53h] 170  -86 'ª'
-	db 06h	; [1F54h]   6
-	db 0C3h	; [1F55h] 195  -61 'Ã'
-	db 0EBh	; [1F56h] 235  -21 'ë'
-	db 94h	; [1F57h] 148 -108
-	db 41h	; [1F58h]  65 'A'
-	db 0EAh	; [1F59h] 234  -22 'ê'
-	db 64h	; [1F5Ah] 100 'd'
-	db 80h	; [1F5Bh] 128 -128
-	db 94h	; [1F5Ch] 148 -108
-	db 7Ch	; [1F5Dh] 124 '|'
-	db 50h	; [1F5Eh]  80 'P'
-	db 0Ah	; [1F5Fh]  10
-	db 0E4h	; [1F60h] 228  -28 'ä'
-	db 90h	; [1F61h] 144 -112
-	db 00h	; [1F62h]   0
-	db 0F7h	; [1F63h] 247   -9 '÷'
-	db 0F0h	; [1F64h] 240  -16 'ð'
-	db 0A3h	; [1F65h] 163  -93 '£'
-	db 0F0h	; [1F66h] 240  -16 'ð'
-	db 02h	; [1F67h]   2
-	db 20h	; [1F68h]  32 ' '
-	db 52h	; [1F69h]  82 'R'
-	db 0C3h	; [1F6Ah] 195  -61 'Ã'
-	db 0EBh	; [1F6Bh] 235  -21 'ë'
-	db 94h	; [1F6Ch] 148 -108
-	db 0A8h	; [1F6Dh] 168  -88 '¨'
-	db 0EAh	; [1F6Eh] 234  -22 'ê'
-	db 64h	; [1F6Fh] 100 'd'
-	db 80h	; [1F70h] 128 -128
-	db 94h	; [1F71h] 148 -108
-	db 7Dh	; [1F72h] 125 '}'
-	db 50h	; [1F73h]  80 'P'
-	db 23h	; [1F74h]  35 '#'
-	db 0AEh	; [1F75h] 174  -82 '®'
-	db 02h	; [1F76h]   2
-	db 0AFh	; [1F77h] 175  -81 '¯'
-	db 03h	; [1F78h]   3
-	db 7Ch	; [1F79h] 124 '|'
-	db 00h	; [1F7Ah]   0
-	db 7Dh	; [1F7Bh] 125 '}'
-	db 0Eh	; [1F7Ch]  14
-	db 12h	; [1F7Dh]  18
-	db 36h	; [1F7Eh]  54 '6'
-	db 1Ch	; [1F7Fh]  28
-	db 0EFh	; [1F80h] 239  -17 'ï'
-	db 24h	; [1F81h]  36 '$'
-	db 0E5h	; [1F82h] 229  -27 'å'
-
-org	1F84h
-	db 0EEh	; [1F84h] 238  -18 'î'
-	db 34h	; [1F85h]  52 '4'
-	db 38h	; [1F86h]  56 '8'
-	db 0FEh	; [1F87h] 254   -2 'þ'
-	db 7Dh	; [1F88h] 125 '}'
-	db 64h	; [1F89h] 100 'd'
-	db 12h	; [1F8Ah]  18
-	db 36h	; [1F8Bh]  54 '6'
-	db 85h	; [1F8Ch] 133 -123
-	db 90h	; [1F8Dh] 144 -112
-	db 00h	; [1F8Eh]   0
-	db 0F7h	; [1F8Fh] 247   -9 '÷'
-	db 0EEh	; [1F90h] 238  -18 'î'
-	db 0F0h	; [1F91h] 240  -16 'ð'
-	db 0A3h	; [1F92h] 163  -93 '£'
-	db 0EFh	; [1F93h] 239  -17 'ï'
-	db 0F0h	; [1F94h] 240  -16 'ð'
-	db 02h	; [1F95h]   2
-	db 20h	; [1F96h]  32 ' '
-	db 52h	; [1F97h]  82 'R'
-	db 0C3h	; [1F98h] 195  -61 'Ã'
-	db 0EBh	; [1F99h] 235  -21 'ë'
-	db 94h	; [1F9Ah] 148 -108
-	db 0Ch	; [1F9Bh]  12
-	db 0EAh	; [1F9Ch] 234  -22 'ê'
-	db 64h	; [1F9Dh] 100 'd'
-	db 80h	; [1F9Eh] 128 -128
-	db 94h	; [1F9Fh] 148 -108
-	db 7Eh	; [1FA0h] 126 '~'
-	db 50h	; [1FA1h]  80 'P'
-	db 23h	; [1FA2h]  35 '#'
-	db 0AEh	; [1FA3h] 174  -82 '®'
-	db 02h	; [1FA4h]   2
-	db 0AFh	; [1FA5h] 175  -81 '¯'
-	db 03h	; [1FA6h]   3
-	db 7Ch	; [1FA7h] 124 '|'
-	db 00h	; [1FA8h]   0
-	db 7Dh	; [1FA9h] 125 '}'
-	db 05h	; [1FAAh]   5
-	db 12h	; [1FABh]  18
-	db 36h	; [1FACh]  54 '6'
-	db 1Ch	; [1FADh]  28
-	db 0EFh	; [1FAEh] 239  -17 'ï'
-	db 24h	; [1FAFh]  36 '$'
-	db 1Ah	; [1FB0h]  26
-
-org	1FB2h
-	db 0EEh	; [1FB2h] 238  -18 'î'
-	db 34h	; [1FB3h]  52 '4'
-	db 0Eh	; [1FB4h]  14
-	db 0FEh	; [1FB5h] 254   -2 'þ'
-	db 7Dh	; [1FB6h] 125 '}'
-	db 0Ah	; [1FB7h]  10
-	db 12h	; [1FB8h]  18
-	db 36h	; [1FB9h]  54 '6'
-	db 85h	; [1FBAh] 133 -123
-	db 90h	; [1FBBh] 144 -112
-	db 00h	; [1FBCh]   0
-	db 0F7h	; [1FBDh] 247   -9 '÷'
-	db 0EEh	; [1FBEh] 238  -18 'î'
-	db 0F0h	; [1FBFh] 240  -16 'ð'
-	db 0A3h	; [1FC0h] 163  -93 '£'
-	db 0EFh	; [1FC1h] 239  -17 'ï'
-	db 0F0h	; [1FC2h] 240  -16 'ð'
-	db 02h	; [1FC3h]   2
-	db 20h	; [1FC4h]  32 ' '
-	db 52h	; [1FC5h]  82 'R'
-	db 0C3h	; [1FC6h] 195  -61 'Ã'
-	db 0EBh	; [1FC7h] 235  -21 'ë'
-	db 94h	; [1FC8h] 148 -108
-	db 38h	; [1FC9h]  56 '8'
-	db 0EAh	; [1FCAh] 234  -22 'ê'
-	db 64h	; [1FCBh] 100 'd'
-	db 80h	; [1FCCh] 128 -128
-	db 94h	; [1FCDh] 148 -108
-	db 7Fh	; [1FCEh] 127
-	db 50h	; [1FCFh]  80 'P'
-	db 20h	; [1FD0h]  32 ' '
-	db 0AEh	; [1FD1h] 174  -82 '®'
-	db 02h	; [1FD2h]   2
-	db 0AFh	; [1FD3h] 175  -81 '¯'
-	db 03h	; [1FD4h]   3
-	db 7Ch	; [1FD5h] 124 '|'
-	db 00h	; [1FD6h]   0
-	db 7Dh	; [1FD7h] 125 '}'
-	db 0Ah	; [1FD8h]  10
-	db 12h	; [1FD9h]  18
-	db 36h	; [1FDAh]  54 '6'
-	db 1Ch	; [1FDBh]  28
-	db 0EFh	; [1FDCh] 239  -17 'ï'
-	db 24h	; [1FDDh]  36 '$'
-	db 0DEh	; [1FDEh] 222  -34 'Þ'
-
-org	1FE0h
-	db 0EEh	; [1FE0h] 238  -18 'î'
-	db 34h	; [1FE1h]  52 '4'
-	db 17h	; [1FE2h]  23
-	db 0FEh	; [1FE3h] 254   -2 'þ'
-	db 12h	; [1FE4h]  18
-	db 36h	; [1FE5h]  54 '6'
-	db 85h	; [1FE6h] 133 -123
-	db 90h	; [1FE7h] 144 -112
-	db 00h	; [1FE8h]   0
-	db 0F7h	; [1FE9h] 247   -9 '÷'
-	db 0EEh	; [1FEAh] 238  -18 'î'
-	db 0F0h	; [1FEBh] 240  -16 'ð'
-	db 0A3h	; [1FECh] 163  -93 '£'
-	db 0EFh	; [1FEDh] 239  -17 'ï'
-	db 0F0h	; [1FEEh] 240  -16 'ð'
-	db 80h	; [1FEFh] 128 -128
-	db 61h	; [1FF0h]  97 'a'
-	db 0C3h	; [1FF1h] 195  -61 'Ã'
-	db 0EAh	; [1FF2h] 234  -22 'ê'
-	db 64h	; [1FF3h] 100 'd'
-	db 80h	; [1FF4h] 128 -128
-	db 94h	; [1FF5h] 148 -108
-	db 80h	; [1FF6h] 128 -128
-	db 50h	; [1FF7h]  80 'P'
-	db 22h	; [1FF8h]  34 '"'
-	db 0AEh	; [1FF9h] 174  -82 '®'
-	db 02h	; [1FFAh]   2
-	db 0AFh	; [1FFBh] 175  -81 '¯'
-	db 03h	; [1FFCh]   3
-	db 7Ch	; [1FFDh] 124 '|'
-	db 00h	; [1FFEh]   0
-	db 7Dh	; [1FFFh] 125 '}'
-	db 14h	; [2000h]  20
-	db 12h	; [2001h]  18
-	db 36h	; [2002h]  54 '6'
-	db 1Ch	; [2003h]  28
-	db 0EFh	; [2004h] 239  -17 'ï'
-	db 24h	; [2005h]  36 '$'
-	db 0AEh	; [2006h] 174  -82 '®'
-
-org	2008h
-	db 0EEh	; [2008h] 238  -18 'î'
-	db 34h	; [2009h]  52 '4'
-	db 1Fh	; [200Ah]  31
-	db 0FEh	; [200Bh] 254   -2 'þ'
-	db 7Dh	; [200Ch] 125 '}'
-	db 0Ah	; [200Dh]  10
-	db 12h	; [200Eh]  18
-	db 36h	; [200Fh]  54 '6'
-	db 85h	; [2010h] 133 -123
-	db 90h	; [2011h] 144 -112
-	db 00h	; [2012h]   0
-	db 0F7h	; [2013h] 247   -9 '÷'
-	db 0EEh	; [2014h] 238  -18 'î'
-	db 0F0h	; [2015h] 240  -16 'ð'
-	db 0A3h	; [2016h] 163  -93 '£'
-	db 0EFh	; [2017h] 239  -17 'ï'
-	db 0F0h	; [2018h] 240  -16 'ð'
-	db 80h	; [2019h] 128 -128
-	db 37h	; [201Ah]  55 '7'
-	db 0C3h	; [201Bh] 195  -61 'Ã'
-	db 0EBh	; [201Ch] 235  -21 'ë'
-	db 94h	; [201Dh] 148 -108
-	db 78h	; [201Eh] 120 'x'
-	db 0EAh	; [201Fh] 234  -22 'ê'
-	db 64h	; [2020h] 100 'd'
-	db 80h	; [2021h] 128 -128
-	db 94h	; [2022h] 148 -108
-	db 80h	; [2023h] 128 -128
-	db 50h	; [2024h]  80 'P'
-	db 22h	; [2025h]  34 '"'
-	db 0AEh	; [2026h] 174  -82 '®'
-	db 02h	; [2027h]   2
-	db 0AFh	; [2028h] 175  -81 '¯'
-	db 03h	; [2029h]   3
-	db 7Ch	; [202Ah] 124 '|'
-	db 00h	; [202Bh]   0
-	db 7Dh	; [202Ch] 125 '}'
-	db 11h	; [202Dh]  17
-	db 12h	; [202Eh]  18
-	db 36h	; [202Fh]  54 '6'
-	db 1Ch	; [2030h]  28
-	db 0EFh	; [2031h] 239  -17 'ï'
-	db 24h	; [2032h]  36 '$'
-	db 0B4h	; [2033h] 180  -76 '´'
-
-org	2035h
-	db 0EEh	; [2035h] 238  -18 'î'
-	db 34h	; [2036h]  52 '4'
-	db 1Fh	; [2037h]  31
-	db 0FEh	; [2038h] 254   -2 'þ'
-	db 7Dh	; [2039h] 125 '}'
-	db 0Ah	; [203Ah]  10
-	db 12h	; [203Bh]  18
-	db 36h	; [203Ch]  54 '6'
-	db 85h	; [203Dh] 133 -123
-	db 90h	; [203Eh] 144 -112
-	db 00h	; [203Fh]   0
-	db 0F7h	; [2040h] 247   -9 '÷'
-	db 0EEh	; [2041h] 238  -18 'î'
-	db 0F0h	; [2042h] 240  -16 'ð'
-	db 0A3h	; [2043h] 163  -93 '£'
-	db 0EFh	; [2044h] 239  -17 'ï'
-	db 0F0h	; [2045h] 240  -16 'ð'
-	db 80h	; [2046h] 128 -128
-	db 0Ah	; [2047h]  10
-	db 90h	; [2048h] 144 -112
-	db 00h	; [2049h]   0
-	db 0F7h	; [204Ah] 247   -9 '÷'
-	db 74h	; [204Bh] 116 't'
-	db 03h	; [204Ch]   3
-	db 0F0h	; [204Dh] 240  -16 'ð'
-	db 0A3h	; [204Eh] 163  -93 '£'
-	db 74h	; [204Fh] 116 't'
-
-org	2051h
-	db 0F0h	; [2051h] 240  -16 'ð'
-	db 90h	; [2052h] 144 -112
-	db 00h	; [2053h]   0
-	db 0F7h	; [2054h] 247   -9 '÷'
-	db 0E0h	; [2055h] 224  -32 'à'
-	db 0FEh	; [2056h] 254   -2 'þ'
-	db 0A3h	; [2057h] 163  -93 '£'
-	db 0E0h	; [2058h] 224  -32 'à'
-
-org	205Ah
-	db 22h	; [205Ah]  34 '"'
-	db 0ABh	; [205Bh] 171  -85 '«'
-	db 07h	; [205Ch]   7
-	db 0AAh	; [205Dh] 170  -86 'ª'
-	db 06h	; [205Eh]   6
-	db 0C3h	; [205Fh] 195  -61 'Ã'
-	db 0EBh	; [2060h] 235  -21 'ë'
-	db 94h	; [2061h] 148 -108
-	db 0Bh	; [2062h]  11
-	db 0EAh	; [2063h] 234  -22 'ê'
-	db 64h	; [2064h] 100 'd'
-	db 80h	; [2065h] 128 -128
-	db 94h	; [2066h] 148 -108
-	db 80h	; [2067h] 128 -128
-	db 50h	; [2068h]  80 'P'
-	db 0Dh	; [2069h]  13
-	db 90h	; [206Ah] 144 -112
-	db 00h	; [206Bh]   0
-	db 0F9h	; [206Ch] 249   -7 'ù'
-	db 74h	; [206Dh] 116 't'
-	db 0FCh	; [206Eh] 252   -4 'ü'
-	db 0F0h	; [206Fh] 240  -16 'ð'
-	db 0A3h	; [2070h] 163  -93 '£'
-	db 74h	; [2071h] 116 't'
-	db 40h	; [2072h]  64 '@'
-	db 0F0h	; [2073h] 240  -16 'ð'
-	db 02h	; [2074h]   2
-	db 21h	; [2075h]  33 '!'
-	db 79h	; [2076h] 121 'y'
-	db 0C3h	; [2077h] 195  -61 'Ã'
-	db 0EBh	; [2078h] 235  -21 'ë'
-	db 94h	; [2079h] 148 -108
-	db 3Eh	; [207Ah]  62 '>'
-	db 0EAh	; [207Bh] 234  -22 'ê'
-	db 64h	; [207Ch] 100 'd'
-	db 80h	; [207Dh] 128 -128
-	db 94h	; [207Eh] 148 -108
-	db 80h	; [207Fh] 128 -128
-	db 50h	; [2080h]  80 'P'
-	db 29h	; [2081h]  41 ')'
-	db 0AEh	; [2082h] 174  -82 '®'
-	db 02h	; [2083h]   2
-	db 0AFh	; [2084h] 175  -81 '¯'
-	db 03h	; [2085h]   3
-	db 7Ch	; [2086h] 124 '|'
-	db 00h	; [2087h]   0
-	db 7Dh	; [2088h] 125 '}'
-	db 64h	; [2089h] 100 'd'
-	db 12h	; [208Ah]  18
-	db 36h	; [208Bh]  54 '6'
-	db 1Ch	; [208Ch]  28
-	db 0EFh	; [208Dh] 239  -17 'ï'
-	db 24h	; [208Eh]  36 '$'
-	db 0DCh	; [208Fh] 220  -36 'Ü'
-
-org	2091h
-	db 0EEh	; [2091h] 238  -18 'î'
-	db 34h	; [2092h]  52 '4'
-	db 0FBh	; [2093h] 251   -5 'û'
-	db 0FEh	; [2094h] 254   -2 'þ'
-	db 7Dh	; [2095h] 125 '}'
-	db 0Eh	; [2096h]  14
-	db 12h	; [2097h]  18
-	db 36h	; [2098h]  54 '6'
-	db 85h	; [2099h] 133 -123
-	db 0EFh	; [209Ah] 239  -17 'ï'
-	db 24h	; [209Bh]  36 '$'
-	db 40h	; [209Ch]  64 '@'
-	db 90h	; [209Dh] 144 -112
-	db 00h	; [209Eh]   0
-	db 0FAh	; [209Fh] 250   -6 'ú'
-	db 0F0h	; [20A0h] 240  -16 'ð'
-	db 0EEh	; [20A1h] 238  -18 'î'
-	db 34h	; [20A2h]  52 '4'
-	db 0FCh	; [20A3h] 252   -4 'ü'
-	db 90h	; [20A4h] 144 -112
-	db 00h	; [20A5h]   0
-	db 0F9h	; [20A6h] 249   -7 'ù'
-	db 0F0h	; [20A7h] 240  -16 'ð'
-	db 02h	; [20A8h]   2
-	db 21h	; [20A9h]  33 '!'
-	db 79h	; [20AAh] 121 'y'
-	db 0C3h	; [20ABh] 195  -61 'Ã'
-	db 0EBh	; [20ACh] 235  -21 'ë'
-	db 94h	; [20ADh] 148 -108
-	db 70h	; [20AEh] 112 'p'
-	db 0EAh	; [20AFh] 234  -22 'ê'
-	db 64h	; [20B0h] 100 'd'
-	db 80h	; [20B1h] 128 -128
-	db 94h	; [20B2h] 148 -108
-	db 80h	; [20B3h] 128 -128
-	db 50h	; [20B4h]  80 'P'
-	db 29h	; [20B5h]  41 ')'
-	db 0AEh	; [20B6h] 174  -82 '®'
-	db 02h	; [20B7h]   2
-	db 0AFh	; [20B8h] 175  -81 '¯'
-	db 03h	; [20B9h]   3
-	db 7Ch	; [20BAh] 124 '|'
-	db 00h	; [20BBh]   0
-	db 7Dh	; [20BCh] 125 '}'
-	db 0Ah	; [20BDh]  10
-	db 12h	; [20BEh]  18
-	db 36h	; [20BFh]  54 '6'
-	db 1Ch	; [20C0h]  28
-	db 0EFh	; [20C1h] 239  -17 'ï'
-	db 24h	; [20C2h]  36 '$'
-	db 9Eh	; [20C3h] 158  -98
-
-org	20C5h
-	db 0EEh	; [20C5h] 238  -18 'î'
-	db 34h	; [20C6h]  52 '4'
-	db 0FDh	; [20C7h] 253   -3 'ý'
-	db 0FEh	; [20C8h] 254   -2 'þ'
-	db 7Dh	; [20C9h] 125 '}'
-	db 05h	; [20CAh]   5
-	db 12h	; [20CBh]  18
-	db 36h	; [20CCh]  54 '6'
-	db 85h	; [20CDh] 133 -123
-	db 0EFh	; [20CEh] 239  -17 'ï'
-	db 24h	; [20CFh]  36 '$'
-	db 0A8h	; [20D0h] 168  -88 '¨'
-	db 90h	; [20D1h] 144 -112
-	db 00h	; [20D2h]   0
-	db 0FAh	; [20D3h] 250   -6 'ú'
-	db 0F0h	; [20D4h] 240  -16 'ð'
-	db 0EEh	; [20D5h] 238  -18 'î'
-	db 34h	; [20D6h]  52 '4'
-	db 0FDh	; [20D7h] 253   -3 'ý'
-	db 90h	; [20D8h] 144 -112
-	db 00h	; [20D9h]   0
-	db 0F9h	; [20DAh] 249   -7 'ù'
-	db 0F0h	; [20DBh] 240  -16 'ð'
-	db 02h	; [20DCh]   2
-	db 21h	; [20DDh]  33 '!'
-	db 79h	; [20DEh] 121 'y'
-	db 0C3h	; [20DFh] 195  -61 'Ã'
-	db 0EBh	; [20E0h] 235  -21 'ë'
-	db 94h	; [20E1h] 148 -108
-	db 9Ch	; [20E2h] 156 -100
-	db 0EAh	; [20E3h] 234  -22 'ê'
-	db 64h	; [20E4h] 100 'd'
-	db 80h	; [20E5h] 128 -128
-	db 94h	; [20E6h] 148 -108
-	db 81h	; [20E7h] 129 -127
-	db 50h	; [20E8h]  80 'P'
-	db 26h	; [20E9h]  38 '&'
-	db 0AEh	; [20EAh] 174  -82 '®'
-	db 02h	; [20EBh]   2
-	db 0AFh	; [20ECh] 175  -81 '¯'
-	db 03h	; [20EDh]   3
-	db 7Ch	; [20EEh] 124 '|'
-	db 00h	; [20EFh]   0
-	db 7Dh	; [20F0h] 125 '}'
-	db 0Ah	; [20F1h]  10
-	db 12h	; [20F2h]  18
-	db 36h	; [20F3h]  54 '6'
-	db 1Ch	; [20F4h]  28
-	db 0EFh	; [20F5h] 239  -17 'ï'
-	db 24h	; [20F6h]  36 '$'
-	db 0AAh	; [20F7h] 170  -86 'ª'
-
-org	20F9h
-	db 0EEh	; [20F9h] 238  -18 'î'
-	db 34h	; [20FAh]  52 '4'
-	db 0FBh	; [20FBh] 251   -5 'û'
-	db 0FEh	; [20FCh] 254   -2 'þ'
-	db 12h	; [20FDh]  18
-	db 36h	; [20FEh]  54 '6'
-	db 85h	; [20FFh] 133 -123
-	db 0EFh	; [2100h] 239  -17 'ï'
-	db 24h	; [2101h]  36 '$'
-	db 0Ch	; [2102h]  12
-	db 90h	; [2103h] 144 -112
-	db 00h	; [2104h]   0
-	db 0FAh	; [2105h] 250   -6 'ú'
-	db 0F0h	; [2106h] 240  -16 'ð'
-	db 0EEh	; [2107h] 238  -18 'î'
-	db 34h	; [2108h]  52 '4'
-	db 0FEh	; [2109h] 254   -2 'þ'
-	db 90h	; [210Ah] 144 -112
-	db 00h	; [210Bh]   0
-	db 0F9h	; [210Ch] 249   -7 'ù'
-	db 0F0h	; [210Dh] 240  -16 'ð'
-	db 80h	; [210Eh] 128 -128
-	db 69h	; [210Fh] 105 'i'
-	db 0C3h	; [2110h] 195  -61 'Ã'
-	db 0EBh	; [2111h] 235  -21 'ë'
-	db 94h	; [2112h] 148 -108
-	db 2Bh	; [2113h]  43 '+'
-	db 0EAh	; [2114h] 234  -22 'ê'
-	db 64h	; [2115h] 100 'd'
-	db 80h	; [2116h] 128 -128
-	db 94h	; [2117h] 148 -108
-	db 83h	; [2118h] 131 -125
-	db 50h	; [2119h]  80 'P'
-	db 28h	; [211Ah]  40 '('
-	db 0AEh	; [211Bh] 174  -82 '®'
-	db 02h	; [211Ch]   2
-	db 0AFh	; [211Dh] 175  -81 '¯'
-	db 03h	; [211Eh]   3
-	db 7Ch	; [211Fh] 124 '|'
-	db 00h	; [2120h]   0
-	db 7Dh	; [2121h] 125 '}'
-	db 0Ah	; [2122h]  10
-	db 12h	; [2123h]  18
-	db 36h	; [2124h]  54 '6'
-	db 1Ch	; [2125h]  28
-	db 0EFh	; [2126h] 239  -17 'ï'
-	db 24h	; [2127h]  36 '$'
-	db 0F2h	; [2128h] 242  -14 'ò'
-
-org	212Ah
-	db 0EEh	; [212Ah] 238  -18 'î'
-	db 34h	; [212Bh]  52 '4'
-	db 0EFh	; [212Ch] 239  -17 'ï'
-	db 0FEh	; [212Dh] 254   -2 'þ'
-	db 7Dh	; [212Eh] 125 '}'
-	db 14h	; [212Fh]  20
-	db 12h	; [2130h]  18
-	db 36h	; [2131h]  54 '6'
-	db 85h	; [2132h] 133 -123
-	db 0EFh	; [2133h] 239  -17 'ï'
-	db 24h	; [2134h]  36 '$'
-	db 38h	; [2135h]  56 '8'
-	db 90h	; [2136h] 144 -112
-	db 00h	; [2137h]   0
-	db 0FAh	; [2138h] 250   -6 'ú'
-	db 0F0h	; [2139h] 240  -16 'ð'
-	db 0EEh	; [213Ah] 238  -18 'î'
-	db 34h	; [213Bh]  52 '4'
-
-org	213Dh
-	db 90h	; [213Dh] 144 -112
-	db 00h	; [213Eh]   0
-	db 0F9h	; [213Fh] 249   -7 'ù'
-	db 0F0h	; [2140h] 240  -16 'ð'
-	db 80h	; [2141h] 128 -128
-	db 36h	; [2142h]  54 '6'
-	db 0C3h	; [2143h] 195  -61 'Ã'
-	db 0EBh	; [2144h] 235  -21 'ë'
-	db 94h	; [2145h] 148 -108
-	db 0F8h	; [2146h] 248   -8 'ø'
-	db 0EAh	; [2147h] 234  -22 'ê'
-	db 64h	; [2148h] 100 'd'
-	db 80h	; [2149h] 128 -128
-	db 94h	; [214Ah] 148 -108
-	db 83h	; [214Bh] 131 -125
-	db 50h	; [214Ch]  80 'P'
-	db 22h	; [214Dh]  34 '"'
-	db 0AEh	; [214Eh] 174  -82 '®'
-	db 02h	; [214Fh]   2
-	db 0AFh	; [2150h] 175  -81 '¯'
-	db 03h	; [2151h]   3
-	db 7Ch	; [2152h] 124 '|'
-	db 00h	; [2153h]   0
-	db 7Dh	; [2154h] 125 '}'
-	db 0Ah	; [2155h]  10
-	db 12h	; [2156h]  18
-	db 36h	; [2157h]  54 '6'
-	db 1Ch	; [2158h]  28
-	db 0EFh	; [2159h] 239  -17 'ï'
-	db 24h	; [215Ah]  36 '$'
-	db 54h	; [215Bh]  84 'T'
-
-org	215Dh
-	db 0EEh	; [215Dh] 238  -18 'î'
-	db 34h	; [215Eh]  52 '4'
-	db 0E0h	; [215Fh] 224  -32 'à'
-	db 0FEh	; [2160h] 254   -2 'þ'
-	db 7Dh	; [2161h] 125 '}'
-	db 11h	; [2162h]  17
-	db 12h	; [2163h]  18
-	db 36h	; [2164h]  54 '6'
-	db 85h	; [2165h] 133 -123
-	db 90h	; [2166h] 144 -112
-	db 00h	; [2167h]   0
-	db 0F9h	; [2168h] 249   -7 'ù'
-	db 0EEh	; [2169h] 238  -18 'î'
-	db 0F0h	; [216Ah] 240  -16 'ð'
-	db 0A3h	; [216Bh] 163  -93 '£'
-	db 0EFh	; [216Ch] 239  -17 'ï'
-	db 0F0h	; [216Dh] 240  -16 'ð'
-	db 80h	; [216Eh] 128 -128
-	db 09h	; [216Fh]   9
-	db 90h	; [2170h] 144 -112
-	db 00h	; [2171h]   0
-	db 0F9h	; [2172h] 249   -7 'ù'
-	db 0E4h	; [2173h] 228  -28 'ä'
-	db 0F0h	; [2174h] 240  -16 'ð'
-	db 0A3h	; [2175h] 163  -93 '£'
-	db 74h	; [2176h] 116 't'
-	db 78h	; [2177h] 120 'x'
-	db 0F0h	; [2178h] 240  -16 'ð'
-	db 90h	; [2179h] 144 -112
-	db 00h	; [217Ah]   0
-	db 0F9h	; [217Bh] 249   -7 'ù'
-	db 0E0h	; [217Ch] 224  -32 'à'
-	db 0FEh	; [217Dh] 254   -2 'þ'
-	db 0A3h	; [217Eh] 163  -93 '£'
-	db 0E0h	; [217Fh] 224  -32 'à'
-
-org	2181h
-	db 22h	; [2181h]  34 '"'
-	db 0ABh	; [2182h] 171  -85 '«'
-	db 07h	; [2183h]   7
-	db 0C3h	; [2184h] 195  -61 'Ã'
-	db 74h	; [2185h] 116 't'
-
-org	2187h
-	db 9Dh	; [2187h] 157  -99
-
-org	2189h
-	db 74h	; [2189h] 116 't'
-	db 03h	; [218Ah]   3
-	db 9Ch	; [218Bh] 156 -100
-	db 0FEh	; [218Ch] 254   -2 'þ'
-	db 90h	; [218Dh] 144 -112
-	db 00h	; [218Eh]   0
-	db 0FBh	; [218Fh] 251   -5 'û'
-	db 0F0h	; [2190h] 240  -16 'ð'
-	db 0A3h	; [2191h] 163  -93 '£'
-	db 0EFh	; [2192h] 239  -17 'ï'
-	db 0F0h	; [2193h] 240  -16 'ð'
-	db 78h	; [2194h] 120 'x'
-	db 02h	; [2195h]   2
-	db 0CEh	; [2196h] 206  -50 'Î'
-	db 0C3h	; [2197h] 195  -61 'Ã'
-	db 13h	; [2198h]  19
-	db 0CEh	; [2199h] 206  -50 'Î'
-	db 13h	; [219Ah]  19
-	db 0D8h	; [219Bh] 216  -40 'Ø'
-	db 0F9h	; [219Ch] 249   -7 'ù'
-
-org	219Eh
-	db 74h	; [219Eh] 116 't'
-	db 54h	; [219Fh]  84 'T'
-	db 2Bh	; [21A0h]  43 '+'
-	db 0F8h	; [21A1h] 248   -8 'ø'
-	db 0A6h	; [21A2h] 166  -90 '¦'
-	db 07h	; [21A3h]   7
-	db 0EBh	; [21A4h] 235  -21 'ë'
-	db 0C3h	; [21A5h] 195  -61 'Ã'
-	db 94h	; [21A6h] 148 -108
-	db 04h	; [21A7h]   4
-	db 50h	; [21A8h]  80 'P'
-	db 1Dh	; [21A9h]  29
-	db 0E4h	; [21AAh] 228  -28 'ä'
-	db 0FEh	; [21ABh] 254   -2 'þ'
-	db 90h	; [21ACh] 144 -112
-	db 00h	; [21ADh]   0
-	db 0FCh	; [21AEh] 252   -4 'ü'
-	db 0E0h	; [21AFh] 224  -32 'à'
-	db 54h	; [21B0h]  84 'T'
-	db 03h	; [21B1h]   3
-
-org	21B3h
-	db 0EBh	; [21B3h] 235  -21 'ë'
-	db 25h	; [21B4h]  37 '%'
-	db 0E0h	; [21B5h] 224  -32 'à'
-	db 0FDh	; [21B6h] 253   -3 'ý'
-	db 0EFh	; [21B7h] 239  -17 'ï'
-	db 0A8h	; [21B8h] 168  -88 '¨'
-	db 05h	; [21B9h]   5
-	db 08h	; [21BAh]   8
-	db 80h	; [21BBh] 128 -128
-	db 05h	; [21BCh]   5
-	db 0C3h	; [21BDh] 195  -61 'Ã'
-	db 33h	; [21BEh]  51 '3'
-	db 0CEh	; [21BFh] 206  -50 'Î'
-	db 33h	; [21C0h]  51 '3'
-	db 0CEh	; [21C1h] 206  -50 'Î'
-	db 0D8h	; [21C2h] 216  -40 'Ø'
-	db 0F9h	; [21C3h] 249   -7 'ù'
-	db 0F5h	; [21C4h] 245  -11 'õ'
-	db 65h	; [21C5h] 101 'e'
-	db 22h	; [21C6h]  34 '"'
-	db 0EBh	; [21C7h] 235  -21 'ë'
-	db 54h	; [21C8h]  84 'T'
-	db 03h	; [21C9h]   3
-
-org	21CBh
-	db 25h	; [21CBh]  37 '%'
-	db 0E0h	; [21CCh] 224  -32 'à'
-
-org	21CEh
-	db 0E4h	; [21CEh] 228  -28 'ä'
-	db 90h	; [21CFh] 144 -112
-	db 00h	; [21D0h]   0
-	db 0FCh	; [21D1h] 252   -4 'ü'
-	db 0E0h	; [21D2h] 224  -32 'à'
-	db 54h	; [21D3h]  84 'T'
-	db 03h	; [21D4h]   3
-	db 7Eh	; [21D5h] 126 '~'
-	db 00h	; [21D6h]   0
-	db 0A8h	; [21D7h] 168  -88 '¨'
-	db 07h	; [21D8h]   7
-	db 08h	; [21D9h]   8
-	db 80h	; [21DAh] 128 -128
-	db 05h	; [21DBh]   5
-	db 0C3h	; [21DCh] 195  -61 'Ã'
-	db 33h	; [21DDh]  51 '3'
-	db 0CEh	; [21DEh] 206  -50 'Î'
-	db 33h	; [21DFh]  51 '3'
-	db 0CEh	; [21E0h] 206  -50 'Î'
-	db 0D8h	; [21E1h] 216  -40 'Ø'
-	db 0F9h	; [21E2h] 249   -7 'ù'
-	db 0F5h	; [21E3h] 245  -11 'õ'
-	db 66h	; [21E4h] 102 'f'
-	db 22h	; [21E5h]  34 '"'
-	db 74h	; [21E6h] 116 't'
-	db 0FBh	; [21E7h] 251   -5 'û'
-	db 2Fh	; [21E8h]  47 '/'
-
-org	21EAh
-	db 74h	; [21EAh] 116 't'
-
-org	21ECh
-	db 3Eh	; [21ECh]  62 '>'
-	db 0FEh	; [21EDh] 254   -2 'þ'
-	db 0C3h	; [21EEh] 195  -61 'Ã'
-	db 64h	; [21EFh] 100 'd'
-	db 80h	; [21F0h] 128 -128
-	db 94h	; [21F1h] 148 -108
-	db 80h	; [21F2h] 128 -128
-	db 50h	; [21F3h]  80 'P'
-	db 03h	; [21F4h]   3
-	db 0E4h	; [21F5h] 228  -28 'ä'
-	db 0FEh	; [21F6h] 254   -2 'þ'
-
-org	21F8h
-	db 0C3h	; [21F8h] 195  -61 'Ã'
-	db 74h	; [21F9h] 116 't'
-
-org	21FBh
-	db 9Fh	; [21FBh] 159  -97
-
-org	21FDh
-	db 74h	; [21FDh] 116 't'
-	db 03h	; [21FEh]   3
-	db 9Eh	; [21FFh] 158  -98
-	db 0FEh	; [2200h] 254   -2 'þ'
-	db 0EFh	; [2201h] 239  -17 'ï'
-	db 78h	; [2202h] 120 'x'
-	db 02h	; [2203h]   2
-	db 0CEh	; [2204h] 206  -50 'Î'
-	db 0A2h	; [2205h] 162  -94 '¢'
-	db 0E7h	; [2206h] 231  -25 'ç'
-	db 13h	; [2207h]  19
-	db 0CEh	; [2208h] 206  -50 'Î'
-	db 13h	; [2209h]  19
-	db 0D8h	; [220Ah] 216  -40 'Ø'
-	db 0F8h	; [220Bh] 248   -8 'ø'
-	db 90h	; [220Ch] 144 -112
-
-org	220Fh
-	db 0F0h	; [220Fh] 240  -16 'ð'
-	db 22h	; [2210h]  34 '"'
+jump_1469:
+	mov DPTR, #dptr_0087
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	inc DPTR
+	mov A, #00h	;   0
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0C3h	; 195  -61 'Ã'
+	movx @DPTR, A
+	setb 20h.0
+	clr A
+	mov R7, A
+jump_1480:
+	mov A, R7
+	clr C
+	subb A, #08h	;   8
+	jnc jump_14AE
+	mov DPTR, #dptr_0087
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov R1, B
+	mov R2, A
+	lcall jump_35BE
+	mov R6, A
+	mov DPTR, #dptr_008A
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov DPL, B
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc R7
+	sjmp jump_1480
+
+jump_14AE:
+	setb 20h.2
+	clr 20h.0
+	ret
+
+jump_14B3:
+	mov DPTR, #dptr_008C
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	inc DPTR
+	mov A, #00h	;   0
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0CBh	; 203  -53 'Ë'
+	movx @DPTR, A
+	setb 20h.1
+	clr A
+	mov R7, A
+jump_14CA:
+	mov A, R7
+	clr C
+	subb A, #08h	;   8
+	jnc jump_14F8
+	mov DPTR, #dptr_008C
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov R1, B
+	mov R2, A
+	lcall jump_35BE
+	mov R6, A
+	mov DPTR, #dptr_008F
+	clr A
+	mov B, #01h	;   1
+	lcall jump_36D1
+	mov DPL, B
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc R7
+	sjmp jump_14CA
+
+jump_14F8:
+	setb 20h.3
+	clr 20h.1
+	ret
+
+jump_14FD:
+	push PSW
+	mov PSW, #10h	;  16
+	clr A
+	mov R7, A
+jump_1504:
+	mov A, R7
+	clr C
+	subb A, #08h	;   8
+	jnc jump_1523
+	mov A, R7
+	orl A, #80h	; 128 -128
+	mov DPTR, #dptr_FFF3
+	movx @DPTR, A
+	mov A, #0C3h	; 195  -61 'Ã'
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_FFF2
+	movx @DPTR, A
+	inc R7
+	sjmp jump_1504
+
+jump_1523:
+	pop PSW
+	ret
+
+jump_1526:
+	push PSW
+	clr A
+	mov 2Bh, A
+jump_152B:
+	mov A, 2Bh
+	clr C
+	subb A, #08h	;   8
+	jnc jump_154E
+	mov A, 2Bh
+	orl A, #80h	; 128 -128
+	mov DPTR, #dptr_FFF1
+	movx @DPTR, A
+	mov A, #0CBh	; 203  -53 'Ë'
+	add A, 2Bh
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_FFF0
+	movx @DPTR, A
+	inc 2Bh
+	sjmp jump_152B
+
+jump_154E:
+	pop PSW
+	ret
+
+;org	1551h
+	push PSW
+	mov PSW, #10h	;  16
+	jnb 20h.2, jump_1561
+	jb 20h.0, jump_1561
+	lcall jump_14FD
+	clr 20h.2
+jump_1561:
+	jnb 20h.3, jump_156C
+	jb 20h.1, jump_156C
+	lcall jump_1526
+	clr 20h.3
+jump_156C:
+	pop PSW
+	ret
+
+jump_156F:
+	push PSW
+	mov PSW, #10h	;  16
+	mov DPTR, #dptr_0091
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	jb 20h.0, jump_1585
+	jnb 20h.1, jump_158A
+jump_1585:
+	mov R7, #00h	;   0
+	ljmp jump_1629
+
+jump_158A:
+	mov DPTR, #dptr_00B1
+	movx A, @DPTR
+	jz jump_1599
+	lcall jump_14FD
+	lcall jump_1526
+	ljmp jump_1627
+
+jump_1599:
+	clr A
+	mov 2Ch, A
+jump_159C:
+	mov A, 2Ch
+	clr C
+	subb A, #08h	;   8
+	jnc jump_15DD
+	mov DPTR, #dptr_0091
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	mov DPL, 2Ch
+	mov DPH, #00h	;   0
+	lcall jump_35D9
+	mov 2Dh, A
+	jz jump_15D9
+	mov A, #0C3h	; 195  -61 'Ã'
+	add A, 2Ch
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R7, A
+	anl 2Dh, A
+	mov A, 2Ch
+	orl A, #80h	; 128 -128
+	mov DPTR, #dptr_FFF3
+	movx @DPTR, A
+	mov A, 2Dh
+	xrl A, R7
+	mov DPTR, #dptr_FFF2
+	movx @DPTR, A
+jump_15D9:
+	inc 2Ch
+	sjmp jump_159C
+
+jump_15DD:
+	clr A
+	mov 2Ch, A
+jump_15E0:
+	mov A, 2Ch
+	clr C
+	subb A, #08h	;   8
+	jnc jump_1627
+	mov A, 2Ch
+	add A, #08h	;   8
+	mov R7, A
+	clr A
+	rlc A
+	mov R6, A
+	mov DPTR, #dptr_0091
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	mov DPL, R7
+	mov DPH, R6
+	lcall jump_35D9
+	mov 2Dh, A
+	jz jump_1623
+	mov A, #0CBh	; 203  -53 'Ë'
+	add A, 2Ch
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R7, A
+	anl 2Dh, A
+	mov A, 2Ch
+	orl A, #80h	; 128 -128
+	mov DPTR, #dptr_FFF1
+	movx @DPTR, A
+	mov A, 2Dh
+	xrl A, R7
+	mov DPTR, #dptr_FFF0
+	movx @DPTR, A
+jump_1623:
+	inc 2Ch
+	sjmp jump_15E0
+
+jump_1627:
+	mov R7, #01h	;   1
+jump_1629:
+	pop PSW
+	ret
+
+;org	162Ch
+	push PSW
+	mov PSW, #10h	;  16
+	mov DPTR, #dptr_00B2
+	movx A, @DPTR
+	dec A
+	movx @DPTR, A
+	clr C
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_166E
+	mov DPTR, #dptr_00B1
+	movx A, @DPTR
+	jz jump_164A
+	inc DPTR
+	mov A, #1Bh	;  27
+	movx @DPTR, A
+	sjmp jump_1650
+
+jump_164A:
+	mov DPTR, #dptr_00B2
+	mov A, #06h	;   6
+	movx @DPTR, A
+jump_1650:
+	lcall jump_156F
+	mov A, R7
+	jz jump_1669
+	mov DPTR, #dptr_00B1
+	movx A, @DPTR
+	jnz jump_1660
+	mov R7, #01h	;   1
+	sjmp jump_1662
+
+jump_1660:
+	mov R7, #00h	;   0
+jump_1662:
+	mov DPTR, #dptr_00B1
+	mov A, R7
+	movx @DPTR, A
+	sjmp jump_166E
+
+jump_1669:
+	clr A
+	mov DPTR, #dptr_00B2
+	movx @DPTR, A
+jump_166E:
+	pop PSW
+	ret
+
+;org	1671h
+	mov A, R7
+	jz jump_167F
+	mov DPTR, #dptr_FFF3
+	mov A, #0A3h	; 163  -93 '£'
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF1
+	movx @DPTR, A
+	ret
+
+jump_167F:
+	mov DPTR, #dptr_FFF3
+	mov A, #0A0h	; 160  -96
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF1
+	movx @DPTR, A
+	ret
+
+;org	168Ah
+	mov DPTR, #dptr_0094
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R5
+	movx @DPTR, A
+	mov R5, 03h
+	mov R4, 02h
+	mov A, R5
+	add A, #08h	;   8
+	mov R7, A
+	clr A
+	addc A, R4
+	mov R2, A
+	mov R1, 07h
+	inc DPTR
+	mov A, #02h	;   2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	mov DPTR, #dptr_0094
+	movx A, @DPTR
+	add A, #0FEh	; 254   -2 'þ'
+	jz jump_1715
+	dec A
+	jnz jump_16B7
+	ljmp jump_175A
+
+jump_16B7:
+	dec A
+	jnz jump_16BD
+	ljmp jump_1786
+
+jump_16BD:
+	dec A
+	jnz jump_16C3
+	ljmp jump_17B2
+
+jump_16C3:
+	dec A
+	jnz jump_16C9
+	ljmp jump_17DE
+
+jump_16C9:
+	add A, #05h	;   5
+	jz jump_16D0
+	ljmp jump_180D
+
+jump_16D0:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_16EE
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	add A, #06h	;   6
+	mov R1, A
+	clr A
+	addc A, R2
+	mov R2, A
+	lcall jump_35BE
+	orl A, #80h	; 128 -128
+	lcall jump_3608
+	sjmp jump_1706
+
+jump_16EE:
+	mov DPTR, #dptr_0096
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	add A, #06h	;   6
+	mov R1, A
+	clr A
+	addc A, R2
+	mov R2, A
+	lcall jump_35BE
+	anl A, #7Fh	; 127
+	lcall jump_3608
+jump_1706:
+	mov DPTR, #dptr_0096
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	lcall jump_14B3
+	ret
+
+jump_1715:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_1733
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	add A, #07h	;   7
+	mov R1, A
+	clr A
+	addc A, R2
+	mov R2, A
+	lcall jump_35BE
+	orl A, #80h	; 128 -128
+	lcall jump_3608
+	sjmp jump_174B
+
+jump_1733:
+	mov DPTR, #dptr_0096
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	add A, #07h	;   7
+	mov R1, A
+	clr A
+	addc A, R2
+	mov R2, A
+	lcall jump_35BE
+	anl A, #7Fh	; 127
+	lcall jump_3608
+jump_174B:
+	mov DPTR, #dptr_0096
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	lcall jump_14B3
+	ret
+
+jump_175A:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_176F
+	mov A, R5
+	add A, #06h	;   6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_177C
+
+jump_176F:
+	mov A, R5
+	add A, #06h	;   6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_177C:
+	mov R2, 04h
+	mov R1, 05h
+	mov R3, #02h	;   2
+	lcall jump_1469
+	ret
+
+jump_1786:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_179B
+	mov A, R5
+	add A, #07h	;   7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_17A8
+
+jump_179B:
+	mov A, R5
+	add A, #07h	;   7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_17A8:
+	mov R2, 04h
+	mov R1, 05h
+	mov R3, #02h	;   2
+	lcall jump_1469
+	ret
+
+jump_17B2:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_17C7
+	mov A, R5
+	add A, #06h	;   6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	orl A, #80h	; 128 -128
+	movx @DPTR, A
+	sjmp jump_17D4
+
+jump_17C7:
+	mov A, R5
+	add A, #06h	;   6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+jump_17D4:
+	mov R2, 04h
+	mov R1, 05h
+	mov R3, #02h	;   2
+	lcall jump_1469
+	ret
+
+jump_17DE:
+	mov DPTR, #dptr_0095
+	movx A, @DPTR
+	jz jump_17F3
+	mov A, R5
+	add A, #07h	;   7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	orl A, #80h	; 128 -128
+	movx @DPTR, A
+	sjmp jump_1800
+
+jump_17F3:
+	mov A, R5
+	add A, #07h	;   7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+jump_1800:
+	mov R6, 04h
+	mov R7, 05h
+	mov R2, 06h
+	mov R1, 07h
+	mov R3, #02h	;   2
+	lcall jump_1469
+jump_180D:
+	ret
+
+;org	180Eh
+	mov R1, 07h
+	mov DPL, R5
+	mov DPH, R4
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+	inc DPTR
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+	mov R7, #01h	;   1
+	clr A
+	mov R6, A
+jump_1821:
+	mov A, R6
+	clr C
+	subb A, #08h	;   8
+	jnc jump_185B
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_0099
+	movx @DPTR, A
+	mov A, R1
+	anl A, R7
+	jz jump_183E
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_1845
+
+jump_183E:
+	mov DPTR, #dptr_0099
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_1845:
+	mov DPTR, #dptr_0099
+	movx A, @DPTR
+	mov R3, A
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R3
+	movx @DPTR, A
+	inc R6
+	mov A, R7
+	add A, ACC
+	mov R7, A
+	sjmp jump_1821
+
+jump_185B:
+	mov R6, 04h
+	mov R7, 05h
+	mov R2, 06h
+	mov R1, 07h
+	mov R3, #02h	;   2
+	lcall jump_FE48
+	ret
+
+;org	1869h
+	mov DPTR, #dptr_009A
+	mov A, R7
+	movx @DPTR, A
+	mov R1, #01h	;   1
+	mov R7, #07h	;   7
+jump_1872:
+	mov A, R7
+	setb C
+	subb A, #05h	;   5
+	jc jump_18D5
+	clr A
+	mov R6, A
+jump_187A:
+	mov A, R6
+	clr C
+	subb A, #02h	;   2
+	jnc jump_18D2
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_009B
+	movx @DPTR, A
+	mov DPTR, #dptr_009A
+	movx A, @DPTR
+	anl A, R1
+	jz jump_18A8
+	mov A, R7
+	cjne A, #07h, jump_189F	;   7
+	inc DPTR
+	movx A, @DPTR
+	orl A, #80h	; 128 -128
+	movx @DPTR, A
+	sjmp jump_18BC
+
+jump_189F:
+	mov DPTR, #dptr_009B
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_18BC
+
+jump_18A8:
+	mov A, R7
+	cjne A, #07h, jump_18B5	;   7
+	mov DPTR, #dptr_009B
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+	sjmp jump_18BC
+
+jump_18B5:
+	mov DPTR, #dptr_009B
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_18BC:
+	mov DPTR, #dptr_009B
+	movx A, @DPTR
+	mov R3, A
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R3
+	movx @DPTR, A
+	inc R6
+	mov A, R1
+	add A, ACC
+	mov R1, A
+	sjmp jump_187A
+
+jump_18D2:
+	dec R7
+	sjmp jump_1872
+
+jump_18D5:
+	mov R7, #02h	;   2
+jump_18D7:
+	mov A, R7
+	clr C
+	subb A, #06h	;   6
+	jnc jump_18FB
+	mov A, R5
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_009B
+	movx @DPTR, A
+	anl A, #0BFh	; 191  -65 '¿'
+	mov R6, A
+	movx @DPTR, A
+	mov A, R5
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc R7
+	sjmp jump_18D7
+
+jump_18FB:
+	mov R6, 04h
+	mov R7, 05h
+	mov R2, 06h
+	mov R1, 07h
+	mov R3, #02h	;   2
+	lcall jump_FE48
+	ret
+
+;org	1909h
+	mov DPTR, #dptr_009C
+	mov A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R3
+	movx @DPTR, A
+	mov R1, 05h
+	mov R7, #01h	;   1
+jump_1918:
+	mov A, R7
+	clr C
+	subb A, #06h	;   6
+	jnc jump_195E
+	mov DPTR, #dptr_009D
+	movx A, @DPTR
+	mov R4, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_009F
+	movx @DPTR, A
+	mov A, R7
+	dec A
+	mov R6, A
+	mov DPTR, #dptr_009C
+	movx A, @DPTR
+	cjne A, 06h, jump_1945
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_194C
+
+jump_1945:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_194C:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	mov R6, A
+	mov A, R5
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc R7
+	sjmp jump_1918
+
+jump_195E:
+	clr A
+	mov R7, A
+jump_1960:
+	mov A, R7
+	clr C
+	subb A, #02h	;   2
+	jnc jump_19AD
+	mov DPTR, #dptr_009D
+	movx A, @DPTR
+	mov R4, A
+	inc DPTR
+	movx A, @DPTR
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_009F
+	movx @DPTR, A
+	mov A, R7
+	add A, #01h	;   1
+	mov R5, A
+	clr A
+	rlc A
+	mov R4, A
+	mov A, R1
+	cjne A, 05h, jump_198E
+	clr A
+	cjne A, 04h, jump_198E
+	movx A, @DPTR
+	orl A, #80h	; 128 -128
+	movx @DPTR, A
+	sjmp jump_1995
+
+jump_198E:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+jump_1995:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	mov R6, A
+	mov DPTR, #dptr_009D
+	movx A, @DPTR
+	mov R4, A
+	inc DPTR
+	movx A, @DPTR
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc R7
+	sjmp jump_1960
+
+jump_19AD:
+	mov DPTR, #dptr_009D
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPL, A
+	mov DPH, R6
+	movx A, @DPTR
+	mov DPTR, #dptr_009F
+	movx @DPTR, A
+	mov A, R1
+	cjne A, #03h, jump_19C8	;   3
+	movx A, @DPTR
+	orl A, #40h	;  64 '@'
+	movx @DPTR, A
+	sjmp jump_19CF
+
+jump_19C8:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	anl A, #0BFh	; 191  -65 '¿'
+	movx @DPTR, A
+jump_19CF:
+	mov DPTR, #dptr_009F
+	movx A, @DPTR
+	mov DPL, R7
+	mov DPH, R6
+	movx @DPTR, A
+	mov R2, 06h
+	mov R1, 07h
+	mov R3, #02h	;   2
+	lcall jump_FE48
+	ret
+
+;org	19E2h
+	mov R6, #02h	;   2
+jump_19E4:
+	mov A, R6
+	clr C
+	subb A, #06h	;   6
+	jnc jump_1A1C
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	movx A, @DPTR
+	mov DPTR, #dptr_00A0
+	movx @DPTR, A
+	mov A, R6
+	add A, #0FEh	; 254   -2 'þ'
+	cjne A, 07h, jump_1A03
+	movx A, @DPTR
+	orl A, #80h	; 128 -128
+	movx @DPTR, A
+	sjmp jump_1A0A
+
+jump_1A03:
+	mov DPTR, #dptr_00A0
+	movx A, @DPTR
+	anl A, #7Fh	; 127
+	movx @DPTR, A
+jump_1A0A:
+	mov DPTR, #dptr_00A0
+	movx A, @DPTR
+	mov R3, A
+	mov A, R5
+	add A, R6
+	mov DPL, A
+	clr A
+	addc A, R4
+	mov DPH, A
+	mov A, R3
+	movx @DPTR, A
+	inc R6
+	sjmp jump_19E4
+
+jump_1A1C:
+	mov R6, 04h
+	mov R7, 05h
+	mov R2, 06h
+	mov R1, 07h
+	mov R3, #02h	;   2
+	lcall jump_FE48
+	ret
+
+;org	1A2Ah
+	lcall jump_1D68
+	mov R7, #01h	;   1
+	lcall jump_1E4B
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	mov R7, #50h	;  80 'P'
+	lcall jump_1DDA
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	mov R7, #72h	; 114 'r'
+	lcall jump_1DDA
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	mov R7, #60h	;  96 '`'
+	lcall jump_1DDA
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	clr A
+	mov 7Fh, A
+	lcall jump_33D8
+	mov R7, #80h	; 128 -128
+	lcall jump_1DDA
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	clr A
+	mov 52h, A
+	mov 53h, A
+	mov DPTR, #dptr_00E3
+	movx @DPTR, A
+jump_1AA3:
+	mov DPTR, #dptr_00E3
+	movx A, @DPTR
+	mov R7, A
+	clr C
+	subb A, #08h	;   8
+	jnc jump_1AB8
+	mov A, #5Ch	;  92 '\'
+	add A, R7
+	mov R0, A
+	clr A
+	mov @R0, A
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	sjmp jump_1AA3
+
+jump_1AB8:
+	clr A
+	mov 64h, A
+	mov 65h, A
+	mov 66h, A
+	mov DPTR, #dptr_00E3
+	movx @DPTR, A
+jump_1AC3:
+	mov DPTR, #dptr_00E3
+	movx A, @DPTR
+	mov R7, A
+	setb C
+	subb A, #07h	;   7
+	jnc jump_1ADB
+	clr A
+	mov R5, A
+	mov R4, A
+	lcall jump_2182
+	mov DPTR, #dptr_00E3
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	sjmp jump_1AC3
+
+jump_1ADB:
+	ret
+
+;org	1ADCh
+	mov DPTR, #dptr_00E4
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	lcall jump_1DAD
+	mov A, R7
+	jz jump_1AF2
+	mov R6, #00h	;   0
+	mov R7, #00h	;   0
+	ret
+
+jump_1AF2:
+	clr A
+	mov 08h, A
+	mov DPTR, #dptr_00EA
+	movx @DPTR, A
+	inc DPTR
+	inc A
+	movx @DPTR, A
+jump_1AFC:
+	mov DPTR, #dptr_00EA
+	movx A, @DPTR
+	mov R7, A
+	clr C
+	subb A, #08h	;   8
+	jc jump_1B09
+	ljmp jump_1C6C
+
+jump_1B09:
+	inc DPTR
+	movx A, @DPTR
+	anl A, 7Ah
+	jnz jump_1B1E
+	mov A, #18h	;  24
+	add A, R7
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	clr A
+	movx @DPTR, A
+	ljmp jump_1C5D
+
+jump_1B1E:
+	mov A, R7
+	clr C
+	subb A, #04h	;   4
+	jnc jump_1B39
+	mov A, R7
+	add A, ACC
+	mov R6, A
+	mov A, 78h
+	mov R0, 06h
+	inc R0
+	sjmp jump_1B31
+
+jump_1B2F:
+	clr C
+	rrc A
+jump_1B31:
+	djnz R0, jump_1B2F
+	mov DPTR, #dptr_00E7
+	movx @DPTR, A
+	sjmp jump_1B4F
+
+jump_1B39:
+	mov A, R7
+	anl A, #03h	;   3
+	mov R7, A
+	add A, ACC
+	mov R7, A
+	mov A, 79h
+	mov R0, 07h
+	inc R0
+	sjmp jump_1B49
+
+jump_1B47:
+	clr C
+	rrc A
+jump_1B49:
+	djnz R0, jump_1B47
+	mov DPTR, #dptr_00E7
+	movx @DPTR, A
+jump_1B4F:
+	mov DPTR, #dptr_00EA
+	movx A, @DPTR
+	mov R5, A
+	add A, #67h	; 103 'g'
+	mov R0, A
+	mov A, @R0
+	mov B, #04h	;   4
+	mul AB
+	mov R7, A
+	mov DPTR, #dptr_00E7
+	movx A, @DPTR
+	anl A, #03h	;   3
+	mov R2, #00h	;   0
+	add A, R7
+	mov R7, A
+	mov A, R2
+	addc A, B
+	mov R6, A
+	inc DPTR
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	clr C
+	mov A, #0FFh	; 255   -1 'ÿ'
+	subb A, R7
+	movx @DPTR, A
+	mov A, #03h	;   3
+	subb A, R6
+	mov DPTR, #dptr_00E8
+	movx @DPTR, A
+	mov A, #18h	;  24
+	add A, R5
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	movx A, @DPTR
+	jnz jump_1BC1
+	mov DPTR, #dptr_00E8
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov R4, A
+	add A, ACC
+	add A, #0FDh	; 253   -3 'ý'
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov A, #18h	;  24
+	add A, R4
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	mov A, #01h	;   1
+	movx @DPTR, A
+	mov A, #21h	;  33 '!'
+	add A, R4
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	mov A, #01h	;   1
+	movx @DPTR, A
+	ljmp jump_1C5D
+
+jump_1BC1:
+	mov A, #21h	;  33 '!'
+	add A, R5
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	movx A, @DPTR
+	xrl A, #01h	;   1
+	jnz jump_1C31
+	mov DPTR, #dptr_00E8
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	add A, ACC
+	add A, #0FDh	; 253   -3 'ý'
+	mov DPL, A
+	clr A
+	addc A, #00h	;   0
+	mov DPH, A
+	movx A, @DPTR
+	mov R4, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	lcall jump_1F2B
+	clr C
+	mov A, R7
+	subb A, #03h	;   3
+	mov A, R6
+	subb A, #00h	;   0
+	jc jump_1C5D
+	mov DPTR, #dptr_00E8
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPTR, #dptr_00E4
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	mov DPTR, #dptr_00EA
+	movx A, @DPTR
+	mov R5, A
+	mov B, #02h	;   2
+	mul AB
+	mov DPL, A
+	mov DPH, B
+	mov A, R6
+	mov B, R7
+	lcall jump_3708
+	mov A, #21h	;  33 '!'
+	add A, R5
+	mov DPL, A
+	clr A
+	addc A, #01h	;   1
+	mov DPH, A
+	clr A
+	movx @DPTR, A
+	mov DPTR, #dptr_00EB
+	movx A, @DPTR
+	orl 08h, A
+	sjmp jump_1C5D
+
+jump_1C31:
+	mov DPTR, #dptr_00E8
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPTR, #dptr_00E4
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R1, A
+	mov DPTR, #dptr_00EA
+	movx A, @DPTR
+	mov B, #02h	;   2
+	mul AB
+	mov DPL, A
+	mov DPH, B
+	mov A, R6
+	mov B, R7
+	lcall jump_3708
+	mov DPTR, #dptr_00EB
+	movx A, @DPTR
+	orl 08h, A
+jump_1C5D:
+	mov DPTR, #dptr_00EA
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	add A, ACC
+	movx @DPTR, A
+	ljmp jump_1AFC
+
+jump_1C6C:
+	mov R5, 08h
+	mov R4, #00h	;   0
+	mov A, R5
+	mov R5, #00h	;   0
+	mov R4, A
+	mov A, 7Ah
+	mov R5, A
+	mov R6, 04h
+	mov R7, A
+	ret
+
+;org	1C7Bh
+	mov DPTR, #dptr_00EC
+	mov A, R3
+	movx @DPTR, A
+	inc DPTR
+	mov A, R2
+	movx @DPTR, A
+	inc DPTR
+	mov A, R1
+	movx @DPTR, A
+	clr A
+	mov DPTR, #dptr_00F1
+	movx @DPTR, A
+	jnb P1.4, jump_1C91
+	ljmp jump_1D5B
+
+jump_1C91:
+	inc A
+	movx @DPTR, A
+	setb P4.4
+	mov ADCON, #08h	;   8
+jump_1C98:
+	mov A, ADCON
+	jnb ACC.4, jump_1C98
+	mov R7, 0C6h
+	mov 09h, #00h	;   0
+	mov 0Ah, R7
+	mov A, 0Ah
+	mov R6, 09h
+	mov R0, #02h	;   2
+jump_1CAA:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+	djnz R0, jump_1CAA
+	mov 0Ah, A
+	mov 09h, R6
+	mov A, ADCON
+	swap A
+	rrc A
+	rrc A
+	anl A, #03h	;   3
+	anl A, #03h	;   3
+	orl 0Ah, A
+	clr A
+	clr C
+	mov A, #02h	;   2
+	subb A, 0Ah
+	mov DPTR, #dptr_00F0
+	movx @DPTR, A
+	mov A, #04h	;   4
+	subb A, 09h
+	mov DPTR, #dptr_00EF
+	movx @DPTR, A
+	mov DPTR, #dptr_0120
+	movx A, @DPTR
+	jnz jump_1CF3
+	mov DPTR, #dptr_00EF
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPTR, #dptr_010D
+	xch A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPTR, #dptr_0120
+	mov A, #01h	;   1
+	movx @DPTR, A
+	mov DPTR, #dptr_0129
+	movx @DPTR, A
+	sjmp jump_1D62
+
+jump_1CF3:
+	mov DPTR, #dptr_0129
+	movx A, @DPTR
+	cjne A, #01h, jump_1D3B	;   1
+	mov DPTR, #dptr_00EF
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPTR, #dptr_010D
+	movx A, @DPTR
+	mov R4, A
+	inc DPTR
+	movx A, @DPTR
+	mov R5, A
+	lcall jump_1F2B
+	clr C
+	mov A, R7
+	subb A, #03h	;   3
+	mov A, R6
+	subb A, #00h	;   0
+	jc jump_1D62
+	mov DPTR, #dptr_00EF
+	movx A, @DPTR
+	mov R1, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPTR, #dptr_00EC
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	xch A, R1
+	mov B, R7
+	lcall jump_36E7
+	clr A
+	mov DPTR, #dptr_0129
+	movx @DPTR, A
+	mov DPTR, #dptr_00F1
+	mov A, #03h	;   3
+	movx @DPTR, A
+	sjmp jump_1D62
+
+jump_1D3B:
+	mov DPTR, #dptr_00EF
+	movx A, @DPTR
+	mov R1, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPTR, #dptr_00EC
+	movx A, @DPTR
+	mov R3, A
+	inc DPTR
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	xch A, R1
+	mov B, R7
+	lcall jump_36E7
+	mov DPTR, #dptr_00F1
+	mov A, #03h	;   3
+	movx @DPTR, A
+	sjmp jump_1D62
+
+jump_1D5B:
+	clr A
+	mov DPTR, #dptr_0120
+	movx @DPTR, A
+	clr P4.4
+jump_1D62:
+	mov DPTR, #dptr_00F1
+	movx A, @DPTR
+	mov R7, A
+	ret
+
+jump_1D68:
+	mov S1ADR, #63h	;  99 'c'
+	mov 0Bh, #01h	;   1
+	clr A
+	mov 7Ch, A
+	setb IEN0.7
+	setb IP0.5
+	setb IEN0.5
+	lcall jump_1ED2
+	mov S1CON, #47h	;  71 'G'
+	ret
+
+;org	1D7Eh
+	jb 20h.5, jump_1D84
+	mov R7, #00h	;   0
+	ret
+
+jump_1D84:
+	mov 53h, #08h	;   8
+	mov 7Ch, #15h	;  21
+	mov 7Dh, #80h	; 128 -128
+	mov R7, #0F4h	; 244  -12 'ô'
+	mov R6, #01h	;   1
+	setb S1CON.5
+jump_1D93:
+	mov A, 7Ch
+	jz jump_1DA0
+	mov A, R7
+	dec R7
+	jnz jump_1D9C
+	dec R6
+jump_1D9C:
+	dec A
+	orl A, R6
+	jnz jump_1D93
+jump_1DA0:
+	mov A, R7
+	orl A, R6
+	jz jump_1DA7
+	mov R7, #00h	;   0
+	ret
+
+jump_1DA7:
+	lcall jump_1ED2
+	mov R7, #01h	;   1
+	ret
+
+jump_1DAD:
+	jb 20h.5, jump_1DB3
+	mov R7, #01h	;   1
+	ret
+
+jump_1DB3:
+	mov 7Ch, #13h	;  19
+	mov 7Dh, #81h	; 129 -127
+	mov R7, #0F4h	; 244  -12 'ô'
+	mov R6, #01h	;   1
+	setb S1CON.5
+jump_1DBF:
+	mov A, 7Ch
+	cpl A
+	jz jump_1DCD
+	mov A, R7
+	dec R7
+	jnz jump_1DC9
+	dec R6
+jump_1DC9:
+	dec A
+	orl A, R6
+	jnz jump_1DBF
+jump_1DCD:
+	mov A, R7
+	orl A, R6
+	jz jump_1DD4
+	mov R7, #00h	;   0
+	ret
+
+jump_1DD4:
+	lcall jump_1ED2
+	mov R7, #01h	;   1
+	ret
+
+jump_1DDA:
+	mov R6, 07h
+	jb 20h.5, jump_1DE2
+	mov R7, #00h	;   0
+	ret
+
+jump_1DE2:
+	clr A
+	mov 52h, A
+	mov A, R6
+	anl A, #0F7h	; 247   -9 '÷'
+	mov 53h, A
+	mov 7Ch, #02h	;   2
+	mov 7Dh, #80h	; 128 -128
+	mov R7, #0FAh	; 250   -6 'ú'
+	mov R6, #00h	;   0
+	setb S1CON.5
+jump_1DF6:
+	mov A, 7Ch
+	jz jump_1E03
+	mov A, R7
+	dec R7
+	jnz jump_1DFF
+	dec R6
+jump_1DFF:
+	dec A
+	orl A, R6
+	jnz jump_1DF6
+jump_1E03:
+	mov A, R7
+	orl A, R6
+	jz jump_1E0A
+	mov R7, #00h	;   0
+	ret
+
+jump_1E0A:
+	lcall jump_1ED2
+	mov R7, #01h	;   1
+	ret
+
+jump_1E10:
+	mov R6, 07h
+	mov A, R5
+	jz jump_1E1B
+	jb 20h.5, jump_1E1B
+	mov R7, #00h	;   0
+	ret
+
+jump_1E1B:
+	mov R7, 06h
+	mov 52h, R7
+	mov 7Ch, #01h	;   1
+	clr A
+	mov 7Dh, A
+	mov R7, #0FAh	; 250   -6 'ú'
+	mov R6, A
+	setb S1CON.5
+jump_1E2A:
+	mov A, 7Ch
+	jz jump_1E37
+	mov A, R7
+	dec R7
+	jnz jump_1E33
+	dec R6
+jump_1E33:
+	dec A
+	orl A, R6
+	jnz jump_1E2A
+jump_1E37:
+	mov A, R7
+	orl A, R6
+	jz jump_1E3E
+	mov R7, #00h	;   0
+	ret
+
+jump_1E3E:
+	lcall jump_1ED2
+	mov R7, #01h	;   1
+	ret
+
+jump_1E44:
+	mov 7Fh, #0Ah	;  10
+	lcall jump_33D8
+	ret
+
+jump_1E4B:
+	mov DPTR, #dptr_00F2
+	mov A, R7
+	movx @DPTR, A
+	clr A
+	mov DPTR, #dptr_0117
+	movx @DPTR, A
+	lcall jump_1ED2
+	mov DPTR, #dptr_00F2
+	movx A, @DPTR
+	jz jump_1E7A
+	lcall jump_1F23
+	clr A
+	mov DPTR, #dptr_00F3
+	movx @DPTR, A
+jump_1E66:
+	mov DPTR, #dptr_00F3
+	movx A, @DPTR
+	clr C
+	subb A, #64h	; 100 'd'
+	jnc jump_1E7A
+	lcall jump_1E44
+	mov DPTR, #dptr_00F3
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	sjmp jump_1E66
+
+jump_1E7A:
+	lcall jump_1E8F
+	lcall jump_1E44
+	lcall jump_1E44
+	mov DPTR, #dptr_00F2
+	movx A, @DPTR
+	jz jump_1E8E
+	mov R7, #50h	;  80 'P'
+	lcall jump_1DDA
+jump_1E8E:
+	ret
+
+jump_1E8F:
+	clr A
+	mov DPTR, #dptr_0117
+	movx @DPTR, A
+	mov 52h, A
+	mov 53h, #70h	; 112 'p'
+	mov 7Ch, #01h	;   1
+	mov 7Dh, #81h	; 129 -127
+	setb S1CON.5
+	mov R7, #0FAh	; 250   -6 'ú'
+	mov R6, A
+jump_1EA4:
+	mov A, R7
+	dec R7
+	mov R4, 06h
+	jnz jump_1EAB
+	dec R6
+jump_1EAB:
+	orl A, R4
+	jz jump_1EB9
+	mov A, 7Ch
+	cjne A, #0FFh, jump_1EA4	; 255   -1 'ÿ'
+	mov DPTR, #dptr_0117
+	mov A, 68h
+	movx @DPTR, A
+jump_1EB9:
+	mov DPTR, #dptr_0117
+	movx A, @DPTR
+	setb C
+	subb A, #00h	;   0
+	jc jump_1EC6
+	setb 20h.5
+	sjmp jump_1EC8
+
+jump_1EC6:
+	clr 20h.5
+jump_1EC8:
+	mov S1CON, #47h	;  71 'G'
+	mov S1CON, #57h	;  87 'W'
+	clr A
+	mov 7Ch, A
+	ret
+
+jump_1ED2:
+	mov S1CON, #57h	;  87 'W'
+	clr A
+	mov 7Ch, A
+	mov 52h, A
+	mov 53h, A
+	mov 77h, A
+	mov DPTR, #dptr_00F4
+	movx @DPTR, A
+jump_1EE2:
+	mov DPTR, #dptr_00F4
+	movx A, @DPTR
+	mov R7, A
+	clr C
+	subb A, #08h	;   8
+	jnc jump_1F09
+	mov A, #54h	;  84 'T'
+	add A, R7
+	mov R0, A
+	clr A
+	mov @R0, A
+	mov A, #5Ch	;  92 '\'
+	add A, R7
+	mov R0, A
+	clr A
+	mov @R0, A
+	mov A, #67h	; 103 'g'
+	add A, R7
+	mov R0, A
+	clr A
+	mov @R0, A
+	mov A, #6Fh	; 111 'o'
+	add A, R7
+	mov R0, A
+	clr A
+	mov @R0, A
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	sjmp jump_1EE2
+
+jump_1F09:
+	clr A
+	mov DPTR, #dptr_00F4
+	movx @DPTR, A
+jump_1F0E:
+	mov DPTR, #dptr_00F4
+	movx A, @DPTR
+	clr C
+	subb A, #14h	;  20
+	jnc jump_1F22
+	lcall jump_1E44
+	mov DPTR, #dptr_00F4
+	movx A, @DPTR
+	inc A
+	movx @DPTR, A
+	sjmp jump_1F0E
+
+jump_1F22:
+	ret
+
+jump_1F23:
+	mov R7, #01h	;   1
+	clr A
+	mov R5, A
+	lcall jump_1E10
+	ret
+
+jump_1F2B:
+	mov DPTR, #dptr_00F5
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPTR, #dptr_00F5
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov R3, A
+	setb C
+	subb A, R5
+	mov A, R2
+	subb A, R4
+	jc jump_1F49
+	clr C
+	mov A, R3
+	subb A, R5
+	mov R7, A
+	mov A, R2
+	subb A, R4
+	mov R6, A
+	ret
+
+jump_1F49:
+	clr C
+	mov A, R5
+	subb A, R3
+	mov R7, A
+	mov A, R4
+	subb A, R2
+	mov R6, A
+	ret
+
+;org	1F51h
+	mov R3, 07h
+	mov R2, 06h
+	clr C
+	mov A, R3
+	subb A, #41h	;  65 'A'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #7Ch	; 124 '|'
+	jnc jump_1F6A
+	clr A
+	mov DPTR, #dptr_00F7
+	movx @DPTR, A
+	inc DPTR
+	movx @DPTR, A
+	ljmp jump_2052
+
+jump_1F6A:
+	clr C
+	mov A, R3
+	subb A, #0A8h	; 168  -88 '¨'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #7Dh	; 125 '}'
+	jnc jump_1F98
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Eh	;  14
+	lcall jump_361C
+	mov A, R7
+	add A, #0E5h	; 229  -27 'å'
+	mov R7, A
+	mov A, R6
+	addc A, #38h	;  56 '8'
+	mov R6, A
+	mov R5, #64h	; 100 'd'
+	lcall jump_3685
+	mov DPTR, #dptr_00F7
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	ljmp jump_2052
+
+jump_1F98:
+	clr C
+	mov A, R3
+	subb A, #0Ch	;  12
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #7Eh	; 126 '~'
+	jnc jump_1FC6
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #05h	;   5
+	lcall jump_361C
+	mov A, R7
+	add A, #1Ah	;  26
+	mov R7, A
+	mov A, R6
+	addc A, #0Eh	;  14
+	mov R6, A
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov DPTR, #dptr_00F7
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	ljmp jump_2052
+
+jump_1FC6:
+	clr C
+	mov A, R3
+	subb A, #38h	;  56 '8'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #7Fh	; 127
+	jnc jump_1FF1
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_361C
+	mov A, R7
+	add A, #0DEh	; 222  -34 'Þ'
+	mov R7, A
+	mov A, R6
+	addc A, #17h	;  23
+	mov R6, A
+	lcall jump_3685
+	mov DPTR, #dptr_00F7
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	sjmp jump_2052
+
+jump_1FF1:
+	clr C
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_201B
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #14h	;  20
+	lcall jump_361C
+	mov A, R7
+	add A, #0AEh	; 174  -82 '®'
+	mov R7, A
+	mov A, R6
+	addc A, #1Fh	;  31
+	mov R6, A
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov DPTR, #dptr_00F7
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	sjmp jump_2052
+
+jump_201B:
+	clr C
+	mov A, R3
+	subb A, #78h	; 120 'x'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_2048
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #11h	;  17
+	lcall jump_361C
+	mov A, R7
+	add A, #0B4h	; 180  -76 '´'
+	mov R7, A
+	mov A, R6
+	addc A, #1Fh	;  31
+	mov R6, A
+	mov R5, #0Ah	;  10
+	lcall jump_3685
+	mov DPTR, #dptr_00F7
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	sjmp jump_2052
+
+jump_2048:
+	mov DPTR, #dptr_00F7
+	mov A, #03h	;   3
+	movx @DPTR, A
+	inc DPTR
+	mov A, #0FFh	; 255   -1 'ÿ'
+	movx @DPTR, A
+jump_2052:
+	mov DPTR, #dptr_00F7
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	ret
+
+;org	205Bh
+	mov R3, 07h
+	mov R2, 06h
+	clr C
+	mov A, R3
+	subb A, #0Bh	;  11
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_2077
+	mov DPTR, #dptr_00F9
+	mov A, #0FCh	; 252   -4 'ü'
+	movx @DPTR, A
+	inc DPTR
+	mov A, #40h	;  64 '@'
+	movx @DPTR, A
+	ljmp jump_2179
+
+jump_2077:
+	clr C
+	mov A, R3
+	subb A, #3Eh	;  62 '>'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_20AB
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #64h	; 100 'd'
+	lcall jump_361C
+	mov A, R7
+	add A, #0DCh	; 220  -36 'Ü'
+	mov R7, A
+	mov A, R6
+	addc A, #0FBh	; 251   -5 'û'
+	mov R6, A
+	mov R5, #0Eh	;  14
+	lcall jump_3685
+	mov A, R7
+	add A, #40h	;  64 '@'
+	mov DPTR, #dptr_00FA
+	movx @DPTR, A
+	mov A, R6
+	addc A, #0FCh	; 252   -4 'ü'
+	mov DPTR, #dptr_00F9
+	movx @DPTR, A
+	ljmp jump_2179
+
+jump_20AB:
+	clr C
+	mov A, R3
+	subb A, #70h	; 112 'p'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_20DF
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_361C
+	mov A, R7
+	add A, #9Eh	; 158  -98
+	mov R7, A
+	mov A, R6
+	addc A, #0FDh	; 253   -3 'ý'
+	mov R6, A
+	mov R5, #05h	;   5
+	lcall jump_3685
+	mov A, R7
+	add A, #0A8h	; 168  -88 '¨'
+	mov DPTR, #dptr_00FA
+	movx @DPTR, A
+	mov A, R6
+	addc A, #0FDh	; 253   -3 'ý'
+	mov DPTR, #dptr_00F9
+	movx @DPTR, A
+	ljmp jump_2179
+
+jump_20DF:
+	clr C
+	mov A, R3
+	subb A, #9Ch	; 156 -100
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #81h	; 129 -127
+	jnc jump_2110
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_361C
+	mov A, R7
+	add A, #0AAh	; 170  -86 'ª'
+	mov R7, A
+	mov A, R6
+	addc A, #0FBh	; 251   -5 'û'
+	mov R6, A
+	lcall jump_3685
+	mov A, R7
+	add A, #0Ch	;  12
+	mov DPTR, #dptr_00FA
+	movx @DPTR, A
+	mov A, R6
+	addc A, #0FEh	; 254   -2 'þ'
+	mov DPTR, #dptr_00F9
+	movx @DPTR, A
+	sjmp jump_2179
+
+jump_2110:
+	clr C
+	mov A, R3
+	subb A, #2Bh	;  43 '+'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #83h	; 131 -125
+	jnc jump_2143
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_361C
+	mov A, R7
+	add A, #0F2h	; 242  -14 'ò'
+	mov R7, A
+	mov A, R6
+	addc A, #0EFh	; 239  -17 'ï'
+	mov R6, A
+	mov R5, #14h	;  20
+	lcall jump_3685
+	mov A, R7
+	add A, #38h	;  56 '8'
+	mov DPTR, #dptr_00FA
+	movx @DPTR, A
+	mov A, R6
+	addc A, #0FFh	; 255   -1 'ÿ'
+	mov DPTR, #dptr_00F9
+	movx @DPTR, A
+	sjmp jump_2179
+
+jump_2143:
+	clr C
+	mov A, R3
+	subb A, #0F8h	; 248   -8 'ø'
+	mov A, R2
+	xrl A, #80h	; 128 -128
+	subb A, #83h	; 131 -125
+	jnc jump_2170
+	mov R6, 02h
+	mov R7, 03h
+	mov R4, #00h	;   0
+	mov R5, #0Ah	;  10
+	lcall jump_361C
+	mov A, R7
+	add A, #54h	;  84 'T'
+	mov R7, A
+	mov A, R6
+	addc A, #0E0h	; 224  -32 'à'
+	mov R6, A
+	mov R5, #11h	;  17
+	lcall jump_3685
+	mov DPTR, #dptr_00F9
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	sjmp jump_2179
+
+jump_2170:
+	mov DPTR, #dptr_00F9
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	mov A, #78h	; 120 'x'
+	movx @DPTR, A
+jump_2179:
+	mov DPTR, #dptr_00F9
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	ret
+
+jump_2182:
+	mov R3, 07h
+	clr C
+	mov A, #0FFh	; 255   -1 'ÿ'
+	subb A, R5
+	mov R7, A
+	mov A, #03h	;   3
+	subb A, R4
+	mov R6, A
+	mov DPTR, #dptr_00FB
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov R0, #02h	;   2
+jump_2196:
+	xch A, R6
+	clr C
+	rrc A
+	xch A, R6
+	rrc A
+	djnz R0, jump_2196
+	mov R7, A
+	mov A, #54h	;  84 'T'
+	add A, R3
+	mov R0, A
+	mov @R0, 07h
+	mov A, R3
+	clr C
+	subb A, #04h	;   4
+	jnc jump_21C7
+	clr A
+	mov R6, A
+	mov DPTR, #dptr_00FC
+	movx A, @DPTR
+	anl A, #03h	;   3
+	mov R7, A
+	mov A, R3
+	add A, ACC
+	mov R5, A
+	mov A, R7
+	mov R0, 05h
+	inc R0
+	sjmp jump_21C2
+
+jump_21BD:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+jump_21C2:
+	djnz R0, jump_21BD
+	mov 65h, A
+	ret
+
+jump_21C7:
+	mov A, R3
+	anl A, #03h	;   3
+	mov R7, A
+	add A, ACC
+	mov R7, A
+	clr A
+	mov DPTR, #dptr_00FC
+	movx A, @DPTR
+	anl A, #03h	;   3
+	mov R6, #00h	;   0
+	mov R0, 07h
+	inc R0
+	sjmp jump_21E1
+
+jump_21DC:
+	clr C
+	rlc A
+	xch A, R6
+	rlc A
+	xch A, R6
+jump_21E1:
+	djnz R0, jump_21DC
+	mov 66h, A
+	ret
+
+;org	21E6h
+	mov A, #0FBh	; 251   -5 'û'
+	add A, R7
+	mov R7, A
+	mov A, #0FFh	; 255   -1 'ÿ'
+	addc A, R6
+	mov R6, A
+	clr C
+	xrl A, #80h	; 128 -128
+	subb A, #80h	; 128 -128
+	jnc jump_21F8
+	clr A
+	mov R6, A
+	mov R7, A
+jump_21F8:
+	clr C
+	mov A, #0FFh	; 255   -1 'ÿ'
+	subb A, R7
+	mov R7, A
+	mov A, #03h	;   3
+	subb A, R6
+	mov R6, A
+	mov A, R7
+	mov R0, #02h	;   2
+jump_2204:
+	xch A, R6
+	mov C, ACC.7
+	rrc A
+	xch A, R6
+	rrc A
+	djnz R0, jump_2204
+	mov DPTR, #dptr_FFFF
+	movx @DPTR, A
+	ret
+
 dptr_2211:
 	db 48h	; [2211h]  72 'H'
 	db 01h	; [2212h]   1
@@ -8429,466 +6673,323 @@ dptr_2211:
 	db 00h	; [22DFh]   0
 	db 76h	; [22E0h] 118 'v'
 	db 00h	; [22E1h]   0
-	db 0C0h	; [22E2h] 192  -64 'À'
-	db 0D0h	; [22E3h] 208  -48 'Ð'
-	db 75h	; [22E4h] 117 'u'
-	db 0D0h	; [22E5h] 208  -48 'Ð'
-	db 10h	; [22E6h]  16
-	db 90h	; [22E7h] 144 -112
-	db 01h	; [22E8h]   1
-	db 2Ah	; [22E9h]  42 '*'
-	db 0EEh	; [22EAh] 238  -18 'î'
-	db 0F0h	; [22EBh] 240  -16 'ð'
-	db 0A3h	; [22ECh] 163  -93 '£'
-	db 0EFh	; [22EDh] 239  -17 'ï'
-	db 0F0h	; [22EEh] 240  -16 'ð'
-	db 90h	; [22EFh] 144 -112
+;org	22E2h
+	push PSW
+	mov PSW, #10h	;  16
+	mov DPTR, #dptr_012A
+	mov A, R6
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPTR, #dptr_FFF8
+	movx A, @DPTR
+	mov R0, #97h	; 151 -105
+	mov @R0, A
+	mov R1, A
+	jnb ACC.0, jump_2322
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	mov DPL, R5
+	mov DPH, R4
+	movx @DPTR, A
+	mov R7, A
+	mov DPTR, #dptr_012C
+	movx A, @DPTR
+	mov R6, A
+	clr C
+	mov A, R7
+	subb A, R6
+	mov R7, A
+	mov DPTR, #dptr_012A
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, A
+	mov DPH, R2
+	mov A, R7
+	movx @DPTR, A
+	mov DPL, R5
+	mov DPH, R4
+	movx A, @DPTR
+	mov DPTR, #dptr_012C
+	movx @DPTR, A
+jump_2322:
+	mov A, R1
+	jnb ACC.1, jump_2353
+	mov DPTR, #dptr_FFFA
+	movx A, @DPTR
+	mov R7, A
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	movx @DPTR, A
+	mov R7, A
+	mov DPTR, #dptr_012D
+	movx A, @DPTR
+	mov R6, A
+	clr C
+	mov A, R7
+	subb A, R6
+	mov R7, A
+	mov DPTR, #dptr_012A
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, A
+	mov DPH, R2
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	movx A, @DPTR
+	mov DPTR, #dptr_012D
+	movx @DPTR, A
+jump_2353:
+	mov A, R1
+	jnb ACC.2, jump_2387
+	mov DPTR, #dptr_FFFB
+	movx A, @DPTR
+	mov R7, A
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	inc DPTR
+	movx @DPTR, A
+	mov R7, A
+	mov DPTR, #dptr_012E
+	movx A, @DPTR
+	mov R6, A
+	clr C
+	mov A, R7
+	subb A, R6
+	mov R7, A
+	mov DPTR, #dptr_012A
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, A
+	mov DPH, R2
+	inc DPTR
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	inc DPTR
+	movx A, @DPTR
+	mov DPTR, #dptr_012E
+	movx @DPTR, A
+jump_2387:
+	mov A, R1
+	jnb ACC.3, jump_23C2
+	mov DPTR, #dptr_FFFC
+	movx A, @DPTR
+	mov R7, A
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	inc DPTR
+	inc DPTR
+	movx @DPTR, A
+	mov R7, A
+	mov DPTR, #dptr_012F
+	movx A, @DPTR
+	mov R6, A
+	clr C
+	mov A, R7
+	subb A, R6
+	mov R7, A
+	mov DPTR, #dptr_012A
+	movx A, @DPTR
+	mov R2, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, A
+	mov DPH, R2
+	inc DPTR
+	inc DPTR
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov R6, 14h
+	mov R7, 15h
+	mov DPL, R7
+	mov DPH, R6
+	inc DPTR
+	inc DPTR
+	inc DPTR
+	movx A, @DPTR
+	mov DPTR, #dptr_012F
+	movx @DPTR, A
+jump_23C2:
+	pop PSW
+	ret
 
-org	22F1h
-	db 0F8h	; [22F1h] 248   -8 'ø'
-	db 0E0h	; [22F2h] 224  -32 'à'
-	db 78h	; [22F3h] 120 'x'
-	db 97h	; [22F4h] 151 -105
-	db 0F6h	; [22F5h] 246  -10 'ö'
-	db 0F9h	; [22F6h] 249   -7 'ù'
-	db 30h	; [22F7h]  48 '0'
-	db 0E0h	; [22F8h] 224  -32 'à'
-	db 28h	; [22F9h]  40 '('
-	db 0A3h	; [22FAh] 163  -93 '£'
-	db 0E0h	; [22FBh] 224  -32 'à'
+;org	23C5h
+	push PSW
+	mov PSW, #10h	;  16
+	mov R5, 17h
+	mov R4, 16h
+	mov DPTR, #dptr_FFF8
+	movx A, @DPTR
+	jnb ACC.4, jump_2423
+	mov DPTR, #dptr_FFFD
+	movx A, @DPTR
+	mov DPTR, #dptr_0131
+	movx @DPTR, A
+	mov DPTR, #dptr_FFFD
+	movx A, @DPTR
+	mov DPTR, #dptr_0130
+	movx @DPTR, A
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	inc DPTR
+	xch A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPTR, #dptr_0132
+	movx A, @DPTR
+	mov R6, A
+	inc DPTR
+	movx A, @DPTR
+	mov R7, A
+	clr C
+	mov DPTR, #dptr_0131
+	movx A, @DPTR
+	subb A, R7
+	mov R7, A
+	mov DPTR, #dptr_0130
+	movx A, @DPTR
+	subb A, R6
+	mov DPL, R5
+	mov DPH, R4
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov DPTR, #dptr_0130
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPTR, #dptr_0132
+	xch A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov R7, #01h	;   1
+	sjmp jump_243F
 
-org	22FDh
-	db 8Dh	; [22FDh] 141 -115
-	db 82h	; [22FEh] 130 -126
-	db 8Ch	; [22FFh] 140 -116
-	db 83h	; [2300h] 131 -125
-	db 0F0h	; [2301h] 240  -16 'ð'
+jump_2423:
+	mov DPL, R5
+	mov DPH, R4
+	clr A
+	movx @DPTR, A
+	inc DPTR
+	movx @DPTR, A
+	mov DPTR, #dptr_0130
+	movx A, @DPTR
+	mov R7, A
+	inc DPTR
+	movx A, @DPTR
+	mov DPL, R5
+	mov DPH, R4
+	inc DPTR
+	inc DPTR
+	xch A, R7
+	movx @DPTR, A
+	inc DPTR
+	mov A, R7
+	movx @DPTR, A
+	mov R7, #00h	;   0
+jump_243F:
+	pop PSW
+	ret
 
-org	2303h
-	db 90h	; [2303h] 144 -112
-	db 01h	; [2304h]   1
-	db 2Ch	; [2305h]  44 ','
-	db 0E0h	; [2306h] 224  -32 'à'
-	db 0FEh	; [2307h] 254   -2 'þ'
-	db 0C3h	; [2308h] 195  -61 'Ã'
-	db 0EFh	; [2309h] 239  -17 'ï'
-	db 9Eh	; [230Ah] 158  -98
+;org	2442h
+	clr P4.0
+	clr P4.2
+	clr A
+	mov R0, #98h	; 152 -104
+	mov @R0, A
+	inc R0
+	mov @R0, A
+jump_244C:
+	clr C
+	mov R0, #99h	; 153 -103
+	mov A, @R0
+	subb A, #0E8h	; 232  -24 'è'
+	dec R0
+	mov A, @R0
+	xrl A, #80h	; 128 -128
+	subb A, #83h	; 131 -125
+	jnc jump_2463
+	inc R0
+	inc @R0
+	mov A, @R0
+	jnz fwd_2461_jump_244C
+	dec R0
+	inc @R0
+fwd_2461_jump_244C:
+	sjmp jump_244C
 
-org	230Ch
-	db 90h	; [230Ch] 144 -112
-	db 01h	; [230Dh]   1
-	db 2Ah	; [230Eh]  42 '*'
-	db 0E0h	; [230Fh] 224  -32 'à'
-	db 0FAh	; [2310h] 250   -6 'ú'
-	db 0A3h	; [2311h] 163  -93 '£'
-	db 0E0h	; [2312h] 224  -32 'à'
-	db 0F5h	; [2313h] 245  -11 'õ'
-	db 82h	; [2314h] 130 -126
-	db 8Ah	; [2315h] 138 -118
-	db 83h	; [2316h] 131 -125
-	db 0EFh	; [2317h] 239  -17 'ï'
-	db 0F0h	; [2318h] 240  -16 'ð'
-	db 8Dh	; [2319h] 141 -115
-	db 82h	; [231Ah] 130 -126
-	db 8Ch	; [231Bh] 140 -116
-	db 83h	; [231Ch] 131 -125
-	db 0E0h	; [231Dh] 224  -32 'à'
-	db 90h	; [231Eh] 144 -112
-	db 01h	; [231Fh]   1
-	db 2Ch	; [2320h]  44 ','
-	db 0F0h	; [2321h] 240  -16 'ð'
-	db 0E9h	; [2322h] 233  -23 'é'
-	db 30h	; [2323h]  48 '0'
-	db 0E1h	; [2324h] 225  -31 'á'
-	db 2Dh	; [2325h]  45 '-'
-	db 90h	; [2326h] 144 -112
+jump_2463:
+	setb P4.0
+	setb P4.2
+jump_2467:
+	inc R7
+	mov A, R7
+	mov R4, 06h
+	jnz jump_246E
+	inc R6
+jump_246E:
+	dec A
+	mov DPL, A
+	mov DPH, R4
+	clr A
+	movc A, @A + DPTR
+	mov R0, #9Ah	; 154 -102
+	mov @R0, A
+	inc R0
+	mov @R0, #08h	;   8
+jump_247B:
+	mov R0, #9Bh	; 155 -101
+	mov A, @R0
+	setb C
+	subb A, #00h	;   0
+	jc jump_2491
+	dec R0
+	mov A, @R0
+	mov R5, A
+	mov DPTR, #dptr_FFF6
+	movx @DPTR, A
+	clr C
+	rrc A
+	mov @R0, A
+	inc R0
+	dec @R0
+	sjmp jump_247B
 
-org	2328h
-	db 0FAh	; [2328h] 250   -6 'ú'
-	db 0E0h	; [2329h] 224  -32 'à'
+jump_2491:
+	jnb P4.0, jump_2467
+	ret
 
-org	232Bh
-	db 8Dh	; [232Bh] 141 -115
-	db 82h	; [232Ch] 130 -126
-	db 8Ch	; [232Dh] 140 -116
-	db 83h	; [232Eh] 131 -125
-	db 0A3h	; [232Fh] 163  -93 '£'
-	db 0F0h	; [2330h] 240  -16 'ð'
-
-org	2332h
-	db 90h	; [2332h] 144 -112
-	db 01h	; [2333h]   1
-	db 2Dh	; [2334h]  45 '-'
-	db 0E0h	; [2335h] 224  -32 'à'
-	db 0FEh	; [2336h] 254   -2 'þ'
-	db 0C3h	; [2337h] 195  -61 'Ã'
-	db 0EFh	; [2338h] 239  -17 'ï'
-	db 9Eh	; [2339h] 158  -98
-
-org	233Bh
-	db 90h	; [233Bh] 144 -112
-	db 01h	; [233Ch]   1
-	db 2Ah	; [233Dh]  42 '*'
-	db 0E0h	; [233Eh] 224  -32 'à'
-	db 0FAh	; [233Fh] 250   -6 'ú'
-	db 0A3h	; [2340h] 163  -93 '£'
-	db 0E0h	; [2341h] 224  -32 'à'
-	db 0F5h	; [2342h] 245  -11 'õ'
-	db 82h	; [2343h] 130 -126
-	db 8Ah	; [2344h] 138 -118
-	db 83h	; [2345h] 131 -125
-	db 0A3h	; [2346h] 163  -93 '£'
-	db 0EFh	; [2347h] 239  -17 'ï'
-	db 0F0h	; [2348h] 240  -16 'ð'
-	db 8Dh	; [2349h] 141 -115
-	db 82h	; [234Ah] 130 -126
-	db 8Ch	; [234Bh] 140 -116
-	db 83h	; [234Ch] 131 -125
-	db 0A3h	; [234Dh] 163  -93 '£'
-	db 0E0h	; [234Eh] 224  -32 'à'
-	db 90h	; [234Fh] 144 -112
-	db 01h	; [2350h]   1
-	db 2Dh	; [2351h]  45 '-'
-	db 0F0h	; [2352h] 240  -16 'ð'
-	db 0E9h	; [2353h] 233  -23 'é'
-	db 30h	; [2354h]  48 '0'
-	db 0E2h	; [2355h] 226  -30 'â'
-	db 30h	; [2356h]  48 '0'
-	db 90h	; [2357h] 144 -112
-
-org	2359h
-	db 0FBh	; [2359h] 251   -5 'û'
-	db 0E0h	; [235Ah] 224  -32 'à'
-
-org	235Ch
-	db 8Dh	; [235Ch] 141 -115
-	db 82h	; [235Dh] 130 -126
-	db 8Ch	; [235Eh] 140 -116
-	db 83h	; [235Fh] 131 -125
-	db 0A3h	; [2360h] 163  -93 '£'
-	db 0A3h	; [2361h] 163  -93 '£'
-	db 0F0h	; [2362h] 240  -16 'ð'
-
-org	2364h
-	db 90h	; [2364h] 144 -112
-	db 01h	; [2365h]   1
-	db 2Eh	; [2366h]  46 '.'
-	db 0E0h	; [2367h] 224  -32 'à'
-	db 0FEh	; [2368h] 254   -2 'þ'
-	db 0C3h	; [2369h] 195  -61 'Ã'
-	db 0EFh	; [236Ah] 239  -17 'ï'
-	db 9Eh	; [236Bh] 158  -98
-
-org	236Dh
-	db 90h	; [236Dh] 144 -112
-	db 01h	; [236Eh]   1
-	db 2Ah	; [236Fh]  42 '*'
-	db 0E0h	; [2370h] 224  -32 'à'
-	db 0FAh	; [2371h] 250   -6 'ú'
-	db 0A3h	; [2372h] 163  -93 '£'
-	db 0E0h	; [2373h] 224  -32 'à'
-	db 0F5h	; [2374h] 245  -11 'õ'
-	db 82h	; [2375h] 130 -126
-	db 8Ah	; [2376h] 138 -118
-	db 83h	; [2377h] 131 -125
-	db 0A3h	; [2378h] 163  -93 '£'
-	db 0A3h	; [2379h] 163  -93 '£'
-	db 0EFh	; [237Ah] 239  -17 'ï'
-	db 0F0h	; [237Bh] 240  -16 'ð'
-	db 8Dh	; [237Ch] 141 -115
-	db 82h	; [237Dh] 130 -126
-	db 8Ch	; [237Eh] 140 -116
-	db 83h	; [237Fh] 131 -125
-	db 0A3h	; [2380h] 163  -93 '£'
-	db 0A3h	; [2381h] 163  -93 '£'
-	db 0E0h	; [2382h] 224  -32 'à'
-	db 90h	; [2383h] 144 -112
-	db 01h	; [2384h]   1
-	db 2Eh	; [2385h]  46 '.'
-	db 0F0h	; [2386h] 240  -16 'ð'
-	db 0E9h	; [2387h] 233  -23 'é'
-	db 30h	; [2388h]  48 '0'
-	db 0E3h	; [2389h] 227  -29 'ã'
-	db 37h	; [238Ah]  55 '7'
-	db 90h	; [238Bh] 144 -112
-
-org	238Dh
-	db 0FCh	; [238Dh] 252   -4 'ü'
-	db 0E0h	; [238Eh] 224  -32 'à'
-
-org	2390h
-	db 8Dh	; [2390h] 141 -115
-	db 82h	; [2391h] 130 -126
-	db 8Ch	; [2392h] 140 -116
-	db 83h	; [2393h] 131 -125
-	db 0A3h	; [2394h] 163  -93 '£'
-	db 0A3h	; [2395h] 163  -93 '£'
-	db 0A3h	; [2396h] 163  -93 '£'
-	db 0F0h	; [2397h] 240  -16 'ð'
-
-org	2399h
-	db 90h	; [2399h] 144 -112
-	db 01h	; [239Ah]   1
-	db 2Fh	; [239Bh]  47 '/'
-	db 0E0h	; [239Ch] 224  -32 'à'
-	db 0FEh	; [239Dh] 254   -2 'þ'
-	db 0C3h	; [239Eh] 195  -61 'Ã'
-	db 0EFh	; [239Fh] 239  -17 'ï'
-	db 9Eh	; [23A0h] 158  -98
-
-org	23A2h
-	db 90h	; [23A2h] 144 -112
-	db 01h	; [23A3h]   1
-	db 2Ah	; [23A4h]  42 '*'
-	db 0E0h	; [23A5h] 224  -32 'à'
-	db 0FAh	; [23A6h] 250   -6 'ú'
-	db 0A3h	; [23A7h] 163  -93 '£'
-	db 0E0h	; [23A8h] 224  -32 'à'
-	db 0F5h	; [23A9h] 245  -11 'õ'
-	db 82h	; [23AAh] 130 -126
-	db 8Ah	; [23ABh] 138 -118
-	db 83h	; [23ACh] 131 -125
-	db 0A3h	; [23ADh] 163  -93 '£'
-	db 0A3h	; [23AEh] 163  -93 '£'
-	db 0A3h	; [23AFh] 163  -93 '£'
-	db 0EFh	; [23B0h] 239  -17 'ï'
-	db 0F0h	; [23B1h] 240  -16 'ð'
-	db 0AEh	; [23B2h] 174  -82 '®'
-	db 14h	; [23B3h]  20
-	db 0AFh	; [23B4h] 175  -81 '¯'
-	db 15h	; [23B5h]  21
-	db 8Fh	; [23B6h] 143 -113
-	db 82h	; [23B7h] 130 -126
-	db 8Eh	; [23B8h] 142 -114
-	db 83h	; [23B9h] 131 -125
-	db 0A3h	; [23BAh] 163  -93 '£'
-	db 0A3h	; [23BBh] 163  -93 '£'
-	db 0A3h	; [23BCh] 163  -93 '£'
-	db 0E0h	; [23BDh] 224  -32 'à'
-	db 90h	; [23BEh] 144 -112
-	db 01h	; [23BFh]   1
-	db 2Fh	; [23C0h]  47 '/'
-	db 0F0h	; [23C1h] 240  -16 'ð'
-	db 0D0h	; [23C2h] 208  -48 'Ð'
-	db 0D0h	; [23C3h] 208  -48 'Ð'
-	db 22h	; [23C4h]  34 '"'
-	db 0C0h	; [23C5h] 192  -64 'À'
-	db 0D0h	; [23C6h] 208  -48 'Ð'
-	db 75h	; [23C7h] 117 'u'
-	db 0D0h	; [23C8h] 208  -48 'Ð'
-	db 10h	; [23C9h]  16
-	db 0ADh	; [23CAh] 173  -83
-	db 17h	; [23CBh]  23
-	db 0ACh	; [23CCh] 172  -84 '¬'
-	db 16h	; [23CDh]  22
-	db 90h	; [23CEh] 144 -112
-
-org	23D0h
-	db 0F8h	; [23D0h] 248   -8 'ø'
-	db 0E0h	; [23D1h] 224  -32 'à'
-	db 30h	; [23D2h]  48 '0'
-	db 0E4h	; [23D3h] 228  -28 'ä'
-	db 4Eh	; [23D4h]  78 'N'
-	db 90h	; [23D5h] 144 -112
-
-org	23D7h
-	db 0FDh	; [23D7h] 253   -3 'ý'
-	db 0E0h	; [23D8h] 224  -32 'à'
-	db 90h	; [23D9h] 144 -112
-	db 01h	; [23DAh]   1
-	db 31h	; [23DBh]  49 '1'
-	db 0F0h	; [23DCh] 240  -16 'ð'
-	db 90h	; [23DDh] 144 -112
-
-org	23DFh
-	db 0FDh	; [23DFh] 253   -3 'ý'
-	db 0E0h	; [23E0h] 224  -32 'à'
-	db 90h	; [23E1h] 144 -112
-	db 01h	; [23E2h]   1
-	db 30h	; [23E3h]  48 '0'
-	db 0F0h	; [23E4h] 240  -16 'ð'
-	db 0E0h	; [23E5h] 224  -32 'à'
-
-org	23E7h
-	db 0A3h	; [23E7h] 163  -93 '£'
-	db 0E0h	; [23E8h] 224  -32 'à'
-	db 8Dh	; [23E9h] 141 -115
-	db 82h	; [23EAh] 130 -126
-	db 8Ch	; [23EBh] 140 -116
-	db 83h	; [23ECh] 131 -125
-	db 0A3h	; [23EDh] 163  -93 '£'
-	db 0A3h	; [23EEh] 163  -93 '£'
-	db 0CFh	; [23EFh] 207  -49 'Ï'
-	db 0F0h	; [23F0h] 240  -16 'ð'
-	db 0A3h	; [23F1h] 163  -93 '£'
-	db 0EFh	; [23F2h] 239  -17 'ï'
-	db 0F0h	; [23F3h] 240  -16 'ð'
-	db 90h	; [23F4h] 144 -112
-	db 01h	; [23F5h]   1
-	db 32h	; [23F6h]  50 '2'
-	db 0E0h	; [23F7h] 224  -32 'à'
-	db 0FEh	; [23F8h] 254   -2 'þ'
-	db 0A3h	; [23F9h] 163  -93 '£'
-	db 0E0h	; [23FAh] 224  -32 'à'
-
-org	23FCh
-	db 0C3h	; [23FCh] 195  -61 'Ã'
-	db 90h	; [23FDh] 144 -112
-	db 01h	; [23FEh]   1
-	db 31h	; [23FFh]  49 '1'
-	db 0E0h	; [2400h] 224  -32 'à'
-	db 9Fh	; [2401h] 159  -97
-
-org	2403h
-	db 90h	; [2403h] 144 -112
-	db 01h	; [2404h]   1
-	db 30h	; [2405h]  48 '0'
-	db 0E0h	; [2406h] 224  -32 'à'
-	db 9Eh	; [2407h] 158  -98
-	db 8Dh	; [2408h] 141 -115
-	db 82h	; [2409h] 130 -126
-	db 8Ch	; [240Ah] 140 -116
-	db 83h	; [240Bh] 131 -125
-	db 0F0h	; [240Ch] 240  -16 'ð'
-	db 0A3h	; [240Dh] 163  -93 '£'
-	db 0EFh	; [240Eh] 239  -17 'ï'
-	db 0F0h	; [240Fh] 240  -16 'ð'
-	db 90h	; [2410h] 144 -112
-	db 01h	; [2411h]   1
-	db 30h	; [2412h]  48 '0'
-	db 0E0h	; [2413h] 224  -32 'à'
-
-org	2415h
-	db 0A3h	; [2415h] 163  -93 '£'
-	db 0E0h	; [2416h] 224  -32 'à'
-	db 90h	; [2417h] 144 -112
-	db 01h	; [2418h]   1
-	db 32h	; [2419h]  50 '2'
-	db 0CFh	; [241Ah] 207  -49 'Ï'
-	db 0F0h	; [241Bh] 240  -16 'ð'
-	db 0A3h	; [241Ch] 163  -93 '£'
-	db 0EFh	; [241Dh] 239  -17 'ï'
-	db 0F0h	; [241Eh] 240  -16 'ð'
-	db 7Fh	; [241Fh] 127
-	db 01h	; [2420h]   1
-	db 80h	; [2421h] 128 -128
-	db 1Ch	; [2422h]  28
-	db 8Dh	; [2423h] 141 -115
-	db 82h	; [2424h] 130 -126
-	db 8Ch	; [2425h] 140 -116
-	db 83h	; [2426h] 131 -125
-	db 0E4h	; [2427h] 228  -28 'ä'
-	db 0F0h	; [2428h] 240  -16 'ð'
-	db 0A3h	; [2429h] 163  -93 '£'
-	db 0F0h	; [242Ah] 240  -16 'ð'
-	db 90h	; [242Bh] 144 -112
-	db 01h	; [242Ch]   1
-	db 30h	; [242Dh]  48 '0'
-	db 0E0h	; [242Eh] 224  -32 'à'
-
-org	2430h
-	db 0A3h	; [2430h] 163  -93 '£'
-	db 0E0h	; [2431h] 224  -32 'à'
-	db 8Dh	; [2432h] 141 -115
-	db 82h	; [2433h] 130 -126
-	db 8Ch	; [2434h] 140 -116
-	db 83h	; [2435h] 131 -125
-	db 0A3h	; [2436h] 163  -93 '£'
-	db 0A3h	; [2437h] 163  -93 '£'
-	db 0CFh	; [2438h] 207  -49 'Ï'
-	db 0F0h	; [2439h] 240  -16 'ð'
-	db 0A3h	; [243Ah] 163  -93 '£'
-	db 0EFh	; [243Bh] 239  -17 'ï'
-	db 0F0h	; [243Ch] 240  -16 'ð'
-	db 7Fh	; [243Dh] 127
-	db 00h	; [243Eh]   0
-	db 0D0h	; [243Fh] 208  -48 'Ð'
-	db 0D0h	; [2440h] 208  -48 'Ð'
-	db 22h	; [2441h]  34 '"'
-	db 0C2h	; [2442h] 194  -62 'Â'
-	db 0C0h	; [2443h] 192  -64 'À'
-	db 0C2h	; [2444h] 194  -62 'Â'
-	db 0C2h	; [2445h] 194  -62 'Â'
-	db 0E4h	; [2446h] 228  -28 'ä'
-	db 78h	; [2447h] 120 'x'
-	db 98h	; [2448h] 152 -104
-	db 0F6h	; [2449h] 246  -10 'ö'
-	db 08h	; [244Ah]   8
-	db 0F6h	; [244Bh] 246  -10 'ö'
-	db 0C3h	; [244Ch] 195  -61 'Ã'
-	db 78h	; [244Dh] 120 'x'
-	db 99h	; [244Eh] 153 -103
-	db 0E6h	; [244Fh] 230  -26 'æ'
-	db 94h	; [2450h] 148 -108
-	db 0E8h	; [2451h] 232  -24 'è'
-	db 18h	; [2452h]  24
-	db 0E6h	; [2453h] 230  -26 'æ'
-	db 64h	; [2454h] 100 'd'
-	db 80h	; [2455h] 128 -128
-	db 94h	; [2456h] 148 -108
-	db 83h	; [2457h] 131 -125
-	db 50h	; [2458h]  80 'P'
-	db 09h	; [2459h]   9
-	db 08h	; [245Ah]   8
-	db 06h	; [245Bh]   6
-	db 0E6h	; [245Ch] 230  -26 'æ'
-	db 70h	; [245Dh] 112 'p'
-	db 02h	; [245Eh]   2
-	db 18h	; [245Fh]  24
-	db 06h	; [2460h]   6
-	db 80h	; [2461h] 128 -128
-	db 0E9h	; [2462h] 233  -23 'é'
-	db 0D2h	; [2463h] 210  -46 'Ò'
-	db 0C0h	; [2464h] 192  -64 'À'
-	db 0D2h	; [2465h] 210  -46 'Ò'
-	db 0C2h	; [2466h] 194  -62 'Â'
-	db 0Fh	; [2467h]  15
-	db 0EFh	; [2468h] 239  -17 'ï'
-	db 0ACh	; [2469h] 172  -84 '¬'
-	db 06h	; [246Ah]   6
-	db 70h	; [246Bh] 112 'p'
-	db 01h	; [246Ch]   1
-	db 0Eh	; [246Dh]  14
-	db 14h	; [246Eh]  20
-	db 0F5h	; [246Fh] 245  -11 'õ'
-	db 82h	; [2470h] 130 -126
-	db 8Ch	; [2471h] 140 -116
-	db 83h	; [2472h] 131 -125
-	db 0E4h	; [2473h] 228  -28 'ä'
-	db 93h	; [2474h] 147 -109
-	db 78h	; [2475h] 120 'x'
-	db 9Ah	; [2476h] 154 -102
-	db 0F6h	; [2477h] 246  -10 'ö'
-	db 08h	; [2478h]   8
-	db 76h	; [2479h] 118 'v'
-	db 08h	; [247Ah]   8
-	db 78h	; [247Bh] 120 'x'
-	db 9Bh	; [247Ch] 155 -101
-	db 0E6h	; [247Dh] 230  -26 'æ'
-	db 0D3h	; [247Eh] 211  -45 'Ó'
-	db 94h	; [247Fh] 148 -108
-	db 00h	; [2480h]   0
-	db 40h	; [2481h]  64 '@'
-	db 0Eh	; [2482h]  14
-	db 18h	; [2483h]  24
-	db 0E6h	; [2484h] 230  -26 'æ'
-	db 0FDh	; [2485h] 253   -3 'ý'
-	db 90h	; [2486h] 144 -112
-
-org	2488h
-	db 0F6h	; [2488h] 246  -10 'ö'
-	db 0F0h	; [2489h] 240  -16 'ð'
-	db 0C3h	; [248Ah] 195  -61 'Ã'
-	db 13h	; [248Bh]  19
-	db 0F6h	; [248Ch] 246  -10 'ö'
-	db 08h	; [248Dh]   8
-	db 16h	; [248Eh]  22
-	db 80h	; [248Fh] 128 -128
-	db 0EAh	; [2490h] 234  -22 'ê'
-	db 30h	; [2491h]  48 '0'
-	db 0C0h	; [2492h] 192  -64 'À'
-	db 0D3h	; [2493h] 211  -45 'Ó'
-	db 22h	; [2494h]  34 '"'
 
 org	2496h
 	db 04h	; [2496h]   4
@@ -12932,302 +11033,258 @@ jump_357E:
 	pop ACC
 	reti
 
-;org	359Ch
-	db 0C2h	; [359Ch] 194  -62 'Â'
-	db 0D5h	; [359Dh] 213  -43 'Õ'
-	db 30h	; [359Eh]  48 '0'
-	db 0F7h	; [359Fh] 247   -9 '÷'
-	db 07h	; [35A0h]   7
-	db 0B2h	; [35A1h] 178  -78 '²'
-	db 0D5h	; [35A2h] 213  -43 'Õ'
-	db 63h	; [35A3h]  99 'c'
-	db 0F0h	; [35A4h] 240  -16 'ð'
+jump_359C:
+	clr PSW.5
+	jnb B.7, jump_35A8
+	cpl PSW.5
+	xrl B, #0FFh	; 255   -1 'ÿ'
+	inc B
+jump_35A8:
+	jnb ACC.7, jump_35B7
+	cpl PSW.5
+	cpl A
+	inc A
+	div AB
+	xrl B, #0FFh	; 255   -1 'ÿ'
+	inc B
+	sjmp jump_35B8
 
-org	35A6h
-	db 05h	; [35A6h]   5
-	db 0F0h	; [35A7h] 240  -16 'ð'
-	db 30h	; [35A8h]  48 '0'
-	db 0E7h	; [35A9h] 231  -25 'ç'
-	db 0Ch	; [35AAh]  12
-	db 0B2h	; [35ABh] 178  -78 '²'
-	db 0D5h	; [35ACh] 213  -43 'Õ'
-	db 0F4h	; [35ADh] 244  -12 'ô'
-	db 04h	; [35AEh]   4
-	db 84h	; [35AFh] 132 -124
-	db 63h	; [35B0h]  99 'c'
-	db 0F0h	; [35B1h] 240  -16 'ð'
+jump_35B7:
+	div AB
+jump_35B8:
+	jnb PSW.5, jump_35BD
+	cpl A
+	inc A
+jump_35BD:
+	ret
 
-org	35B3h
-	db 05h	; [35B3h]   5
-	db 0F0h	; [35B4h] 240  -16 'ð'
-	db 80h	; [35B5h] 128 -128
-	db 01h	; [35B6h]   1
-	db 84h	; [35B7h] 132 -124
-	db 30h	; [35B8h]  48 '0'
-	db 0D5h	; [35B9h] 213  -43 'Õ'
-	db 02h	; [35BAh]   2
-	db 0F4h	; [35BBh] 244  -12 'ô'
-	db 04h	; [35BCh]   4
-	db 22h	; [35BDh]  34 '"'
-	db 0BBh	; [35BEh] 187  -69 '»'
-	db 02h	; [35BFh]   2
-	db 06h	; [35C0h]   6
-	db 89h	; [35C1h] 137 -119
-	db 82h	; [35C2h] 130 -126
-	db 8Ah	; [35C3h] 138 -118
-	db 83h	; [35C4h] 131 -125
-	db 0E0h	; [35C5h] 224  -32 'à'
-	db 22h	; [35C6h]  34 '"'
-	db 40h	; [35C7h]  64 '@'
-	db 03h	; [35C8h]   3
-	db 0BBh	; [35C9h] 187  -69 '»'
-	db 04h	; [35CAh]   4
-	db 02h	; [35CBh]   2
-	db 0E7h	; [35CCh] 231  -25 'ç'
-	db 22h	; [35CDh]  34 '"'
-	db 40h	; [35CEh]  64 '@'
-	db 07h	; [35CFh]   7
-	db 89h	; [35D0h] 137 -119
-	db 82h	; [35D1h] 130 -126
-	db 8Ah	; [35D2h] 138 -118
-	db 83h	; [35D3h] 131 -125
-	db 0E4h	; [35D4h] 228  -28 'ä'
-	db 93h	; [35D5h] 147 -109
-	db 22h	; [35D6h]  34 '"'
-	db 0E3h	; [35D7h] 227  -29 'ã'
-	db 22h	; [35D8h]  34 '"'
-	db 0BBh	; [35D9h] 187  -69 '»'
-	db 02h	; [35DAh]   2
-	db 0Ch	; [35DBh]  12
-	db 0E5h	; [35DCh] 229  -27 'å'
-	db 82h	; [35DDh] 130 -126
-	db 29h	; [35DEh]  41 ')'
-	db 0F5h	; [35DFh] 245  -11 'õ'
-	db 82h	; [35E0h] 130 -126
-	db 0E5h	; [35E1h] 229  -27 'å'
-	db 83h	; [35E2h] 131 -125
-	db 3Ah	; [35E3h]  58 ':'
-	db 0F5h	; [35E4h] 245  -11 'õ'
-	db 83h	; [35E5h] 131 -125
-	db 0E0h	; [35E6h] 224  -32 'à'
-	db 22h	; [35E7h]  34 '"'
-	db 40h	; [35E8h]  64 '@'
-	db 03h	; [35E9h]   3
-	db 0BBh	; [35EAh] 187  -69 '»'
-	db 04h	; [35EBh]   4
-	db 06h	; [35ECh]   6
-	db 0E9h	; [35EDh] 233  -23 'é'
-	db 25h	; [35EEh]  37 '%'
-	db 82h	; [35EFh] 130 -126
-	db 0F8h	; [35F0h] 248   -8 'ø'
-	db 0E6h	; [35F1h] 230  -26 'æ'
-	db 22h	; [35F2h]  34 '"'
-	db 40h	; [35F3h]  64 '@'
-	db 0Dh	; [35F4h]  13
-	db 0E5h	; [35F5h] 229  -27 'å'
-	db 82h	; [35F6h] 130 -126
-	db 29h	; [35F7h]  41 ')'
-	db 0F5h	; [35F8h] 245  -11 'õ'
-	db 82h	; [35F9h] 130 -126
-	db 0E5h	; [35FAh] 229  -27 'å'
-	db 83h	; [35FBh] 131 -125
-	db 3Ah	; [35FCh]  58 ':'
-	db 0F5h	; [35FDh] 245  -11 'õ'
-	db 83h	; [35FEh] 131 -125
-	db 0E4h	; [35FFh] 228  -28 'ä'
-	db 93h	; [3600h] 147 -109
-	db 22h	; [3601h]  34 '"'
-	db 0E9h	; [3602h] 233  -23 'é'
-	db 25h	; [3603h]  37 '%'
-	db 82h	; [3604h] 130 -126
-	db 0F8h	; [3605h] 248   -8 'ø'
-	db 0E2h	; [3606h] 226  -30 'â'
-	db 22h	; [3607h]  34 '"'
-	db 0BBh	; [3608h] 187  -69 '»'
-	db 02h	; [3609h]   2
-	db 06h	; [360Ah]   6
-	db 89h	; [360Bh] 137 -119
-	db 82h	; [360Ch] 130 -126
-	db 8Ah	; [360Dh] 138 -118
-	db 83h	; [360Eh] 131 -125
-	db 0F0h	; [360Fh] 240  -16 'ð'
-	db 22h	; [3610h]  34 '"'
-	db 40h	; [3611h]  64 '@'
-	db 03h	; [3612h]   3
-	db 0BBh	; [3613h] 187  -69 '»'
-	db 04h	; [3614h]   4
-	db 02h	; [3615h]   2
-	db 0F7h	; [3616h] 247   -9 '÷'
-	db 22h	; [3617h]  34 '"'
-	db 50h	; [3618h]  80 'P'
-	db 01h	; [3619h]   1
-	db 0F3h	; [361Ah] 243  -13 'ó'
-	db 22h	; [361Bh]  34 '"'
-	db 0EFh	; [361Ch] 239  -17 'ï'
-	db 0F8h	; [361Dh] 248   -8 'ø'
-	db 8Dh	; [361Eh] 141 -115
-	db 0F0h	; [361Fh] 240  -16 'ð'
-	db 0A4h	; [3620h] 164  -92 '¤'
+jump_35BE:
+	cjne R3, #02h, jump_35C7	;   2
+	mov DPL, R1
+	mov DPH, R2
+	movx A, @DPTR
+	ret
 
-org	3622h
-	db 0EDh	; [3622h] 237  -19 'í'
-	db 0C5h	; [3623h] 197  -59 'Å'
-	db 0F0h	; [3624h] 240  -16 'ð'
-	db 0CEh	; [3625h] 206  -50 'Î'
-	db 0A4h	; [3626h] 164  -92 '¤'
-	db 2Eh	; [3627h]  46 '.'
-	db 0FEh	; [3628h] 254   -2 'þ'
-	db 0ECh	; [3629h] 236  -20 'ì'
-	db 88h	; [362Ah] 136 -120
-	db 0F0h	; [362Bh] 240  -16 'ð'
-	db 0A4h	; [362Ch] 164  -92 '¤'
-	db 2Eh	; [362Dh]  46 '.'
-	db 0FEh	; [362Eh] 254   -2 'þ'
-	db 22h	; [362Fh]  34 '"'
-	db 0BCh	; [3630h] 188  -68 '¼'
-	db 00h	; [3631h]   0
-	db 0Bh	; [3632h]  11
-	db 0BEh	; [3633h] 190  -66 '¾'
-	db 00h	; [3634h]   0
-	db 29h	; [3635h]  41 ')'
-	db 0EFh	; [3636h] 239  -17 'ï'
-	db 8Dh	; [3637h] 141 -115
-	db 0F0h	; [3638h] 240  -16 'ð'
-	db 84h	; [3639h] 132 -124
+jump_35C7:
+	jc jump_35CC
+	cjne R3, #04h, jump_35CE	;   4
+jump_35CC:
+	mov A, @R1
+	ret
 
-org	363Bh
-	db 0ADh	; [363Bh] 173  -83
-	db 0F0h	; [363Ch] 240  -16 'ð'
-	db 22h	; [363Dh]  34 '"'
-	db 0E4h	; [363Eh] 228  -28 'ä'
-	db 0CCh	; [363Fh] 204  -52 'Ì'
-	db 0F8h	; [3640h] 248   -8 'ø'
-	db 75h	; [3641h] 117 'u'
-	db 0F0h	; [3642h] 240  -16 'ð'
-	db 08h	; [3643h]   8
-	db 0EFh	; [3644h] 239  -17 'ï'
-	db 2Fh	; [3645h]  47 '/'
+jump_35CE:
+	jc jump_35D7
+	mov DPL, R1
+	mov DPH, R2
+	clr A
+	movc A, @A + DPTR
+	ret
 
-org	3647h
-	db 0EEh	; [3647h] 238  -18 'î'
-	db 33h	; [3648h]  51 '3'
-	db 0FEh	; [3649h] 254   -2 'þ'
-	db 0ECh	; [364Ah] 236  -20 'ì'
-	db 33h	; [364Bh]  51 '3'
-	db 0FCh	; [364Ch] 252   -4 'ü'
-	db 0EEh	; [364Dh] 238  -18 'î'
-	db 9Dh	; [364Eh] 157  -99
-	db 0ECh	; [364Fh] 236  -20 'ì'
-	db 98h	; [3650h] 152 -104
-	db 40h	; [3651h]  64 '@'
-	db 05h	; [3652h]   5
-	db 0FCh	; [3653h] 252   -4 'ü'
-	db 0EEh	; [3654h] 238  -18 'î'
-	db 9Dh	; [3655h] 157  -99
-	db 0FEh	; [3656h] 254   -2 'þ'
-	db 0Fh	; [3657h]  15
-	db 0D5h	; [3658h] 213  -43 'Õ'
-	db 0F0h	; [3659h] 240  -16 'ð'
-	db 0E9h	; [365Ah] 233  -23 'é'
-	db 0E4h	; [365Bh] 228  -28 'ä'
-	db 0CEh	; [365Ch] 206  -50 'Î'
-	db 0FDh	; [365Dh] 253   -3 'ý'
-	db 22h	; [365Eh]  34 '"'
-	db 0EDh	; [365Fh] 237  -19 'í'
-	db 0F8h	; [3660h] 248   -8 'ø'
-	db 0F5h	; [3661h] 245  -11 'õ'
-	db 0F0h	; [3662h] 240  -16 'ð'
-	db 0EEh	; [3663h] 238  -18 'î'
-	db 84h	; [3664h] 132 -124
-	db 20h	; [3665h]  32 ' '
-	db 0D2h	; [3666h] 210  -46 'Ò'
-	db 1Ch	; [3667h]  28
-	db 0FEh	; [3668h] 254   -2 'þ'
-	db 0ADh	; [3669h] 173  -83
-	db 0F0h	; [366Ah] 240  -16 'ð'
-	db 75h	; [366Bh] 117 'u'
-	db 0F0h	; [366Ch] 240  -16 'ð'
-	db 08h	; [366Dh]   8
-	db 0EFh	; [366Eh] 239  -17 'ï'
-	db 2Fh	; [366Fh]  47 '/'
+jump_35D7:
+	movx A, @R1
+	ret
 
-org	3671h
-	db 0EDh	; [3671h] 237  -19 'í'
-	db 33h	; [3672h]  51 '3'
-	db 0FDh	; [3673h] 253   -3 'ý'
-	db 40h	; [3674h]  64 '@'
-	db 07h	; [3675h]   7
-	db 98h	; [3676h] 152 -104
-	db 50h	; [3677h]  80 'P'
-	db 06h	; [3678h]   6
-	db 0D5h	; [3679h] 213  -43 'Õ'
-	db 0F0h	; [367Ah] 240  -16 'ð'
-	db 0F2h	; [367Bh] 242  -14 'ò'
-	db 22h	; [367Ch]  34 '"'
-	db 0C3h	; [367Dh] 195  -61 'Ã'
-	db 98h	; [367Eh] 152 -104
-	db 0FDh	; [367Fh] 253   -3 'ý'
-	db 0Fh	; [3680h]  15
-	db 0D5h	; [3681h] 213  -43 'Õ'
-	db 0F0h	; [3682h] 240  -16 'ð'
-	db 0EAh	; [3683h] 234  -22 'ê'
-	db 22h	; [3684h]  34 '"'
-	db 0C2h	; [3685h] 194  -62 'Â'
-	db 0D5h	; [3686h] 213  -43 'Õ'
-	db 0ECh	; [3687h] 236  -20 'ì'
-	db 30h	; [3688h]  48 '0'
-	db 0E7h	; [3689h] 231  -25 'ç'
-	db 09h	; [368Ah]   9
-	db 0B2h	; [368Bh] 178  -78 '²'
-	db 0D5h	; [368Ch] 213  -43 'Õ'
-	db 0E4h	; [368Dh] 228  -28 'ä'
-	db 0C3h	; [368Eh] 195  -61 'Ã'
-	db 9Dh	; [368Fh] 157  -99
-	db 0FDh	; [3690h] 253   -3 'ý'
-	db 0E4h	; [3691h] 228  -28 'ä'
-	db 9Ch	; [3692h] 156 -100
-	db 0FCh	; [3693h] 252   -4 'ü'
-	db 0EEh	; [3694h] 238  -18 'î'
-	db 30h	; [3695h]  48 '0'
-	db 0E7h	; [3696h] 231  -25 'ç'
-	db 15h	; [3697h]  21
-	db 0B2h	; [3698h] 178  -78 '²'
-	db 0D5h	; [3699h] 213  -43 'Õ'
-	db 0E4h	; [369Ah] 228  -28 'ä'
-	db 0C3h	; [369Bh] 195  -61 'Ã'
-	db 9Fh	; [369Ch] 159  -97
+jump_35D9:
+	cjne R3, #02h, jump_35E8	;   2
+	mov A, DPL
+	add A, R1
+	mov DPL, A
+	mov A, DPH
+	addc A, R2
+	mov DPH, A
+	movx A, @DPTR
+	ret
 
-org	369Eh
-	db 0E4h	; [369Eh] 228  -28 'ä'
-	db 9Eh	; [369Fh] 158  -98
-	db 0FEh	; [36A0h] 254   -2 'þ'
-	db 12h	; [36A1h]  18
-	db 36h	; [36A2h]  54 '6'
-	db 30h	; [36A3h]  48 '0'
-	db 0C3h	; [36A4h] 195  -61 'Ã'
-	db 0E4h	; [36A5h] 228  -28 'ä'
-	db 9Dh	; [36A6h] 157  -99
-	db 0FDh	; [36A7h] 253   -3 'ý'
-	db 0E4h	; [36A8h] 228  -28 'ä'
-	db 9Ch	; [36A9h] 156 -100
-	db 0FCh	; [36AAh] 252   -4 'ü'
-	db 80h	; [36ABh] 128 -128
-	db 03h	; [36ACh]   3
-	db 12h	; [36ADh]  18
-	db 36h	; [36AEh]  54 '6'
-	db 30h	; [36AFh]  48 '0'
-	db 30h	; [36B0h]  48 '0'
-	db 0D5h	; [36B1h] 213  -43 'Õ'
-	db 07h	; [36B2h]   7
-	db 0C3h	; [36B3h] 195  -61 'Ã'
-	db 0E4h	; [36B4h] 228  -28 'ä'
-	db 9Fh	; [36B5h] 159  -97
+jump_35E8:
+	jc jump_35ED
+	cjne R3, #04h, jump_35F3	;   4
+jump_35ED:
+	mov A, R1
+	add A, DPL
+	mov R0, A
+	mov A, @R0
+	ret
 
-org	36B7h
-	db 0E4h	; [36B7h] 228  -28 'ä'
-	db 9Eh	; [36B8h] 158  -98
-	db 0FEh	; [36B9h] 254   -2 'þ'
-	db 22h	; [36BAh]  34 '"'
+jump_35F3:
+	jc jump_3602
+	mov A, DPL
+	add A, R1
+	mov DPL, A
+	mov A, DPH
+	addc A, R2
+	mov DPH, A
+	clr A
+	movc A, @A + DPTR
+	ret
+
+jump_3602:
+	mov A, R1
+	add A, DPL
+	mov R0, A
+	movx A, @R0
+	ret
+
+jump_3608:
+	cjne R3, #02h, jump_3611	;   2
+	mov DPL, R1
+	mov DPH, R2
+	movx @DPTR, A
+	ret
+
+jump_3611:
+	jc jump_3616
+	cjne R3, #04h, jump_3618	;   4
+jump_3616:
+	mov @R1, A
+	ret
+
+jump_3618:
+	jnc jump_361B
+	movx @R1, A
+jump_361B:
+	ret
+
+jump_361C:
+	mov A, R7
+	mov R0, A
+	mov B, R5
+	mul AB
+	mov R7, A
+	mov A, R5
+	xch A, B
+	xch A, R6
+	mul AB
+	add A, R6
+	mov R6, A
+	mov A, R4
+	mov B, R0
+	mul AB
+	add A, R6
+	mov R6, A
+	ret
+
+jump_3630:
+	cjne R4, #00h, jump_363E	;   0
+	cjne R6, #00h, jump_365F	;   0
+	mov A, R7
+	mov B, R5
+	div AB
+	mov R7, A
+	mov R5, B
+	ret
+
+jump_363E:
+	clr A
+	xch A, R4
+	mov R0, A
+	mov B, #08h	;   8
+jump_3644:
+	mov A, R7
+	add A, R7
+	mov R7, A
+	mov A, R6
+	rlc A
+	mov R6, A
+	mov A, R4
+	rlc A
+	mov R4, A
+	mov A, R6
+	subb A, R5
+	mov A, R4
+	subb A, R0
+	jc jump_3658
+	mov R4, A
+	mov A, R6
+	subb A, R5
+	mov R6, A
+	inc R7
+jump_3658:
+	djnz B, jump_3644
+	clr A
+	xch A, R6
+	mov R5, A
+	ret
+
+jump_365F:
+	mov A, R5
+	mov R0, A
+	mov B, A
+	mov A, R6
+	div AB
+	jb PSW.2, jump_3684
+	mov R6, A
+	mov R5, B
+	mov B, #08h	;   8
+jump_366E:
+	mov A, R7
+	add A, R7
+	mov R7, A
+	mov A, R5
+	rlc A
+	mov R5, A
+	jc jump_367D
+	subb A, R0
+	jnc jump_367F
+	djnz B, jump_366E
+	ret
+
+jump_367D:
+	clr C
+	subb A, R0
+jump_367F:
+	mov R5, A
+	inc R7
+	djnz B, jump_366E
+jump_3684:
+	ret
+
+jump_3685:
+	clr PSW.5
+	mov A, R4
+	jnb ACC.7, jump_3694
+	cpl PSW.5
+	clr A
+	clr C
+	subb A, R5
+	mov R5, A
+	clr A
+	subb A, R4
+	mov R4, A
+jump_3694:
+	mov A, R6
+	jnb ACC.7, jump_36AD
+	cpl PSW.5
+	clr A
+	clr C
+	subb A, R7
+	mov R7, A
+	clr A
+	subb A, R6
+	mov R6, A
+	lcall jump_3630
+	clr C
+	clr A
+	subb A, R5
+	mov R5, A
+	clr A
+	subb A, R4
+	mov R4, A
+	sjmp jump_36B0
+
+jump_36AD:
+	lcall jump_3630
+jump_36B0:
+	jnb PSW.5, jump_36BA
+	clr C
+	clr A
+	subb A, R7
+	mov R7, A
+	clr A
+	subb A, R6
+	mov R6, A
+jump_36BA:
+	ret
+
 jump_36BB:
 	xch A, B
 	mov R0, A
@@ -13247,108 +11304,94 @@ jump_36CD:
 	movx @DPTR, A
 	ret
 
-;org	36D1h
-	db 0A3h	; [36D1h] 163  -93 '£'
-	db 0F8h	; [36D2h] 248   -8 'ø'
-	db 0E0h	; [36D3h] 224  -32 'à'
-	db 0C5h	; [36D4h] 197  -59 'Å'
-	db 0F0h	; [36D5h] 240  -16 'ð'
-	db 25h	; [36D6h]  37 '%'
-	db 0F0h	; [36D7h] 240  -16 'ð'
-	db 0F0h	; [36D8h] 240  -16 'ð'
-	db 0E5h	; [36D9h] 229  -27 'å'
-	db 82h	; [36DAh] 130 -126
-	db 15h	; [36DBh]  21
-	db 82h	; [36DCh] 130 -126
-	db 70h	; [36DDh] 112 'p'
-	db 02h	; [36DEh]   2
-	db 15h	; [36DFh]  21
-	db 83h	; [36E0h] 131 -125
-	db 0E0h	; [36E1h] 224  -32 'à'
-	db 0C8h	; [36E2h] 200  -56 'È'
-	db 38h	; [36E3h]  56 '8'
-	db 0F0h	; [36E4h] 240  -16 'ð'
-	db 0E8h	; [36E5h] 232  -24 'è'
-	db 22h	; [36E6h]  34 '"'
-	db 0BBh	; [36E7h] 187  -69 '»'
-	db 02h	; [36E8h]   2
-	db 0Ah	; [36E9h]  10
-	db 89h	; [36EAh] 137 -119
-	db 82h	; [36EBh] 130 -126
-	db 8Ah	; [36ECh] 138 -118
-	db 83h	; [36EDh] 131 -125
-	db 0F0h	; [36EEh] 240  -16 'ð'
-	db 0E5h	; [36EFh] 229  -27 'å'
-	db 0F0h	; [36F0h] 240  -16 'ð'
-	db 0A3h	; [36F1h] 163  -93 '£'
-	db 0F0h	; [36F2h] 240  -16 'ð'
-	db 22h	; [36F3h]  34 '"'
-	db 40h	; [36F4h]  64 '@'
-	db 03h	; [36F5h]   3
-	db 0BBh	; [36F6h] 187  -69 '»'
-	db 04h	; [36F7h]   4
-	db 06h	; [36F8h]   6
-	db 0F7h	; [36F9h] 247   -9 '÷'
-	db 09h	; [36FAh]   9
-	db 0A7h	; [36FBh] 167  -89 '§'
-	db 0F0h	; [36FCh] 240  -16 'ð'
-	db 19h	; [36FDh]  25
-	db 22h	; [36FEh]  34 '"'
-	db 50h	; [36FFh]  80 'P'
-	db 06h	; [3700h]   6
-	db 0F3h	; [3701h] 243  -13 'ó'
-	db 0E5h	; [3702h] 229  -27 'å'
-	db 0F0h	; [3703h] 240  -16 'ð'
-	db 09h	; [3704h]   9
-	db 0F3h	; [3705h] 243  -13 'ó'
-	db 19h	; [3706h]  25
-	db 22h	; [3707h]  34 '"'
-	db 0F8h	; [3708h] 248   -8 'ø'
-	db 0BBh	; [3709h] 187  -69 '»'
-	db 02h	; [370Ah]   2
-	db 11h	; [370Bh]  17
-	db 0E5h	; [370Ch] 229  -27 'å'
-	db 82h	; [370Dh] 130 -126
-	db 29h	; [370Eh]  41 ')'
-	db 0F5h	; [370Fh] 245  -11 'õ'
-	db 82h	; [3710h] 130 -126
-	db 0E5h	; [3711h] 229  -27 'å'
-	db 83h	; [3712h] 131 -125
-	db 3Ah	; [3713h]  58 ':'
-	db 0F5h	; [3714h] 245  -11 'õ'
-	db 83h	; [3715h] 131 -125
-	db 0E8h	; [3716h] 232  -24 'è'
-	db 0F0h	; [3717h] 240  -16 'ð'
-	db 0E5h	; [3718h] 229  -27 'å'
-	db 0F0h	; [3719h] 240  -16 'ð'
-	db 0A3h	; [371Ah] 163  -93 '£'
-	db 0F0h	; [371Bh] 240  -16 'ð'
-	db 22h	; [371Ch]  34 '"'
-	db 40h	; [371Dh]  64 '@'
-	db 03h	; [371Eh]   3
-	db 0BBh	; [371Fh] 187  -69 '»'
-	db 04h	; [3720h]   4
-	db 09h	; [3721h]   9
-	db 0E9h	; [3722h] 233  -23 'é'
-	db 25h	; [3723h]  37 '%'
-	db 82h	; [3724h] 130 -126
-	db 0C8h	; [3725h] 200  -56 'È'
-	db 0F6h	; [3726h] 246  -10 'ö'
-	db 08h	; [3727h]   8
-	db 0A6h	; [3728h] 166  -90 '¦'
-	db 0F0h	; [3729h] 240  -16 'ð'
-	db 22h	; [372Ah]  34 '"'
-	db 50h	; [372Bh]  80 'P'
-	db 09h	; [372Ch]   9
-	db 0E9h	; [372Dh] 233  -23 'é'
-	db 25h	; [372Eh]  37 '%'
-	db 82h	; [372Fh] 130 -126
-	db 0C8h	; [3730h] 200  -56 'È'
-	db 0F2h	; [3731h] 242  -14 'ò'
-	db 0E5h	; [3732h] 229  -27 'å'
-	db 0F0h	; [3733h] 240  -16 'ð'
-	db 08h	; [3734h]   8
-	db 0F2h	; [3735h] 242  -14 'ò'
-	db 22h	; [3736h]  34 '"'
+jump_36D1:
+	inc DPTR
+	mov R0, A
+	movx A, @DPTR
+	xch A, B
+	add A, B
+	movx @DPTR, A
+	mov A, DPL
+	dec DPL
+	jnz jump_36E1
+	dec DPH
+jump_36E1:
+	movx A, @DPTR
+	xch A, R0
+	addc A, R0
+	movx @DPTR, A
+	mov A, R0
+	ret
+
+jump_36E7:
+	cjne R3, #02h, jump_36F4	;   2
+	mov DPL, R1
+	mov DPH, R2
+	movx @DPTR, A
+	mov A, B
+	inc DPTR
+	movx @DPTR, A
+	ret
+
+jump_36F4:
+	jc jump_36F9
+	cjne R3, #04h, jump_36FF	;   4
+jump_36F9:
+	mov @R1, A
+	inc R1
+	mov @R1, B
+	dec R1
+	ret
+
+jump_36FF:
+	jnc jump_3707
+	movx @R1, A
+	mov A, B
+	inc R1
+	movx @R1, A
+	dec R1
+jump_3707:
+	ret
+
+jump_3708:
+	mov R0, A
+	cjne R3, #02h, jump_371D	;   2
+	mov A, DPL
+	add A, R1
+	mov DPL, A
+	mov A, DPH
+	addc A, R2
+	mov DPH, A
+	mov A, R0
+	movx @DPTR, A
+	mov A, B
+	inc DPTR
+	movx @DPTR, A
+	ret
+
+jump_371D:
+	jc jump_3722
+	cjne R3, #04h, jump_372B	;   4
+jump_3722:
+	mov A, R1
+	add A, DPL
+	xch A, R0
+	mov @R0, A
+	inc R0
+	mov @R0, B
+	ret
+
+jump_372B:
+	jnc jump_3736
+	mov A, R1
+	add A, DPL
+	xch A, R0
+	movx @R0, A
+	mov A, B
+	inc R0
+	movx @R0, A
+jump_3736:
+	ret
+
 
 end

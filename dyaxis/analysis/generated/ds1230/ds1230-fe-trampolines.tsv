@@ -1,44 +1,44 @@
-cpu_address	file_offset	u17_code_target
-0xFE00	0x7E00	0x2442
-0xFE03	0x7E03	0x06EB
-0xFE06	0x7E06	0x075D
-0xFE09	0x7E09	0x22E2
-0xFE0C	0x7E0C	0x1F51
-0xFE0F	0x7E0F	0x205B
-0xFE12	0x7E12	0x07B8
-0xFE15	0x7E15	0x0821
-0xFE18	0x7E18	0x090D
-0xFE1B	0x7E1B	0x09E3
-0xFE1E	0x7E1E	0x1A2A
-0xFE21	0x7E21	0x1423
-0xFE24	0x7E24	0x0C14
-0xFE27	0x7E27	0x1D7E
-0xFE2A	0x7E2A	0x1ADC
-0xFE2D	0x7E2D	0x162C
-0xFE30	0x7E30	0x1551
-0xFE33	0x7E33	0x2182
-0xFE36	0x7E36	0x0680
-0xFE39	0x7E39	0x0542
-0xFE3C	0x7E3C	0x05C6
-0xFE3F	0x7E3F	0x0B4D
-0xFE42	0x7E42	0x0BD9
-0xFE45	0x7E45	0x1469
-0xFE48	0x7E48	0x14B3
-0xFE4B	0x7E4B	0x0C4B
-0xFE4E	0x7E4E	0x0A55
-0xFE51	0x7E51	0x007C
-0xFE54	0x7E54	0x1671
-0xFE57	0x7E57	0x21E6
-0xFE5A	0x7E5A	0x1C7B
-0xFE5D	0x7E5D	0x23C5
-0xFE60	0x7E60	0x037C
-0xFE63	0x7E63	0x168A
-0xFE66	0x7E66	0x12D5
-0xFE69	0x7E69	0x137B
-0xFE6C	0x7E6C	0x12AB
-0xFE6F	0x7E6F	0x1278
-0xFE72	0x7E72	0x180E
-0xFE75	0x7E75	0x1869
-0xFE78	0x7E78	0x1909
-0xFE7B	0x7E7B	0x19E2
-0xFE7E	0x7E7E	0x0076
+cpu_address	file_offset	u17_code_target	callers	likely_function	confidence	evidence
+0xFE00	0x7E00	0x2442	0x01ED jump_01E0	U17 CODE 0x2442 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE03	0x7E03	0x06EB	0x0797 jump_076E;0x07AA jump_079C	U17 CODE 0x06EB service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE06	0x7E06	0x075D	0x0244 jump_023A;0x0251 jump_023A;0x0266 jump_0257;0x0273 jump_0257;0x028D jump_027E;0x02B6 jump_02A1;0x02C3 jump_02A1;0x02D7 jump_02CD;0x02FD jump_02CD;0x030A jump_02CD;0x031B jump_0311;0x0328 jump_0311;0x0359 jump_034D;0x0366 jump_034D;0x0373 jump_034D;0x081D jump_0803;0x0909 jump_08DC;0x09DF jump_09A8;0x0A51 jump_0A07;0x31AF jump_3176	display/string service	high	R2:R1 resolves to embedded boot strings at every observed call
+0xFE09	0x7E09	0x22E2	—	U17 CODE 0x22E2 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE0C	0x7E0C	0x1F51	—	U17 CODE 0x1F51 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE0F	0x7E0F	0x205B	—	U17 CODE 0x205B service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE12	0x7E12	0x07B8	—	U17 CODE 0x07B8 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE15	0x7E15	0x0821	—	U17 CODE 0x0821 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE18	0x7E18	0x090D	—	U17 CODE 0x090D service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE1B	0x7E1B	0x09E3	—	U17 CODE 0x09E3 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE1E	0x7E1E	0x1A2A	0x0EBA jump_0EA2	U17 CODE 0x1A2A service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE21	0x7E21	0x1423	0x01F6 jump_01E0	U17 CODE 0x1423 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE24	0x7E24	0x0C14	0x0212 jump_0212	U17 CODE 0x0C14 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE27	0x7E27	0x1D7E	0x0EFC jump_0EA2;0x11CC jump_11CC	U17 CODE 0x1D7E service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE2A	0x7E2A	0x1ADC	0x102A jump_1016	U17 CODE 0x1ADC service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE2D	0x7E2D	0x162C	—	U17 CODE 0x162C service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE30	0x7E30	0x1551	—	U17 CODE 0x1551 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE33	0x7E33	0x2182	0x0EC1 jump_0EA2;0x0EC9 jump_0EA2;0x0ED1 jump_0EA2;0x0ED9 jump_0EA2;0x0EE1 jump_0EA2;0x0EE9 jump_0EA2;0x0EF1 jump_0EA2;0x0EF9 jump_0EA2;0x10D8 jump_10CB;0x11B8 jump_11AB	indexed external service	medium	repeated U17 calls use R7 values 1..7; exact peripheral role unresolved
+0xFE36	0x7E36	0x0680	—	U17 CODE 0x0680 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE39	0x7E39	0x0542	—	U17 CODE 0x0542 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE3C	0x7E3C	0x05C6	—	U17 CODE 0x05C6 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE3F	0x7E3F	0x0B4D	0x0217 jump_0212;0x0F03 jump_0EA2	U17 CODE 0x0B4D service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE42	0x7E42	0x0BD9	0x021A jump_0212;0x0F06 jump_0EA2	U17 CODE 0x0BD9 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE45	0x7E45	0x1469	0x0EA8 jump_0EA2;0x0FE2 jump_0FCD	U17 CODE 0x1469 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE48	0x7E48	0x14B3	0x0EB1 jump_0EA2;0x0F99 jump_0F84;0x1865 jump_185B;0x1905 jump_18FB;0x19DE jump_19CF;0x1A26 jump_1A1C	U17 CODE 0x14B3 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE4B	0x7E4B	0x0C4B	0x0F09 jump_0EA2	U17 CODE 0x0C4B service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE4E	0x7E4E	0x0A55	—	U17 CODE 0x0A55 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE51	0x7E51	0x007C	0x0378 jump_034D;0x0F21 jump_0F1F;0x100E jump_0FFA	U17 CODE 0x007C service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE54	0x7E54	0x1671	0x0E2E jump_0E2C;0x0E33 jump_0E2C	U17 CODE 0x1671 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE57	0x7E57	0x21E6	0x10C4 jump_10B8;0x11A5 jump_119C	U17 CODE 0x21E6 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE5A	0x7E5A	0x1C7B	0x101C jump_1016	U17 CODE 0x1C7B service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE5D	0x7E5D	0x23C5	—	U17 CODE 0x23C5 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE60	0x7E60	0x037C	—	checksum helper	high	trampoline reaches U17 037C, the validated application checksum loop
+0xFE63	0x7E63	0x168A	—	U17 CODE 0x168A service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE66	0x7E66	0x12D5	—	U17 CODE 0x12D5 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE69	0x7E69	0x137B	—	U17 CODE 0x137B service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE6C	0x7E6C	0x12AB	0x0F30 jump_0F1F	U17 CODE 0x12AB service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE6F	0x7E6F	0x1278	0x0F16 jump_0F16	U17 CODE 0x1278 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE72	0x7E72	0x180E	—	U17 CODE 0x180E service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE75	0x7E75	0x1869	—	U17 CODE 0x1869 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE78	0x7E78	0x1909	—	U17 CODE 0x1909 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE7B	0x7E7B	0x19E2	—	U17 CODE 0x19E2 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only
+0xFE7E	0x7E7E	0x0076	—	U17 CODE 0x0076 service; semantic role unresolved	low	valid LJMP target and U17 call-site evidence only

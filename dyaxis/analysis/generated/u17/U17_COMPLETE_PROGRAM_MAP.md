@@ -1,8 +1,8 @@
 # U17 current reachable-vector map
 
 Generated from `u17.reachable.asm` and the verified tracked ROM. The current
-pass reconstructs exact ROM addresses for **1830 valid instructions**
-covering **2950 bytes**. It is not a complete program map: bytes
+pass reconstructs exact ROM addresses for **5859 valid instructions**
+covering **8935 bytes**. It is not a complete program map: bytes
 outside reachable vector paths, unresolved indirect control flow and external
 CODE bodies remain separate evidence domains.
 

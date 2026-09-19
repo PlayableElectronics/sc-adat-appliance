@@ -20,6 +20,12 @@ rom_address	caller	target	family	confidence	inputs_before	outputs_after
 0x0366	jump_034D	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #02h; mov R3, #05h; mov R2, #04h; mov R1, #0E7h	clr A; mov R7, A; mov R5, #07h; mov R3, #05h; mov R2, #05h; mov R1, #15h
 0x0373	jump_034D	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #07h; mov R3, #05h; mov R2, #05h; mov R1, #15h	clr A; mov R7, A
 0x0378	jump_034D	0xFE51	FE-page service	low	mov R3, #05h; mov R2, #05h; mov R1, #15h; clr A; mov R7, A	clr A; mov R5, A; mov R4, A
+0x0797	jump_076E	0xFE03	FE-page service	low	mov DPTR, #dptr_0040; movx A, @DPTR; mov R5, A; inc DPTR; movx A, @DPTR; mov R3, A	mov DPTR, #dptr_0045; movx A, @DPTR; add A, #0E0h; mov R7, A; mov DPTR, #dptr_0040
+0x07AA	jump_079C	0xFE03	FE-page service	low	mov DPTR, #dptr_0040; movx A, @DPTR; mov R5, A; inc DPTR; movx A, @DPTR; mov R3, A	mov DPTR, #dptr_0040; movx A, @DPTR; add A, #05h; movx @DPTR, A
+0x081D	jump_0803	0xFE06	FE-page service	low	inc DPTR; movx A, @DPTR; mov R5, A; mov R3, #01h; mov R2, #00h; mov R1, #89h	mov DPTR, #dptr_0048; mov A, R7; movx @DPTR, A; inc DPTR; mov A, R5
+0x0909	jump_08DC	0xFE06	FE-page service	low	inc DPTR; movx A, @DPTR; mov R5, A; mov R3, #01h; mov R2, #00h; mov R1, #89h	mov DPTR, #dptr_004C; mov A, R7; movx @DPTR, A; inc DPTR; mov A, R5
+0x09DF	jump_09A8	0xFE06	FE-page service	low	inc DPTR; movx A, @DPTR; mov R5, A; mov R3, #01h; mov R2, #00h; mov R1, #89h	mov DPTR, #dptr_0050; mov A, R7; movx @DPTR, A; inc DPTR; mov A, R5
+0x0A51	jump_0A07	0xFE06	FE-page service	low	inc DPTR; movx A, @DPTR; mov R5, A; mov R3, #01h; mov R2, #00h; mov R1, #89h	mov R3, 07h; mov A, #80h; add A, R3; mov R3, A
 0x0E2E	jump_0E2C	0xFE54	FE-page service	low	movx A, @DPTR; inc A; movx @DPTR, A; clr A; mov R7, A	clr A; mov R7, A; clr A; mov DPTR, #dptr_005A; movx @DPTR, A
 0x0E33	jump_0E2C	0xFE54	FE-page service	low	clr A; mov R7, A; clr A; mov R7, A	clr A; mov DPTR, #dptr_005A; movx @DPTR, A; inc DPTR; movx @DPTR, A
 0x0EA8	jump_0EA2	0xFE45	FE-page service	low	inc A; movx @DPTR, A; mov R3, #02h; mov R2, #00h; mov R1, #5Ch	mov R3, #02h; mov R2, #00h; mov R1, #64h; clr A
@@ -50,6 +56,10 @@ rom_address	caller	target	family	confidence	inputs_before	outputs_after
 0x11A5	jump_119C	0xFE57	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R6, A; inc DPTR; movx A, @DPTR; mov R7, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; mov R7, A; mov DPTR, #dptr_006C; movx A, @DPTR
 0x11B8	jump_11AB	0xFE33	FE-page service	low	mov DPTR, #dptr_006C; movx A, @DPTR; mov R4, A; inc DPTR; movx A, @DPTR; mov R5, A	mov DPTR, #fwd_005B_jump_3434; movx A, @DPTR; inc A; movx @DPTR, A; mov DPTR, #dptr_005A
 0x11CC	jump_11CC	0xFE27	FE-page service	low	mov DPTR, #dptr_005A; movx A, @DPTR; inc A; movx @DPTR, A	clr A; mov R6, A; mov A, R6
+0x1865	jump_185B	0xFE48	FE-page service	low	mov R6, 04h; mov R7, 05h; mov R2, 06h; mov R1, 07h; mov R3, #02h	mov DPTR, #dptr_009A; mov A, R7; movx @DPTR, A; mov R1, #01h; mov R7, #07h
+0x1905	jump_18FB	0xFE48	FE-page service	low	mov R6, 04h; mov R7, 05h; mov R2, 06h; mov R1, 07h; mov R3, #02h	mov DPTR, #dptr_009C; mov A, R7; movx @DPTR, A; inc DPTR; mov A, R2
+0x19DE	jump_19CF	0xFE48	FE-page service	low	mov DPL, R7; mov DPH, R6; movx @DPTR, A; mov R2, 06h; mov R1, 07h; mov R3, #02h	mov R6, #02h; mov A, R6
+0x1A26	jump_1A1C	0xFE48	FE-page service	low	mov R6, 04h; mov R7, 05h; mov R2, 06h; mov R1, 07h; mov R3, #02h	mov R7, #01h; clr A
 0x31AF	jump_3176	0xFE06	FE-page service	low	clr A; mov R7, A; mov R5, #06h; mov R3, #05h; mov R2, #33h; mov R1, #0CEh	mov R0, #0A8h; mov R0, #0A5h
 0x32A2	jump_328A	0x8000	external application launch	high	clr A; mov TM2CON, A; clr TM2IR.4	mov R7, #02h; clr A; mov R7, A
 0x3408	jump_33F8	0xFEC9	interrupt/service shim	medium	mov DPTR, #dptr_FEC8; movx A, @DPTR

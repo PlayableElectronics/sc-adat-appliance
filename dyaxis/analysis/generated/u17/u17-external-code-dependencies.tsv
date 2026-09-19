@@ -20,6 +20,12 @@ rom_address	caller	target	instruction
 0x0366	jump_034D	0xFE06	lcall jump_FE06
 0x0373	jump_034D	0xFE06	lcall jump_FE06
 0x0378	jump_034D	0xFE51	lcall jump_FE51
+0x0797	jump_076E	0xFE03	lcall jump_FE03
+0x07AA	jump_079C	0xFE03	lcall jump_FE03
+0x081D	jump_0803	0xFE06	lcall jump_FE06
+0x0909	jump_08DC	0xFE06	lcall jump_FE06
+0x09DF	jump_09A8	0xFE06	lcall jump_FE06
+0x0A51	jump_0A07	0xFE06	lcall jump_FE06
 0x0E2E	jump_0E2C	0xFE54	lcall jump_FE54
 0x0E33	jump_0E2C	0xFE54	lcall jump_FE54
 0x0EA8	jump_0EA2	0xFE45	lcall jump_FE45
@@ -50,6 +56,10 @@ rom_address	caller	target	instruction
 0x11A5	jump_119C	0xFE57	lcall jump_FE57
 0x11B8	jump_11AB	0xFE33	lcall jump_FE33
 0x11CC	jump_11CC	0xFE27	lcall jump_FE27
+0x1865	jump_185B	0xFE48	lcall jump_FE48
+0x1905	jump_18FB	0xFE48	lcall jump_FE48
+0x19DE	jump_19CF	0xFE48	lcall jump_FE48
+0x1A26	jump_1A1C	0xFE48	lcall jump_FE48
 0x31AF	jump_3176	0xFE06	lcall jump_FE06
 0x32A2	jump_328A	0x8000	lcall jump_8000
 0x3408	jump_33F8	0xFEC9	lcall jump_FEC9

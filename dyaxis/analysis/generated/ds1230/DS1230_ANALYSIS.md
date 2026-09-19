@@ -61,6 +61,32 @@ Input: `41.005.415.Z1-U17-DS1230Y-100.bin`; size `32768` bytes; SHA-256
 - Printable runs (minimum four bytes):
 - `—` `none`
 
+## Non-zero storage inventory
+
+These are byte-presence regions only; classification is deliberately
+conservative and is not inferred from position alone.
+
+| File range | Bytes | Classification | Confidence |
+|---|---:|---|---|
+| `0x7E00–0x7E51` | 82 | CODE trampoline table | high |
+| `0x7E53–0x7E7E` | 44 | CODE trampoline table | high |
+| `0x7E80–0x7E80` | 1 | persistent state/configuration candidate | low |
+| `0x7EC0–0x7EC1` | 2 | persistent state/configuration candidate | low |
+| `0x7EC4–0x7EC5` | 2 | persistent state/configuration candidate | low |
+| `0x7EC8–0x7EC9` | 2 | persistent state/configuration candidate | low |
+| `0x7ECC–0x7ECD` | 2 | persistent state/configuration candidate | low |
+| `0x7ED0–0x7ED1` | 2 | persistent state/configuration candidate | low |
+| `0x7ED4–0x7ED5` | 2 | persistent state/configuration candidate | low |
+| `0x7ED8–0x7ED9` | 2 | persistent state/configuration candidate | low |
+| `0x7EDC–0x7EDD` | 2 | persistent state/configuration candidate | low |
+| `0x7EE0–0x7EE1` | 2 | persistent state/configuration candidate | low |
+| `0x7EE4–0x7EE5` | 2 | persistent state/configuration candidate | low |
+| `0x7EE8–0x7EE9` | 2 | persistent state/configuration candidate | low |
+| `0x7EEC–0x7EF1` | 6 | persistent state/configuration candidate | low |
+| `0x7EF4–0x7EF5` | 2 | persistent state/configuration candidate | low |
+| `0x7EF8–0x7EF9` | 2 | persistent state/configuration candidate | low |
+| `0x7F00–0x7FFF` | 256 | unexplained retained/residual data | low |
+
 ## U17 signature and checksum
 
 U17 sums file offsets `0000–7DFC` (CPU `8000–FDFC` inclusive), complements

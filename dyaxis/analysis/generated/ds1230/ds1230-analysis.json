@@ -13,217 +13,599 @@
     {
       "cpu_address": "0xFE00",
       "file_offset": "0x7E00",
-      "target": "0x2442"
+      "target": "0x2442",
+      "callers": [
+        "0x01ED jump_01E0"
+      ],
+      "likely_function": "U17 CODE 0x2442 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE03",
       "file_offset": "0x7E03",
-      "target": "0x06EB"
+      "target": "0x06EB",
+      "callers": [
+        "0x0797 jump_076E",
+        "0x07AA jump_079C"
+      ],
+      "likely_function": "U17 CODE 0x06EB service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE06",
       "file_offset": "0x7E06",
-      "target": "0x075D"
+      "target": "0x075D",
+      "callers": [
+        "0x0244 jump_023A",
+        "0x0251 jump_023A",
+        "0x0266 jump_0257",
+        "0x0273 jump_0257",
+        "0x028D jump_027E",
+        "0x02B6 jump_02A1",
+        "0x02C3 jump_02A1",
+        "0x02D7 jump_02CD",
+        "0x02FD jump_02CD",
+        "0x030A jump_02CD",
+        "0x031B jump_0311",
+        "0x0328 jump_0311",
+        "0x0359 jump_034D",
+        "0x0366 jump_034D",
+        "0x0373 jump_034D",
+        "0x081D jump_0803",
+        "0x0909 jump_08DC",
+        "0x09DF jump_09A8",
+        "0x0A51 jump_0A07",
+        "0x31AF jump_3176"
+      ],
+      "likely_function": "display/string service",
+      "confidence": "high",
+      "evidence": "R2:R1 resolves to embedded boot strings at every observed call"
     },
     {
       "cpu_address": "0xFE09",
       "file_offset": "0x7E09",
-      "target": "0x22E2"
+      "target": "0x22E2",
+      "callers": [],
+      "likely_function": "U17 CODE 0x22E2 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE0C",
       "file_offset": "0x7E0C",
-      "target": "0x1F51"
+      "target": "0x1F51",
+      "callers": [],
+      "likely_function": "U17 CODE 0x1F51 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE0F",
       "file_offset": "0x7E0F",
-      "target": "0x205B"
+      "target": "0x205B",
+      "callers": [],
+      "likely_function": "U17 CODE 0x205B service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE12",
       "file_offset": "0x7E12",
-      "target": "0x07B8"
+      "target": "0x07B8",
+      "callers": [],
+      "likely_function": "U17 CODE 0x07B8 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE15",
       "file_offset": "0x7E15",
-      "target": "0x0821"
+      "target": "0x0821",
+      "callers": [],
+      "likely_function": "U17 CODE 0x0821 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE18",
       "file_offset": "0x7E18",
-      "target": "0x090D"
+      "target": "0x090D",
+      "callers": [],
+      "likely_function": "U17 CODE 0x090D service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE1B",
       "file_offset": "0x7E1B",
-      "target": "0x09E3"
+      "target": "0x09E3",
+      "callers": [],
+      "likely_function": "U17 CODE 0x09E3 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE1E",
       "file_offset": "0x7E1E",
-      "target": "0x1A2A"
+      "target": "0x1A2A",
+      "callers": [
+        "0x0EBA jump_0EA2"
+      ],
+      "likely_function": "U17 CODE 0x1A2A service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE21",
       "file_offset": "0x7E21",
-      "target": "0x1423"
+      "target": "0x1423",
+      "callers": [
+        "0x01F6 jump_01E0"
+      ],
+      "likely_function": "U17 CODE 0x1423 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE24",
       "file_offset": "0x7E24",
-      "target": "0x0C14"
+      "target": "0x0C14",
+      "callers": [
+        "0x0212 jump_0212"
+      ],
+      "likely_function": "U17 CODE 0x0C14 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE27",
       "file_offset": "0x7E27",
-      "target": "0x1D7E"
+      "target": "0x1D7E",
+      "callers": [
+        "0x0EFC jump_0EA2",
+        "0x11CC jump_11CC"
+      ],
+      "likely_function": "U17 CODE 0x1D7E service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE2A",
       "file_offset": "0x7E2A",
-      "target": "0x1ADC"
+      "target": "0x1ADC",
+      "callers": [
+        "0x102A jump_1016"
+      ],
+      "likely_function": "U17 CODE 0x1ADC service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE2D",
       "file_offset": "0x7E2D",
-      "target": "0x162C"
+      "target": "0x162C",
+      "callers": [],
+      "likely_function": "U17 CODE 0x162C service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE30",
       "file_offset": "0x7E30",
-      "target": "0x1551"
+      "target": "0x1551",
+      "callers": [],
+      "likely_function": "U17 CODE 0x1551 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE33",
       "file_offset": "0x7E33",
-      "target": "0x2182"
+      "target": "0x2182",
+      "callers": [
+        "0x0EC1 jump_0EA2",
+        "0x0EC9 jump_0EA2",
+        "0x0ED1 jump_0EA2",
+        "0x0ED9 jump_0EA2",
+        "0x0EE1 jump_0EA2",
+        "0x0EE9 jump_0EA2",
+        "0x0EF1 jump_0EA2",
+        "0x0EF9 jump_0EA2",
+        "0x10D8 jump_10CB",
+        "0x11B8 jump_11AB"
+      ],
+      "likely_function": "indexed external service",
+      "confidence": "medium",
+      "evidence": "repeated U17 calls use R7 values 1..7; exact peripheral role unresolved"
     },
     {
       "cpu_address": "0xFE36",
       "file_offset": "0x7E36",
-      "target": "0x0680"
+      "target": "0x0680",
+      "callers": [],
+      "likely_function": "U17 CODE 0x0680 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE39",
       "file_offset": "0x7E39",
-      "target": "0x0542"
+      "target": "0x0542",
+      "callers": [],
+      "likely_function": "U17 CODE 0x0542 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE3C",
       "file_offset": "0x7E3C",
-      "target": "0x05C6"
+      "target": "0x05C6",
+      "callers": [],
+      "likely_function": "U17 CODE 0x05C6 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE3F",
       "file_offset": "0x7E3F",
-      "target": "0x0B4D"
+      "target": "0x0B4D",
+      "callers": [
+        "0x0217 jump_0212",
+        "0x0F03 jump_0EA2"
+      ],
+      "likely_function": "U17 CODE 0x0B4D service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE42",
       "file_offset": "0x7E42",
-      "target": "0x0BD9"
+      "target": "0x0BD9",
+      "callers": [
+        "0x021A jump_0212",
+        "0x0F06 jump_0EA2"
+      ],
+      "likely_function": "U17 CODE 0x0BD9 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE45",
       "file_offset": "0x7E45",
-      "target": "0x1469"
+      "target": "0x1469",
+      "callers": [
+        "0x0EA8 jump_0EA2",
+        "0x0FE2 jump_0FCD"
+      ],
+      "likely_function": "U17 CODE 0x1469 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE48",
       "file_offset": "0x7E48",
-      "target": "0x14B3"
+      "target": "0x14B3",
+      "callers": [
+        "0x0EB1 jump_0EA2",
+        "0x0F99 jump_0F84",
+        "0x1865 jump_185B",
+        "0x1905 jump_18FB",
+        "0x19DE jump_19CF",
+        "0x1A26 jump_1A1C"
+      ],
+      "likely_function": "U17 CODE 0x14B3 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE4B",
       "file_offset": "0x7E4B",
-      "target": "0x0C4B"
+      "target": "0x0C4B",
+      "callers": [
+        "0x0F09 jump_0EA2"
+      ],
+      "likely_function": "U17 CODE 0x0C4B service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE4E",
       "file_offset": "0x7E4E",
-      "target": "0x0A55"
+      "target": "0x0A55",
+      "callers": [],
+      "likely_function": "U17 CODE 0x0A55 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE51",
       "file_offset": "0x7E51",
-      "target": "0x007C"
+      "target": "0x007C",
+      "callers": [
+        "0x0378 jump_034D",
+        "0x0F21 jump_0F1F",
+        "0x100E jump_0FFA"
+      ],
+      "likely_function": "U17 CODE 0x007C service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE54",
       "file_offset": "0x7E54",
-      "target": "0x1671"
+      "target": "0x1671",
+      "callers": [
+        "0x0E2E jump_0E2C",
+        "0x0E33 jump_0E2C"
+      ],
+      "likely_function": "U17 CODE 0x1671 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE57",
       "file_offset": "0x7E57",
-      "target": "0x21E6"
+      "target": "0x21E6",
+      "callers": [
+        "0x10C4 jump_10B8",
+        "0x11A5 jump_119C"
+      ],
+      "likely_function": "U17 CODE 0x21E6 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE5A",
       "file_offset": "0x7E5A",
-      "target": "0x1C7B"
+      "target": "0x1C7B",
+      "callers": [
+        "0x101C jump_1016"
+      ],
+      "likely_function": "U17 CODE 0x1C7B service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE5D",
       "file_offset": "0x7E5D",
-      "target": "0x23C5"
+      "target": "0x23C5",
+      "callers": [],
+      "likely_function": "U17 CODE 0x23C5 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE60",
       "file_offset": "0x7E60",
-      "target": "0x037C"
+      "target": "0x037C",
+      "callers": [],
+      "likely_function": "checksum helper",
+      "confidence": "high",
+      "evidence": "trampoline reaches U17 037C, the validated application checksum loop"
     },
     {
       "cpu_address": "0xFE63",
       "file_offset": "0x7E63",
-      "target": "0x168A"
+      "target": "0x168A",
+      "callers": [],
+      "likely_function": "U17 CODE 0x168A service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE66",
       "file_offset": "0x7E66",
-      "target": "0x12D5"
+      "target": "0x12D5",
+      "callers": [],
+      "likely_function": "U17 CODE 0x12D5 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE69",
       "file_offset": "0x7E69",
-      "target": "0x137B"
+      "target": "0x137B",
+      "callers": [],
+      "likely_function": "U17 CODE 0x137B service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE6C",
       "file_offset": "0x7E6C",
-      "target": "0x12AB"
+      "target": "0x12AB",
+      "callers": [
+        "0x0F30 jump_0F1F"
+      ],
+      "likely_function": "U17 CODE 0x12AB service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE6F",
       "file_offset": "0x7E6F",
-      "target": "0x1278"
+      "target": "0x1278",
+      "callers": [
+        "0x0F16 jump_0F16"
+      ],
+      "likely_function": "U17 CODE 0x1278 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE72",
       "file_offset": "0x7E72",
-      "target": "0x180E"
+      "target": "0x180E",
+      "callers": [],
+      "likely_function": "U17 CODE 0x180E service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE75",
       "file_offset": "0x7E75",
-      "target": "0x1869"
+      "target": "0x1869",
+      "callers": [],
+      "likely_function": "U17 CODE 0x1869 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE78",
       "file_offset": "0x7E78",
-      "target": "0x1909"
+      "target": "0x1909",
+      "callers": [],
+      "likely_function": "U17 CODE 0x1909 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE7B",
       "file_offset": "0x7E7B",
-      "target": "0x19E2"
+      "target": "0x19E2",
+      "callers": [],
+      "likely_function": "U17 CODE 0x19E2 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
     },
     {
       "cpu_address": "0xFE7E",
       "file_offset": "0x7E7E",
-      "target": "0x0076"
+      "target": "0x0076",
+      "callers": [],
+      "likely_function": "U17 CODE 0x0076 service; semantic role unresolved",
+      "confidence": "low",
+      "evidence": "valid LJMP target and U17 call-site evidence only"
+    }
+  ],
+  "nonzero_regions": [
+    {
+      "start": "0x7E00",
+      "end": "0x7E51",
+      "length": 82,
+      "classification": "CODE trampoline table",
+      "confidence": "high"
+    },
+    {
+      "start": "0x7E53",
+      "end": "0x7E7E",
+      "length": 44,
+      "classification": "CODE trampoline table",
+      "confidence": "high"
+    },
+    {
+      "start": "0x7E80",
+      "end": "0x7E80",
+      "length": 1,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EC0",
+      "end": "0x7EC1",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EC4",
+      "end": "0x7EC5",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EC8",
+      "end": "0x7EC9",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7ECC",
+      "end": "0x7ECD",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7ED0",
+      "end": "0x7ED1",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7ED4",
+      "end": "0x7ED5",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7ED8",
+      "end": "0x7ED9",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EDC",
+      "end": "0x7EDD",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EE0",
+      "end": "0x7EE1",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EE4",
+      "end": "0x7EE5",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EE8",
+      "end": "0x7EE9",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EEC",
+      "end": "0x7EF1",
+      "length": 6,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EF4",
+      "end": "0x7EF5",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7EF8",
+      "end": "0x7EF9",
+      "length": 2,
+      "classification": "persistent state/configuration candidate",
+      "confidence": "low"
+    },
+    {
+      "start": "0x7F00",
+      "end": "0x7FFF",
+      "length": 256,
+      "classification": "unexplained retained/residual data",
+      "confidence": "low"
     }
   ],
   "reset_bytes": "0000000000000000",

@@ -1,11 +1,11 @@
 {
   "method": "disasm51 reachable boundaries plus ROM-backed 8051 address reconstruction and CFG DPTR analysis",
-  "instruction_records": 1830,
-  "function_labels": 158,
-  "external_code_call_count": 67,
+  "instruction_records": 5859,
+  "function_labels": 476,
+  "external_code_call_count": 77,
   "resolved_movc_table_count": 1,
   "unresolved_movc_count": 1,
-  "unclassified_range_count": 160,
+  "unclassified_range_count": 320,
   "fe06_call_count": 16,
   "literal_high_xdata": {
     "0xFFE1": {
@@ -51,17 +51,37 @@
     },
     "0xFFF0": {
       "R": 1,
-      "W": 0,
+      "W": 2,
       "locations": [
-        "0x1455 jump_1440: movx A, @DPTR"
+        "0x1455 jump_1440: movx A, @DPTR",
+        "0x1543 jump_152B: movx @DPTR, A",
+        "0x1618 jump_15E0: movx @DPTR, A"
       ]
     },
     "0xFFF1": {
       "R": 0,
-      "W": 2,
+      "W": 4,
       "locations": [
         "0x1445 jump_1440: movx @DPTR, A",
-        "0x1451 jump_1440: movx @DPTR, A"
+        "0x1451 jump_1440: movx @DPTR, A",
+        "0x1535 jump_152B: movx @DPTR, A",
+        "0x1612 jump_15E0: movx @DPTR, A"
+      ]
+    },
+    "0xFFF2": {
+      "R": 0,
+      "W": 2,
+      "locations": [
+        "0x1519 jump_1504: movx @DPTR, A",
+        "0x15D1 jump_159C: movx @DPTR, A"
+      ]
+    },
+    "0xFFF3": {
+      "R": 0,
+      "W": 2,
+      "locations": [
+        "0x150C jump_1504: movx @DPTR, A",
+        "0x15CA jump_159C: movx @DPTR, A"
       ]
     },
     "0xFFF4": {
@@ -87,23 +107,58 @@
         "0x066E jump_0646: movx @DPTR, A",
         "0x0677 jump_0646: movx @DPTR, A"
       ]
+    },
+    "0xFFF8": {
+      "R": 1,
+      "W": 0,
+      "locations": [
+        "0x22F2 dptr_2211: movx A, @DPTR"
+      ]
+    },
+    "0xFFF9": {
+      "R": 1,
+      "W": 0,
+      "locations": [
+        "0x22FB dptr_2211: movx A, @DPTR"
+      ]
+    },
+    "0xFFFA": {
+      "R": 1,
+      "W": 0,
+      "locations": [
+        "0x2329 jump_2322: movx A, @DPTR"
+      ]
+    },
+    "0xFFFB": {
+      "R": 1,
+      "W": 0,
+      "locations": [
+        "0x235A jump_2353: movx A, @DPTR"
+      ]
+    },
+    "0xFFFC": {
+      "R": 1,
+      "W": 0,
+      "locations": [
+        "0x238E jump_2387: movx A, @DPTR"
+      ]
     }
   },
   "coverage": {
     "rom_bytes": 32768,
-    "reachable_instruction_bytes": 2950,
+    "reachable_instruction_bytes": 8935,
     "referenced_table_bytes": 32,
     "referenced_string_bytes": 378,
     "candidate_string_bytes": 276,
-    "unclassified_bytes": 29137,
-    "overlap_conflict_bytes": 5,
+    "unclassified_bytes": 23184,
+    "overlap_conflict_bytes": 37,
     "percentages": {
-      "reachable_instruction_bytes": 9.003,
+      "reachable_instruction_bytes": 27.267,
       "referenced_table_bytes": 0.098,
       "referenced_string_bytes": 1.154,
       "candidate_string_bytes": 0.842,
-      "unclassified_bytes": 88.919,
-      "overlap_conflict_bytes": 0.015
+      "unclassified_bytes": 70.752,
+      "overlap_conflict_bytes": 0.113
     }
   },
   "limits": [

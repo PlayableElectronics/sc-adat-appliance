@@ -1,8 +1,10 @@
 rom_address	function	instruction
+0x074A	jump_071D	movc A, @A + DPTR
 0x0F49	jump_0F3C	movc A, @A + DPTR
 0x1058	jump_1048	movc A, @A + DPTR
 0x1166	jump_114A	movc A, @A + DPTR
 0x116A	jump_114A	movc A, @A + DPTR
+0x2474	jump_246E	movc A, @A + DPTR
 0x2F9B	jump_2F9A	movc A, @A + DPTR
 0x2F9F	jump_2F9E	movc A, @A + DPTR
 0x2FAD	jump_2FAC	movc A, @A + DPTR
@@ -12,3 +14,5 @@ rom_address	function	instruction
 0x2FF3	jump_2FEB	movc A, @A + DPTR
 0x2FF9	jump_2FEB	movc A, @A + DPTR
 0x2FFD	jump_2FFC	movc A, @A + DPTR
+0x35D4	jump_35CE	movc A, @A + DPTR
+0x35FF	jump_35F3	movc A, @A + DPTR

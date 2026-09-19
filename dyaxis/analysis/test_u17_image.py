@@ -8,6 +8,19 @@ spec.loader.exec_module(mod)
 
 
 class U17ImageTests(unittest.TestCase):
+    def test_tracked_first_sjmp_candidate_properties_independently(self):
+        root = Path(__file__).parents[1]
+        candidate = (root / "firmware/candidates/41.005.415.Z1-U17-first-app-SJMP-8000.bin").read_bytes()
+        original = (root / "firmware/original/41.005.415.Z1-U17-DS1230Y-100.bin").read_bytes()
+        self.assertEqual(len(candidate), 32768)
+        self.assertEqual(candidate[:2], bytes.fromhex("80 FE"))
+        self.assertEqual(candidate[2:0x7DFC], bytes(0x7DFC - 2))
+        self.assertEqual(candidate[0x7DFC:0x7DFE], bytes.fromhex("AA 55"))
+        expected = (~(sum(candidate[:0x7DFD]) & 0xFFFF)) & 0xFFFF
+        self.assertEqual(int.from_bytes(candidate[0x7DFE:0x7E00], "big"), expected)
+        self.assertEqual(candidate[0x7E00:], original[0x7E00:])
+        self.assertEqual(candidate[0x7E00:] != original[0x7E00:], False)
+
     def test_build_and_validate(self):
         template = bytes(range(256)) * 128
         image = mod.build(b"test application", template)

@@ -165,6 +165,14 @@ under the proposed `8000` mapping, including `FE06 -> U17 CODE 075D` and
 `FE33 -> U17 CODE 2182`; the application region and checksum fields are
 zero-filled.
 
+## U17 validation candidate
+
+`candidates/41.005.415.Z1-U17-first-app-SJMP-8000.bin` is a derived,
+deliberately minimal two-byte external application (`80 FE`, 8051 `SJMP $`).
+Its complete-image construction, programming record and readback verification
+are documented beside the source in the same directory. It is not original
+historical firmware.
+
 ## Preservation notice
 
 These firmware images are preserved for historical research, maintenance,

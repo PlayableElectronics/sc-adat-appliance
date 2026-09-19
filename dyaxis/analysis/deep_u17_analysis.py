@@ -537,7 +537,7 @@ def generate(args):
     ]
     write_tsv(args.out / "u17-memory-ranges.tsv", ["space", "start", "end", "observed_role", "evidence"], memory_ranges)
     checksum_ranges = [
-        ("checksum_input", "0x8000", "0xFDFC", "half-open [start,end)", "sum bytes 0x8000..0xFDFC inclusive; complement in R6:R7"),
+        ("checksum_input", "0x8000", "0xFDFD", "half-open [start,end)", "sum bytes 0x8000..0xFDFC inclusive; complement in R6:R7"),
         ("checksum_result", "0xFDFE", "0xFDFF", "stored big-endian comparison bytes", "compared against complemented sum at 0x02D7..0x0304"),
         ("signature", "0xFDFC", "0xFDFD", "AA 55", "startup gate at 0x0293..0x02AC"),
         ("clear_application", "0x8000", "0xFDFD", "half-open [start,end)", "clear loop 0x03A4..0x03BE"),

@@ -26,8 +26,24 @@ class U17ImageTests(unittest.TestCase):
     def test_checksum_includes_signature_first_byte(self):
         image = bytearray(mod.IMAGE_SIZE)
         image[mod.SIGNATURE_OFFSET:mod.SIGNATURE_OFFSET + 2] = b"\xAA\x55"
+        self.assertEqual(mod.checksum(bytes(image)), 0xFF55)
         image[mod.CHECKSUM_OFFSET:mod.CHECKSUM_OFFSET + 2] = mod.checksum(image).to_bytes(2, "big")
         self.assertEqual(mod.validate(bytes(image)), [])
+
+    def test_checksum_boundary_mutations(self):
+        image = bytearray(mod.IMAGE_SIZE)
+        image[mod.SIGNATURE_OFFSET:mod.SIGNATURE_OFFSET + 2] = b"\xAA\x55"
+        baseline = mod.checksum(bytes(image))
+        changed_first_signature = bytearray(image)
+        changed_first_signature[0x7DFC] ^= 1
+        self.assertNotEqual(mod.checksum(bytes(changed_first_signature)), baseline)
+        changed_second_signature = bytearray(image)
+        changed_second_signature[0x7DFD] ^= 1
+        self.assertEqual(mod.checksum(bytes(changed_second_signature)), baseline)
+        for offset in (0x7DFE, 0x7DFF):
+            changed_checksum = bytearray(image)
+            changed_checksum[offset] ^= 1
+            self.assertEqual(mod.checksum(bytes(changed_checksum)), baseline)
 
 
 if __name__ == "__main__":

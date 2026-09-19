@@ -14,12 +14,13 @@ IMAGE_SIZE = 0x8000
 PAYLOAD_MAX = 0x7DFC       # file 0000..7DFB; signature begins at 7DFC
 SIGNATURE_OFFSET = 0x7DFC
 CHECKSUM_OFFSET = 0x7DFE
+CHECKSUM_END_EXCLUSIVE = 0x7DFD  # file 0000..7DFC; CPU 8000..FDFC
 TRAMPOLINE_OFFSET = 0x7E00
 SIGNATURE = b"\xAA\x55"
 
 
 def checksum(image: bytes) -> int:
-    return (~(sum(image[:CHECKSUM_OFFSET]) & 0xFFFF)) & 0xFFFF
+    return (~(sum(image[:CHECKSUM_END_EXCLUSIVE]) & 0xFFFF)) & 0xFFFF
 
 
 def validate(image: bytes) -> list[str]:

@@ -101,6 +101,10 @@ The FPGA and external-address reassessment is
 The U17 system-leader reconstruction and literal `0xFFE0..0xFFFF` service-register map
 are in `analysis/U17_MAIN_PROGRAM_ARCHITECTURE.md` and
 `analysis/U17_HIGH_ADDRESS_MAILBOX.md`.
+The corrected checksum derivation is in `analysis/U17_CHECKSUM_INSTRUCTION_TABLE.md`;
+the guarded, passive memory-decode capture procedure is
+`analysis/U17_LOGIC_ANALYZER_PROCEDURE.md`, preceded by the powered-off
+`analysis/U17_DS1230_CONTINUITY_TABLE.md`.
 The deeper generated program map, startup state machine, external-CODE
 dependency list, conservative service-window report, serial boundary and
 standalone-capability report are under `analysis/generated/u17/`; unresolved

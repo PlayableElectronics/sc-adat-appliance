@@ -1,6 +1,6 @@
 # Project context
 
-Last updated: 2026-09-16
+Last updated: 2026-09-20
 
 This is the canonical high-level handoff for humans and coding agents. Focused
 contracts in the other documents remain authoritative for their own areas.
@@ -67,6 +67,15 @@ Other available hardware:
   images are preserved and deliberately published at `dyaxis/firmware/`; their
   provenance and checksum manifest are in `dyaxis/firmware/README.md` and
   `SHA256SUMS`.
+
+Current Dyaxis checksum status: the derived two-byte U17 application candidate
+was physically programmed and read-back verified twice, but the console showed
+`Checksum Failed` both times. No further candidate is authorized. The corrected
+static path is marker mismatch -> checksum validation; `FDFE/FDFF` may remain
+the stored checksum bytes during both reads. Before any logic-analyzer work,
+use `dyaxis/analysis/U17_DS1230_CONTINUITY_TABLE.md` with power removed, then
+follow the narrowly scoped passive capture in
+`dyaxis/analysis/U17_LOGIC_ANALYZER_PROCEDURE.md`.
 
 Never describe this installation as a 24-channel physical interface unless the
 ADAT3 expansion hardware is added and verified. Keep the software data model

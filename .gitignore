@@ -21,3 +21,5 @@ __pycache__/
 artifacts/
 candidates/*.cpio*
 candidates/*.bzImage
+# PlatformIO build output for the AtomS3 bridge.
+m5stack/espnow-midi-bridge/.pio/

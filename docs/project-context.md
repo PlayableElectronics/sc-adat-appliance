@@ -1,6 +1,6 @@
 # Project context
 
-Last updated: 2026-09-20
+Last updated: 2026-09-24
 
 This is the canonical high-level handoff for humans and coding agents. Focused
 contracts in the other documents remain authoritative for their own areas.
@@ -63,6 +63,13 @@ Other available hardware:
   serial;
 - two rear RS-422 ports and network hardware remain future reverse-engineering
   work;
+- two M5Stack AtomS3 Lite boards run the standalone
+  `PlayableElectronics/usbmidi-over-espnow` bridge. Both boards were flashed
+  from the same reliability-hardened image and verified by esptool on
+  2026-09-24. The bridge presents native class-compliant USB-MIDI and uses
+  automatic ESP-NOW pairing; its latest firmware commit is
+  `3b6a32affa8ddc07450085ffecb9330ab4cc707b` and the flashed image SHA-256 is
+  `3b1405204544390f93862dcffb49594fb974fa2782cb100a755b65a518d95604`.
 - the verified Studer Dyaxis/MultiDesk U17 and Uptown Automation U7 firmware
   images are preserved and deliberately published at `dyaxis/firmware/`; their
   provenance and checksum manifest are in `dyaxis/firmware/README.md` and

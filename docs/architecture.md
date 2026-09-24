@@ -69,6 +69,20 @@ The first production mixer milestone is Debian/Docker-only:
 It activates only 16 confirmed ADAT channels and keeps a 24-channel data-model
 capacity. It does not change Buildroot, partitions, GRUB, or `/boot`.
 
+Chataigne is an optional external show-control and dashboard layer. It does
+not process audio and is not required for mixer startup or operation. Native
+SuperCollider scheduling remains available for future sample-accurate events;
+this milestone adds no automation sequencer. Open Stage Control remains a
+possible future specialized surface, not a dependency of the first spatial
+prototype.
+
+The intended capture contract keeps physical identity stable: all 16 raw
+inputs are pre-fader/pre-processing, followed by eight pre-spatial group
+stems and four post-spatial quad master channels. Timestamped OSC automation
+and song markers are metadata. Song scenes may reassign physical inputs to
+functional groups. Recording is deliberately outside this quad milestone;
+the stable names and interfaces are reserved for a later recorder.
+
 RME clock ownership is in the Debian audio-hardware layer, not mixer DSP.
 `audio/clock.conf` declares the current `Digi9652` intent (`master`, 48 kHz),
 and `scripts/audio-clock apply` is run before JACK. The later Buildroot

@@ -49,7 +49,7 @@ try:
         assert max(float(x) for x in values) < 0.01
         inject(26 + channel - 1)
         values = [float(x) for x in meters()]
-        input_peaks, group_peaks, output_peaks = values[:16], values[32:37], values[42:58]
+        input_peaks, group_peaks, output_peaks = values[:16], values[32:40], values[48:64]
         assert input_peaks[channel - 1] > 0.01
         assert output_peaks[channel - 1] > 0.01
         assert all(x < 0.01 for i,x in enumerate(input_peaks) if i != channel - 1)
@@ -61,7 +61,7 @@ try:
         time.sleep(0.4)
     inject(42)  # physical channel 17: outside the active 16-channel window
     values = [float(x) for x in meters()]
-    assert max(values[:16] + values[42:58]) < 0.01
+    assert max(values[:16] + values[48:64]) < 0.01
     print("sample flow buses 26->0, 34->8, 41->15; meters and channels 17..26: OK")
 finally:
     proc.terminate(); proc.wait(timeout=2)

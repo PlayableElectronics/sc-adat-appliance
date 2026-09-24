@@ -9,13 +9,41 @@ model reserves 24 channels, but the validator rejects physical mappings above
 `supercollider/synthdefs/sc-adat-mixer.scd` contains DSP only. The versioned
 scene in `payload/config/mixer.conf` and `mixer/mixerctl.py` own configuration,
 validation, OSC policy, node startup, and bounded meter reception. The DSP has
-five explicit groups: drums, bass, instruments, vocals, and fx_returns.
+eight canonical groups matching the Dyaxis faders: kick, drums, bass, music_a,
+music_b, vocals, fx_a, and fx_b.
+`routing.mode=direct` is the unchanged default. `routing.mode=quad` sums those
+groups to physical outputs in canonical order `front_left`, `front_right`,
+`rear_left`, `rear_right` (default 1, 2, 3, 4).
+
+Quad panning uses square-root bilinear rectangular weights, so squared gains
+sum to one at every XY coordinate. Public X is 0 left/0.5 centre/1 right and
+public Y is 0 rear/0.5 centre/1 front; the reusable group node converts this to
+internal X/Y corners (-1,+1) front-left, (+1,+1) front-right, (-1,-1)
+rear-left, (+1,-1) rear-right.
+Spatial controls and calibration are smoothed over the 30 ms default.
+Spatial bypass means a smoothed transition to neutral centre `(0.5, 0.5)`.
+Output calibration provides gain, mute, and polarity; delay is deferred.
+
+The existing scene has group membership but no authoritative stereo-pair
+metadata. Quad mode uses the smallest deterministic fallback: each group's
+existing mono sum is duplicated into two correlated components around the group
+position, separated by width and power-normalized. It cannot recover
+independent stereo information absent from the current topology.
 
 Controls are smoothed over 30 ms. Gains are bounded, audio is clipped before a
 short hard limiter, and invalid control values are rejected. The default scene
 is unity, unmuted, normal polarity, HPF disabled, no sends, and no EQ or
-compression. Meter reports are emitted at 10 Hz for 16 inputs, five groups,
+compression. Meter reports are emitted at 10 Hz for 16 inputs, eight groups,
 and 16 outputs.
+
+The capture contract reserves stable physical identity: all 16 raw inputs are
+captured pre-fader and pre-processing; eight pre-spatial group stems are
+available by canonical name; and four post-spatial quad master channels are
+available in canonical output order. Timestamped OSC automation and song
+markers are metadata interfaces, not audio buses. Song scenes may reassign
+stable physical inputs to functional groups. Recording is out of scope for
+this milestone; these names are reserved so a recorder can be added later
+without redesigning the mixer.
 
 Use:
 
@@ -27,9 +55,28 @@ Use:
 ./lab mixer stop
 ```
 
-The controller listens on UDP 57120 for `/mixer/set` and `/mixer/get`, forwards
-validated changes to scsynth on UDP 57110, and reports `/mixer/ok`,
-`/mixer/error`, and `/mixer/state`.
+The controller listens on UDP 57120 for `/mixer/set`, `/mixer/get`, and bounded
+`/mixer/get-all`, forwards only validated changes to scsynth on UDP 57110, and
+reports `/mixer/ok`, `/mixer/error`, `/mixer/state`, and a completion marker.
+
+The runtime node graph is deterministic:
+
+```text
+In.ar(26,16) -> sc_adat_router (3900)
+                 -> eight sc_adat_group instances (4000..4007)
+                 -> sc_adat_quad_master (4100) -> physical outputs 1..16
+```
+
+The controller owns these transient IDs; clients address only logical group
+IDs. The router preserves the 16 raw pre-processing inputs and produces eight
+group-stem buses. Every group uses the same reusable `sc_adat_group` SynthDef.
+The master meters all 16 raw inputs, eight group stems, and the actual 16
+post-master output channels at 10 Hz. Startup/restart frees the owned graph,
+recreates it under one node group, and synchronizes SynthDef loading first.
+
+Spatial envelopes are mixer-enforced: kick and bass are front-centre; drums
+and vocals are front-biased; music_a/music_b have broad movement; fx_a/fx_b
+have the full quad field. Each has an explicit neutral position in the scene.
 
 Clock ownership belongs to the Debian audio-hardware layer. `./lab audio clock
 status|set ...` addresses ALSA by the stable `Digi9652` name, and `./lab mixer

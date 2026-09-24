@@ -176,7 +176,7 @@ cannot replace the physical RME/optical test.
 Commit `90107bf` introduced the first Debian/Docker production mixer:
 
 - 16 active one-to-one input/output paths;
-- explicit groups: drums, bass, instruments, vocals and FX returns;
+- explicit production groups: kick, drums, bass, music_a, music_b, vocals, fx_a and fx_b;
 - neutral unity scene;
 - smoothed controls;
 - bounded gains and protection;
@@ -249,8 +249,8 @@ Initial live roles are approximately:
 Vocals, vocal effects, spare returns and room/talkback require additional
 physical I/O or revised allocation until ADAT3 exists.
 
-Groups are first-class musical objects: drums, bass, instruments, vocals and FX
-returns. Membership is explicit per song. Bass may originate from different
+Groups are first-class musical objects: kick, drums, bass, music_a, music_b,
+vocals, fx_a and fx_b. Membership is explicit per song. Bass may originate from different
 hardware in different songs; the system never classifies or rearranges it.
 
 Live processing is intentionally restrained:

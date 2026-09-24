@@ -15,7 +15,7 @@ else
 fi
 mkdir -p "$OUT/synthdefs" "$OUT/config" "$OUT/scripts"
 sh -c "$COMPOSE run --rm --no-deps --entrypoint env sc-audio QT_QPA_PLATFORM=offscreen QTWEBENGINE_DISABLE_SANDBOX=1 sclang /workspace/payload/runtime/compile.scd" >"$OUT/sclang.log" 2>&1
-for f in sc_adat_tone24.scsyndef sc_adat_scan.scsyndef sc_adat_mixer.scsyndef; do
+for f in sc_adat_tone24.scsyndef sc_adat_scan.scsyndef sc_adat_router.scsyndef sc_adat_group.scsyndef sc_adat_quad_master.scsyndef; do
   test -s "$OUT/$f" || { echo "missing or empty SynthDef: $f" >&2; exit 1; }; mv "$OUT/$f" "$OUT/synthdefs/$f"
 done
 test "$(find "$OUT" -maxdepth 1 -type f -name '*.scsyndef' | wc -l)" -eq 0 || { echo 'unexpected SynthDef output' >&2; exit 1; }
@@ -26,7 +26,7 @@ cp "$ROOT/payload/runtime/payload-consumer" "$OUT/scripts/payload-consumer"
 printf '%s\n' "$VERSION" >"$OUT/VERSION"
 source_commit=$(git -C "$ROOT" rev-parse HEAD); source_sha=$(sha256sum "$ROOT/supercollider/synthdefs/sc-adat-tone.scd" "$ROOT/supercollider/synthdefs/sc-adat-mixer.scd" | sha256sum | cut -d' ' -f1); epoch=$(git -C "$ROOT" show -s --format=%ct HEAD)
 cat >"$OUT/metadata.json" <<EOF
-{"version":"$VERSION","source_commit":"$source_commit","source_sha256":"$source_sha","supercollider_version":"$SC_VERSION","protocol_version":$PROTOCOL,"synthdefs":["sc_adat_tone24","sc_adat_scan","sc_adat_mixer"],"mixer_channels":16,"mixer_capacity":24,"source_date_epoch":$epoch}
+{"version":"$VERSION","source_commit":"$source_commit","source_sha256":"$source_sha","supercollider_version":"$SC_VERSION","protocol_version":$PROTOCOL,"synthdefs":["sc_adat_tone24","sc_adat_scan","sc_adat_router","sc_adat_group","sc_adat_quad_master"],"mixer_channels":16,"mixer_capacity":24,"source_date_epoch":$epoch}
 EOF
 (cd "$OUT" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$OUT/manifest.sha256"
 (cd "$OUT" && sha256sum -c manifest.sha256)

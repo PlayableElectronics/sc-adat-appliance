@@ -1,0 +1,22 @@
+{
+  "name": "SC-ADAT Quad Mixer",
+  "orientation": "tablet-landscape",
+  "performance_panels": [
+    {"id": 0, "name": "kick"},
+    {"id": 1, "name": "drums"},
+    {"id": 2, "name": "bass"},
+    {"id": 3, "name": "music_a"},
+    {"id": 4, "name": "music_b"},
+    {"id": 5, "name": "vocals"},
+    {"id": 6, "name": "fx_a"},
+    {"id": 7, "name": "fx_b"}
+  ],
+  "panel_controls": ["level", "mute-disabled", "xy", "width", "spatial_bypass", "neutral_reset"],
+  "calibration": {
+    "separate": true,
+    "outputs": ["front_left", "front_right", "rear_left", "rear_right"],
+    "controls": ["gain_db", "mute", "polarity"]
+  },
+  "global": ["connection_status", "connect_refresh", "stop_automation"],
+  "automation": ["manual", "parrot_explicit_arm", "time_machine_explicit_arm"]
+}

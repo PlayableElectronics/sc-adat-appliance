@@ -19,6 +19,8 @@ __pycache__/
 !/dyaxis/firmware/original/41.005.431.11-U3-EDIT-V1.1-AM27C256.bin
 !/dyaxis/firmware/original/41.005.415.Z1-U17-DS1230Y-100.bin
 artifacts/
+# Chataigne autosaves/preferences are local application state, not projects.
+/chataigne/*_autosave/
 candidates/*.cpio*
 candidates/*.bzImage
 # PlatformIO build output for the AtomS3 bridge.

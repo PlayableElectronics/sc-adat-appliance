@@ -1,0 +1,25 @@
+{
+  "osc": {
+    "set": {"address": "/mixer/set", "types": ",sf"},
+    "get": {"address": "/mixer/get", "types": ",s"},
+    "get_all": {"address": "/mixer/get-all", "types": ""}
+  },
+  "groups": [
+    {"id": 0, "name": "kick", "keys": ["groupLevel0", "group0PosX", "group0PosY", "group0Width", "group0SpatialBypass"]},
+    {"id": 1, "name": "drums", "keys": ["groupLevel1", "group1PosX", "group1PosY", "group1Width", "group1SpatialBypass"]},
+    {"id": 2, "name": "bass", "keys": ["groupLevel2", "group2PosX", "group2PosY", "group2Width", "group2SpatialBypass"]},
+    {"id": 3, "name": "music_a", "keys": ["groupLevel3", "group3PosX", "group3PosY", "group3Width", "group3SpatialBypass"]},
+    {"id": 4, "name": "music_b", "keys": ["groupLevel4", "group4PosX", "group4PosY", "group4Width", "group4SpatialBypass"]},
+    {"id": 5, "name": "vocals", "keys": ["groupLevel5", "group5PosX", "group5PosY", "group5Width", "group5SpatialBypass"]},
+    {"id": 6, "name": "fx_a", "keys": ["groupLevel6", "group6PosX", "group6PosY", "group6Width", "group6SpatialBypass"]},
+    {"id": 7, "name": "fx_b", "keys": ["groupLevel7", "group7PosX", "group7PosY", "group7Width", "group7SpatialBypass"]}
+  ],
+  "calibration": [
+    "quadOutput0GainDb", "quadOutput0Mute", "quadOutput0Polarity",
+    "quadOutput1GainDb", "quadOutput1Mute", "quadOutput1Polarity",
+    "quadOutput2GainDb", "quadOutput2Mute", "quadOutput2Polarity",
+    "quadOutput3GainDb", "quadOutput3Mute", "quadOutput3Polarity"
+  ],
+  "global": ["master", "bypass", "routingMode"],
+  "unsupported_placeholders": ["groupNMute"]
+}

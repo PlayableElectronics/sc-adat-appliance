@@ -20,6 +20,7 @@
     "quadOutput2GainDb", "quadOutput2Mute", "quadOutput2Polarity",
     "quadOutput3GainDb", "quadOutput3Mute", "quadOutput3Polarity"
   ],
-  "global": ["master", "bypass", "routingMode"],
+  "global": ["master", "bypass"],
+  "read_only": ["routingMode"],
   "unsupported_placeholders": ["groupNMute"]
 }

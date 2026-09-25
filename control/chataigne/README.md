@@ -1,72 +1,113 @@
-# SC-ADAT Chataigne control project
+# SC-ADAT Chataigne control surface
 
-This is an optional Chataigne control surface for the committed SC-ADAT OSC
-contract. It does not process audio, start the mixer, alter SuperCollider, or
-replace mixer-side validation. The Dell controller remains authoritative.
+This is an optional external control client. It does not process audio, start
+the mixer, alter SuperCollider, or replace mixer-side validation. Chataigne is
+never required for appliance startup.
 
-## Version and seed
+## Version and generation
 
-The installed application is Chataigne 1.10.4 on macOS. The repository's
-authoritative seed is `../../chataigne/Mixer.noisette`; it is readable JSON and
-contains the 1.10.4 metadata and `OSC` module serialization used by the
-generated project. The requested historical path
-`control/chataigne/sc-adat-quad.noisette` did not exist in the checkout; this
-directory is the new canonical location.
-
-Generate the project from the seed with:
+The project was generated from `../../chataigne/Mixer.noisette`, the readable
+seed for the installed Chataigne 1.10.4 (`versionNumber` 68100). The generator
+uses the installed-version native serialization for Custom Variables,
+Point2D dashboard controls, dashboard groups and project-local scripts:
 
 ```sh
 python3 tools/generate_chataigne_project.py
 ```
 
-Open `control/chataigne/sc-adat-quad.noisette` in Chataigne 1.10.4. The Dell
-host is one editable OSC output setting, `remoteHost`, defaulting to
-`192.168.1.100` as a placeholder; replace it with the currently configured Dell
-address. `remotePort` defaults to `57120`.
+Open `sc-adat-quad.noisette` in Chataigne 1.10.4. The script is attached to
+the OSC module at `scripts/sc_adat_mixer.js`; it is kept readable and separate
+from the packed project. Reopen the generated file after generation to verify
+the native dashboard collection.
 
-## Contract and controls
+## Network and synchronization
 
-The exact supported writable messages are listed in
-`reference/controls.json`. They use `/mixer/set` with OSC signature `,sf` and
-the parameter key as the string argument. Refresh uses `/mixer/get-all` with no
-arguments; state, ok, error and get-all-done replies are shown by the script
-logic in `scripts/sc_adat_mixer.js`.
+The OSC output has one editable `remoteHost` setting, defaulting to
+`192.168.1.100`, and UDP port `57120`. Change the host once in the OSC output;
+there are no duplicated addresses in dashboard mappings. `Connect / Refresh`
+sends only `/mixer/get-all` and does not write mixer state. Opening the project
+does not send `/mixer/set` or begin automation.
 
-The eight equal group panels are: kick (0), drums (1), bass (2), music_a (3),
-music_b (4), vocals (5), fx_a (6), and fx_b (7). Each supported panel has
-level, X, Y, width, spatial bypass and neutral/reset actions. Group mute is
-not advertised because the committed controller has no confirmed writable
-`groupNMute` key; it remains a deliberately disabled placeholder. FX A and FX
-B are not renamed or treated as utility effects.
+The script applies incoming `/mixer/state` to the native Custom Variables
+under a feedback guard, so remote state updates the dashboard without an OSC
+feedback loop. `/mixer/ok`, `/mixer/get-all-done` and `/mixer/error` update the
+visible status. A stale/error status never changes mixer state automatically.
 
-Quad output calibration is separate from performance controls: front-left,
-front-right, rear-left and rear-right each expose gain, mute and polarity.
-Calibration is setup-only and must be explicitly armed. Parrot gesture capture
-and Time Machine sequences are placeholders and never arm on load or connect.
-Stop Automation is the global emergency action and returns automation to the
-current manual state without sending a movement merely because the project
-opened.
+## Dashboard
 
-## Operation
+The `SC-ADAT Groups` dashboard contains eight native `DashboardGroupItem`
+panels, all visible in the same dashboard and identified as:
 
-1. Open the `.noisette` project in Chataigne 1.10.4.
-2. Set `remoteHost` once to the Dell address; leave `remotePort` at `57120`.
-3. Use explicit Connect/Refresh to send `/mixer/get-all`; connection is state
-   synchronization only.
-4. Operate the eight group panels manually. The mixer enforces spatial limits.
-5. Arm automation explicitly before using Parrot or Time Machine, and use Stop
-   Automation to return to manual/current state.
-6. If state becomes stale, stop automation, verify the Dell address and refresh.
+| ID | Group |
+|---:|---|
+| 0 | kick |
+| 1 | drums |
+| 2 | bass |
+| 3 | music_a |
+| 4 | music_b |
+| 5 | vocals |
+| 6 | fx_a |
+| 7 | fx_b |
 
-For no-audio verification, run the mixer OSC tests or observe `/mixer/state`,
-`/mixer/ok`, `/mixer/error` and `/mixer/get-all-done` packets with a UDP test
-listener. Chataigne is not required for mixer startup or audio recovery.
+Each panel has a level fader, native Point2D XY canvas, width, spatial bypass
+and Neutral reset. The committed API has no confirmed writable group-mute key,
+so group mute is intentionally absent. XY uses X 0=left/1=right and
+Y 0=rear/1=front; the Dell remains authoritative for constraints.
 
-The readable script is kept outside the packed project where Chataigne permits
-it. It is the reference for exact message construction and incoming-state
-handling; attach it to the OSC module's script slot if this Chataigne build
-does not automatically discover project-local scripts. No automatic movement
-or feedback loop is permitted.
+`Connection and Safety` contains connection state, Refresh, explicit
+automation arm and the global Stop Automation action. Stop Automation invokes
+the installed Chataigne Parrot stop triggers and Time Machine `stopAll` trigger;
+it is not merely a private flag. Parrot and Time Machine remain placeholders
+until a user explicitly arms automation.
 
-The current Dell quad-graph repair is separate and may change which already
-documented controls are effective. No proposed API addition is implemented.
+`Quad Output Calibration (armed)` is separate from performance controls.
+Front-left, front-right, rear-left and rear-right each expose gain, mute and
+polarity. Changes are transmitted only while Arm Calibration is active.
+`routingMode` is displayed as read-only status and is not a writable control.
+
+## Supported OSC
+
+Outgoing performance and armed calibration changes use exactly:
+
+```text
+/mixer/set ,sf <parameter-key> <float-value>
+/mixer/get ,s <parameter-key>
+/mixer/get-all
+```
+
+The exact supported keys are in `reference/controls.json`. There is no
+unimplemented API addition in this project. Incoming `/mixer/state`,
+`/mixer/ok`, `/mixer/error` and `/mixer/get-all-done` are handled by the
+attached script.
+
+## Mock and operation
+
+Run the dependency-free mock receiver on a development machine:
+
+```sh
+python3 tools/chataigne_mock_osc.py --host 127.0.0.1 --port 57120
+```
+
+Set `remoteHost` to `127.0.0.1`, press Connect / Refresh, and observe the
+validated packets. This can be done with no speakers connected. Restore the
+Dell host before live use. A stale/error state is recovered by checking the
+host and pressing Refresh; Chataigne does not attempt automatic recovery
+writes.
+
+For performance, use the eight group panels manually. Arm calibration before
+touching output setup. Arm Parrot or Time Machine explicitly, and use Stop
+Automation to stop playback and retain current manual values. The Dell mixer
+remains the safety authority.
+
+## Validation and limitations
+
+The project has been reopened in the installed Chataigne 1.10.4 and its
+normalized dashboard serialization inspected. Host tests validate the OSC
+mock, all eight group key families, Refresh, malformed/error handling and the
+absence of writable `routingMode`.
+
+The mock proves packet construction and state-model behavior without hardware;
+it is not a substitute for a live Dell run. One real dashboard gesture and a
+live incoming state update should still be observed with the mock receiver
+after any local Chataigne UI layout changes. The separate Dell quad-graph
+repair remains outside this project.

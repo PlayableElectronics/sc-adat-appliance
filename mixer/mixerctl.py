@@ -74,7 +74,8 @@ def validate_parameter(key, numeric, values=None):
     if key.startswith(("groupLevel", "master")): return bounded(numeric, 0, 2, key)
     if key.startswith("group") and "_" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.endswith(("PosX", "PosY", "Width")):
-        index=int(key[5:key.index("Pos")])
+        suffix_start=key.index("Pos") if "Pos" in key else key.index("Width")
+        index=int(key[5:suffix_start])
         limits=group_limits(values or {}, GROUPS[index])
         low,high=(limits[0],limits[1]) if key.endswith("PosX") else (limits[2],limits[3]) if key.endswith("PosY") else (limits[4],limits[5])
         return bounded(numeric, low, high, key)

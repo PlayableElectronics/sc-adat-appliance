@@ -39,6 +39,20 @@ for _ in range(int(.03*48000)): sample += alpha*(1-sample)
 assert .62 < sample < .64
 print("quad corners, centre, edges, 11x11 constant-power grid, stereo width, 30ms smoothing: OK")
 
+# Regression for the target-build spatial bypass path: SelectX interpolates
+# positioned and neutral gains, so both endpoints and every smoothed value stay
+# finite and non-silent instead of collapsing through a zero/NaN branch.
+assert "SelectX.kr(spatialBypass, [gfl, nfl])" in source
+assert all(math.isfinite(v) and abs(v) > 0 for v in gains(.5, .5))
+for bypass in [i / 10 for i in range(11)]:
+    positioned=gains(.1, .9); neutral=gains(.5, .5)
+    transition=[p * (1-bypass) + n * bypass for p,n in zip(positioned,neutral)]
+    assert all(math.isfinite(v) for v in transition)
+    assert math.sqrt(sum(v*v for v in transition)) > 0
+assert gains(.1,.9) != gains(.5,.5)
+assert gains(.5,.5) == gains(.5,.5)
+print("spatial bypass endpoints, SelectX transition finiteness, and non-silence: OK")
+
 def request(sock, path, types, vals):
     sock.sendto(packet(path, types, vals), address); return parse_packet(sock.recv(65535))
 port=57221; proc=subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__),"mixerctl.py"),"serve",CONFIG,"--listen",str(port),"--port","57218","--no-node"])

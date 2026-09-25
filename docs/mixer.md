@@ -109,8 +109,12 @@ four-channel lanes and gates exactly one tuple with its validated integer
 avoiding feedback, latency, or per-group SynthDef duplication. The lane map is
 group 0=`76..79`, group 1=`80..83`, through group 7=`104..107`.
 
-The scan fixture uses `Env.asr(0.05, 1, 0.10, doneAction: 2)`. Tests gate it
-off, explicitly free the unique node, synchronize, query its absence, and poll
-four consecutive meter frames below the strict `0.01` threshold before moving
-or injecting the next case. This prevents fixture energy from being mistaken
-for spatial leakage.
+The scan fixture uses `Env.asr(0.05, 1, 0.10, doneAction: 2)`: gate zero starts
+a 100 ms release and `doneAction: 2` frees the scan node when that envelope
+completes. Tests use a unique scan ID, send gate zero, poll through the intended
+release, explicitly `/n_free` as bounded cleanup, `/sync`, and prove absence
+with `/n_query`. The meter peak and RMS paths each decay over 100 ms. Before
+and after every case, the fixture requires four consecutive 10 Hz meter frames
+with every relevant output below the strict `0.01` threshold; the timeout
+reports node tree, effective controls, and peak/RMS history. This identifies
+the former corner residue as stale scan-fixture energy, not spatial leakage.

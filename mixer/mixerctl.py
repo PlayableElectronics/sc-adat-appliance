@@ -15,6 +15,13 @@ SPATIAL_LIMITS = {
     "fx_b": (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.5),
 }
 QUAD_OUTPUTS = ("front_left", "front_right", "rear_left", "rear_right")
+BUS_GROUP_STEMS = 52
+BUS_DIRECT = 60
+BUS_QUAD_GROUPS = 76
+BUS_PHYSICAL_OUT = 0
+BUS_INPUTS = 26
+BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP_STEMS, BUS_GROUP_STEMS + 8), "direct": (BUS_DIRECT, BUS_DIRECT + 16), "quad_group": (BUS_QUAD_GROUPS, BUS_QUAD_GROUPS + 32), "physical_outputs": (BUS_PHYSICAL_OUT, 26)}
+assert all(a[1] <= b[0] or b[1] <= a[0] for i,a in enumerate(BUS_RANGES.values()) for j,b in enumerate(BUS_RANGES.values()) if i < j)
 FIELDS = ("name", "input", "output", "group", "trim_db", "mute", "polarity", "hpf", "hpf_hz")
 METER_WIDTH = 16 + 16 + 8 + 8 + 16 + 16
 
@@ -52,7 +59,10 @@ def bounded(value, low, high, label):
     number=finite(value, label)
     if not low <= number <= high: raise ValueError(f"{label} must be {low}..{high}")
     return number
-def validate_parameter(key, numeric):
+def group_limits(values, name):
+    defaults=SPATIAL_LIMITS[name]
+    return tuple(float(values.get(f"group.{name}.{key}", defaults[i])) for i,key in enumerate(("x_min","x_max","y_min","y_max","width_min","width_max"))) + defaults[6:]
+def validate_parameter(key, numeric, values=None):
     if key == "routingMode" or "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
     if key.startswith(("mute", "hpf", "bypass")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
@@ -65,7 +75,7 @@ def validate_parameter(key, numeric):
     if key.startswith("group") and "_" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.endswith(("PosX", "PosY", "Width")):
         index=int(key[5:key.index("Pos")])
-        limits=SPATIAL_LIMITS[GROUPS[index]]
+        limits=group_limits(values or {}, GROUPS[index])
         low,high=(limits[0],limits[1]) if key.endswith("PosX") else (limits[2],limits[3]) if key.endswith("PosY") else (limits[4],limits[5])
         return bounded(numeric, low, high, key)
     if key == "quadSmoothingMs": return bounded(numeric, 0, 1000, key)
@@ -97,9 +107,9 @@ def read_config(path):
     if len(set(quad_outputs)) != 4: raise ValueError("quad physical outputs must be unique")
     for name in configured_groups:
         finite(values[f"group.{name}.level_db"], f"group.{name}.level_db")
-        limits=SPATIAL_LIMITS[name]
-        for suffix,expected in zip(("x_min","x_max","y_min","y_max","width_min","width_max"), limits[:6]):
-            if abs(bounded(values.get(f"group.{name}.{suffix}", str(expected)), 0, 1, f"group.{name}.{suffix}") - expected) > 1e-9: raise ValueError(f"{name} spatial constraint does not match production policy")
+        limits=group_limits(values, name)
+        for suffix,expected in zip(("x_min","x_max","y_min","y_max","width_min","width_max"), limits[:6]): bounded(expected, 0, 1, f"group.{name}.{suffix}")
+        if limits[0] > limits[1] or limits[2] > limits[3] or limits[4] > limits[5]: raise ValueError(f"{name} spatial constraint min exceeds max")
         for suffix, default, low, high in (("pos_x", limits[6], limits[0], limits[1]), ("pos_y", limits[7], limits[2], limits[3]), ("width", limits[8], limits[4], limits[5]), ("neutral_x", limits[6], limits[0], limits[1]), ("neutral_y", limits[7], limits[2], limits[3]), ("neutral_width", limits[8], limits[4], limits[5]), ("spatial_bypass", 0, 0, 1)):
             key=f"group.{name}.{suffix}"; value=values.get(key, str(default))
             if suffix == "spatial_bypass": strict_bool(value, key)
@@ -140,7 +150,7 @@ def controls(values, channels):
     for g,name in enumerate(GROUPS): result.append((f"groupLevel{g}", dbamp(values[f"group.{name}.level_db"])))
     result.append(("master", dbamp(values["master.level_db"]))); result.append(("bypass", as_bool(values["bypass"])))
     for g,name in enumerate(GROUPS):
-        limits=SPATIAL_LIMITS[name]
+        limits=group_limits(values, name)
         result += [(f"group{g}PosX", float(values.get(f"group.{name}.pos_x", limits[6]))), (f"group{g}PosY", float(values.get(f"group.{name}.pos_y", limits[7]))), (f"group{g}Width", float(values.get(f"group.{name}.width", limits[8]))), (f"group{g}SpatialBypass", int(values.get(f"group.{name}.spatial_bypass", 0)))]
         result += [(f"group{g}NeutralX", float(values.get(f"group.{name}.neutral_x", limits[6]))), (f"group{g}NeutralY", float(values.get(f"group.{name}.neutral_y", limits[7]))), (f"group{g}NeutralWidth", float(values.get(f"group.{name}.neutral_width", limits[8])))]
     result.append(("quadSmoothingMs", float(values.get("quad.smoothing_ms", 30))))
@@ -161,26 +171,65 @@ def dsp_controls(values, channels):
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
 def db(value): return -120.0 if value <= 1e-9 else 20.0 * math.log10(min(1.0, max(1e-9, value)))
-ROUTER_NODE=3900; GROUP_NODE_BASE=4000; MASTER_NODE=4100; NODE_GROUP=1000
-def send_snew(sock, port, name, node, target, controls_list):
-    vals=[name, node, 1, target]; types=",siii"
+ROUTER_NODE=3900; GROUP_NODE_BASE=4000; MASTER_NODE=4100
+NODE_ROUTING=1000; NODE_SPATIAL=1001; NODE_MASTER=1002
+def send_snew(sock, port, name, node, target, controls_list, action=0):
+    vals=[name, node, action, target]; types=",siii"
     for name,value in controls_list:
         if isinstance(value, str): continue
-        types += "sf"; vals += [name, value]
+        if name in ("inbus", "outbus", "directbus", "groupbus", "out0", "out1", "out2", "out3"):
+            # scsynth controls are numeric OSC values; retain bus identity as
+            # an exact integer-valued float so the SynthDef's bus UGen sees
+            # the same value as its default/control representation.
+            types += "sf"; vals += [name, float(value)]
+        else:
+            types += "sf"; vals += [name, value]
     send(sock, port, packet("/s_new", types, vals))
 def start_graph(sock, port, values, channels):
     sock.settimeout(0.25)
+    send(sock, port, packet("/sync", ",i", [1]))
+    deadline=time.time()+2.0
+    while time.time() < deadline:
+        try:
+            if parse_packet(sock.recv(65535))[0] == "/synced": break
+        except (socket.timeout, ValueError, IndexError): pass
+    else: raise RuntimeError("scsynth synchronization failed before graph creation")
     for _ in range(20):
-        send(sock, port, packet("/notify", ",i", [1])); send(sock, port, packet("/n_free", ",i", [ROUTER_NODE])); send(sock, port, packet("/n_free", ",i", [MASTER_NODE])); send(sock, port, packet("/g_freeAll", ",i", [NODE_GROUP])); send(sock, port, packet("/g_new", ",iii", [NODE_GROUP, 0, 0]))
-        send_snew(sock, port, "sc_adat_router", ROUTER_NODE, NODE_GROUP, router_controls(values, channels))
-        for g in range(8): send_snew(sock, port, "sc_adat_group", GROUP_NODE_BASE + g, NODE_GROUP, group_controls(values, g))
-        send_snew(sock, port, "sc_adat_quad_master", MASTER_NODE, NODE_GROUP, master_controls(values))
-        deadline=time.time() + 0.25
-        while time.time() < deadline:
+        send(sock, port, packet("/notify", ",i", [1]));
+        for node in (ROUTER_NODE, MASTER_NODE, NODE_ROUTING, NODE_SPATIAL, NODE_MASTER):
+            send(sock, port, packet("/n_free", ",i", [node]))
+        # Build an explicit feed-forward chain.  /g_new action 0 inserts at
+        # the head, while action 3 inserts after the target.  The latter is
+        # essential here: relying on packet order or repeated add-to-head
+        # reverses the execution order seen by In.ar.
+        send(sock, port, packet("/g_new", ",iii", [NODE_ROUTING, 0, 0]))
+        send(sock, port, packet("/g_new", ",iii", [NODE_SPATIAL, 3, NODE_ROUTING]))
+        send(sock, port, packet("/g_new", ",iii", [NODE_MASTER, 3, NODE_SPATIAL]))
+        send_snew(sock, port, "sc_adat_router", ROUTER_NODE, NODE_ROUTING, router_controls(values, channels))
+        # Add siblings at the tail so the queried tree is 4000..4007.  Their
+        # order is not relied on for signal flow, but it is part of the
+        # deterministic ownership contract and makes diagnostics unambiguous.
+        for g in range(8): send_snew(sock, port, "sc_adat_group", GROUP_NODE_BASE + g, NODE_SPATIAL, group_controls(values, g), action=1)
+        send_snew(sock, port, "sc_adat_quad_master", MASTER_NODE, NODE_MASTER, master_controls(values))
+        send(sock, port, packet("/sync", ",i", [2])); synced=False; deadline=time.time()+2.0
+        while time.time() < deadline and not synced:
             try: path, _, _ = parse_packet(sock.recv(65535))
             except (socket.timeout, ValueError, IndexError): break
-            if path == "/n_go": sock.settimeout(None); return
+            if path == "/synced": synced=True
             if path == "/fail": break
+        if synced:
+            # Reassert bus controls after node creation.  This is deliberately
+            # synchronized: it distinguishes a control-assignment problem
+            # from an execution-order problem in the integration test.
+            for g in range(8):
+                send(sock, port, packet("/n_set", ",isf", [GROUP_NODE_BASE + g, "outbus", float(BUS_QUAD_GROUPS + g * 4)]))
+            send(sock, port, packet("/sync", ",i", [3])); deadline=time.time()+2.0
+            while time.time() < deadline:
+                try:
+                    if parse_packet(sock.recv(65535))[0] == "/synced": break
+                except (socket.timeout, ValueError, IndexError): pass
+            else: raise RuntimeError("scsynth synchronization failed after bus assignment")
+            sock.settimeout(None); return
         time.sleep(0.1)
     sock.settimeout(None)
     raise RuntimeError("scsynth did not acknowledge mixer node")
@@ -188,12 +237,13 @@ def router_controls(values, channels):
     result=[(n,v) for n,v in dsp_controls(values, channels) if not (n.startswith("group") and "_" in n) and not n.startswith("quadOutput") and not n.startswith("groupLevel") and n not in ("quadMode", "quadSmoothing")]
     result += [(f"groupSelect{i}", GROUPS.index(row["group"])) for i,row in enumerate(channels)]
     result += [(f"level{g}", dbamp(values[f"group.{name}.level_db"])) for g,name in enumerate(GROUPS)]
+    result.append(("smoothing", float(values.get("quad.smoothing_ms",30))/1000.0))
     return result
 def group_controls(values, g):
-    name=GROUPS[g]; limits=SPATIAL_LIMITS[name]
-    return [("inbus",52+g),("outbus",64+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",float(values.get(f"group.{name}.pos_y",limits[7]))*2-1),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))),("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8])]
+    name=GROUPS[g]; limits=group_limits(values, name)
+    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",float(values.get(f"group.{name}.pos_y",limits[7]))*2-1),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
 def master_controls(values):
-    result=[("directbus",60),("groupbus",64),("quadMode",int(values.get("routing.mode")=="quad")),("master",dbamp(values["master.level_db"])),("bypass",as_bool(values["bypass"]))]
+    result=[("directbus",BUS_DIRECT),("groupbus",BUS_QUAD_GROUPS),("quadMode",int(values.get("routing.mode")=="quad")),("master",dbamp(values["master.level_db"])),("bypass",as_bool(values["bypass"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
     for n in range(4): result += [(f"quadOutput{n}Gain",dbamp(values.get(f"quad.output.{n}.gain_db",0))),(f"quadOutput{n}Mute",int(values.get(f"quad.output.{n}.mute",0))),(f"quadOutput{n}Polarity",int(values.get(f"quad.output.{n}.polarity",1)))]
     result += [(f"out{i}",int(values[f"routing.quad.output.{name}"])-1) for i,name in enumerate(QUAD_OUTPUTS)]
     return result
@@ -218,7 +268,7 @@ def serve(config, listen=57120, sc_port=57110, start=True):
     def shutdown(_signum, _frame):
         try:
             send(sock, sc_port, packet("/n_set", ",isf", [MASTER_NODE, "master", 0.0])); time.sleep(0.06)
-            send(sock, sc_port, packet("/n_free", ",i", [NODE_GROUP]))
+            for node in (NODE_ROUTING, NODE_SPATIAL, NODE_MASTER): send(sock, sc_port, packet("/n_free", ",i", [node]))
         finally:
             raise SystemExit(0)
     signal.signal(signal.SIGTERM, shutdown); signal.signal(signal.SIGINT, shutdown)
@@ -238,12 +288,16 @@ def serve(config, listen=57120, sc_port=57110, start=True):
             try: numeric=float(value)
             except (TypeError, ValueError): send_to(sock, address, packet("/mixer/error", ",s", ["value is not numeric"])); continue
             if not math.isfinite(numeric): send_to(sock, address, packet("/mixer/error", ",s", ["value must be finite"])); continue
-            try: numeric=validate_parameter(key, numeric)
+            try: numeric=validate_parameter(key, numeric, values)
             except ValueError as exc:
                 send_to(sock, address, packet("/mixer/error", ",s", [str(exc)])); continue
             state[key]=numeric
-            target,dsp_key,dsp_value=node_update(key, numeric)
-            send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value])); send_to(sock, address, packet("/mixer/ok", ",s", [key]))
+            if key == "quadSmoothingMs":
+                for target in [ROUTER_NODE, MASTER_NODE] + [GROUP_NODE_BASE + g for g in range(8)]: send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", numeric / 1000.0]))
+            else:
+                target,dsp_key,dsp_value=node_update(key, numeric)
+                send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value]))
+            send_to(sock, address, packet("/mixer/ok", ",s", [key]))
         elif path == "/mixer/set":
             send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/set ,sf parameter value"]))
         elif path == "/mixer/get" and types == ",s":
@@ -268,7 +322,7 @@ def print_meters(port=57120):
     print("groups  peak/rms dBFS")
     for i,name in enumerate(GROUPS): print(f"{name:<11} {db(values[32+i]):7.1f}/{db(values[40+i]):7.1f}")
     print("outputs peak/rms dBFS")
-    for i in range(16): print(f"O{i+1:02d} {db(values[42+i]):7.1f}/{db(values[58+i]):7.1f}", end="  " if i % 2 == 0 else "\n")
+    for i in range(16): print(f"O{i+1:02d} {db(values[48+i]):7.1f}/{db(values[64+i]):7.1f}", end="  " if i % 2 == 0 else "\n")
 def print_probe(port=57120, duration=5):
     duration=max(1, min(30, int(duration))); maximum=[0.0] * 16; deadline=time.time() + duration
     while time.time() < deadline:

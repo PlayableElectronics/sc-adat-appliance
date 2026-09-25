@@ -94,3 +94,23 @@ integration.
 
 Deliberately deferred: recording, song markers, scenes per song, EQ,
 compression, sends, offline analysis, virtual soundcheck, and Dyaxis control.
+Private buses are disjoint: hardware inputs `26..51`, group stems `52..59`,
+direct path `60..75`, reusable-group quad outputs `76..107`, and physical
+outputs `0..25`. The master transposes the group-major 8×4 layout: speaker
+`s` is `sum(group[s + 4*g] for g=0..7)`. The canonical speaker vector is
+front-left, front-right, rear-left, rear-right. Public Y remains `0` rear,
+`0.5` centre, `1` front.
+
+On the validated target scsynth build, a runtime control-rate bus selector used
+as `Out.ar`'s destination is not reliable: a direct pass-through probe writes
+no signal. The reusable group SynthDef therefore writes all eight fixed
+four-channel lanes and gates exactly one tuple with its validated integer
+`groupIndex`. This preserves one SynthDef and independent ownership while
+avoiding feedback, latency, or per-group SynthDef duplication. The lane map is
+group 0=`76..79`, group 1=`80..83`, through group 7=`104..107`.
+
+The scan fixture uses `Env.asr(0.05, 1, 0.10, doneAction: 2)`. Tests gate it
+off, explicitly free the unique node, synchronize, query its absence, and poll
+four consecutive meter frames below the strict `0.01` threshold before moving
+or injecting the next case. This prevents fixture energy from being mistaken
+for spatial leakage.

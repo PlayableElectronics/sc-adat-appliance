@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Small deterministic OSC/config controller for the transparent SC mixer."""
+"""Small deterministic OSC/config controller for the SC group mixers."""
 import argparse, math, os, signal, socket, struct, sys, time
 
 GROUPS = ("kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b")
@@ -14,13 +14,11 @@ SPATIAL_LIMITS = {
     "fx_a": (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.5),
     "fx_b": (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.5),
 }
-QUAD_OUTPUTS = ("front_left", "front_right", "rear_left", "rear_right")
 BUS_GROUP_STEMS = 52
-BUS_DIRECT = 60
 BUS_QUAD_GROUPS = 76
 BUS_PHYSICAL_OUT = 0
 BUS_INPUTS = 26
-BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP_STEMS, BUS_GROUP_STEMS + 8), "direct": (BUS_DIRECT, BUS_DIRECT + 16), "quad_group": (BUS_QUAD_GROUPS, BUS_QUAD_GROUPS + 32), "physical_outputs": (BUS_PHYSICAL_OUT, 26)}
+BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP_STEMS, BUS_GROUP_STEMS + 8), "quad_group": (BUS_QUAD_GROUPS, BUS_QUAD_GROUPS + 32), "physical_outputs": (BUS_PHYSICAL_OUT, 26)}
 assert all(a[1] <= b[0] or b[1] <= a[0] for i,a in enumerate(BUS_RANGES.values()) for j,b in enumerate(BUS_RANGES.values()) if i < j)
 FIELDS = ("name", "input", "output", "group", "trim_db", "mute", "polarity", "hpf", "hpf_hz")
 METER_WIDTH = 16 + 16 + 8 + 8 + 16 + 16
@@ -63,7 +61,7 @@ def group_limits(values, name):
     defaults=SPATIAL_LIMITS[name]
     return tuple(float(values.get(f"group.{name}.{key}", defaults[i])) for i,key in enumerate(("x_min","x_max","y_min","y_max","width_min","width_max"))) + defaults[6:]
 def validate_parameter(key, numeric, values=None):
-    if key == "routingMode" or "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
+    if "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
     if key.startswith(("mute", "hpf", "bypass")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
     if key.startswith("polarity") or key.endswith("Polarity"):
@@ -98,14 +96,6 @@ def read_config(path):
     configured_groups=tuple(values.get("group.names", ",".join(GROUPS)).split(","))
     if not 1 <= group_count <= MAX_GROUPS or len(configured_groups) != group_count: raise ValueError("group.count must be 1..8 and match group.names")
     if configured_groups != GROUPS: raise ValueError("production scene must use canonical eight groups")
-    mode=values.get("routing.mode", "direct")
-    if mode not in ("direct", "quad"): raise ValueError("routing.mode must be direct or quad")
-    quad_outputs=[]
-    for output in QUAD_OUTPUTS:
-        key=f"routing.quad.output.{output}"; number=int(values.get(key, "0"))
-        if not 1 <= number <= 16: raise ValueError(f"{key} must be in physical range 1..16")
-        quad_outputs.append(number)
-    if len(set(quad_outputs)) != 4: raise ValueError("quad physical outputs must be unique")
     for name in configured_groups:
         finite(values[f"group.{name}.level_db"], f"group.{name}.level_db")
         limits=group_limits(values, name)
@@ -116,10 +106,6 @@ def read_config(path):
             if suffix == "spatial_bypass": strict_bool(value, key)
             else: bounded(value, low, high, key)
     bounded(values.get("quad.smoothing_ms", "30"), 0, 1000, "quad.smoothing_ms")
-    for n in range(4):
-        bounded(values.get(f"quad.output.{n}.gain_db", "0"), -120, 24, f"quad.output.{n}.gain_db")
-        strict_bool(values.get(f"quad.output.{n}.mute", "0"), f"quad.output.{n}.mute")
-        if int(values.get(f"quad.output.{n}.polarity", "1")) not in (-1, 1): raise ValueError("quad output polarity must be -1 or 1")
     finite(values["master.level_db"], "master.level_db"); as_bool(values["bypass"])
     channels_out=[]; seen_inputs=set(); seen_outputs=set()
     for ch in range(1, channels + 1):
@@ -155,13 +141,10 @@ def controls(values, channels):
         result += [(f"group{g}PosX", float(values.get(f"group.{name}.pos_x", limits[6]))), (f"group{g}PosY", float(values.get(f"group.{name}.pos_y", limits[7]))), (f"group{g}Width", float(values.get(f"group.{name}.width", limits[8]))), (f"group{g}SpatialBypass", int(values.get(f"group.{name}.spatial_bypass", 0)))]
         result += [(f"group{g}NeutralX", float(values.get(f"group.{name}.neutral_x", limits[6]))), (f"group{g}NeutralY", float(values.get(f"group.{name}.neutral_y", limits[7]))), (f"group{g}NeutralWidth", float(values.get(f"group.{name}.neutral_width", limits[8])))]
     result.append(("quadSmoothingMs", float(values.get("quad.smoothing_ms", 30))))
-    for n,output in enumerate(QUAD_OUTPUTS): result += [(f"quadOutput{n}GainDb", float(values.get(f"quad.output.{n}.gain_db", 0))), (f"quadOutput{n}Mute", int(values.get(f"quad.output.{n}.mute", 0))), (f"quadOutput{n}Polarity", int(values.get(f"quad.output.{n}.polarity", 1))), (f"quadOutput{n}Bus", int(values[f"routing.quad.output.{output}"]) - 1)]
-    result.append(("routingMode", values.get("routing.mode", "direct")))
     return result
 def dsp_controls(values, channels):
     result=[]
     for name,value in controls(values, channels):
-        if name == "routingMode": result.append(("quadMode", int(value == "quad"))); continue
         if name == "quadSmoothingMs": result.append(("quadSmoothing", float(value) / 1000.0)); continue
         if "Neutral" in name: continue
         if name.startswith("group") and "_" in name: continue
@@ -178,7 +161,7 @@ def send_snew(sock, port, name, node, target, controls_list, action=0):
     vals=[name, node, action, target]; types=",siii"
     for name,value in controls_list:
         if isinstance(value, str): continue
-        if name in ("inbus", "outbus", "directbus", "groupbus", "out0", "out1", "out2", "out3"):
+        if name in ("inbus", "outbus", "groupbus", "out0", "out1", "out2", "out3"):
             # scsynth controls are numeric OSC values; retain bus identity as
             # an exact integer-valued float so the SynthDef's bus UGen sees
             # the same value as its default/control representation.
@@ -211,7 +194,9 @@ def start_graph(sock, port, values, channels):
         # order is not relied on for signal flow, but it is part of the
         # deterministic ownership contract and makes diagnostics unambiguous.
         for g in range(8): send_snew(sock, port, "sc_adat_group", GROUP_NODE_BASE + g, NODE_SPATIAL, group_controls(values, g), action=1)
-        send_snew(sock, port, "sc_adat_quad_master", MASTER_NODE, NODE_MASTER, master_controls(values))
+        master_name = "sc_adat_quad_master" if values.get("_mode", "stereo") == "quad" else "sc_adat_stereo_master"
+        master_node = MASTER_NODE
+        send_snew(sock, port, master_name, master_node, NODE_MASTER, master_controls(values))
         send(sock, port, packet("/sync", ",i", [2])); synced=False; deadline=time.time()+2.0
         while time.time() < deadline and not synced:
             try: path, _, _ = parse_packet(sock.recv(65535))
@@ -235,18 +220,15 @@ def start_graph(sock, port, values, channels):
     sock.settimeout(None)
     raise RuntimeError("scsynth did not acknowledge mixer node")
 def router_controls(values, channels):
-    result=[(n,v) for n,v in dsp_controls(values, channels) if not (n.startswith("group") and "_" in n) and not n.startswith("quadOutput") and not n.startswith("groupLevel") and n not in ("quadMode", "quadSmoothing")]
+    result=[(n,v) for n,v in dsp_controls(values, channels) if not (n.startswith("group") and "_" in n) and not n.startswith("quadOutput") and not n.startswith("groupLevel") and n != "quadSmoothing"]
     result += [(f"groupSelect{i}", GROUPS.index(row["group"])) for i,row in enumerate(channels)]
-    result += [(f"level{g}", dbamp(values[f"group.{name}.level_db"])) for g,name in enumerate(GROUPS)]
     result.append(("smoothing", float(values.get("quad.smoothing_ms",30))/1000.0))
     return result
 def group_controls(values, g):
     name=GROUPS[g]; limits=group_limits(values, name)
     return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",float(values.get(f"group.{name}.pos_y",limits[7]))*2-1),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
 def master_controls(values):
-    result=[("directbus",BUS_DIRECT),("groupbus",BUS_QUAD_GROUPS),("quadMode",int(values.get("routing.mode")=="quad")),("master",dbamp(values["master.level_db"])),("bypass",as_bool(values["bypass"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
-    for n in range(4): result += [(f"quadOutput{n}Gain",dbamp(values.get(f"quad.output.{n}.gain_db",0))),(f"quadOutput{n}Mute",int(values.get(f"quad.output.{n}.mute",0))),(f"quadOutput{n}Polarity",int(values.get(f"quad.output.{n}.polarity",1)))]
-    result += [(f"out{i}",int(values[f"routing.quad.output.{name}"])-1) for i,name in enumerate(QUAD_OUTPUTS)]
+    result=[("master",dbamp(values["master.level_db"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
     return result
 def node_update(key, value):
     if key.startswith("group") and key[5:6].isdigit():
@@ -256,15 +238,19 @@ def node_update(key, value):
         if suffix: return node,suffix,(value*2-1 if suffix in ("x","y") else value)
     if key.startswith("groupLevel"):
         return GROUP_NODE_BASE+int(key[len("groupLevel"):]),"gain",value
-    if key.startswith("quadOutput"):
-        n=int(key[10:key.index("GainDb") if "GainDb" in key else key.index("Mute") if "Mute" in key else key.index("Polarity") if "Polarity" in key else key.index("Bus")])
-        suffix="Gain" if key.endswith("GainDb") else "Mute" if key.endswith("Mute") else "Polarity" if key.endswith("Polarity") else "out%d" % n
-        return MASTER_NODE,suffix,(dbamp(value) if key.endswith("GainDb") else value)
     return ROUTER_NODE,key,value
-def apply(config, port=57110):
-    values, channels=read_config(config); sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); start_graph(sock, port, values, channels); time.sleep(.15); return values, channels
-def serve(config, listen=57120, sc_port=57110, start=True):
-    values, channels=read_config(config); sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH
+def apply(config, port=57110, mode=None):
+    values, channels=read_config(config)
+    if mode is not None:
+        if mode not in ("stereo", "quad"): raise ValueError("mode must be stereo or quad")
+        values["_mode"]=mode
+    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); start_graph(sock, port, values, channels); time.sleep(.15); return values, channels
+def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
+    values, channels=read_config(config)
+    if mode is not None:
+        if mode not in ("stereo", "quad"): raise ValueError("mode must be stereo or quad")
+        values["_mode"]=mode
+    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH
     if start: start_graph(sock, sc_port, values, channels)
     def shutdown(_signum, _frame):
         try:
@@ -347,15 +333,15 @@ def tone(output, duration=5, port=57110):
         send(sock, port, packet("/n_set", ",isi", [node, "gate", 0]))
         time.sleep(0.5)
 def main():
-    parser=argparse.ArgumentParser(); parser.add_argument("action", choices=("validate", "apply", "serve", "meters", "probe", "tone")); parser.add_argument("config", nargs="?"); parser.add_argument("--port", type=int, default=57110); parser.add_argument("--listen", type=int, default=57120); parser.add_argument("--duration", type=int, default=5); parser.add_argument("--output", type=int); parser.add_argument("--no-node", action="store_true")
+    parser=argparse.ArgumentParser(); parser.add_argument("action", choices=("validate", "apply", "serve", "meters", "probe", "tone")); parser.add_argument("config", nargs="?"); parser.add_argument("--port", type=int, default=57110); parser.add_argument("--listen", type=int, default=57120); parser.add_argument("--duration", type=int, default=5); parser.add_argument("--output", type=int); parser.add_argument("--mode", choices=("stereo", "quad")); parser.add_argument("--no-node", action="store_true")
     args=parser.parse_args()
     try:
         if args.action == "validate": values, channels=read_config(args.config); print(f"valid mixer config: {len(channels)} channels, inputs/outputs 1..16, capacity 24")
-        elif args.action == "apply": apply(args.config, args.port); print("mixer graph applied: router, 8 groups, quad master")
+        elif args.action == "apply": apply(args.config, args.port, args.mode); print(f"mixer graph applied: router, 8 groups, {args.mode or 'stereo'} master")
         elif args.action == "meters": print_meters(args.listen)
         elif args.action == "probe": print_probe(args.listen, args.duration)
         elif args.action == "tone": tone(args.output, args.duration, args.port)
-        else: serve(args.config, args.listen, args.port, not args.no_node)
+        else: serve(args.config, args.listen, args.port, not args.no_node, args.mode)
     except (OSError, ValueError, OverflowError) as exc: print(f"mixerctl: {exc}", file=sys.stderr); return 1
     return 0
 if __name__ == "__main__": sys.exit(main())

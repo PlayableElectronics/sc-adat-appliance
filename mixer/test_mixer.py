@@ -7,8 +7,8 @@ from mixerctl import group_controls
 ROOT=os.path.dirname(os.path.dirname(__file__))
 config = "/workspace/payload/config/mixer.conf"
 values, channels = read_config(config)
-assert list(BUS_RANGES.values()) == [(26,52),(52,60),(60,76),(76,108),(0,26)]
-assert len({tuple(x) for x in BUS_RANGES.values()}) == 5
+assert list(BUS_RANGES.values()) == [(26,52),(52,60),(76,108),(0,26)]
+assert len({tuple(x) for x in BUS_RANGES.values()}) == 4
 state = dict(controls(values, channels))
 assert state["trim0"] == 1 and state["mute0"] == 0 and state["polarity0"] == 1
 assert state["hpf0"] == 0 and state["group0_0"] == 1 and state["group0_1"] == 0
@@ -34,7 +34,7 @@ finally:
 # Real quad flow: run the reusable graph in quad mode and observe actual
 # post-master meters. The fixture broadens constraints only for exhaustive
 # corner coverage; production config retains the musical envelopes.
-scene=open(config, encoding="utf-8").read().replace("routing.mode=direct", "routing.mode=quad")
+scene=open(config, encoding="utf-8").read()
 import re
 for name in GROUPS:
     scene=re.sub(rf"group\.{name}\.x_min=.*", f"group.{name}.x_min=0", scene)
@@ -47,7 +47,7 @@ scene=scene.replace("channel.9.group=music_a", "channel.9.group=music_b")
 with tempfile.NamedTemporaryFile("w", suffix=".conf", delete=False) as fixture:
     fixture.write(scene); quad_config=fixture.name
 quad_values, quad_channels=read_config(quad_config)
-quad_proc=subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__),"mixerctl.py"),"serve",quad_config,"--port","57118","--listen","57121"])
+quad_proc=subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__),"mixerctl.py"),"serve",quad_config,"--port","57118","--listen","57121","--mode","quad"])
 quad_sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); quad_sock.settimeout(2); time.sleep(.6)
 SC_PORT = 57118
 MIXER_PORT = 57121
@@ -121,6 +121,7 @@ def diagnostic(label, node=None, previous_corner=None, current_corner=None,
 def request_mixer(action, key):
     quad_sock.sendto(packet(f"/mixer/{action}", ",s", [key]), ("127.0.0.1", MIXER_PORT))
     return parse_packet(quad_sock.recv(65535))
+
 def qset(key,value):
     quad_sock.sendto(packet("/mixer/set",",sf",[key,value]),( "127.0.0.1",MIXER_PORT))
     deadline=time.monotonic()+2.0
@@ -134,12 +135,12 @@ def qset(key,value):
 def qnode(g,x,y):
     quad_sock.sendto(packet("/n_set",",isfsfsf",[4000+g,"x",x,"y",y,"width",0]),( "127.0.0.1",SC_PORT))
     sync_sc(11000 + g)
-def qinject(bus,node):
-    quad_sock.sendto(packet("/s_new",",siiisisfsfsi",["sc_adat_scan",node,0,0,"output",bus,"freq",440.0,"level",-12.0,"gate",1]),( "127.0.0.1",SC_PORT))
+def qinject(bus,node,level=-12.0):
+    quad_sock.sendto(packet("/s_new",",siiisisfsfsi",["sc_adat_scan",node,0,0,"output",bus,"freq",440.0,"level",level,"gate",1]),( "127.0.0.1",SC_PORT))
     sync_sc(12000 + node)
     deadline=time.monotonic()+2.0; samples=[]
     while time.monotonic() < deadline:
-        values_now=quad_meters(); peaks,rms=output_meter(values_now); samples.append((peaks[:4],rms[:4]))
+        values_now=quad_meters(); peaks,rms=output_meter(values_now); samples.append((values_now[32:40],peaks[:],rms[:]))
         if max(peaks+rms) > SILENCE_THRESHOLD:
             return
     raise AssertionError(("scan did not reach measurable level", node, samples[-6:], query_tree()))
@@ -187,11 +188,21 @@ def set_corner(g,x,y,previous_corner=None,current_corner=None):
 try:
     source_by_group={GROUPS.index(row["group"]):26+int(row["input"])-1 for row in quad_channels}
     assert set(source_by_group)==set(range(8))
-    qinject(52,7000)
-    print("private bus 52 writer/reader probe complete")
-    qstop(7000)
-    wait_quiet("after private bus 52 probe")
-    corners=[(-1,1,0), (1,1,1), (-1,-1,2), (1,-1,3)]
+    mapped_outputs=[0,1,2,3]
+    input_scan_id=4400
+    for row in quad_channels:
+        channel=int(row["input"]); group=GROUPS.index(row["group"])
+        node=input_scan_id; input_scan_id += 1
+        qinject(26+channel-1,node,level=-30.0)
+        input_values=quad_meters(); input_peaks=input_values[:16]; group_peaks=input_values[32:40]
+        assert input_peaks[channel-1] > SILENCE_THRESHOLD, (channel,input_peaks)
+        assert group_peaks[group] > SILENCE_THRESHOLD, (channel,group,group_peaks)
+        assert all(value < SILENCE_THRESHOLD for i,value in enumerate(group_peaks) if i != group), (channel,group,group_peaks)
+        gate_off_at,node_free_at=qstop(node)
+        wait_quiet("after configured input route",node,gate_off_at=gate_off_at,node_free_at=node_free_at)
+    print("real input-to-group flow: all 16 configured inputs reach only their assigned group: OK")
+    qinject(52,7000); qstop(7000); wait_quiet("after private bus 52 probe")
+    corners=[(-1,1,mapped_outputs[0]), (1,1,mapped_outputs[1]), (-1,-1,mapped_outputs[2]), (1,-1,mapped_outputs[3])]
     previous_corner=None
     for g in range(8):
         for x,y,output in corners:
@@ -201,7 +212,7 @@ try:
             meter_history=[]
             for _ in range(QUIET_FRAMES):
                 values_now=quad_meters(); peaks,rms=output_meter(values_now)
-                meter_history.append((time.monotonic(),peaks[:4],rms[:4]))
+                meter_history.append((time.monotonic(),peaks[:],rms[:]))
             try:
                 assert all(sample[1][output] > SILENCE_THRESHOLD for sample in meter_history), (g, output, "input", values_now[:16], "groups", values_now[32:48], "outputs", peaks)
                 assert all(all(v < SILENCE_THRESHOLD for i,v in enumerate(sample[1]) if i != output) for sample in meter_history), diagnostic("unintended output",scan_node,previous_corner,current_corner,position_at=position_at,history=meter_history)
@@ -211,16 +222,16 @@ try:
             wait_quiet("after corner", scan_node, previous_corner, current_corner, gate_off_at,node_free_at,position_at)
             previous_corner=current_corner
     position_at=set_corner(0,0,0,previous_corner,"centre")
-    centre_node=5800; qinject(source_by_group[0],centre_node); centre=output_meter(quad_meters())[0][:4]; assert max(centre)-min(centre) < 0.08, centre
+    centre_node=5800; qinject(source_by_group[0],centre_node); centre=output_meter(quad_meters())[0]; assert max(centre[i] for i in mapped_outputs)-min(centre[i] for i in mapped_outputs) < 0.08, centre
     gate_off_at,node_free_at=qstop(centre_node); wait_quiet("after centre",centre_node,previous_corner,"centre",gate_off_at,node_free_at,position_at)
     set_corner(0,-1,1,previous_corner,"summed left"); set_corner(1,-1,1,"summed left","summed left")
-    qinject(source_by_group[0],5900); qinject(source_by_group[1],5901); summed=output_meter(quad_meters())[0][:4]; assert summed[0] > 0.02 and max(summed[1:]) < SILENCE_THRESHOLD, summed
+    qinject(source_by_group[0],5900); qinject(source_by_group[1],5901); summed=output_meter(quad_meters())[0]; assert summed[mapped_outputs[0]] > 0.02 and max(v for i,v in enumerate(summed) if i != mapped_outputs[0]) < SILENCE_THRESHOLD, summed
     gate_a,free_a=qstop(5900); gate_b,free_b=qstop(5901); wait_quiet("after two-group sum",5901,"summed left","summed left",gate_b,free_b)
     qset("quadSmoothingMs",200); qset("group0PosX",0); qset("group0PosY",1); qset("group0Width",0); wait_quiet("before smoothing case"); wait_position_settle()
-    smooth_node=6000; qinject(source_by_group[0],smooth_node); before=output_meter(quad_meters())[0][:4]
+    smooth_node=6000; qinject(source_by_group[0],smooth_node); before=output_meter(quad_meters())[0]
     change_at=time.monotonic(); qset("group0PosX",1)
-    early=output_meter(quad_meters())[0][:4]; wait_position_settle(); late=output_meter(quad_meters())[0][:4]
-    assert early[0] > late[0] and late[1] > early[1], (before,early,late)
+    early=output_meter(quad_meters())[0]; wait_position_settle(); late=output_meter(quad_meters())[0]
+    assert early[mapped_outputs[0]] > late[mapped_outputs[0]] and late[mapped_outputs[1]] > early[mapped_outputs[1]], (before,early,late)
     gate_off_at,node_free_at=qstop(smooth_node); wait_quiet("after smoothing",smooth_node,"smoothing start","smoothing end",gate_off_at,node_free_at,change_at)
 
     # The fixed-lane contract is deliberately checked both statically and by
@@ -229,12 +240,15 @@ try:
     assert source_text.count("SynthDef(\\sc_adat_group") == 1
     lane_expr=re.findall(r"Out\.ar\(76 \+ \(g \* 4\), quadSignal \* InRange\.kr\(groupIndex, g - 0\.01, g \+ 0\.01\)\)",source_text)
     assert len(lane_expr)==1 and "groupIndex" in source_text
+    assert "physical = quad * master" in source_text
+    assert "out0c" not in source_text and source_text.count("quadSignal = [") == 1
+    assert "Limiter.ar(x.clip2(4), 0.99, 0.01)" in source_text
     assert [int(group_controls(quad_values,g)[0][1]) for g in range(8)] == list(range(8))
     lane_windows=[(g - 0.01, g + 0.01) for g in range(8)]
     assert all(not (lo <= other <= hi) for g,(lo,hi) in enumerate(lane_windows) for other in range(8) if other != g)
     for g in range(8):
         lane_node=6100+g; set_corner(g,-1,1,"lane",("lane",g)); qinject(source_by_group[g],lane_node)
-        lane_values=output_meter(quad_meters())[0]; assert lane_values[0] > SILENCE_THRESHOLD and max(lane_values[1:]) < SILENCE_THRESHOLD, (g,lane_values)
+        lane_values=output_meter(quad_meters())[0]; assert lane_values[mapped_outputs[0]] > SILENCE_THRESHOLD and max(v for i,v in enumerate(lane_values) if i != mapped_outputs[0]) < SILENCE_THRESHOLD, (g,lane_values)
         gate_off_at,node_free_at=qstop(lane_node); wait_quiet("after fixed lane",lane_node,"lane",g,gate_off_at,node_free_at)
     # Invalid group-index values must not select any lane; the controller only
     # emits the validated integer range and the DSP gate is one-hot.
@@ -243,73 +257,24 @@ try:
     # Exercise the proven SelectX spatial bypass at both endpoints and through
     # its smoothed transition on a full-field group with a neutral centre.
     qset("group3SpatialBypass",0); set_corner(3,-1,1,"lane","bypass positioned")
-    bypass_node=6200; qinject(source_by_group[3],bypass_node); positioned=output_meter(quad_meters())[0][:4]
-    assert positioned[0] > SILENCE_THRESHOLD and max(positioned[1:]) < SILENCE_THRESHOLD, positioned
-    qset("group3SpatialBypass",1); wait_position_settle(); neutral=output_meter(quad_meters())[0][:4]
-    assert all(math.isfinite(v) and v > SILENCE_THRESHOLD for v in neutral), neutral
-    assert max(neutral)-min(neutral) < 0.08, neutral
+    bypass_node=6200; qinject(source_by_group[3],bypass_node); positioned=output_meter(quad_meters())[0]
+    assert positioned[mapped_outputs[0]] > SILENCE_THRESHOLD and max(v for i,v in enumerate(positioned) if i != mapped_outputs[0]) < SILENCE_THRESHOLD, positioned
+    qset("group3SpatialBypass",1); wait_position_settle(); neutral=output_meter(quad_meters())[0]
+    assert all(math.isfinite(neutral[i]) and neutral[i] > SILENCE_THRESHOLD for i in mapped_outputs), neutral
+    assert max(neutral[i] for i in mapped_outputs)-min(neutral[i] for i in mapped_outputs) < 0.08, neutral
     gate_off_at,node_free_at=qstop(bypass_node); wait_quiet("after spatial bypass",bypass_node,"bypass positioned","bypass neutral",gate_off_at,node_free_at)
+
+    # Excessive source level must be bounded by the restored output protection,
+    # while meters report that protected hardware signal and cleanup remains
+    # deterministic.
+    protection_node=6300; qset("group0SpatialBypass",0); set_corner(0,-1,1,"bypass neutral","protection")
+    qinject(source_by_group[0],protection_node,level=30.0)
+    protected_values=quad_meters(); protected_peaks,protected_rms=output_meter(protected_values)
+    assert all(math.isfinite(v) for v in protected_peaks + protected_rms)
+    assert protected_peaks[mapped_outputs[0]] <= 1.01 and protected_peaks[mapped_outputs[0]] > 0.5, protected_values
+    assert max(v for i,v in enumerate(protected_peaks) if i != mapped_outputs[0]) < SILENCE_THRESHOLD, protected_peaks
+    gate_off_at,node_free_at=qstop(protection_node); wait_quiet("after protection",protection_node,"protection","quiescent",gate_off_at,node_free_at)
+    assert not node_exists(protection_node), query_tree()
     print("real scsynth quad flow: 8 groups x 4 corners, centre, transposed two-group sum, meter identity and configurable smoothing: OK")
 finally:
     quad_proc.terminate(); quad_proc.wait(timeout=2); quad_sock.close(); os.unlink(quad_config)
-
-# Actual sample-flow test: the scan SynthDef writes simulated hardware input
-# buses 26..41. The mixer must read those buses and emit only output buses 0..15.
-proc = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "mixerctl.py"),
-                         "serve", config, "--port", "57118", "--listen", "57121"],
-                        stdout=None, stderr=None)
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.settimeout(2)
-time.sleep(0.5)
-def meters():
-    sock.sendto(packet("/mixer/meters", ","), ("127.0.0.1", 57121))
-    return parse_packet(sock.recv(4096))[2]
-direct_scan_id=8000
-def inject(input_bus):
-    global direct_scan_id
-    node=direct_scan_id; direct_scan_id += 1
-    sock.sendto(packet("/s_new", ",siiisisfsfsi",
-                       ["sc_adat_scan", node, 0, 0, "output", input_bus,
-                        "freq", 440.0, "level", -30.0, "gate", 1]),
-                ("127.0.0.1", 57118))
-    sock.sendto(packet("/sync",",i",[node]),("127.0.0.1",57118))
-    sock.settimeout(2)
-    while parse_packet(sock.recv(65535))[0] != "/synced": pass
-    deadline=time.monotonic()+2.0
-    while time.monotonic() < deadline:
-        values=[float(x) for x in meters()]
-        if not 26 <= input_bus < 42 or values[input_bus-26] > SILENCE_THRESHOLD: break
-    else: raise AssertionError(("direct scan did not reach measurable level",node,values))
-    return node
-def stop_direct(node):
-    sock.sendto(packet("/n_set", ",isf", [node, "gate", 0]), ("127.0.0.1", 57118))
-    sock.sendto(packet("/sync", ",i", [10000+node]), ("127.0.0.1", 57118))
-    while parse_packet(sock.recv(65535))[0] != "/synced": pass
-    sock.sendto(packet("/n_free", ",i", [node]), ("127.0.0.1", 57118))
-    sock.sendto(packet("/sync", ",i", [11000+node]), ("127.0.0.1", 57118))
-    while parse_packet(sock.recv(65535))[0] != "/synced": pass
-try:
-    for channel in (1, 9, 16):
-        values = meters()
-        assert max(float(x) for x in values) < 0.01
-        node=inject(26 + channel - 1)
-        values = [float(x) for x in meters()]
-        input_peaks, group_peaks, output_peaks = values[:16], values[32:40], values[48:64]
-        assert input_peaks[channel - 1] > 0.01
-        assert output_peaks[channel - 1] > 0.01
-        assert all(x < 0.01 for i,x in enumerate(input_peaks) if i != channel - 1)
-        assert all(x < 0.01 for i,x in enumerate(output_peaks) if i != channel - 1)
-        expected_group = GROUPS.index(channels[channel - 1]["group"])
-        assert group_peaks[expected_group] > 0.01, (channel, input_peaks, group_peaks, output_peaks)
-        assert all(x < 0.01 for i,x in enumerate(group_peaks) if i != expected_group)
-        stop_direct(node)
-        values=[float(x) for x in meters()]
-        deadline=time.monotonic()+2.0
-        while time.monotonic()<deadline and max(values[:16]+values[48:64]) >= 0.01: values=[float(x) for x in meters()]
-        assert max(values[:16]+values[48:64]) < 0.01, values
-    node=inject(42)  # physical channel 17: outside the active 16-channel window
-    values = [float(x) for x in meters()]
-    assert max(values[:16] + values[48:64]) < 0.01
-    stop_direct(node)
-    print("sample flow buses 26->0, 34->8, 41->15; meters and channels 17..26: OK")
-finally:
-    proc.terminate(); proc.wait(timeout=2)

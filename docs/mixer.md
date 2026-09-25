@@ -1,19 +1,21 @@
-# Production mixer milestone
+# Stereo and quad group mixers
 
-The Debian/Docker mixer is a transparent 16-channel hardware path at 48 kHz,
-128 frames, with one-to-one `system:capture_1..16` to
-`system:playback_1..16` processing. Channels 17..26 remain unused. The data
-model reserves 24 channels, but the validator rejects physical mappings above
-16 until those inputs are confirmed.
+The Debian/Docker group mixers run at 48 kHz and 128 frames. Sixteen hardware
+inputs are processed and assigned to eight canonical groups. The default
+`./lab mixer start` path is stereo and emits only to outputs 1–2;
+`./lab mixer-quad start` is an independent quad program and emits only to
+outputs 1–4 in FL, FR, RL, RR order. Neither program provides transparent
+16-input-to-16-output routing; separate hardware/tone/sample-flow diagnostic
+tools remain available.
 
 `supercollider/synthdefs/sc-adat-mixer.scd` contains DSP only. The versioned
 scene in `payload/config/mixer.conf` and `mixer/mixerctl.py` own configuration,
 validation, OSC policy, node startup, and bounded meter reception. The DSP has
 eight canonical groups matching the Dyaxis faders: kick, drums, bass, music_a,
 music_b, vocals, fx_a, and fx_b.
-`routing.mode=direct` is the unchanged default. `routing.mode=quad` sums those
-groups to physical outputs in canonical order `front_left`, `front_right`,
-`rear_left`, `rear_right` (default 1, 2, 3, 4).
+Stereo is the production default. The two programs are started and stopped
+independently; the launcher refuses to start one while the other is running.
+JACK owns future hardware remapping.
 
 Quad panning uses square-root bilinear rectangular weights, so squared gains
 sum to one at every XY coordinate. Public X is 0 left/0.5 centre/1 right and
@@ -22,7 +24,7 @@ internal X/Y corners (-1,+1) front-left, (+1,+1) front-right, (-1,-1)
 rear-left, (+1,-1) rear-right.
 Spatial controls and calibration are smoothed over the 30 ms default.
 Spatial bypass means a smoothed transition to neutral centre `(0.5, 0.5)`.
-Output calibration provides gain, mute, and polarity; delay is deferred.
+Output calibration and delay are deferred.
 
 The existing scene has group membership but no authoritative stereo-pair
 metadata. Quad mode uses the smallest deterministic fallback: each group's
@@ -64,14 +66,14 @@ The runtime node graph is deterministic:
 ```text
 In.ar(26,16) -> sc_adat_router (3900)
                  -> eight sc_adat_group instances (4000..4007)
-                 -> sc_adat_quad_master (4100) -> physical outputs 1..16
+                 -> selected fixed master (4100) -> outputs 1–2 or 1–4
 ```
 
 The controller owns these transient IDs; clients address only logical group
 IDs. The router preserves the 16 raw pre-processing inputs and produces eight
 group-stem buses. Every group uses the same reusable `sc_adat_group` SynthDef.
 The master meters all 16 raw inputs, eight group stems, and the actual 16
-post-master output channels at 10 Hz. Startup/restart frees the owned graph,
+post-protection output channels at 10 Hz. Startup/restart frees the owned graph,
 recreates it under one node group, and synchronizes SynthDef loading first.
 
 Spatial envelopes are mixer-enforced: kick and bass are front-centre; drums
@@ -87,19 +89,23 @@ audio init service immediately after Digi9652 detection and before `jackd`,
 using a native equivalent of `scripts/audio-clock apply`; Buildroot is not
 changed by this milestone.
 
-Implemented now: transparent 16-channel routing, explicit groups, versioned
-neutral configuration, smoothed controls, bypass, protection, OSC control and
-query, meters, payload compilation, load/sync checks, and Docker dummy-JACK
-integration.
+Implemented now: 16-input group processing, versioned neutral configuration,
+smoothed controls, spatial bypass, protection, OSC control and query, meters,
+payload compilation, load/sync checks, and Docker dummy-JACK integration.
 
 Deliberately deferred: recording, song markers, scenes per song, EQ,
 compression, sends, offline analysis, virtual soundcheck, and Dyaxis control.
 Private buses are disjoint: hardware inputs `26..51`, group stems `52..59`,
-direct path `60..75`, reusable-group quad outputs `76..107`, and physical
-outputs `0..25`. The master transposes the group-major 8×4 layout: speaker
+and reusable-group quad outputs `76..107`; physical outputs use `0..25`. The
+master transposes the group-major 8×4 layout: speaker
 `s` is `sum(group[s + 4*g] for g=0..7)`. The canonical speaker vector is
 front-left, front-right, rear-left, rear-right. Public Y remains `0` rear,
 `0.5` centre, `1` front.
+
+The quad master emits the canonical FL, FR, RL, RR tuple directly at bus zero.
+The stereo master folds front/rear pairs while retaining left/right position.
+Both apply bounded `clip2(4)` and `Limiter.ar(..., 0.99, 0.01)` before output
+and meter calculation. Outputs unused by the selected master remain silent.
 
 On the validated target scsynth build, a runtime control-rate bus selector used
 as `Out.ar`'s destination is not reliable: a direct pass-through probe writes

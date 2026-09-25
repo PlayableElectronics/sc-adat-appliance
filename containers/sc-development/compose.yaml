@@ -43,7 +43,21 @@ services:
     depends_on:
       - sc-audio
     entrypoint: ["sh", "-c"]
-    command: ["set -eu; ready=0; for retry in $$(seq 1 100); do if SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync >/dev/null 2>&1; then ready=1; break; fi; sleep 0.1; done; test \"$$ready\" -eq 1; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_router.scsyndef /payload-out/synthdefs/sc_adat_group.scsyndef /payload-out/synthdefs/sc_adat_quad_master.scsyndef; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync; for retry in $$(seq 1 100); do jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null 2>&1 && break; sleep 0.1; done; jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null; for i in $$(seq 1 16); do for retry in $$(seq 1 20); do jack_connect system:capture_$$i jack:in_$$i && break; sleep 0.1; done; for retry in $$(seq 1 20); do jack_connect jack:out_$$i system:playback_$$i && break; sleep 0.1; done; done; exec python3 /workspace/mixer/mixerctl.py serve /workspace/payload/config/mixer.conf"]
+    command: ["set -eu; ready=0; for retry in $$(seq 1 100); do if SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync >/dev/null 2>&1; then ready=1; break; fi; sleep 0.1; done; test \"$$ready\" -eq 1; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_router.scsyndef /payload-out/synthdefs/sc_adat_group.scsyndef /payload-out/synthdefs/sc_adat_quad_master.scsyndef /payload-out/synthdefs/sc_adat_stereo_master.scsyndef; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync; for retry in $$(seq 1 100); do jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null 2>&1 && break; sleep 0.1; done; jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null; for i in $$(seq 1 16); do for retry in $$(seq 1 20); do jack_connect system:capture_$$i jack:in_$$i && break; sleep 0.1; done; for retry in $$(seq 1 20); do jack_connect jack:out_$$i system:playback_$$i && break; sleep 0.1; done; done; exec python3 /workspace/mixer/mixerctl.py serve /workspace/payload/config/mixer.conf --mode stereo"]
+    volumes:
+      - ../../mixer:/workspace/mixer:ro
+      - ../../payload:/workspace/payload:ro
+      - ../../.local/payload-build:/payload-out:ro
+  sc-quad-mixer:
+    image: sc-adat-sc-development:debian13
+    container_name: sc-adat-sc-quad-mixer
+    init: true
+    network_mode: host
+    ipc: service:sc-audio
+    depends_on:
+      - sc-audio
+    entrypoint: ["sh", "-c"]
+    command: ["set -eu; ready=0; for retry in $$(seq 1 100); do if SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync >/dev/null 2>&1; then ready=1; break; fi; sleep 0.1; done; test \"$$ready\" -eq 1; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader load /payload-out/synthdefs/sc_adat_router.scsyndef /payload-out/synthdefs/sc_adat_group.scsyndef /payload-out/synthdefs/sc_adat_quad_master.scsyndef /payload-out/synthdefs/sc_adat_stereo_master.scsyndef; SC_ADAT_OSC_PORT=57110 /usr/bin/sc-adat-osc-loader sync; for retry in $$(seq 1 100); do jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null 2>&1 && break; sleep 0.1; done; jack_lsp system:capture_16 system:playback_16 jack:in_16 jack:out_16 >/dev/null; for i in $$(seq 1 16); do for retry in $$(seq 1 20); do jack_connect system:capture_$$i jack:in_$$i && break; sleep 0.1; done; for retry in $$(seq 1 20); do jack_connect jack:out_$$i system:playback_$$i && break; sleep 0.1; done; done; exec python3 /workspace/mixer/mixerctl.py serve /workspace/payload/config/mixer.conf --mode quad"]
     volumes:
       - ../../mixer:/workspace/mixer:ro
       - ../../payload:/workspace/payload:ro

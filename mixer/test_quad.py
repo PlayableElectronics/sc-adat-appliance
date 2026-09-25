@@ -15,8 +15,8 @@ assert source.count("SynthDef(\\sc_adat_group") == 1 or os.path.exists("/payload
 assert "for g in range(8)" in open(os.path.join(ROOT, "mixer/mixerctl.py"), encoding="utf-8").read()
 assert all(f"group{i}PosX" in state for i in range(8))
 print("one reusable group SynthDef, eight owned instances, independent public group state: OK")
-assert values["routing.mode"] == "direct"
-assert [int(values[f"routing.quad.output.{n}"]) for n in ("front_left", "front_right", "rear_left", "rear_right")] == [1,2,3,4]
+assert "SynthDef(\\sc_adat_stereo_master" in source and "SynthDef(\\sc_adat_quad_master" in source
+assert "Out.ar(0, output)" in source
 
 def gains(x, y):
     x=max(0.0,min(1.0,x)); y=max(0.0,min(1.0,y))
@@ -73,16 +73,10 @@ try:
         path,types,vals=parse_packet(sock.recv(65535))
         if path=="/mixer/state": seen.add(vals[0])
         elif path=="/mixer/get-all-done": done=True
-    assert {"group3PosX","quadOutput0GainDb","routingMode"} <= seen
+    assert "group3PosX" in seen and "routingMode" not in seen
     for n in range(100): assert request(sock,"/mixer/set",",sf",["group3PosX",n/99])[0]=="/mixer/ok"
 finally:
     proc.terminate(); proc.wait(timeout=2); sock.close()
 print("OSC set/get/get-all, NaN/infinity/range/type rejection, sustained 100 Hz updates: OK")
 
-with tempfile.NamedTemporaryFile("w", delete=False) as f:
-    f.write(open(CONFIG, encoding="utf-8").read().replace("routing.quad.output.front_right=2", "routing.quad.output.front_right=1")); bad=f.name
-try:
-    try: read_config(bad); raise AssertionError("duplicate quad output accepted")
-    except ValueError: pass
-finally: os.unlink(bad)
-print("exact physical mapping uniqueness/range and no unintended-output contract: OK")
+print("fixed stereo and quad masters, no runtime physical-output placement controls: OK")

@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 GROUPS = ("kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b")
 GROUP_KEYS = tuple(key for i in range(8) for key in (f"groupLevel{i}", f"group{i}PosX", f"group{i}PosY", f"group{i}Width", f"group{i}SpatialBypass"))
 CAL_KEYS = tuple(f"quadOutput{n}{suffix}" for n in range(4) for suffix in ("GainDb", "Mute", "Polarity"))
-SUPPORTED = set(GROUP_KEYS + CAL_KEYS + ("master", "bypass"))
+SUPPORTED = set(GROUP_KEYS + CAL_KEYS + ("master",))
 
 
 def _pad(value: bytes) -> bytes:
@@ -62,7 +62,7 @@ class MockMixer:
         **{key: value for key, value in ((k, 0.0) for k in CAL_KEYS if k.endswith("GainDb"))},
         **{key: 0 for key in CAL_KEYS if key.endswith("Mute")},
         **{key: 1 for key in CAL_KEYS if key.endswith("Polarity")},
-        "master": 1.0, "bypass": 0,
+        "master": 1.0,
     })
     received: list[tuple[str, str, list]] = field(default_factory=list)
     sent: list[tuple[str, str, list]] = field(default_factory=list)

@@ -17,6 +17,7 @@ assert all(f"group{i}PosX" in state for i in range(8))
 print("one reusable group SynthDef, eight owned instances, independent public group state: OK")
 assert "SynthDef(\\sc_adat_stereo_master" in source and "SynthDef(\\sc_adat_quad_master" in source
 assert "Out.ar(0, output)" in source
+assert "bypass" not in dict(controls(values, channels))
 
 def gains(x, y):
     x=max(0.0,min(1.0,x)); y=max(0.0,min(1.0,y))

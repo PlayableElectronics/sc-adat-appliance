@@ -29,6 +29,11 @@ class ChataigneMockTests(unittest.TestCase):
         path, _, _ = parse(mixer.handle(packet("/mixer/set", "sf", ["groupLevel0", math.inf])))
         self.assertEqual(path, "/mixer/error")
 
+    def test_global_bypass_is_removed(self):
+        mixer = MockMixer()
+        self.assertNotIn("bypass", mixer.state)
+        self.assertEqual(parse(mixer.handle(packet("/mixer/set", "sf", ["bypass", 1])))[0], "/mixer/error")
+
 
 if __name__ == "__main__":
     unittest.main()

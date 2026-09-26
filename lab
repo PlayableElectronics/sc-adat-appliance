@@ -20,7 +20,7 @@ Commands:
   payload <build|test|inspect|promote|status|rollback|verify> [options]
                                   Build/test/promote shared-data payloads
   mixer <build|start|status|clock|meters|inputs|tone|test|stop>
-                                  Transparent 16-channel Debian/Docker mixer
+                                  Stereo group mixer
   mixer-quad <start|status|test|stop>
                                   Fixed four-output quad mixer
   build candidate                 Build the native Buildroot RAM appliance

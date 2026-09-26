@@ -24,7 +24,7 @@ function snapshot() {
         last["group" + i + "Width"] = c("group" + i + "Width").get();
         last["group" + i + "SpatialBypass"] = c("group" + i + "SpatialBypass").get();
     }
-    last.master = c("master").get(); last.bypass = c("bypass").get();
+    last.master = c("master").get();
     for (var n = 0; n < 4; n++) {
         last["quadOutput" + n + "GainDb"] = c("quadOutput" + n + "GainDb").get();
         last["quadOutput" + n + "Mute"] = c("quadOutput" + n + "Mute").get();
@@ -59,7 +59,6 @@ function processUserValues() {
         if (c("group" + i + "NeutralReset").get()) resetGroup(i);
     }
     var master = c("master").get(); if (changed("master", master)) sendSet("master", master);
-    var bypassAll = c("bypass").get(); if (changed("bypass", bypassAll)) sendSet("bypass", bypassAll ? 1 : 0);
     for (var n = 0; n < 4; n++) {
         var gain = c("quadOutput" + n + "GainDb").get(), mute = c("quadOutput" + n + "Mute").get(), polarity = c("quadOutput" + n + "Polarity").get();
         if (changed("quadOutput" + n + "GainDb", gain) && calibrationArmed) sendSet("quadOutput" + n + "GainDb", gain);
@@ -74,7 +73,7 @@ function update() {
     calibrationArmed = c("calibrationArm").get(); processUserValues();
 }
 function setRemote(key, value) {
-    if (key == "master" || key == "bypass") { c(key).set(value); return; }
+    if (key == "master") { c(key).set(value); return; }
     var match = /^groupLevel([0-7])$/.exec(key); if (match) { c("groupLevel" + match[1]).set(value); return; }
     match = /^group([0-7])Pos([XY])$/.exec(key);
     if (match) { var p = c("group" + match[1] + "Position").get(); p[match[2] == "X" ? 0 : 1] = value; c("group" + match[1] + "Position").set(p); return; }

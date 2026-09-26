@@ -23,7 +23,7 @@ in order front-left, front-right, rear-left, rear-right. Replies are
 
 The established `/mixer/set` keys are the semantic compatibility surface:
 `groupNPosX/Y` is group position, `groupNWidth` is width, and
-`groupNSpatialBypass` is bypass. These eight logical IDs are the only public
+`groupNSpatialBypass` is spatial bypass. These eight logical IDs are the only public
 group identity; transient scsynth node IDs are never exposed.
 
 Use 30–60 Hz for coordinate updates. DSP smoothing remains authoritative;
@@ -33,5 +33,6 @@ source, and Time Machine for recalled parameter snapshots or show cues.
 Automation must be explicitly enabled by the operator; a connection never
 implicitly enables it.
 
-Select quad mode with `routing.mode=quad`; direct mode remains the default.
+The `master` control is the global output gain. Select quad mode with
+`routing.mode=quad`; direct mode remains the default.
 Spatial bypass is a smoothed transition to neutral centre `(0.5, 0.5)`.

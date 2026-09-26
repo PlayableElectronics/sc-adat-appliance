@@ -107,7 +107,6 @@ def main() -> None:
         ])
     vars_items.extend([
         variable("Float Parameter", "Float", "Master", "master", 1.0, 0, 2),
-        variable("Bool Parameter", "Boolean", "Bypass", "bypass", False),
         variable("String Parameter", "String", "Routing mode", "routingMode", "direct", description="Read-only configuration status"),
     ])
     project["customVariables"] = {"items": [{

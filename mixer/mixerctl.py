@@ -63,7 +63,7 @@ def group_limits(values, name):
 def validate_parameter(key, numeric, values=None):
     if "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
-    if key.startswith(("mute", "hpf", "bypass")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
+    if key.startswith(("mute", "hpf")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
     if key.startswith("polarity") or key.endswith("Polarity"):
         number=finite(numeric, key)
         if number not in (-1, 1): raise ValueError(f"{key} must be -1 or 1")
@@ -106,7 +106,7 @@ def read_config(path):
             if suffix == "spatial_bypass": strict_bool(value, key)
             else: bounded(value, low, high, key)
     bounded(values.get("quad.smoothing_ms", "30"), 0, 1000, "quad.smoothing_ms")
-    finite(values["master.level_db"], "master.level_db"); as_bool(values["bypass"])
+    finite(values["master.level_db"], "master.level_db")
     channels_out=[]; seen_inputs=set(); seen_outputs=set()
     for ch in range(1, channels + 1):
         prefix=f"channel.{ch}."; row={}
@@ -135,7 +135,7 @@ def controls(values, channels):
         group=GROUPS.index(row["group"])
         result += [(f"group{i}_{g}", int(g == group)) for g in range(MAX_GROUPS)]
     for g,name in enumerate(GROUPS): result.append((f"groupLevel{g}", dbamp(values[f"group.{name}.level_db"])))
-    result.append(("master", dbamp(values["master.level_db"]))); result.append(("bypass", as_bool(values["bypass"])))
+    result.append(("master", dbamp(values["master.level_db"])))
     for g,name in enumerate(GROUPS):
         limits=group_limits(values, name)
         result += [(f"group{g}PosX", float(values.get(f"group.{name}.pos_x", limits[6]))), (f"group{g}PosY", float(values.get(f"group.{name}.pos_y", limits[7]))), (f"group{g}Width", float(values.get(f"group.{name}.width", limits[8]))), (f"group{g}SpatialBypass", int(values.get(f"group.{name}.spatial_bypass", 0)))]
@@ -226,18 +226,22 @@ def router_controls(values, channels):
     return result
 def group_controls(values, g):
     name=GROUPS[g]; limits=group_limits(values, name)
-    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",float(values.get(f"group.{name}.pos_y",limits[7]))*2-1),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
+    y = 1.0 if values.get("_mode", "stereo") == "stereo" else float(values.get(f"group.{name}.pos_y", limits[7])) * 2 - 1
+    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",y),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
 def master_controls(values):
     result=[("master",dbamp(values["master.level_db"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
     return result
-def node_update(key, value):
+def node_update(key, value, mode="stereo"):
     if key.startswith("group") and key[5:6].isdigit():
         g=int(key[5:key.index("Pos") if "Pos" in key else key.index("Width") if "Width" in key else key.index("Spatial")])
         node=GROUP_NODE_BASE+g
         suffix="x" if key.endswith("PosX") else "y" if key.endswith("PosY") else "width" if key.endswith("Width") else "spatialBypass" if key.endswith("SpatialBypass") else "gain" if key.startswith("groupLevel") else None
+        if suffix == "y" and mode == "stereo": return None
         if suffix: return node,suffix,(value*2-1 if suffix in ("x","y") else value)
     if key.startswith("groupLevel"):
         return GROUP_NODE_BASE+int(key[len("groupLevel"):]),"gain",value
+    if key == "master":
+        return MASTER_NODE,key,value
     return ROUTER_NODE,key,value
 def apply(config, port=57110, mode=None):
     values, channels=read_config(config)
@@ -282,8 +286,10 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             if key == "quadSmoothingMs":
                 for target in [ROUTER_NODE, MASTER_NODE] + [GROUP_NODE_BASE + g for g in range(8)]: send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", numeric / 1000.0]))
             else:
-                target,dsp_key,dsp_value=node_update(key, numeric)
-                send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value]))
+                update=node_update(key, numeric, values.get("_mode", "stereo"))
+                if update is not None:
+                    target,dsp_key,dsp_value=update
+                    send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value]))
             send_to(sock, address, packet("/mixer/ok", ",s", [key]))
         elif path == "/mixer/set":
             send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/set ,sf parameter value"]))

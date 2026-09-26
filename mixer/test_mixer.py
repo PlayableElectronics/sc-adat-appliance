@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import math, os, re, socket, subprocess, sys, tempfile, time
+import math, os, re, socket, statistics, subprocess, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(__file__))
 from mixerctl import BUS_RANGES, GROUPS, controls, packet, parse_packet, read_config
 from mixerctl import group_controls
@@ -12,8 +12,8 @@ assert len({tuple(x) for x in BUS_RANGES.values()}) == 4
 state = dict(controls(values, channels))
 assert state["trim0"] == 1 and state["mute0"] == 0 and state["polarity0"] == 1
 assert state["hpf0"] == 0 and state["group0_0"] == 1 and state["group0_1"] == 0
-assert state["groupLevel0"] == 1 and state["master"] == 1 and state["bypass"] == 0
-print("neutral controls, groups, mute, polarity, HPF-disabled, levels, bypass: OK")
+assert state["groupLevel0"] == 1 and state["master"] == 1 and "bypass" not in state
+print("neutral controls, groups, mute, polarity, HPF-disabled, levels: OK")
 
 proc = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "mixerctl.py"),
                          "serve", config, "--port", "57118", "--listen", "57121", "--no-node"],
@@ -145,6 +145,12 @@ def qinject(bus,node,level=-12.0):
             return
     raise AssertionError(("scan did not reach measurable level", node, samples[-6:], query_tree()))
 
+def master_level(key, value):
+    qset(key, value); deadline=time.monotonic()+1.0; samples=[]
+    while time.monotonic() < deadline:
+        samples.append(output_meter(quad_meters())[1][0]); time.sleep(.03)
+    return statistics.median(samples[-12:])
+
 def qstop(node, label="scan"):
     gate_off_at=time.monotonic()
     quad_sock.sendto(packet("/n_set",",isf",[node,"gate",0]),( "127.0.0.1",SC_PORT))
@@ -201,6 +207,17 @@ try:
         gate_off_at,node_free_at=qstop(node)
         wait_quiet("after configured input route",node,gate_off_at=gate_off_at,node_free_at=node_free_at)
     print("real input-to-group flow: all 16 configured inputs reach only their assigned group: OK")
+    set_corner(0,0,1,"configured input","master gain")
+    master_node=6400; qinject(source_by_group[0],master_node,level=-30.0)
+    reference=master_level("master",1.0)
+    half=master_level("master",0.5)
+    silent=master_level("master",0.0)
+    restored=master_level("master",1.0)
+    assert reference > SILENCE_THRESHOLD and 0.4*reference < half < 0.6*reference, (reference,half)
+    assert silent < SILENCE_THRESHOLD, silent
+    assert 0.85*reference < restored < 1.15*reference, (reference,restored)
+    print(f"real quad master gain: reference={reference:.4f}, half={half:.4f}, zero={silent:.4f}, restored={restored:.4f}: OK")
+    gate_off_at,node_free_at=qstop(master_node); wait_quiet("after master gain",master_node,gate_off_at=gate_off_at,node_free_at=node_free_at)
     qinject(52,7000); qstop(7000); wait_quiet("after private bus 52 probe")
     corners=[(-1,1,mapped_outputs[0]), (1,1,mapped_outputs[1]), (-1,-1,mapped_outputs[2]), (1,-1,mapped_outputs[3])]
     previous_corner=None

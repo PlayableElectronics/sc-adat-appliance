@@ -206,6 +206,31 @@ def dsp_controls(values, channels):
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
 
+def reply_destination(source, reply_port):
+    """Return a per-request destination, preserving the sender IP."""
+    if reply_port is None:
+        return source
+    if not isinstance(reply_port, (int, float)):
+        raise ValueError("reply port must be an integer 1..65535")
+    try:
+        number = float(reply_port)
+    except (TypeError, ValueError, OverflowError):
+        raise ValueError("reply port must be an integer 1..65535")
+    if not math.isfinite(number) or not number.is_integer() or not 1 <= number <= 65535:
+        raise ValueError("reply port must be an integer 1..65535")
+    return source[0], int(number)
+
+def request_destination(source, values, expected_without_port, expected_with_port):
+    """Validate an optional final reply port and return (destination, error)."""
+    if len(values) == expected_without_port:
+        return source, None
+    if len(values) == expected_with_port:
+        try:
+            return reply_destination(source, values[-1]), None
+        except ValueError as exc:
+            return source, str(exc)
+    return source, None
+
 
 def state_chunk_packets(state, snapshot, entries_per_chunk=BULK_STATE_ENTRIES):
     """Build bounded bulk-state datagrams; values may be numeric or strings."""
@@ -340,17 +365,25 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             if len(numeric) >= METER_WIDTH: meter_values=numeric[-METER_WIDTH:]
             meters += 1
         elif path == "/mixer/meters":
-            send_to(sock, address, packet("/mixer/meters", "," + "f" * METER_WIDTH, meter_values))
-        elif path == "/mixer/set" and types == ",sf" and len(vals) == 2:
-            key, value=vals; allowed={name for name,_ in controls(values, channels)}
+            destination, port_error=request_destination(address, vals, 0, 1)
+            if port_error is not None:
+                send_to(sock, address, packet("/mixer/error", ",s", [port_error])); continue
+            if len(vals) not in (0, 1) or (len(vals) == 1 and types not in (",i", ",f")):
+                send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/meters [,i|f reply_port]"])); continue
+            send_to(sock, destination, packet("/mixer/meters", "," + "f" * METER_WIDTH, meter_values))
+        elif path == "/mixer/set" and types in (",sf", ",sfi", ",sff") and len(vals) in (2, 3):
+            destination, port_error=request_destination(address, vals, 2, 3)
+            if port_error is not None:
+                send_to(sock, address, packet("/mixer/error", ",s", [port_error])); continue
+            key, value=vals[:2]; allowed={name for name,_ in controls(values, channels)}
             if key not in allowed:
-                send_to(sock, address, packet("/mixer/error", ",s", ["invalid parameter"])); continue
+                send_to(sock, destination, packet("/mixer/error", ",s", ["invalid parameter"])); continue
             try: numeric=float(value)
-            except (TypeError, ValueError): send_to(sock, address, packet("/mixer/error", ",s", ["value is not numeric"])); continue
-            if not math.isfinite(numeric): send_to(sock, address, packet("/mixer/error", ",s", ["value must be finite"])); continue
+            except (TypeError, ValueError): send_to(sock, destination, packet("/mixer/error", ",s", ["value is not numeric"])); continue
+            if not math.isfinite(numeric): send_to(sock, destination, packet("/mixer/error", ",s", ["value must be finite"])); continue
             try: numeric=validate_parameter(key, numeric, values)
             except ValueError as exc:
-                send_to(sock, address, packet("/mixer/error", ",s", [str(exc)])); continue
+                send_to(sock, destination, packet("/mixer/error", ",s", [str(exc)])); continue
             state[key]=numeric
             if key == "quadSmoothingMs":
                 for target in [ROUTER_NODE, MASTER_NODE] + [GROUP_NODE_BASE + g for g in range(8)]: send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", numeric / 1000.0]))
@@ -359,15 +392,20 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
                 if update is not None:
                     target,dsp_key,dsp_value=update
                     send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value]))
-            send_to(sock, address, packet("/mixer/ok", ",s", [key]))
+            send_to(sock, destination, packet("/mixer/ok", ",s", [key]))
         elif path == "/mixer/set":
-            send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/set ,sf parameter value"]))
-        elif path == "/mixer/get" and types == ",s":
+            send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/set ,sf key value [reply_port]"]))
+        elif path == "/mixer/get" and types in (",s", ",si", ",sf") and len(vals) in (1, 2):
+            destination, port_error=request_destination(address, vals, 1, 2)
+            if port_error is not None:
+                send_to(sock, address, packet("/mixer/error", ",s", [port_error])); continue
             key=str(vals[0]) if vals else "master"
-            if key not in state: send_to(sock, address, packet("/mixer/error", ",s", ["invalid parameter"]))
+            if key not in state: send_to(sock, destination, packet("/mixer/error", ",s", ["invalid parameter"]))
             else:
                 value=state[key]
-                send_to(sock, address, packet("/mixer/state", ",ss", [key, value]) if isinstance(value, str) else packet("/mixer/state", ",sf", [key, value]))
+                send_to(sock, destination, packet("/mixer/state", ",ss", [key, value]) if isinstance(value, str) else packet("/mixer/state", ",sf", [key, value]))
+        elif path == "/mixer/get":
+            send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/get ,s key [reply_port]"]))
         elif path == "/mixer/get-all" and types == ",":
             snapshot_id += 1
             chunks, completion, legacy_completion = state_chunk_packets(state, snapshot_id)

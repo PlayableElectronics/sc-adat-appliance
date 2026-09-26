@@ -5,6 +5,17 @@
     "set_address": "/mixer/set",
     "get_address": "/mixer/get",
     "get_all_address": "/mixer/get-all",
+    "reply_transport": {
+      "description": "Replies default to the UDP source address and port. An optional final reply_port keeps the source IP and selects UDP destination port 1..65535 for that request only.",
+      "reply_port_types": ["integer", "finite whole-valued float"],
+      "messages": {
+        "get": ["/mixer/get ,s key", "/mixer/get ,si key reply_port", "/mixer/get ,sf key reply_port"],
+        "set": ["/mixer/set ,sf key value", "/mixer/set ,sfi key value reply_port", "/mixer/set ,sff key value reply_port"],
+        "meters": ["/mixer/meters ,", "/mixer/meters ,i reply_port", "/mixer/meters ,f reply_port"]
+      },
+      "invalid_reply": "An invalid reply_port produces /mixer/error at the original source address and does not mutate mixer state.",
+      "persistent_registration": false
+    },
     "bulk_state": {"chunk_address": "/mixer/state-chunk", "chunk_types": ",sii + (key:string,value:number|string)*", "completion_address": "/mixer/state-complete", "completion_types": ",sii", "legacy_completion_address": "/mixer/get-all-done", "legacy_completion_types": ",i", "entries_per_chunk": 8, "max_datagram_bytes": 1200}
   },
   "groups": ["kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b"],

@@ -63,6 +63,15 @@ Use:
 The controller listens on UDP 57120 for `/mixer/set`, `/mixer/get`, and bounded
 `/mixer/get-all`, forwards only validated changes to scsynth on UDP 57110, and
 reports `/mixer/ok`, `/mixer/error`, `/mixer/state`, and a completion marker.
+Requests without a reply port receive replies at their UDP source address and
+port. `/mixer/get` also accepts a final reply port after the key,
+`/mixer/set` after the key and value, and `/mixer/meters` as its sole argument.
+The controller keeps the sender IP and sends that request's `/mixer/state`,
+`/mixer/ok`, `/mixer/error`, or `/mixer/meters` reply to UDP port 1..65535.
+The port may be an OSC integer or a finite whole-valued OSC float. An invalid
+port receives `/mixer/error` at the original source address and does not
+change mixer state. No client registration is stored. This is transport
+metadata and does not add a mixer or DSP parameter.
 Bulk state uses `/mixer/state-chunk` packets with snapshot ID, chunk index,
 chunk count, and typed key/value pairs; each chunk is limited to eight entries
 and the encoded datagram target is below 1200 bytes. `/mixer/state-complete`

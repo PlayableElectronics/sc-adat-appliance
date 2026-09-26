@@ -1,5 +1,16 @@
 # Chataigne integration
 
+## Relationship to the Production Runtime Boundary
+
+Chataigne is an optional external creative controller, never a production
+runtime authority. It MUST NOT be required to boot, start audio, enforce
+safety, restore normal stereo state, or keep SuperCollider running. Normal
+stereo performance MUST continue headlessly if Chataigne closes or the network
+disappears; SuperCollider retains the last valid state. Chataigne is intended
+for rehearsal, experimentation, OSC/XY control, quad movement authoring, and
+explicitly armed automation. Python is not a live control dependency; it is
+reserved for offline/development analysis and diagnostics.
+
 Chataigne is optional show control and dashboard software. It does not process
 audio and mixer startup and DSP smoothing must not depend on it. The Dell
 controller listens on UDP port **57120**.

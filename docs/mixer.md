@@ -8,11 +8,14 @@ outputs 1–4 in FL, FR, RL, RR order. Neither program provides transparent
 16-input-to-16-output routing; separate hardware/tone/sample-flow diagnostic
 tools remain available.
 
-`supercollider/synthdefs/sc-adat-mixer.scd` contains DSP only. The versioned
-scene in `payload/config/mixer.conf` and `mixer/mixerctl.py` own configuration,
-validation, OSC policy, node startup, and bounded meter reception. The DSP has
-eight canonical groups matching the Dyaxis faders: kick, drums, bass, music_a,
-music_b, vocals, fx_a, and fx_b.
+`supercollider/synthdefs/sc-adat-mixer.scd` contains the DSP authority. The
+versioned scene and `mixer/mixerctl.py` currently provide a Debian/Docker
+development and validation harness for configuration, validated OSC
+forwarding, node startup and bounded meter reception. That Python harness is
+not the production live control path or authoritative mixer state and MUST NOT
+be required by the Buildroot appliance. The DSP has eight canonical groups
+matching the Dyaxis faders: kick, drums, bass, music_a, music_b, vocals, fx_a,
+and fx_b.
 Stereo is the production default. The two programs are started and stopped
 independently; the launcher refuses to start one while the other is running.
 JACK owns future hardware remapping.

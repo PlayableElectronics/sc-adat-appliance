@@ -8,6 +8,16 @@
 > takes precedence where this earlier milestone assumes routine live fader or
 > channel-strip operation.
 
+## Relationship to the Production Runtime Boundary
+
+This milestone is subordinate to the normative boundary in
+[architecture.md](architecture.md#production-runtime-boundary--architectural-decision).
+The final appliance MUST use SuperCollider as the sole live authority and
+normal stereo MUST be headless. Python, Chataigne, a Mac, a web interface, an
+automation engine and a network are not normal-stereo runtime requirements.
+Chataigne MAY be used for rehearsal and attended quad authoring; Python MAY
+perform offline advisory analysis but MUST NOT change a live mix automatically.
+
 ## Purpose
 
 Turn the SC-ADAT appliance into a dependable live console, multitrack recorder,
@@ -56,7 +66,7 @@ The initial live engine should provide:
 - song and section markers;
 - versioned scene capture and recall;
 - virtual soundcheck using recorded dry tracks;
-- bounded metering, xrun reporting, and a known safe bypass/baseline state.
+- bounded metering, xrun reporting, and a known-safe attenuation/baseline state.
 
 Synthesizers and drum machines retain their own sound design and effects. The
 appliance integrates, balances, records, monitors, and recalls them.
@@ -88,7 +98,7 @@ stored scene.
 ## State hierarchy
 
 1. **Show baseline** — hardware routing, channel calibration, safety limits,
-   monitor topology, and emergency bypass. This is locked during performance.
+   monitor topology, and emergency attenuation/mute. This is locked during performance.
 2. **Song scene** — explicit levels, mutes, EQ, dynamics, sends, and group
    assignments for one song.
 3. **Section cue** — a small intentional delta such as a mute, level change, or
@@ -128,7 +138,9 @@ RF64, with recoverable metadata.
 ## Offline review loop
 
 Spectral and statistical analysis runs on Debian after rehearsal or performance,
-never in the time-critical Buildroot audio path.
+never in the time-critical Buildroot audio path. Python-based analysis is
+advisory only and requires explicit human acceptance before any result enters
+a reviewed SuperCollider program.
 
 1. Record dry tracks, optional stems, master, and markers.
 2. Split or address material by song and section.
@@ -184,8 +196,8 @@ Likely valid uses are:
 
 Prefer frequency-selective dynamic EQ over full-band ducking. Typical maximum
 gain reduction should be approximately 0.5-2 dB with gentle ratios and
-material-appropriate attack/release. It passes review only when bypass makes
-the mix subtly less clear while the enabled processor is not perceptible as
+material-appropriate attack/release. It passes review only when disabling the
+processor makes the mix subtly less clear while the enabled processor is not perceptible as
 ducking or pumping.
 
 Offline review should compare:
@@ -231,8 +243,8 @@ surface.
 1. Prove the compiled-payload path and the tone/xrun test; physical evidence
    is limited to ADAT1 and ADAT2 on the installed main bracket, with ADAT3
    remaining software-path-only until its expansion bracket exists.
-2. Implement a stable 24-channel pass-through mixer with metering and safe
-   bypass.
+2. Implement a stable 24-channel group mixer with metering and safe
+   attenuation/baseline behaviour.
 3. Add dry multitrack recording, recoverable session metadata, and markers.
 4. Add deterministic groups, monitor buses, and shared vocal sends.
 5. Add versioned show baselines, song scenes, section cues, smooth recall, and

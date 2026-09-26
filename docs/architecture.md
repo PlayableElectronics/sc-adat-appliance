@@ -1,5 +1,55 @@
 # Architecture
 
+## Production Runtime Boundary — Architectural Decision
+
+Status: accepted 2026-09-26. This is the normative production boundary for
+the SC-ADAT appliance. The current Debian/Docker mixer is a development and
+hardware-validation environment; its helper processes MUST NOT be mistaken
+for production runtime requirements.
+
+SuperCollider MUST be the sole authority for real-time DSP, routing,
+protection, smoothing, runtime mixer state, validated program/state
+restoration, and deterministic audio behaviour. The production appliance MUST
+run normal stereo mode headlessly from Buildroot, JACK, the RME DIGI9652,
+SuperCollider, and the existing minimal startup, loading, diagnostics and
+persistence mechanisms.
+
+Normal stereo live mode MUST NOT require Python, Chataigne, a Mac, a web
+interface, an automation engine, or a network connection. The approved
+performance program SHOULD avoid routine fader riding and automatic correction.
+Automation MUST be absent from normal stereo operation unless deliberately
+requested and explicitly enabled.
+
+Chataigne MAY be used as an optional external creative controller for
+rehearsal, experimentation, OSC/XY control, quad movement authoring and
+automation drawing, recording and playback. It MUST NOT be a boot, audio,
+safety, or normal-stereo dependency. If it disconnects, closes, or loses the
+network, SuperCollider MUST continue unchanged from its last valid state.
+
+Automation MUST be explicit, deterministic, and executed/smoothed by
+SuperCollider. It MUST NOT introduce adaptive or inferred live behaviour and
+MUST hold its last valid value if its controller disappears. Headless quad
+automation MAY be added later only after real Chataigne-created movements
+exist; reviewed movements SHOULD be translated into deterministic
+SuperCollider-native sequences. A generic automation framework MUST NOT be
+introduced speculatively.
+
+Python MUST NOT be a production live-mixer control daemon or authoritative
+state store. Python MAY be used offline and during development for rehearsal
+and recording analysis, diagnostics, test tooling, and conversion of reviewed
+Chataigne movements. Its analysis MUST be advisory: it MUST NOT change a live
+mix automatically, and every proposal requires explicit human review and
+acceptance. Automatic live EQ, compression, ducking, source recognition and
+failover are prohibited. Recording and clock capture remain required future
+capabilities and MUST follow this same minimal-runtime rule.
+
+| Mode | SuperCollider | Chataigne | Python | Network | Automation |
+|---|---|---|---|---|---|
+| Normal stereo performance | Required | Optional, never required | Prohibited in runtime | Prohibited as a dependency | Prohibited by default; deliberate explicit use only |
+| Attended quad performance with Chataigne | Required | Required for this attended-controller mode | Prohibited in runtime | Required for OSC control | Optional, explicitly enabled |
+| Future headless quad performance | Required | Prohibited as a runtime dependency | Prohibited in runtime | Prohibited as a dependency | Optional, explicitly enabled and SC-native |
+| Offline rehearsal analysis | Optional for playback/virtual soundcheck | Optional as an authoring source | Required for Python-based analysis tools | Prohibited for the analysis workflow | Prohibited from automatic live execution |
+
 ## Three machine identities
 
 ### Debian factory and recovery host
@@ -50,7 +100,7 @@ contains:
 - scsynth and initially supernova;
 - selected plugins and SynthDefs;
 - Dyaxis ADB USB-serial bridge and future surface host emulator;
-- OSC/control daemon, supervision and health reporting.
+- minimal SuperCollider-native control/state, supervision and health reporting.
 
 Persistent configuration, calibration, approved recordings, loops and
 SynthDefs live on the shared data filesystem. The exact RAM-root mechanism
@@ -60,21 +110,25 @@ implementation choice.
 ## Data flow
 
 ```text
-norns / Dyaxis -- OSC/control --> scsynth appliance -- PCI --> DIGI9652 -- ADAT
+optional norns / Dyaxis -- OSC/control --> scsynth appliance -- PCI --> DIGI9652 -- ADAT
 ```
 
-The first production mixer milestone is Debian/Docker-only:
-`mixer/mixerctl.py` owns configuration and OSC policy, while
-`supercollider/synthdefs/sc-adat-mixer.scd` is compiled by Debian `sclang`.
-It activates only 16 confirmed ADAT channels and keeps a 24-channel data-model
-capacity. It does not change Buildroot, partitions, GRUB, or `/boot`.
+The first mixer milestone is Debian/Docker-only development and hardware
+validation. Its `mixer/mixerctl.py` helper currently owns the development
+configuration/OSC boundary, while
+`supercollider/synthdefs/sc-adat-mixer.scd` supplies the DSP compiled by Debian
+`sclang`. That Python helper is not the production control path or an
+authoritative state store and MUST NOT be carried into the production live
+runtime. The milestone activates only 16 confirmed ADAT channels and keeps a
+24-channel data-model capacity. It does not change Buildroot, partitions,
+GRUB, or `/boot`.
 
 Chataigne is an optional external show-control and dashboard layer. It does
-not process audio and is not required for mixer startup or operation. Native
-SuperCollider scheduling remains available for future sample-accurate events;
-this milestone adds no automation sequencer. Open Stage Control remains a
-possible future specialized surface, not a dependency of the first spatial
-prototype.
+not process audio and is not required for mixer startup or operation. A
+disconnect MUST leave the last valid SuperCollider state unchanged. Native
+SuperCollider scheduling is the only permitted future sample-accurate
+automation path; external surfaces remain optional authoring/control clients,
+not production dependencies.
 
 The intended capture contract keeps physical identity stable: all 16 raw
 inputs are pre-fader/pre-processing, followed by eight pre-spatial group

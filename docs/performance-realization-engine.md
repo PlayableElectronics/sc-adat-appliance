@@ -4,6 +4,17 @@ Date: 2026-09-26
 
 Status: agreed product direction
 
+## Relationship to the Production Runtime Boundary
+
+The production appliance follows the normative boundary in
+[architecture.md](architecture.md#production-runtime-boundary--architectural-decision).
+SuperCollider MUST remain the sole live authority. Normal stereo performance
+MUST run headlessly without Python, Chataigne, a Mac, a web interface, an
+automation engine, or a network. Chataigne is an optional rehearsal and
+creative-authoring client; it MUST NOT become a boot, audio, safety, or
+normal-stereo dependency. Python analysis is offline/development and advisory
+only, never an automatic live controller.
+
 ## Decision
 
 The appliance is not intended to become a software clone of a conventional
@@ -139,11 +150,15 @@ Offline analysis is an adviser, never a live controller. It may identify mud,
 masking, rumble, harshness, inconsistent role balance, phase problems or vocal
 intelligibility issues. It may propose static group treatment and, only when
 justified, shallow frequency-selective sidechain processing. Nothing becomes
-active until it is listened to and approved.
+active until it is listened to and approved. Python-generated recommendations
+MUST remain advisory artifacts until a human explicitly accepts them into a
+reviewed SuperCollider program.
 
 Chataigne and the future Dyaxis integration are principally authoring,
-rehearsal and explicit-cue tools. The final performance should not depend on a
-touchscreen or an operator continuously manipulating a virtual mixer.
+rehearsal and explicit-cue tools. Chataigne MAY support attended quad
+movement, but losing it MUST leave SuperCollider on its last valid value. The
+final performance should not depend on a touchscreen or an operator
+continuously manipulating a virtual mixer.
 
 ## Recording and clock contract
 
@@ -250,4 +265,3 @@ Do not prioritize a general-purpose console UI, banks of channel strips, live
 fader riding, automatic mixing, or feature parity with products such as an
 MR18. New work must demonstrate how it improves calibration, authoring,
 recording, deterministic reproduction, safety or musical role realization.
-

@@ -3,7 +3,7 @@
 This document preserves experimental directions for the appliance. These are
 design possibilities, not requirements for the first implementation.
 
-The first milestone remains a safe, measurable 24-channel pass-through matrix.
+The first milestone remains a safe, measurable 24-channel grouped mixer.
 Experimental features must be added incrementally without destabilizing that
 baseline.
 
@@ -292,7 +292,7 @@ The final mapping must remain consistent and provide clear visual feedback.
 ## Implementation sequence
 
 1. Muted 24-channel hardware enumeration and channel identification.
-2. Stable pass-through matrix with output protection.
+2. Stable grouped mixer with output protection.
 3. Input strips, subgroups, effects sends, and monitor buses.
 4. Scene serialization and smooth recall.
 5. Short rolling buffers and manually controlled delayed routes.

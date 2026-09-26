@@ -18,7 +18,7 @@ series of commands for the operator to type.
 
 ## Purpose
 
-Build a reliable, network-controlled SuperCollider performance realization
+Build a reliable, headless SuperCollider performance realization
 appliance from owned hardware. It is deliberately not a desktop DAW, an
 autonomous mixing system, a conventional-console clone, or a replacement for
 the sound design and effects in the connected instruments.
@@ -176,6 +176,14 @@ cannot replace the physical RME/optical test.
 
 ## Current mixer milestone
 
+The production boundary is normative: SuperCollider owns live DSP, routing,
+protection, smoothing, runtime state and deterministic restoration. Normal
+stereo MUST run without Python, Chataigne, a Mac, a web interface, an
+automation engine or a network. The current Debian/Docker `mixerctl.py` path is
+a development and hardware-validation harness only; it is not a production
+control daemon or authoritative state store. See
+[Production Runtime Boundary — Architectural Decision](architecture.md#production-runtime-boundary--architectural-decision).
+
 Commit `90107bf` introduced the first Debian/Docker production mixer:
 
 - 16 active one-to-one input/output paths;
@@ -183,7 +191,7 @@ Commit `90107bf` introduced the first Debian/Docker production mixer:
 - neutral unity scene;
 - smoothed controls;
 - bounded gains and protection;
-- bypass;
+- known-safe attenuation/baseline state;
 - OSC set/query policy;
 - bounded meters;
 - 24-channel-capable data model with strict active-channel validation;
@@ -286,8 +294,9 @@ Responsibilities:
 
 - `scsynth`: realtime audio graph, sample-accurate application, smoothing and
   metering;
-- headless `sclang`: authoritative mixer state, OSC API, validation, scenes,
-  song markers, transport, automation, MIDI and scheduled bundles;
+- headless SuperCollider mechanisms: authoritative mixer state, native
+  validation, scenes, song markers, transport, automation, MIDI and scheduled
+  bundles;
 - Open Stage Control: replaceable browser control surface only;
 - future Dyaxis: physical surface using the same logical control contract.
 
@@ -302,13 +311,15 @@ automation for that parameter until the next marker or explicit re-enable.
 Stopping automation never stops audio. Invalid automation leaves the current
 static mix untouched. No adaptive live decisions are allowed.
 
-Develop the control engine in the existing Debian SuperCollider container.
-Once stable, evaluate adding headless `sclang` to Buildroot without the IDE or
-Qt GUI components.
+Develop and validate native SuperCollider control mechanisms in the existing
+Debian container. Once stable, integrate the minimal headless mechanisms into
+Buildroot without the IDE or Qt GUI components. Python remains development and
+offline-analysis tooling only.
 
 ## First virtual control surface
 
-Use Open Stage Control in a separate pinned, unprivileged, headless container:
+External control surfaces such as Chataigne MAY run in a separate pinned,
+unprivileged client environment:
 
 - no `/dev/snd`;
 - no JACK;
@@ -316,10 +327,10 @@ Use Open Stage Control in a separate pinned, unprivileged, headless container:
 - no authoritative state;
 - layout stored in Git;
 - read-only layout mount;
-- browser clients on Mac/tablet/phone;
+- browser or native clients on Mac/tablet/phone;
 - runs on Dell Debian during development;
-- runs on an external Docker host, initially the Mac, while Dell boots
-  Buildroot.
+- runs on an external host only when deliberately used; the Dell remains
+  independent when Buildroot is booted.
 
 Initial pages:
 
@@ -351,9 +362,10 @@ because the CPU has multiple cores.
 1. Prove actual sample flow, terminal meters and safe per-output tone.
 2. Add deterministic RME clock status/set commands and boot-time verification.
 3. Complete the real 16-input/16-output physical test.
-4. Replace the temporary Python-authoritative mixer policy with the agreed
-   headless `sclang` authoritative control model without regressing DSP.
-5. Add the separate Open Stage Control container and bidirectional surface.
+4. Replace the temporary Python development control policy with the agreed
+   native SuperCollider authoritative control model without regressing DSP.
+5. Add an optional external control surface, such as Chataigne, with a
+   bidirectional surface contract.
 6. Stabilize scenes, markers and native SuperCollider automation.
 7. Add dry multitrack recording to the separate recording disk.
 8. Add monitor buses and shared vocal sends.

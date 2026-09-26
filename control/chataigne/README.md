@@ -4,6 +4,15 @@ This is an optional external control client. It does not process audio, start
 the mixer, alter SuperCollider, or replace mixer-side validation. Chataigne is
 never required for appliance startup.
 
+## Production runtime boundary
+
+Chataigne MUST remain optional. Normal stereo live mode MUST work without this
+project, Python, a Mac, a web interface, an automation engine, or a network.
+Chataigne is for rehearsal, experimentation, OSC/XY authoring, attended quad
+movement, and explicitly armed automation. If it disconnects or closes,
+SuperCollider MUST continue unchanged from its last valid state. Chataigne
+cannot become the boot, audio, safety, or authoritative state layer.
+
 ## Version and generation
 
 The project was generated from `../../chataigne/Mixer.noisette`, the readable
@@ -94,10 +103,11 @@ Dell host before live use. A stale/error state is recovered by checking the
 host and pressing Refresh; Chataigne does not attempt automatic recovery
 writes.
 
-For performance, use the eight group panels manually. Arm calibration before
-touching output setup. Arm Parrot or Time Machine explicitly, and use Stop
-Automation to stop playback and retain current manual values. The Dell mixer
-remains the safety authority.
+For rehearsal and authoring, use the eight group panels and arm calibration
+before touching output setup. Arm Parrot or Time Machine explicitly, and use
+Stop Automation to stop playback and retain current values. Normal stereo
+performance uses the reviewed SuperCollider program without requiring this
+client; the Dell/SC runtime remains the safety authority.
 
 ## Validation and limitations
 

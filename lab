@@ -19,7 +19,7 @@ Commands:
                                   Debian Docker development workflow
   payload <build|test|inspect|promote|status|rollback|verify> [options]
                                   Build/test/promote shared-data payloads
-  mixer <build|start|status|clock|meters|inputs|tone|test|stop>
+  mixer <build|start|status|clock|meters|inputs|tone|test|console|stop>
                                   Stereo group mixer
   mixer-quad <start|status|test|stop>
                                   Fixed four-output quad mixer

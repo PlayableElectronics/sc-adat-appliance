@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+python3 -m py_compile "$ROOT/mixer/console.py" "$ROOT/mixer/test_console.py"
+(cd "$ROOT/mixer" && python3 -m unittest -v test_console)
+echo 'PASS mock OSC mixer console tests'

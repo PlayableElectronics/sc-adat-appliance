@@ -64,6 +64,24 @@ The controller listens on UDP 57120 for `/mixer/set`, `/mixer/get`, and bounded
 `/mixer/get-all`, forwards only validated changes to scsynth on UDP 57110, and
 reports `/mixer/ok`, `/mixer/error`, `/mixer/state`, and a completion marker.
 
+For Debian development and rehearsal, `./lab mixer console` opens a minimal
+standard-library curses OSC client. It is not part of the Buildroot runtime and
+does not own mixer state; SuperCollider remains authoritative and Chataigne
+remains the optional creative/quad automation environment. The console reads
+all channels, groups, meters, master, clock and JACK status, and exposes only
+the existing runtime controls. Trim and group/master levels are shown in dB;
+trim is bounded by the existing `0.0001..4` amplitude range (about `-80..+12`
+dB), group/master levels by `0..2` amplitude, positions and width by each
+configured envelope, HPF frequency by `20..20000` Hz, and booleans/polarity by
+Channel keys are `trimN`, `muteN`, `polarityN`, `hpfN`, and `hpfHzN`; group
+keys are `groupLevelN`, `groupNPosX`, `groupNPosY`, `groupNWidth`, and
+`groupNSpatialBypass`; master uses `master`. `N` is the existing zero-based
+OSC index. Stereo Y is displayed as quad-only/inactive;
+width remains active in the existing stereo panner. Runtime edits are temporary,
+never saved to `payload/config/mixer.conf`, and changed keys are printed on exit.
+The console performs no lifecycle operation, JACK probe, clock write, node
+creation, or tone generation; it samples health no faster than every five seconds.
+
 The runtime node graph is deterministic:
 
 ```text

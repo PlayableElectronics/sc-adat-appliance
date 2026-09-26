@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE="${COMPOSE:-docker compose -f $ROOT/containers/sc-development/compose.yaml}"
+sh -c "$COMPOSE run --rm --no-deps --entrypoint python3 sc-mixer -c 'import sys; sys.path.insert(0, \"/workspace/mixer\"); import contract, mixerctl; from pathlib import Path; assert Path(\"/workspace/control/mixer-control-contract.json\").is_file(); assert contract.CONTRACT_VERSION == \"1.0.0\"; assert mixerctl.BULK_STATE_ENTRIES > 0; print(\"PASS container control contract import\", contract.CONTRACT_VERSION, mixerctl.BULK_STATE_ENTRIES)'"

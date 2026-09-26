@@ -331,7 +331,7 @@ class ConsoleModel:
         definition, _ = control_for_key(key)
         prompt = None
         confirmation = definition.get("confirmation") if definition else None
-        if confirmation == "increase" and old is not None and value > float(old):
+        if confirmation == "increase" and old is not None and value > float(old) * (1.0 + 1e-7):
             prompt = f"Increase master {db(old)} dB -> {db(value)} dB? y/N"
         elif confirmation == "always":
             prompt = f"Apply polarity inversion to {key}? y/N"

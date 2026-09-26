@@ -73,7 +73,7 @@ the existing runtime controls. Trim and group/master levels are shown in dB;
 trim is bounded by the existing `0.0001..4` amplitude range (about `-80..+12`
 dB), group/master levels by `0..2` amplitude, positions and width by each
 configured envelope, HPF frequency by `20..20000` Hz, and booleans/polarity by
-Channel keys are `trimN`, `muteN`, `polarityN`, `hpfN`, and `hpfHzN`; group
+their existing binary constraints. Channel keys are `trimN`, `muteN`, `polarityN`, `hpfN`, and `hpfHzN`; group
 keys are `groupLevelN`, `groupNPosX`, `groupNPosY`, `groupNWidth`, and
 `groupNSpatialBypass`; master uses `master`. `N` is the existing zero-based
 OSC index. Stereo Y is displayed as quad-only/inactive;

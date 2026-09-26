@@ -14,7 +14,7 @@ import sys
 import time
 from pathlib import Path
 
-from mixerctl import GROUPS, METER_WIDTH, dbamp, group_limits, packet, parse_packet, read_config, validate_parameter
+from mixerctl import GROUPS, METER_WIDTH, controls, dbamp, group_limits, packet, parse_packet, read_config, validate_parameter
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "payload/config/mixer.conf"
@@ -68,6 +68,7 @@ class OscClient:
     def get_all(self):
         self.sock.sendto(packet("/mixer/get-all", ","), self.address)
         state = {}
+        completed = False
         deadline = time.monotonic() + OSC_TIMEOUT
         while time.monotonic() < deadline:
             try:
@@ -77,9 +78,10 @@ class OscClient:
             if path == "/mixer/state" and len(values) == 2:
                 state[str(values[0])] = values[1]
             elif path == "/mixer/get-all-done":
-                return state
-        if not state:
-            raise TimeoutError("OSC get-all timed out")
+                completed = True
+                break
+        if not completed:
+            raise TimeoutError("OSC get-all incomplete or timed out")
         return state
 
     def get(self, key):
@@ -116,9 +118,34 @@ def read_alsa_control(name):
     return items.get(int(match.group(1)), "unknown")
 
 
-def read_health(log_path=None):
+def resolve_rme_proc_path(asound_root=Path("/proc/asound")):
+    """Resolve the RME proc file without assuming it is ALSA card zero."""
+    card_numbers = []
+    try:
+        for line in (asound_root / "cards").read_text(encoding="utf-8").splitlines():
+            match = re.match(r"^\s*(\d+)\s+\[([^]]+)\]", line)
+            if match and match.group(2).strip() == "Digi9652":
+                card_numbers.append(match.group(1))
+    except OSError:
+        pass
+    for card_dir in sorted(asound_root.glob("card*/")):
+        try:
+            if (card_dir / "id").read_text(encoding="utf-8").strip() == "Digi9652":
+                number = card_dir.name.removeprefix("card")
+                if number not in card_numbers:
+                    card_numbers.append(number)
+        except OSError:
+            continue
+    for number in card_numbers:
+        path = asound_root / f"card{number}" / "rme9652"
+        if path.is_file():
+            return path
+    return None
+
+
+def read_health(log_path=None, asound_root=Path("/proc/asound"), proc_root=Path("/proc")):
     """Read hardware/process state without creating a JACK client."""
-    health = {"stale": False, "clock": {}, "jack": {}, "xruns": 0}
+    health = {"stale": False, "clock": {}, "jack": {}, "xruns": None}
     try:
         health["clock"] = {
             "mode": read_alsa_control("Sync Mode"),
@@ -130,34 +157,45 @@ def read_health(log_path=None):
     except (OSError, subprocess.CalledProcessError, ValueError) as exc:
         health["error"] = str(exc)
     try:
-        proc = Path("/proc/asound/card0/rme9652").read_text(encoding="utf-8")
+        proc_path = resolve_rme_proc_path(asound_root)
+        if proc_path is None:
+            raise FileNotFoundError("Digi9652 RME proc state unavailable")
+        proc = proc_path.read_text(encoding="utf-8")
         match = re.search(r"^ADAT Sample rate:\s*(\d+)Hz", proc, re.MULTILINE)
         health["clock"]["rate"] = int(match.group(1)) if match else None
-    except OSError:
+    except OSError as exc:
         health["clock"]["rate"] = None
-    for entry in Path("/proc").iterdir():
-        if not entry.name.isdigit():
-            continue
-        try:
-            if (entry / "comm").read_text().strip() != "jackd":
+        health["stale"] = True
+        health["error"] = str(exc)
+    try:
+        proc_entries = proc_root.iterdir()
+        for entry in proc_entries:
+            if not entry.name.isdigit():
                 continue
-            args = (entry / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace")
-            health["jack"] = {
-                "rate": _arg_int(args, r"-r(\d+)"),
-                "period": _arg_int(args, r"-p(\d+)"),
-                "periods": _arg_int(args, r"-n(\d+)"),
-                "device": _arg_text(args, r"-d(\S+)"),
-                "rt": _jack_rt_priority(entry),
-            }
-            break
-        except (OSError, ValueError):
-            continue
+            try:
+                if (entry / "comm").read_text().strip() != "jackd":
+                    continue
+                args = (entry / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace")
+                health["jack"] = {
+                    "rate": _arg_int(args, r"-r(\d+)"),
+                    "period": _arg_int(args, r"-p(\d+)"),
+                    "periods": _arg_int(args, r"-n(\d+)"),
+                    "device": _arg_text(args, r"-d(\S+)"),
+                    "rt": _jack_rt_priority(entry),
+                }
+                break
+            except (OSError, ValueError):
+                continue
+    except OSError as exc:
+        health["stale"] = True
+        health.setdefault("error", str(exc))
     log = Path(log_path) if log_path else ROOT / ".local/sc-audio-logs/jack.log"
     try:
         text = log.read_text(encoding="utf-8", errors="replace")
         health["xruns"] = len(re.findall(r"xrun|process error|underrun|overrun", text, re.I))
     except OSError:
-        health["xruns"] = 0
+        health["xruns"] = None
+        health["stale"] = True
     return health
 
 
@@ -206,6 +244,10 @@ class ConsoleModel:
 
     def start(self):
         self.state = self.client.get_all()
+        required = {key for key, _ in controls(self.values, self.channels)}
+        missing = sorted(required - set(self.state))
+        if missing:
+            raise RuntimeError("OSC get-all incomplete; missing: " + ", ".join(missing))
         self.initial = dict(self.state)
         self.message = "Connected; no controls changed"
 
@@ -259,9 +301,14 @@ class ConsoleModel:
     def write(self, key, value, confirm=None):
         value = self.validate(key, value)
         old = self.state.get(key)
+        prompt = None
         if key == "master" and old is not None and value > float(old):
-            if confirm is None or not confirm(f"Increase master {db(old)} dB -> {db(value)} dB? y/N"):
-                self.message = "master increase cancelled"
+            prompt = f"Increase master {db(old)} dB -> {db(value)} dB? y/N"
+        elif key.startswith("polarity"):
+            prompt = f"Apply polarity inversion to {key}? y/N"
+        if prompt is not None:
+            if confirm is None or not confirm(prompt):
+                self.message = "control change cancelled"
                 return False
         try:
             readback = self.client.set_and_readback(key, value)
@@ -413,8 +460,10 @@ def _draw_status(stdscr, model):
     _line(stdscr, 3, f"master {float(master):.9f} ({db(master)} dB)  +/- 0.5 dB steps; increases confirm")
     clock = model.health.get("clock", {})
     jack = model.health.get("jack", {})
-    _line(stdscr, 5, f"RME {clock.get('mode','?')} source={clock.get('source','?')} ADAT1={clock.get('adat1','?')} ADAT2={clock.get('adat2','?')} ADAT3={clock.get('adat3','?')} rate={clock.get('rate','?')}")
-    _line(stdscr, 6, f"JACK device={jack.get('device','?')} rate={jack.get('rate','?')} period={jack.get('period','?')} periods={jack.get('periods','?')} RT={jack.get('rt','?')} xruns={model.health.get('xruns','?')}")
+    rate = "unavailable" if clock.get("rate") is None else clock.get("rate")
+    xruns = "unknown" if model.health.get("xruns") is None else model.health.get("xruns")
+    _line(stdscr, 5, f"RME {clock.get('mode','?')} source={clock.get('source','?')} ADAT1={clock.get('adat1','?')} ADAT2={clock.get('adat2','?')} ADAT3={clock.get('adat3','?')} rate={rate}")
+    _line(stdscr, 6, f"JACK device={jack.get('device','?')} rate={jack.get('rate','?')} period={jack.get('period','?')} periods={jack.get('periods','?')} RT={jack.get('rt','?')} xruns={xruns}")
     _line(stdscr, 8, "Mixer state is read through OSC; health is read-only and sampled no faster than every 5 seconds.")
 
 
@@ -426,16 +475,28 @@ def _line(stdscr, y, text, attr=0):
 
 
 def _confirm(stdscr, prompt):
-    h, w = stdscr.getmaxyx(); _line(stdscr, h // 2, prompt + " ", curses.A_REVERSE); stdscr.refresh()
-    key = stdscr.getch()
-    return key in (ord("y"), ord("Y"))
+    h, _ = stdscr.getmaxyx()
+    stdscr.nodelay(False)
+    try:
+        _line(stdscr, h // 2, prompt + " ", curses.A_REVERSE)
+        stdscr.refresh()
+        key = stdscr.getch()
+        return key in (ord("y"), ord("Y"))
+    finally:
+        stdscr.nodelay(True)
 
 
 def _help(stdscr):
     lines = ["Keys", "Up/Down row  Tab editable field  Left/Right or [/ ] adjust", "+/- gain by 0.5 dB  Space toggle Boolean  p confirmed polarity", "1 Channels  2 Groups  3 Master/Status  r full refresh  q quit", "Y is inactive in stereo. Changes are runtime-only and are printed on exit.", "Press any key..."]
-    stdscr.erase()
-    for i, line in enumerate(lines): _line(stdscr, i + 1, line)
-    stdscr.refresh(); stdscr.getch()
+    stdscr.nodelay(False)
+    try:
+        stdscr.erase()
+        for i, line in enumerate(lines): _line(stdscr, i + 1, line)
+        stdscr.refresh()
+        while stdscr.getch() == -1:
+            pass
+    finally:
+        stdscr.nodelay(True)
 
 
 def main():

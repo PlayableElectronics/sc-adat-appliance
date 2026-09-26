@@ -63,6 +63,12 @@ Use:
 The controller listens on UDP 57120 for `/mixer/set`, `/mixer/get`, and bounded
 `/mixer/get-all`, forwards only validated changes to scsynth on UDP 57110, and
 reports `/mixer/ok`, `/mixer/error`, `/mixer/state`, and a completion marker.
+Bulk state uses `/mixer/state-chunk` packets with snapshot ID, chunk index,
+chunk count, and typed key/value pairs; each chunk is limited to eight entries
+and the encoded datagram target is below 1200 bytes. `/mixer/state-complete`
+has signature `,sii` (snapshot, chunk count, total entries); the small legacy
+`/mixer/get-all-done ,i` marker remains for older listeners. New clients must
+verify every chunk and the typed completion counts before enabling controls.
 
 For Debian development and rehearsal, `./lab mixer console` opens a minimal
 standard-library curses OSC client. It is not part of the Buildroot runtime and

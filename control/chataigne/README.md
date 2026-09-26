@@ -84,7 +84,10 @@ Outgoing performance and armed calibration changes use exactly:
 /mixer/get-all
 ```
 
-The exact supported keys are in `reference/controls.json`. There is no
+The exact supported keys are in `reference/controls.json`. Bulk state replies
+use the versioned `/mixer/state-chunk` protocol and must be reassembled by
+snapshot/chunk metadata; `/mixer/get-all-done` is no longer a per-entry stream
+marker. There is no
 unimplemented API addition in this project. Incoming `/mixer/state`,
 `/mixer/ok`, `/mixer/error` and `/mixer/get-all-done` are handled by the
 attached script.

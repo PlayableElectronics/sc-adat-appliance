@@ -22,6 +22,7 @@ BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP
 assert all(a[1] <= b[0] or b[1] <= a[0] for i,a in enumerate(BUS_RANGES.values()) for j,b in enumerate(BUS_RANGES.values()) if i < j)
 FIELDS = ("name", "input", "output", "group", "trim_db", "mute", "polarity", "hpf", "hpf_hz")
 METER_WIDTH = 16 + 16 + 8 + 8 + 16 + 16
+BULK_STATE_ENTRIES = 8
 
 def osc_string(value):
     raw = value.encode() + b"\0"; return raw + b"\0" * ((4 - len(raw) % 4) % 4)
@@ -204,6 +205,24 @@ def dsp_controls(values, channels):
     return result
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
+
+
+def state_chunk_packets(state, snapshot, entries_per_chunk=BULK_STATE_ENTRIES):
+    """Build bounded bulk-state datagrams; values may be numeric or strings."""
+    items = sorted(state.items())
+    total = max(1, (len(items) + entries_per_chunk - 1) // entries_per_chunk)
+    chunks = []
+    for index in range(total):
+        pairs = items[index * entries_per_chunk:(index + 1) * entries_per_chunk]
+        types = ",sii"
+        values = [str(snapshot), index, total]
+        for key, value in pairs:
+            types += "s" + ("s" if isinstance(value, str) else "f")
+            values.extend([key, value])
+        chunks.append(packet("/mixer/state-chunk", types, values))
+    completion = packet("/mixer/state-complete", ",sii", [str(snapshot), total, len(items)])
+    legacy_completion = packet("/mixer/get-all-done", ",i", [len(items)])
+    return chunks, completion, legacy_completion
 def db(value): return -120.0 if value <= 1e-9 else 20.0 * math.log10(min(1.0, max(1e-9, value)))
 ROUTER_NODE=3900; GROUP_NODE_BASE=4000; MASTER_NODE=4100
 NODE_ROUTING=1000; NODE_SPATIAL=1001; NODE_MASTER=1002
@@ -304,7 +323,7 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
     if mode is not None:
         if mode not in ("stereo", "quad"): raise ValueError("mode must be stereo or quad")
         values["_mode"]=mode
-    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH
+    sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH; snapshot_id=0
     if start: start_graph(sock, sc_port, values, channels)
     def shutdown(_signum, _frame):
         try:
@@ -350,9 +369,11 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
                 value=state[key]
                 send_to(sock, address, packet("/mixer/state", ",ss", [key, value]) if isinstance(value, str) else packet("/mixer/state", ",sf", [key, value]))
         elif path == "/mixer/get-all" and types == ",":
-            for key,value in state.items():
-                send_to(sock, address, packet("/mixer/state", ",sf", [key, value]) if not isinstance(value, str) else packet("/mixer/state", ",ss", [key, value]))
-            send_to(sock, address, packet("/mixer/get-all-done", ",i", [len(state)]))
+            snapshot_id += 1
+            chunks, completion, legacy_completion = state_chunk_packets(state, snapshot_id)
+            for chunk in chunks: send_to(sock, address, chunk)
+            send_to(sock, address, completion)
+            send_to(sock, address, legacy_completion)
 def get_meters(port=57120):
     sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.settimeout(2); send(sock, port, packet("/mixer/meters", ","))
     path, _, values=parse_packet(sock.recv(65535))

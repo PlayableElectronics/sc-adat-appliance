@@ -28,14 +28,16 @@ right; Y `0` rear, `0.5` centre, `1` front.
 |---|---|---|
 | `/mixer/set` | `,sf parameter value` | validated finite update |
 | `/mixer/get` | `,s parameter` | one `/mixer/state` reply |
-| `/mixer/get-all` | no arguments | state stream, then `/mixer/get-all-done ,i count` |
+| `/mixer/get-all` | no arguments | chunked state snapshot, then `/mixer/state-complete ,sii snapshot chunks entries` |
 
 Spatial parameters are `groupNPosX`, `groupNPosY`, `groupNWidth` and
 `groupNSpatialBypass` (`N=0..7`). Calibration parameters are
 `quadOutputNGainDb`, `quadOutputNMute` and `quadOutputNPolarity` (`N=0..3`),
 in order front-left, front-right, rear-left, rear-right. Replies are
 `/mixer/ok ,s parameter`, `/mixer/error ,s reason`, and
-`/mixer/state ,sf parameter value` (routing mode uses `,ss`).
+`/mixer/state ,sf parameter value` (routing mode uses `,ss`). Bulk clients use
+`/mixer/state-chunk ,sii...` with a snapshot ID and bounded typed key/value
+pairs; the contract defines the complete bulk-state format.
 
 The established `/mixer/set` keys are the semantic compatibility surface:
 `groupNPosX/Y` is group position, `groupNWidth` is width, and

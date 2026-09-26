@@ -22,6 +22,7 @@ CONFIG = ROOT / "payload/config/mixer.conf"
 METER_PERIOD = 0.2
 HEALTH_PERIOD = 5.0
 OSC_TIMEOUT = 0.75
+STATE_RETRIES = 3
 GAIN_STEP_DB = 0.5
 TRIM_MIN_DB = 20.0 * math.log10(0.0001)
 TRIM_MAX_DB = 20.0 * math.log10(4.0)
@@ -67,23 +68,63 @@ class OscClient:
         self.sock.close()
 
     def get_all(self):
-        self.sock.sendto(packet("/mixer/get-all", ","), self.address)
-        state = {}
-        completed = False
-        deadline = time.monotonic() + OSC_TIMEOUT
-        while time.monotonic() < deadline:
+        last_error = "OSC bulk state incomplete"
+        for attempt in range(STATE_RETRIES):
+            self.sock.sendto(packet("/mixer/get-all", ","), self.address)
+            chunks = {}
+            snapshot = None
+            completion = None
+            deadline = time.monotonic() + OSC_TIMEOUT
             try:
-                path, _, values = parse_packet(self.sock.recv(65535))
-            except socket.timeout:
-                break
-            if path == "/mixer/state" and len(values) == 2:
-                state[str(values[0])] = values[1]
-            elif path == "/mixer/get-all-done":
-                completed = True
-                break
-        if not completed:
-            raise TimeoutError("OSC get-all incomplete or timed out")
-        return state
+                while time.monotonic() < deadline:
+                    path, types, values = parse_packet(self.sock.recv(65535))
+                    if path == "/mixer/state-chunk":
+                        if len(values) < 3 or types[:4] != ",sii":
+                            raise ValueError("malformed mixer state chunk")
+                        chunk_snapshot, index, total = str(values[0]), int(values[1]), int(values[2])
+                        if snapshot is None:
+                            snapshot = chunk_snapshot
+                        if chunk_snapshot != snapshot:
+                            raise ValueError("mixed mixer state snapshots")
+                        if total <= 0 or index < 0 or index >= total:
+                            raise ValueError("invalid mixer state chunk index")
+                        pairs = values[3:]
+                        pair_types = types[4:]
+                        if len(pairs) != len(pair_types) or len(pairs) % 2:
+                            raise ValueError("malformed mixer state chunk pairs")
+                        entries = {}
+                        for offset in range(0, len(pairs), 2):
+                            if pair_types[offset] != "s" or pair_types[offset + 1] not in "fs":
+                                raise ValueError("invalid mixer state chunk value type")
+                            entries[str(pairs[offset])] = pairs[offset + 1]
+                        if index in chunks and chunks[index] != (total, entries):
+                            raise ValueError("conflicting duplicate mixer state chunk")
+                        chunks[index] = (total, entries)
+                    elif path == "/mixer/state-complete":
+                        if len(values) != 3 or types != ",sii":
+                            raise ValueError("legacy or malformed mixer completion record")
+                        done_snapshot, chunk_count, entry_count = str(values[0]), int(values[1]), int(values[2])
+                        if snapshot is None:
+                            snapshot = done_snapshot
+                        if done_snapshot != snapshot:
+                            raise ValueError("mixed mixer completion snapshot")
+                        completion = (chunk_count, entry_count)
+                    if completion is not None:
+                        chunk_count, entry_count = completion
+                        if (len(chunks) == chunk_count and set(chunks) == set(range(chunk_count))):
+                            state = {}
+                            for index in range(chunk_count):
+                                announced, entries = chunks[index]
+                                if announced != chunk_count:
+                                    raise ValueError("inconsistent mixer chunk count")
+                                state.update(entries)
+                            if len(state) != entry_count:
+                                raise ValueError("mixer state entry count mismatch")
+                            return state
+                last_error = "OSC bulk state missing chunks or completion"
+            except (socket.timeout, ValueError, IndexError, TypeError) as exc:
+                last_error = str(exc)
+        raise TimeoutError(f"OSC get-all failed after {STATE_RETRIES} attempts: {last_error}")
 
     def get(self, key):
         path, _, values = self._request(packet("/mixer/get", ",s", [key]), {"/mixer/state", "/mixer/error"})

@@ -11,7 +11,7 @@ from console import (CHANNEL_FIELDS, GROUP_FIELDS, ConsoleModel, METER_PERIOD, M
                      OscClient, _confirm, _help, _handle_key, _layout_supported,
                      _next_page, db, meter_bar, parse_direct_entry, read_health,
                      resolve_rme_proc_path)
-from mixerctl import METER_WIDTH, controls, packet, parse_packet, read_config
+from mixerctl import METER_WIDTH, controls, packet, parse_packet, read_config, state_chunk_packets
 
 
 class MockMixer:
@@ -21,6 +21,14 @@ class MockMixer:
         self.requests = []
         self.reject = False
         self.complete = complete
+        self.request_count = 0
+        self.drop_chunks = set()
+        self.drop_first_chunks = set()
+        self.drop_done = False
+        self.drop_first_done = False
+        self.duplicate_chunk = None
+        self.reorder = False
+        self.mixed_snapshot = False
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(("127.0.0.1", 0))
         self.sock.settimeout(0.1)
@@ -31,8 +39,8 @@ class MockMixer:
 
     def close(self):
         self.stop = True
-        self.sock.close()
         self.thread.join(timeout=1)
+        self.sock.close()
 
     def run(self):
         while not self.stop:
@@ -43,11 +51,29 @@ class MockMixer:
             path, _, values = parse_packet(data)
             self.requests.append((path, values))
             if path == "/mixer/get-all":
-                for key, value in self.state.items():
-                    types = ",ss" if isinstance(value, str) else ",sf"
-                    self.sock.sendto(packet("/mixer/state", types, [key, value]), address)
-                if self.complete:
-                    self.sock.sendto(packet("/mixer/get-all-done", ",i", [len(self.state)]), address)
+                self.request_count += 1
+                chunks, done, legacy_done = state_chunk_packets(self.state, self.request_count)
+                indexed = list(enumerate(chunks))
+                if self.reorder:
+                    indexed.reverse()
+                drops = self.drop_chunks | (self.drop_first_chunks if self.request_count == 1 else set())
+                for index, chunk in indexed:
+                    if index in drops:
+                        continue
+                    if self.mixed_snapshot and index == 0:
+                        path0, types0, values0 = parse_packet(chunk)
+                        values0[0] = "stale-snapshot"
+                        self.sock.sendto(packet(path0, types0, values0), address)
+                    self.sock.sendto(chunk, address)
+                    if index == self.duplicate_chunk:
+                        self.sock.sendto(chunk, address)
+                if self.complete and not self.drop_done and not (self.drop_first_done and self.request_count == 1):
+                    if self.mixed_snapshot:
+                        done_path, done_types, done_values = parse_packet(done)
+                        done_values[0] = "stale-snapshot"
+                        self.sock.sendto(packet(done_path, done_types, done_values), address)
+                    self.sock.sendto(done, address)
+                    self.sock.sendto(legacy_done, address)
             elif path == "/mixer/meters":
                 self.sock.sendto(packet("/mixer/meters", "," + "f" * METER_WIDTH, [0.0] * METER_WIDTH), address)
             elif path == "/mixer/get":
@@ -110,8 +136,44 @@ class ConsoleTests(unittest.TestCase):
             self.model.start()
         self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
 
+    def test_bulk_state_dropped_middle_chunk_recovers_on_bounded_retry(self):
+        self.mock.drop_first_chunks = {1}
+        self.model.start()
+        self.assertEqual(self.mock.request_count, 2)
+        self.assertEqual(self.model.state["controlContractVersion"], "1.0.0")
+
+    def test_bulk_state_dropped_completion_fails_after_bounded_retries(self):
+        self.mock.drop_done = True
+        with self.assertRaises(TimeoutError):
+            self.model.start()
+        self.assertEqual(self.mock.request_count, 3)
+        self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
+
+    def test_bulk_state_duplicate_and_reordered_chunks(self):
+        self.mock.duplicate_chunk = 2
+        self.mock.reorder = True
+        self.model.start()
+        self.assertEqual(len(self.model.state), len(self.mock.state))
+
+    def test_bulk_state_mixed_snapshot_fails_after_bounded_retries(self):
+        self.mock.mixed_snapshot = True
+        with self.assertRaises(TimeoutError):
+            self.model.start()
+        self.assertGreaterEqual(self.mock.request_count, 2)
+        self.assertLessEqual(self.mock.request_count, 3)
+
+    def test_bulk_state_datagrams_stay_below_contract_limit(self):
+        chunks, done, legacy_done = state_chunk_packets(self.mock.state, "test")
+        self.assertLessEqual(max(map(len, chunks + [done, legacy_done])), 1200)
+
     def test_contract_version_mismatch_refuses_operation(self):
         self.mock.state["controlContractVersion"] = "0.0.0"
+        with self.assertRaises(RuntimeError):
+            self.model.start()
+        self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
+
+    def test_missing_contract_version_refuses_operation(self):
+        del self.mock.state["controlContractVersion"]
         with self.assertRaises(RuntimeError):
             self.model.start()
         self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])

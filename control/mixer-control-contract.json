@@ -4,7 +4,8 @@
     "contract_state_key": "controlContractVersion",
     "set_address": "/mixer/set",
     "get_address": "/mixer/get",
-    "get_all_address": "/mixer/get-all"
+    "get_all_address": "/mixer/get-all",
+    "bulk_state": {"chunk_address": "/mixer/state-chunk", "chunk_types": ",sii + (key:string,value:number|string)*", "completion_address": "/mixer/state-complete", "completion_types": ",sii", "legacy_completion_address": "/mixer/get-all-done", "legacy_completion_types": ",i", "entries_per_chunk": 8, "max_datagram_bytes": 1200}
   },
   "groups": ["kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b"],
   "controls": [

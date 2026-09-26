@@ -7,7 +7,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from console import ConsoleModel, METER_PERIOD, OscClient, _confirm, _help, db, read_health, resolve_rme_proc_path
+from console import (CHANNEL_FIELDS, GROUP_FIELDS, ConsoleModel, METER_PERIOD, MeterVisual,
+                     OscClient, _confirm, _help, _handle_key, _layout_supported,
+                     _next_page, db, meter_bar, parse_direct_entry, read_health,
+                     resolve_rme_proc_path)
 from mixerctl import METER_WIDTH, controls, packet, parse_packet, read_config
 
 
@@ -107,6 +110,12 @@ class ConsoleTests(unittest.TestCase):
             self.model.start()
         self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
 
+    def test_contract_version_mismatch_refuses_operation(self):
+        self.mock.state["controlContractVersion"] = "0.0.0"
+        with self.assertRaises(RuntimeError):
+            self.model.start()
+        self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
+
     def test_master_increase_requires_confirmation_and_small_steps(self):
         self.model.start()
         self.model.write("master", 0.251188636)
@@ -178,6 +187,57 @@ class ConsoleModalTests(unittest.TestCase):
         _help(window)
         self.assertEqual([False, True], window.modes)
         self.assertEqual([], window.keys)
+
+
+class ConsoleUiTests(unittest.TestCase):
+    def setUp(self):
+        self.mock = MockMixer()
+        self.model = ConsoleModel(OscClient(port=self.mock.port), health_reader=lambda: {"xruns": None})
+        self.model.start()
+        self.model.focus = "items"
+        self.model.param = 0
+        self.model.editing = None
+
+    def tearDown(self):
+        self.mock.close()
+        self.model.client.close()
+
+    def test_tab_changes_page_only_and_focus_moves_to_inspector(self):
+        self.assertEqual(CHANNEL_FIELDS, ("trim", "mute", "polarity", "hpf", "hpfHz"))
+        self.assertEqual(GROUP_FIELDS, ("level", "x", "width", "bypass"))
+        _next_page(self.model)
+        self.assertEqual(self.model.page, 2)
+        self.assertEqual(self.model.focus, "items")
+        self.assertEqual(self.model.param, 0)
+        _handle_key(self.model, 261, FakeWindow([]))  # curses.KEY_RIGHT on Linux
+        self.assertEqual(self.model.focus, "params")
+        self.assertEqual(self.model.row, 0)
+        self.assertNotIn("/mixer/set", [path for path, _ in self.mock.requests])
+
+    def test_contract_derived_direct_entry_and_rejection(self):
+        self.assertAlmostEqual(parse_direct_entry("-12 dB", "master"), 0.251188643, places=6)
+        self.assertEqual(parse_direct_entry("500 Hz", "hpfHz0"), 500.0)
+        with self.assertRaises(ValueError):
+            self.model.write("hpfHz0", 20001)
+        with self.assertRaises(ValueError):
+            self.model.write("group0PosX", 2.0)
+
+    def test_small_layout_fails_gracefully(self):
+        self.assertFalse(_layout_supported(19, 100))
+        self.assertFalse(_layout_supported(24, 83))
+        self.assertTrue(_layout_supported(20, 84))
+
+    def test_meter_scaling_smoothing_and_peak_hold(self):
+        bar, state = meter_bar(0.0, 20)
+        self.assertEqual(len(bar), 20); self.assertEqual(state, "silence")
+        bar, state = meter_bar(0.8, 20)
+        self.assertEqual(state, "near-clipping"); self.assertIn("=", bar)
+        visual = MeterVisual(hold_seconds=1.0)
+        visual.update(0.5, 0.2, 0.0)
+        _, rms, hold = visual.update(0.0, 0.0, 0.1)
+        self.assertGreater(rms, 0.0); self.assertGreater(hold, 0.4)
+        _, _, decayed = visual.update(0.0, 0.0, 2.0)
+        self.assertLess(decayed, hold)
 
 
 class ConsoleHealthTests(unittest.TestCase):

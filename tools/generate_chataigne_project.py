@@ -8,7 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SEED = ROOT / "chataigne" / "Mixer.noisette"
 OUT = ROOT / "control" / "chataigne" / "sc-adat-quad.noisette"
-GROUPS = ("kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b")
+CONTRACT = json.loads((ROOT / "control/mixer-control-contract.json").read_text(encoding="utf-8"))
+GROUPS = tuple(CONTRACT["groups"])
 
 
 def parameter(kind, nice, short, value, minimum=None, maximum=None, description=""):

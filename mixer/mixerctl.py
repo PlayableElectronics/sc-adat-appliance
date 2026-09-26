@@ -2,7 +2,7 @@
 """Small deterministic OSC/config controller for the SC group mixers."""
 import argparse, math, os, signal, socket, struct, sys, time
 
-GROUPS = ("kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b")
+from contract import CONTRACT_VERSION, GROUPS, control_definitions, control_for_key
 MAX_GROUPS = 8
 SPATIAL_LIMITS = {
     "kick": (0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0),
@@ -61,6 +61,26 @@ def group_limits(values, name):
     defaults=SPATIAL_LIMITS[name]
     return tuple(float(values.get(f"group.{name}.{key}", defaults[i])) for i,key in enumerate(("x_min","x_max","y_min","y_max","width_min","width_max"))) + defaults[6:]
 def validate_parameter(key, numeric, values=None):
+    definition, index = control_for_key(key)
+    if definition is not None:
+        if not definition["writable"]:
+            raise ValueError(f"{key} is read-only")
+        value_type = definition["value_type"]
+        if value_type == "boolean":
+            return strict_bool(numeric, key)
+        if value_type == "enum":
+            number = finite(numeric, key)
+            if number not in definition["range"]["values"]:
+                raise ValueError(f"{key} has an invalid enumerated value")
+            return number
+        if definition["range"].get("source", "").startswith("group_limits"):
+            name = GROUPS[index]
+            limits = group_limits(values or {}, name)
+            suffix = "x" if key.endswith("PosX") else "y" if key.endswith("PosY") else "width"
+            low, high = {"x": limits[:2], "y": limits[2:4], "width": limits[4:6]}[suffix]
+            return bounded(numeric, low, high, key)
+        bounds = definition["range"]
+        return bounded(numeric, bounds["min"], bounds["max"], key)
     if "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
     if key.startswith(("mute", "hpf")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
@@ -128,17 +148,47 @@ def read_config(path):
         channels_out.append(row)
     if seen_inputs != set(range(1,17)) or seen_outputs != set(range(1,17)): raise ValueError("mapping must cover all 16 channels")
     return values, channels_out
+def _contract_default(definition, index, values, channels):
+    template = definition["key_template"]
+    if definition["scope"] == "channel":
+        row = channels[index]
+        if template == "channelNGroup": return row["group"]
+        field = definition["default_source"].split(".")[-1]
+        value = row[field]
+        if template == "trimN": return dbamp(value)
+        if definition["value_type"] == "boolean": return as_bool(value)
+        if template == "polarityN": return int(value)
+        return float(value)
+    if definition["scope"] == "group":
+        name = GROUPS[index]
+        suffix = definition["default_source"].replace("group.<name>.", "")
+        value = values.get(f"group.{name}.{suffix}")
+        if template == "groupLevelN": return dbamp(value)
+        if definition["value_type"] == "boolean": return as_bool(value)
+        return float(value)
+    if definition["scope"] == "master": return dbamp(values["master.level_db"])
+    return CONTRACT_VERSION
+
+
 def controls(values, channels):
     result=[]
     for i,row in enumerate(channels):
-        result += [(f"trim{i}", dbamp(row["trim_db"])), (f"mute{i}", as_bool(row["mute"])), (f"polarity{i}", int(row["polarity"])), (f"hpf{i}", as_bool(row["hpf"])), (f"hpfHz{i}", float(row["hpf_hz"]))]
+        for definition in control_definitions():
+            if definition["scope"] != "channel": continue
+            result.append((definition["key_template"].replace("N", str(i)), _contract_default(definition, i, values, channels)))
         group=GROUPS.index(row["group"])
         result += [(f"group{i}_{g}", int(g == group)) for g in range(MAX_GROUPS)]
-    for g,name in enumerate(GROUPS): result.append((f"groupLevel{g}", dbamp(values[f"group.{name}.level_db"])))
-    result.append(("master", dbamp(values["master.level_db"])))
+    group_definitions = [item for item in control_definitions() if item["scope"] == "group"]
+    for g in range(len(GROUPS)):
+        for definition in group_definitions:
+            result.append((definition["key_template"].replace("N", str(g)), _contract_default(definition, g, values, channels)))
+    for definition in control_definitions():
+        if definition["scope"] == "master":
+            result.append((definition["key_template"], _contract_default(definition, 0, values, channels)))
+        elif definition["scope"] == "status":
+            result.append((definition["key_template"], _contract_default(definition, 0, values, channels)))
     for g,name in enumerate(GROUPS):
         limits=group_limits(values, name)
-        result += [(f"group{g}PosX", float(values.get(f"group.{name}.pos_x", limits[6]))), (f"group{g}PosY", float(values.get(f"group.{name}.pos_y", limits[7]))), (f"group{g}Width", float(values.get(f"group.{name}.width", limits[8]))), (f"group{g}SpatialBypass", int(values.get(f"group.{name}.spatial_bypass", 0)))]
         result += [(f"group{g}NeutralX", float(values.get(f"group.{name}.neutral_x", limits[6]))), (f"group{g}NeutralY", float(values.get(f"group.{name}.neutral_y", limits[7]))), (f"group{g}NeutralWidth", float(values.get(f"group.{name}.neutral_width", limits[8])))]
     result.append(("quadSmoothingMs", float(values.get("quad.smoothing_ms", 30))))
     return result

@@ -14,6 +14,7 @@ import sys
 import time
 from pathlib import Path
 
+from contract import CONTRACT_VERSION, control_for_key, controls_for_scope
 from mixerctl import GROUPS, METER_WIDTH, controls, dbamp, group_limits, packet, parse_packet, read_config, validate_parameter
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -244,6 +245,8 @@ class ConsoleModel:
 
     def start(self):
         self.state = self.client.get_all()
+        if self.state.get("controlContractVersion") != CONTRACT_VERSION:
+            raise RuntimeError("mixer control contract mismatch: " + str(self.state.get("controlContractVersion", "unavailable")))
         required = {key for key, _ in controls(self.values, self.channels)}
         missing = sorted(required - set(self.state))
         if missing:
@@ -274,37 +277,22 @@ class ConsoleModel:
     def stale(self, now=None):
         return self.meter_time is None or (time.monotonic() if now is None else now) - self.meter_time > 1.0
 
-    def _range(self, key):
-        if key.startswith("trim"):
-            return TRIM_MIN_DB, TRIM_MAX_DB
-        if key.startswith(("groupLevel", "master")):
-            return 0.0001, 2.0
-        if key.startswith("hpfHz"):
-            return 20.0, 20000.0
-        if key.endswith("SpatialBypass"):
-            return 0.0, 1.0
-        if key.endswith("PosX") or key.endswith("PosY") or key.endswith("Width"):
-            index = int(key[5:key.index("Pos")] if "Pos" in key else key[5:key.index("Width")])
-            limits = group_limits(self.values, self.groups[index])
-            if key.endswith("PosX"): return limits[0], limits[1]
-            if key.endswith("PosY"): return limits[2], limits[3]
-            return limits[4], limits[5]
-        return None
-
     def validate(self, key, value):
         if key.endswith("PosY"):
             raise ValueError("Y is quad only / inactive in stereo")
         if key.startswith("trim"):
-            return dbamp(float(value))
+            return validate_parameter(key, _amp_from_db(float(value)), self.values)
         return validate_parameter(key, value, self.values)
 
     def write(self, key, value, confirm=None):
         value = self.validate(key, value)
         old = self.state.get(key)
+        definition, _ = control_for_key(key)
         prompt = None
-        if key == "master" and old is not None and value > float(old):
+        confirmation = definition.get("confirmation") if definition else None
+        if confirmation == "increase" and old is not None and value > float(old):
             prompt = f"Increase master {db(old)} dB -> {db(value)} dB? y/N"
-        elif key.startswith("polarity"):
+        elif confirmation == "always":
             prompt = f"Apply polarity inversion to {key}? y/N"
         if prompt is not None:
             if confirm is None or not confirm(prompt):
@@ -329,6 +317,24 @@ class ConsoleModel:
         value = clamp_db(current_db + delta_db) if key.startswith("trim") else dbamp(current_db + delta_db)
         return self.write(key, value, confirm)
 
+    def adjust_parameter(self, key, direction, coarse=False, confirm=None):
+        definition, _ = control_for_key(key)
+        if not definition:
+            raise ValueError(f"{key} is not in the control contract")
+        if definition["value_type"] == "boolean":
+            return self.bool_toggle(key)
+        if definition.get("enumerated_steps"):
+            steps = definition["enumerated_steps"]
+            current = float(self.state.get(key, steps[0]))
+            index = min(range(len(steps)), key=lambda i: abs(steps[i] - current))
+            return self.write(key, steps[max(0, min(len(steps) - 1, index + direction))], confirm)
+        increments = definition.get("increments") or {}
+        step = increments.get("coarse" if coarse else "fine")
+        if definition["unit"] == "dB":
+            return self.gain_adjust(key, direction * step, confirm)
+        current = float(self.state.get(key, 0.5))
+        return self.write(key, current + direction * step, confirm)
+
     def bool_toggle(self, key, confirm=None):
         return self.write(key, 0 if int(float(self.state.get(key, 0))) else 1, confirm)
 
@@ -336,135 +342,350 @@ class ConsoleModel:
         return dict(self.changed)
 
 
-CHANNEL_FIELDS = ("trim", "mute", "polarity", "hpf", "hpfHz")
-GROUP_FIELDS = ("level", "x", "y", "width", "bypass")
+CHANNEL_DEFS = tuple(item for item in controls_for_scope("channel") if item["key_template"] != "channelNGroup")
+HPF_STEPS = tuple(next(item for item in CHANNEL_DEFS if item["key_template"] == "hpfHzN")["enumerated_steps"])
+CHANNEL_FIELDS = tuple(item["key_template"].removesuffix("N") for item in CHANNEL_DEFS)
+GROUP_DEFS = controls_for_scope("group", "stereo")
+
+
+def _group_field_name(template):
+    return template.replace("groupLevelN", "level").replace("groupN", "").replace("Pos", "").replace("SpatialBypass", "bypass").lower()
+
+
+GROUP_FIELDS = tuple(_group_field_name(item["key_template"]) for item in GROUP_DEFS)
+PAGE_NAMES = {1: "CHANNELS", 2: "GROUPS", 3: "MASTER / STATUS"}
+MIN_LAYOUT = (20, 84)
 
 
 def channel_key(row, field):
-    return f"{field}{row}"
+    definition = next(item for item in CHANNEL_DEFS if item["key_template"].removesuffix("N") == field)
+    return definition["key_template"].replace("N", str(row))
 
 
 def group_key(row, field):
-    return {"level": f"groupLevel{row}", "x": f"group{row}PosX", "y": f"group{row}PosY", "width": f"group{row}Width", "bypass": f"group{row}SpatialBypass"}[field]
+    definition = next(item for item in GROUP_DEFS if _group_field_name(item["key_template"]) == field)
+    return definition["key_template"].replace("N", str(row))
 
 
-def _value_text(value, gain=False):
-    if gain:
-        return f"{db(value)} dB"
-    return str(value)
+def _field_definition(scope, field):
+    definitions = CHANNEL_DEFS if scope == "channel" else GROUP_DEFS
+    if scope == "channel":
+        return next(item for item in definitions if item["key_template"].removesuffix("N") == field)
+    return next(item for item in definitions if _group_field_name(item["key_template"]) == field)
+
+
+def _db_value(value):
+    return f"{db(value)} dB"
+
+
+def _display_control_value(model, key, definition):
+    value = model.state.get(key, 0)
+    if definition["unit"] == "dB": return _db_value(value)
+    if definition["value_type"] == "boolean": return "ON" if int(float(value)) else "OFF"
+    if definition["value_type"] == "enum" and key.startswith("polarity"): return "INVERTED" if float(value) < 0 else "NORMAL"
+    if definition["unit"] == "Hz": return f"{float(value):.0f} Hz"
+    return f"{float(value):.2f}"
+
+
+def _amp_from_db(text):
+    return dbamp(float(text))
+
+
+def parse_direct_entry(text, key):
+    """Parse operator-facing units; validation remains in ConsoleModel.write."""
+    value = text.strip()
+    if not value:
+        raise ValueError("empty numeric entry")
+    definition, _ = control_for_key(key)
+    if not definition:
+        raise ValueError(f"{key} is not in the control contract")
+    if key.startswith("trim"):
+        return float(value.removesuffix("dB").strip())
+    if definition["unit"] == "dB":
+        return _amp_from_db(value.removesuffix("dB").strip())
+    return float(value.removesuffix("Hz").strip())
+
+
+def _dbfs(value):
+    value = float(value)
+    return -60.0 if value <= 0 else max(-60.0, min(0.0, 20.0 * math.log10(value)))
+
+
+def meter_bar(value, width=20, peak_hold=None):
+    """Return a theme-independent bar and state for an amplitude meter."""
+    level = _dbfs(value)
+    filled = int(round((level + 60.0) / 60.0 * max(1, width)))
+    filled = max(0, min(width, filled))
+    bar = "=" * filled + "." * (width - filled)
+    if peak_hold is not None:
+        marker = int(round((_dbfs(peak_hold) + 60.0) / 60.0 * max(1, width)))
+        if 0 < marker <= width:
+            bar = bar[:marker - 1] + "|" + bar[marker:]
+    state = "silence" if level <= -59.5 else "near-clipping" if level >= -3 else "hot" if level >= -12 else "signal"
+    return bar, state
+
+
+class MeterVisual:
+    """UI-only RMS smoothing and peak hold; it never changes OSC meter data."""
+    def __init__(self, hold_seconds=1.0, decay_db_per_second=18.0):
+        self.rms = 0.0
+        self.peak_hold = 0.0
+        self.last_time = None
+        self.hold_until = 0.0
+        self.hold_seconds = hold_seconds
+        self.decay_db_per_second = decay_db_per_second
+
+    def update(self, peak, rms, now):
+        peak = max(0.0, float(peak)); rms = max(0.0, float(rms))
+        dt = 0.0 if self.last_time is None else max(0.0, now - self.last_time)
+        alpha = 1.0 - math.exp(-dt / 0.12) if dt else 1.0
+        self.rms += (rms - self.rms) * alpha
+        if peak >= self.peak_hold:
+            self.peak_hold = peak
+            self.hold_until = now + self.hold_seconds
+        elif now > self.hold_until and dt:
+            self.peak_hold = max(0.0, self.peak_hold * dbamp(-self.decay_db_per_second * dt))
+        self.last_time = now
+        return peak, self.rms, self.peak_hold
+
+
+def _selection_text(text, width, selected):
+    marker = "[SELECTED] " if selected else "           "
+    return (marker + text)[:width].ljust(width)
+
+
+def _layout_supported(h, w):
+    return h >= MIN_LAYOUT[0] and w >= MIN_LAYOUT[1]
+
+
+def _next_page(model):
+    model.page = model.page % 3 + 1
+    model.row = 0
+    model.param = 0
+    model.focus = "items"
+    model.editing = None
+
+
+def _meter_line(label, peak, rms, visual, width=24, now=None):
+    now = time.monotonic() if now is None else now
+    _, smooth_rms, held = visual.update(peak, rms, now)
+    bar, state = meter_bar(smooth_rms, width, held)
+    return f"{label:<5} [{bar}] {state:<13} peak {db(peak):>6} RMS {db(smooth_rms):>6} hold {db(held):>6}"
+
+
+def _visual(model, key):
+    visuals = getattr(model, "meter_visuals", None)
+    if visuals is None:
+        model.meter_visuals = {}
+        visuals = model.meter_visuals
+    return visuals.setdefault(key, MeterVisual())
 
 
 def draw(stdscr, model):
     curses.curs_set(0)
     stdscr.nodelay(True)
     stdscr.keypad(True)
+    model.focus = getattr(model, "focus", "items")
+    model.param = getattr(model, "param", 0)
+    model.coarse = getattr(model, "coarse", False)
+    model.editing = None
     while True:
         now = time.monotonic()
         model.refresh(now)
         stdscr.erase()
         h, w = stdscr.getmaxyx()
-        title = {1: "CHANNELS", 2: "GROUPS", 3: "MASTER / STATUS"}[model.page]
-        _line(stdscr, 0, f"SC-ADAT development console  [{title}]  (q quit, ? help, r refresh)", curses.A_BOLD)
-        if model.page == 1:
-            _draw_channels(stdscr, model)
-        elif model.page == 2:
-            _draw_groups(stdscr, model)
+        if _layout_supported(h, w):
+            _line(stdscr, 0, f"SC-ADAT development console  [{PAGE_NAMES[model.page]}]  focus={model.focus}  ({'coarse' if model.coarse else 'fine'})", curses.A_BOLD)
+            if model.page == 1: _draw_channels(stdscr, model, now)
+            elif model.page == 2: _draw_groups(stdscr, model, now)
+            else: _draw_status(stdscr, model, now)
+            footer = "Tab page  Up/Down select  Left/Right focus/adjust  Enter edit  Esc list  c coarse  m/h/p/b toggles  ? help  q quit"
         else:
-            _draw_status(stdscr, model)
-        footer = f"{model.message} | Up/Down row Tab field Left/Right adjust Space toggle +/- gain p polarity | 1/2/3 pages"
+            _draw_small(stdscr, h, w)
+            footer = "Terminal too small; resize to at least 84x20. q quit  ? help"
+        if model.message: footer = f"{model.message} | {footer}"
         _line(stdscr, h - 1, footer[-max(1, w - 1):])
         stdscr.refresh()
         key = stdscr.getch()
         if key == -1:
-            time.sleep(0.03)
-            continue
-        if key in (ord("q"), ord("Q")):
-            return
-        if key == ord("?"):
-            _help(stdscr)
-            continue
-        if key in (ord("1"), ord("2"), ord("3")):
-            model.page = int(chr(key)); model.row = 0; model.field = 0; continue
-        if key == ord("r"):
-            try:
-                model.state.update(model.client.get_all()); model.refresh(force=True); model.message = "complete state refreshed"
-            except Exception as exc:
-                model.message = f"refresh failed; audio untouched: {exc}"
-            continue
-        if key in (curses.KEY_UP, curses.KEY_DOWN):
-            model.row = max(0, min(_row_count(model), model.row + (1 if key == curses.KEY_DOWN else -1))); continue
+            time.sleep(0.03); continue
+        if key in (ord("q"), ord("Q")): return
+        if key == ord("?"): _help(stdscr); continue
         if key == 9:
-            model.field = (model.field + 1) % len(CHANNEL_FIELDS if model.page == 1 else GROUP_FIELDS if model.page == 2 else ("master",)); continue
+            _next_page(model); continue
+        if key in (ord("1"), ord("2"), ord("3")):
+            model.page = int(chr(key)); model.row = 0; model.param = 0; model.focus = "items"; model.editing = None; continue
+        if not _layout_supported(h, w): continue
         try:
-            _handle_key(model, key, stdscr)
+            if model.editing is not None:
+                _handle_edit(model, key, stdscr)
+            else:
+                _handle_key(model, key, stdscr)
         except ValueError as exc:
             model.message = str(exc)
 
 
-def _row_count(model):
-    return (15 if model.page == 1 else 7 if model.page == 2 else 0)
+def _draw_small(stdscr, h, w):
+    _line(stdscr, max(1, h // 2 - 1), "Console layout unavailable")
+    _line(stdscr, max(1, h // 2), "Resize terminal to at least 84 columns x 20 rows.")
+
+
+def _selected_key(model):
+    if model.page == 1:
+        return channel_key(model.row, CHANNEL_FIELDS[model.param])
+    if model.page == 2:
+        return group_key(model.row, GROUP_FIELDS[model.param])
+    return "master"
+
+
+def _begin_edit(model):
+    key = _selected_key(model)
+    definition, _ = control_for_key(key)
+    if not definition or definition["value_type"] in ("boolean", "enum"):
+        model.message = "select a numeric control for direct editing"
+        return
+    value = model.state.get(key, 0.0)
+    text = db(value) if definition["unit"] == "dB" else str(value)
+    model.editing = (key, definition["label"], text)
+
+
+def _handle_edit(model, key, stdscr):
+    if key == 27:
+        model.editing = None
+        model.message = "numeric edit cancelled"
+        return
+    edit_key, label, text = model.editing
+    if key in (curses.KEY_BACKSPACE, 127, 8):
+        model.editing = (edit_key, label, text[:-1])
+        return
+    if key in (10, 13):
+        try:
+            value = parse_direct_entry(text, edit_key)
+            model.write(edit_key, value, lambda prompt: _confirm(stdscr, prompt))
+            model.editing = None
+        except ValueError as exc:
+            model.message = f"entry rejected: {exc}"
+        return
+    if 32 <= key <= 126 and chr(key) in "0123456789.-":
+        model.editing = (edit_key, label, text + chr(key))
 
 
 def _handle_key(model, key, stdscr):
     confirm = lambda prompt: _confirm(stdscr, prompt)
-    if model.page == 1:
-        field = CHANNEL_FIELDS[model.field % len(CHANNEL_FIELDS)]; keyname = channel_key(model.row, field)
-        if field == "polarity" and key == ord("p"):
-            return model.write(keyname, -1 if int(float(model.state.get(keyname, 1))) == 1 else 1, confirm)
-        if field in ("mute", "hpf") and key == ord(" "):
-            return model.bool_toggle(keyname)
-        if field == "trim" and key in (ord("+"), ord("-")):
-            return model.gain_adjust(keyname, GAIN_STEP_DB if key == ord("+") else -GAIN_STEP_DB, confirm)
-        if field == "trim" and key in (curses.KEY_LEFT, curses.KEY_RIGHT, ord("["), ord("]")):
-            return model.gain_adjust(keyname, GAIN_STEP_DB if key in (curses.KEY_RIGHT, ord("]")) else -GAIN_STEP_DB, confirm)
-        if field == "hpfHz" and key in (curses.KEY_LEFT, curses.KEY_RIGHT, ord("["), ord("]")):
-            return model.write(keyname, float(model.state.get(keyname, 80)) + (10 if key in (curses.KEY_RIGHT, ord("]")) else -10))
-    elif model.page == 2:
-        field = GROUP_FIELDS[model.field % len(GROUP_FIELDS)]; keyname = group_key(model.row, field)
-        if field == "bypass" and key == ord(" "):
-            return model.bool_toggle(keyname)
-        if field == "level" and key in (ord("+"), ord("-"), curses.KEY_LEFT, curses.KEY_RIGHT, ord("["), ord("]")):
-            return model.gain_adjust(keyname, GAIN_STEP_DB if key in (ord("+"), curses.KEY_RIGHT, ord("]")) else -GAIN_STEP_DB, confirm)
-        if field in ("x", "y", "width") and key in (curses.KEY_LEFT, curses.KEY_RIGHT, ord("["), ord("]")):
-            if field == "y": raise ValueError("Y is quad only / inactive in stereo")
-            return model.write(keyname, float(model.state.get(keyname, 0.5)) + (0.05 if key in (curses.KEY_RIGHT, ord("]")) else -0.05))
-    else:
-        if key in (ord("+"), ord("-"), curses.KEY_LEFT, curses.KEY_RIGHT, ord("["), ord("]")):
-            return model.gain_adjust("master", GAIN_STEP_DB if key in (ord("+"), curses.KEY_RIGHT, ord("]")) else -GAIN_STEP_DB, confirm)
+    count = 16 if model.page == 1 else 8 if model.page == 2 else 1
+    if key == 27:
+        model.focus = "items"
+        return
+    if key == ord("c"):
+        model.coarse = not model.coarse
+        model.message = "coarse 3 dB / 0.20 steps" if model.coarse else "fine steps"
+        return
+    if key == ord("r"):
+        try:
+            fresh = model.client.get_all()
+            if fresh.get("controlContractVersion") != CONTRACT_VERSION:
+                raise RuntimeError("mixer control contract mismatch")
+            model.state.update(fresh); model.message = "complete state refreshed"
+        except Exception as exc:
+            model.message = f"refresh failed; audio untouched: {exc}"
+        return
+    if key in (curses.KEY_UP, curses.KEY_DOWN):
+        if model.focus == "items":
+            model.row = max(0, min(count - 1, model.row + (1 if key == curses.KEY_DOWN else -1)))
+        else:
+            fields = CHANNEL_FIELDS if model.page == 1 else GROUP_FIELDS if model.page == 2 else ("master",)
+            model.param = max(0, min(len(fields) - 1, model.param + (1 if key == curses.KEY_DOWN else -1)))
+        return
+    if key == curses.KEY_LEFT:
+        if model.focus == "items": model.focus = "params"
+        else: model.adjust_parameter(_selected_key(model), -1, model.coarse, confirm)
+        return
+    if key == curses.KEY_RIGHT:
+        if model.focus == "items": model.focus = "params"
+        else: model.adjust_parameter(_selected_key(model), 1, model.coarse, confirm)
+        return
+    if key in (10, 13) and model.focus == "params":
+        _begin_edit(model)
+        return
+    if key == ord("m") and model.page == 1:
+        model.bool_toggle(channel_key(model.row, "mute")); return
+    if key == ord("h") and model.page == 1:
+        model.bool_toggle(channel_key(model.row, "hpf")); return
+    if key == ord("p") and model.page == 1:
+        polarity = channel_key(model.row, "polarity")
+        model.write(polarity, -1 if float(model.state.get(polarity, 1)) == 1 else 1, confirm); return
+    if key == ord("b") and model.page == 2:
+        model.bool_toggle(group_key(model.row, "bypass")); return
 
 
-def _draw_channels(stdscr, model):
-    _line(stdscr, 1, "# name                 group       peak/rms       trim(-80..+12) mute pol hpf HPFHz [field: %s]" % CHANNEL_FIELDS[model.field % 5])
-    meters = model.meters or {"input_peak": [0] * 16, "input_rms": [0] * 16}
+def _panel_row(stdscr, y, x, width, text, selected=False):
+    _line_at(stdscr, y, x, _selection_text(text, width, selected), curses.A_REVERSE if selected else 0)
+
+
+def _draw_channels(stdscr, model, now):
+    h, w = stdscr.getmaxyx(); left, centre = 25, 34; right = w - left - centre - 2
+    _line_at(stdscr, 1, 0, "CHANNELS")
+    _line_at(stdscr, 1, left + 1, "SELECTED CHANNEL")
+    _line_at(stdscr, 1, left + centre + 2, "SIGNAL")
     for i, row in enumerate(model.channels):
-        peak = db(meters["input_peak"][i]); rms = db(meters["input_rms"][i])
-        text = f"{i+1:02d} {row['name'][:20]:20s} {row['group'][:10]:10s} {peak:>6}/{rms:<6} {db(model.state.get(f'trim{i}', 1)):>6} {int(float(model.state.get(f'mute{i}', 0)))}   {int(float(model.state.get(f'polarity{i}', 1))):+d}   {int(float(model.state.get(f'hpf{i}', 0)))}  {float(model.state.get(f'hpfHz{i}', row['hpf_hz'])):6.0f}"
-        _line(stdscr, i + 2, (">" if i == model.row else " ") + text)
+        text = f"{i + 1:02d} {row['name'][:12]:12s} {row['group'][:8]:8s}"
+        _panel_row(stdscr, i + 2, 0, left, text, i == model.row and model.focus == "items")
+    row = model.channels[model.row]
+    _line_at(stdscr, 2, left + 1, f"Channel {model.row + 1}: {row['name']}  group={row['group']}")
+    fields = [(field, _field_definition("channel", field)["label"], _display_control_value(model, channel_key(model.row, field), _field_definition("channel", field))) for field in CHANNEL_FIELDS]
+    for i, (_, label, value) in enumerate(fields):
+        _panel_row(stdscr, i + 4, left + 1, centre, f"{label:<14} {value}", i == model.param and model.focus == "params")
+    if model.editing: _line_at(stdscr, 10, left + 1, f"EDIT {model.editing[1]}: {model.editing[2]}_")
+    values = model.meters or {"input_peak": [0] * 16, "input_rms": [0] * 16}
+    _line_at(stdscr, 2, left + centre + 2, "-60 dBFS".ljust(max(1, right)))
+    _line_at(stdscr, 3, left + centre + 2, _meter_line("IN", values["input_peak"][model.row], values["input_rms"][model.row], _visual(model, f"input{model.row}"), max(10, right - 5), now))
+    _line_at(stdscr, 5, left + centre + 2, "Exact diagnostic values")
+    _line_at(stdscr, 6, left + centre + 2, f"peak {db(values['input_peak'][model.row])} dBFS")
+    _line_at(stdscr, 7, left + centre + 2, f"RMS  {db(values['input_rms'][model.row])} dBFS")
 
 
-def _draw_groups(stdscr, model):
-    _line(stdscr, 1, "group       peak/rms       level     X       Y(inactive) width(active) bypass  allowed X/Y/W ranges")
-    meters = model.meters or {"group_peak": [0] * 8, "group_rms": [0] * 8}
-    for i, name in enumerate(GROUPS):
-        y = float(model.state.get(f"group{i}PosY", 0.5))
-        limits = group_limits(model.values, name)
-        text = f"{name:10s} {db(meters['group_peak'][i]):>6}/{db(meters['group_rms'][i]):<6} {db(model.state.get(f'groupLevel{i}', 1)):>7} {float(model.state.get(f'group{i}PosX', .5)):.2f}  {y:.2f} inactive  {float(model.state.get(f'group{i}Width', .5)):.2f}    {int(float(model.state.get(f'group{i}SpatialBypass', 0)))}  {limits[0]:.2f}..{limits[1]:.2f}/{limits[2]:.2f}..{limits[3]:.2f}/{limits[4]:.2f}..{limits[5]:.2f}"
-        _line(stdscr, i + 2, (">" if i == model.row else " ") + text)
+def _draw_groups(stdscr, model, now):
+    h, w = stdscr.getmaxyx(); left, centre = 21, 38; right = w - left - centre - 2
+    _line_at(stdscr, 1, 0, "GROUPS")
+    _line_at(stdscr, 1, left + 1, "SELECTED GROUP")
+    _line_at(stdscr, 1, left + centre + 2, "SIGNAL / MEMBERS")
+    for i, name in enumerate(GROUPS): _panel_row(stdscr, i + 2, 0, left, f"{i + 1} {name}", i == model.row and model.focus == "items")
+    name = GROUPS[model.row]
+    limits = group_limits(model.values, name)
+    fields = [(field, _field_definition("group", field)["label"], _display_control_value(model, group_key(model.row, field), _field_definition("group", field))) for field in GROUP_FIELDS]
+    for i, (_, label, value) in enumerate(fields): _panel_row(stdscr, i + 3, left + 1, centre, f"{label:<18} {value}", i == model.param and model.focus == "params")
+    _line_at(stdscr, 8, left + 1, "Y: QUAD ONLY (inactive in stereo)")
+    _line_at(stdscr, 9, left + 1, f"Allowed X {limits[0]:.2f}..{limits[1]:.2f}  width {limits[4]:.2f}..{limits[5]:.2f}")
+    vals = model.meters or {"group_peak": [0] * 8, "group_rms": [0] * 8}
+    _line_at(stdscr, 3, left + centre + 2, _meter_line("GROUP", vals["group_peak"][model.row], vals["group_rms"][model.row], _visual(model, f"group{model.row}"), max(10, right - 5), now))
+    _line_at(stdscr, 5, left + centre + 2, "Members")
+    members = [f"{i + 1:02d} {ch['name']}" for i, ch in enumerate(model.channels) if ch["group"] == name]
+    for i, member in enumerate(members[:max(1, h - 8)]): _line_at(stdscr, 6 + i, left + centre + 2, member)
 
 
-def _draw_status(stdscr, model):
-    meters = model.meters or {"output_peak": [0] * 16, "output_rms": [0] * 16}
-    age = "stale" if model.stale() else f"{time.monotonic() - model.meter_time:.1f}s old"
-    _line(stdscr, 1, f"outputs L {db(meters['output_peak'][0])}/{db(meters['output_rms'][0])} dBFS  R {db(meters['output_peak'][1])}/{db(meters['output_rms'][1])} dBFS  meters {age}")
-    master = model.state.get("master", 0)
-    _line(stdscr, 3, f"master {float(master):.9f} ({db(master)} dB)  +/- 0.5 dB steps; increases confirm")
-    clock = model.health.get("clock", {})
-    jack = model.health.get("jack", {})
+def _draw_status(stdscr, model, now):
+    h, w = stdscr.getmaxyx(); vals = model.meters or {"output_peak": [0] * 16, "output_rms": [0] * 16}
+    _line_at(stdscr, 1, 0, "MASTER / STATUS")
+    _line_at(stdscr, 3, 0, _meter_line("LEFT", vals["output_peak"][0], vals["output_rms"][0], _visual(model, "outputL"), max(20, w - 12), now))
+    _line_at(stdscr, 5, 0, _meter_line("RIGHT", vals["output_peak"][1], vals["output_rms"][1], _visual(model, "outputR"), max(20, w - 12), now))
+    master = model.state.get("master", 0.0)
+    _panel_row(stdscr, 8, 0, min(w - 1, 45), f"Master {_db_value(master)} amplitude={float(master):.9f}", model.focus == "params")
+    _line_at(stdscr, 10, 0, "Master: Left/Right fine 0.5 dB; c coarse 3 dB; Enter direct edit; increases confirm")
+    clock = model.health.get("clock", {}); jack = model.health.get("jack", {})
     rate = "unavailable" if clock.get("rate") is None else clock.get("rate")
     xruns = "unknown" if model.health.get("xruns") is None else model.health.get("xruns")
-    _line(stdscr, 5, f"RME {clock.get('mode','?')} source={clock.get('source','?')} ADAT1={clock.get('adat1','?')} ADAT2={clock.get('adat2','?')} ADAT3={clock.get('adat3','?')} rate={rate}")
-    _line(stdscr, 6, f"JACK device={jack.get('device','?')} rate={jack.get('rate','?')} period={jack.get('period','?')} periods={jack.get('periods','?')} RT={jack.get('rt','?')} xruns={xruns}")
-    _line(stdscr, 8, "Mixer state is read through OSC; health is read-only and sampled no faster than every 5 seconds.")
+    age = "stale" if model.stale(now) else f"{now - model.meter_time:.1f}s old"
+    _line_at(stdscr, 12, 0, f"Meters: {age}")
+    _line_at(stdscr, 13, 0, f"RME: mode={clock.get('mode','?')} source={clock.get('source','?')} ADAT1={clock.get('adat1','?')} ADAT2={clock.get('adat2','?')} ADAT3={clock.get('adat3','?')} rate={rate}")
+    _line_at(stdscr, 14, 0, f"JACK: device={jack.get('device','?')} rate={jack.get('rate','?')} period={jack.get('period','?')} periods={jack.get('periods','?')} RT={jack.get('rt','?')} xruns={xruns}")
+
+
+def _line_at(stdscr, y, x, text, attr=0):
+    try:
+        width = max(1, stdscr.getmaxyx()[1] - x - 1)
+        stdscr.addnstr(y, x, text, width, attr)
+    except curses.error:
+        pass
 
 
 def _line(stdscr, y, text, attr=0):
@@ -487,7 +708,7 @@ def _confirm(stdscr, prompt):
 
 
 def _help(stdscr):
-    lines = ["Keys", "Up/Down row  Tab editable field  Left/Right or [/ ] adjust", "+/- gain by 0.5 dB  Space toggle Boolean  p confirmed polarity", "1 Channels  2 Groups  3 Master/Status  r full refresh  q quit", "Y is inactive in stereo. Changes are runtime-only and are printed on exit.", "Press any key..."]
+    lines = ["Keys", "Up/Down select item or parameter; Left/Right focus or adjust", "Enter numeric edit; Escape cancels edit/returns to item list", "Tab changes page; c toggles coarse 3 dB / 0.20 steps", "m mute  h HPF  p confirmed polarity  b spatial bypass  r refresh", "Y is quad only/inactive in stereo. q quits; runtime changes are temporary.", "Press any key..."]
     stdscr.nodelay(False)
     try:
         stdscr.erase()

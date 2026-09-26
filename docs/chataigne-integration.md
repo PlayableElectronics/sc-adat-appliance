@@ -15,6 +15,11 @@ Chataigne is optional show control and dashboard software. It does not process
 audio and mixer startup and DSP smoothing must not depend on it. The Dell
 controller listens on UDP port **57120**.
 
+The versioned control interface is defined by
+`control/mixer-control-contract.json`. Chataigne reference metadata is checked
+against that contract, including its version and group keys, so it must not
+define conflicting control identities, ranges, or modes.
+
 The eight group IDs are `0 kick`, `1 drums`, `2 bass`, `3 music_a`, `4 music_b`,
 `5 vocals`, `6 fx_a`, and `7 fx_b`. Coordinates are normalized: X `0` left, `0.5` centre, `1`
 right; Y `0` rear, `0.5` centre, `1` front.

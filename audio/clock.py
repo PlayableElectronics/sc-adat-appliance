@@ -29,7 +29,9 @@ def declared():
             if line and not line.startswith("#") and "=" in line:
                 key, value=line.split("=", 1); result[key.strip()]=value.strip()
     if result.get("mode") not in MODE_NAMES or int(result.get("sample_rate", "0")) != 48000:
-        raise ValueError("audio/clock.conf must declare mode=master and sample_rate=48000")
+        raise ValueError("audio/clock.conf must declare a supported mode and sample_rate=48000")
+    if result["mode"] == "autosync" and result.get("source") not in SOURCE_NAMES:
+        raise ValueError("audio/clock.conf autosync mode requires source=adat1|adat2|adat3|iec958")
     return result
 def declared_mode():
     try:
@@ -46,6 +48,13 @@ def jack_rate():
         match=re.search(r"(\d+(?:\.\d+)?)", output)
         return int(float(match.group(1))) if match else None
     except (OSError, subprocess.CalledProcessError):
+        return None
+def hardware_rate():
+    try:
+        with open("/proc/asound/card0/rme9652", encoding="utf-8") as stream:
+            match=re.search(r"^ADAT Sample rate:\s*(\d+)Hz", stream.read(), re.MULTILINE)
+            return int(match.group(1)) if match else None
+    except OSError:
         return None
 def services_running():
     try:
@@ -77,9 +86,38 @@ def status():
     if mode_name == "Word Clock": healthy = False
     if mode_name == "Word Clock": conclusion="UNHEALTHY: Word Clock selected; no usable word-clock lock/control is exposed on this installation"
     elif mode_name == "AutoSync" and not healthy: conclusion="UNHEALTHY: external source is not Lock Sync"
+    elif mode_name == "AutoSync" and healthy:
+        conclusion=f"HEALTHY: external {source_name} at 48 kHz"
     else: conclusion="HEALTHY: internal 48 kHz master" if healthy else "UNHEALTHY: JACK rate or clock mode mismatch"
     print(f"health: {conclusion}")
     return 0 if healthy else 1
+
+def preflight():
+    """Validate the selected hardware clock before a mixer/JACK start.
+
+    This function is deliberately read-only.  Clock changes belong to the
+    explicit `audio-clock set`/`apply` commands and must happen while JACK is
+    stopped, never as an implicit side effect of mixer startup.
+    """
+    mode=control("Sync Mode")["raw"]
+    source=control("Preferred Sync Source")["raw"]
+    adats={name: control(f"{name.upper()} Sync Check")["raw"] for name in ("adat1", "adat2", "adat3")}
+    rate=jack_rate()
+    hardware=hardware_rate()
+    if rate is not None:
+        raise RuntimeError(f"JACK is already running at {rate} Hz; stop it before mixer startup")
+    if hardware != 48000:
+        raise RuntimeError(f"RME ADAT effective rate is {hardware!r}, expected 48000 Hz before JACK start")
+    if mode == "AutoSync":
+        selected=source.lower().replace(" in", "")
+        if selected not in adats or STATE_NAMES.get(adats[selected]) != "Lock Sync":
+            raise RuntimeError(f"external clock {source} is not Lock Sync before JACK start")
+    elif mode == "Word Clock":
+        raise RuntimeError("Word Clock mode has no validated lock source on this installation")
+    elif mode != "Master":
+        raise RuntimeError(f"unsupported observed clock mode: {mode}")
+    print(f"clock preflight: mode={mode}; preferred={source}; ADAT1={adats['adat1']}; rate={hardware}; JACK=stopped")
+    return 0
 def set_mode(mode, source=None):
     if mode not in MODE_NAMES: raise ValueError("mode must be master, autosync, or wordclock")
     if mode == "autosync" and source not in SOURCE_NAMES or mode != "autosync" and source is not None:
@@ -112,11 +150,13 @@ def set_mode(mode, source=None):
     return 0
 def main():
     parser=argparse.ArgumentParser(); sub=parser.add_subparsers(dest="action", required=True)
-    sub.add_parser("status"); apply_parser=sub.add_parser("apply"); set_parser=sub.add_parser("set"); set_parser.add_argument("mode", choices=MODE_NAMES); set_parser.add_argument("--source")
+    sub.add_parser("status"); sub.add_parser("preflight"); apply_parser=sub.add_parser("apply"); set_parser=sub.add_parser("set"); set_parser.add_argument("mode", choices=MODE_NAMES); set_parser.add_argument("--source")
     args=parser.parse_args()
     try:
         if args.action == "status": return status()
-        if args.action == "apply": return set_mode(declared()["mode"])
+        if args.action == "preflight": return preflight()
+        if args.action == "apply":
+            config=declared(); return set_mode(config["mode"], config.get("source"))
         return set_mode(args.mode, args.source)
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         print(f"audio-clock: {exc}", file=sys.stderr); return 1

@@ -138,10 +138,12 @@ functional groups. Recording is deliberately outside this quad milestone;
 the stable names and interfaces are reserved for a later recorder.
 
 RME clock ownership is in the Debian audio-hardware layer, not mixer DSP.
-`audio/clock.conf` declares the current `Digi9652` intent (`master`, 48 kHz),
-and `scripts/audio-clock apply` is run before JACK. The later Buildroot
-integration point is the audio init service after stable card detection and
-before `jackd`; it will use a native equivalent of that apply/readback step.
+`audio/clock.conf` declares the current `Digi9652` intent (`autosync`, ADAT1,
+48 kHz). Mixer startup performs a read-only clock preflight before JACK and
+never changes the selected clock implicitly. Explicit clock set/apply commands
+remain available while JACK is stopped. The later Buildroot integration point
+is the audio init service after stable card detection and before `jackd`; it
+will use a native equivalent of that preflight and explicit clock policy.
 That Buildroot integration is deliberately not part of this change.
 
 ## SC-ADAT payload ownership

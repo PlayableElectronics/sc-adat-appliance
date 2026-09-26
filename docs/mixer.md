@@ -86,11 +86,14 @@ have the full quad field. Each has an explicit neutral position in the scene.
 Clock ownership belongs to the Debian audio-hardware layer. `./lab audio clock
 status|set ...` addresses ALSA by the stable `Digi9652` name, and `./lab mixer
 clock ...` is only a compatibility delegation. The declarative default is
-`audio/clock.conf` (`mode=master`, `sample_rate=48000`); Debian applies and
-verifies it before JACK starts. The later Buildroot integration point is the
-audio init service immediately after Digi9652 detection and before `jackd`,
-using a native equivalent of `scripts/audio-clock apply`; Buildroot is not
-changed by this milestone.
+`audio/clock.conf` (`mode=autosync`, `source=adat1`, `sample_rate=48000`).
+Mixer startup performs a read-only preflight and requires the selected external
+source to be locked before JACK starts; it never applies Master implicitly.
+Explicit `scripts/audio-clock set|apply` commands remain available for deliberate
+clock changes while JACK is stopped. The later Buildroot integration point is
+the audio init service immediately after Digi9652 detection and before `jackd`,
+using a native equivalent of this preflight and explicit clock policy; Buildroot
+is not changed by this milestone.
 
 Implemented now: 16-input group processing, versioned neutral configuration,
 smoothed controls, spatial bypass, protection, OSC control and query, meters,

@@ -3,6 +3,7 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 python3 - <<'PY'
 import importlib.util
+import pathlib
 spec=importlib.util.spec_from_file_location('clock', 'audio/clock.py'); m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 for raw, expected in [('No Lock','No Lock'),('Lock','Lock but not Sync'),('No Lock Sync','No Lock'),('Lock Sync','Lock Sync')]:
     got=m.parse_control("; Item #0 'No Lock'\n; Item #1 'Lock'\n; Item #2 'No Lock Sync'\n; Item #3 'Lock Sync'\n: values=" + str(['No Lock','Lock','No Lock Sync','Lock Sync'].index(raw)))
@@ -11,5 +12,42 @@ assert m.control('Sync Mode')['raw'] in ('Master','AutoSync','Word Clock')
 assert m.control('ADAT1 Sync Check')['raw'] in m.STATE_NAMES
 assert m.control('ADAT2 Sync Check')['raw'] in m.STATE_NAMES
 assert m.control('ADAT3 Sync Check')['raw'] in m.STATE_NAMES
+original_control=m.control; original_rate=m.jack_rate; original_hardware=m.hardware_rate; original_set=m.set_control
+clock={'Sync Mode':'AutoSync','Preferred Sync Source':'ADAT1 In','ADAT1 Sync Check':'Lock Sync','ADAT2 Sync Check':'No Lock','ADAT3 Sync Check':'No Lock'}
+writes=[]
+m.control=lambda name: {'raw':clock[name], 'value':0}
+m.jack_rate=lambda: None
+m.hardware_rate=lambda: 48000
+m.set_control=lambda name,value: writes.append((name,value))
+assert m.preflight() == 0
+assert writes == [], 'preflight must be read-only'
+clock['ADAT1 Sync Check']='No Lock'
+try:
+    m.preflight()
+except RuntimeError as exc:
+    assert 'not Lock Sync' in str(exc)
+else:
+    raise AssertionError('missing external lock must fail before JACK')
+clock['ADAT1 Sync Check']='Lock Sync'
+clock['Sync Mode']='Master'
+assert m.preflight() == 0
+assert writes == [], 'Master preflight must be read-only'
+clock['Sync Mode']='AutoSync'
+clock['ADAT1 Sync Check']='Lock Sync'
+writes.clear()
+def write_control(name,value):
+    writes.append((name,value)); clock[name]=value
+m.control=lambda name: {'raw':clock[name], 'value':0}
+m.set_control=write_control
+m.services_running=lambda: set()
+assert m.set_mode('master') == 0
+assert writes == [('Sync Mode','Master')], 'explicit Master must use the deliberate setting path'
+clock['Sync Mode']='AutoSync'
+m.control=original_control; m.jack_rate=original_rate; m.hardware_rate=original_hardware; m.set_control=original_set
+for name in ('mixer','mixer-quad'):
+    text=pathlib.Path('scripts', name).read_text()
+    assert 'audio-clock" preflight' in text
+    assert 'audio-clock" apply' not in text
 print('PASS mocked ALSA enum parser and physical Digi9652 readback')
+print('PASS mixer startup is read-only clock preflight; missing AutoSync lock aborts')
 PY

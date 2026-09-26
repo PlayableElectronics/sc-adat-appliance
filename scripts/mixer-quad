@@ -9,7 +9,7 @@ case "${1:-}" in
     if test -n "$(sh -c "$COMPOSE ps --status running -q sc-mixer" 2>/dev/null)"; then
       echo 'quad mixer refused: stereo mixer is running; stop it first' >&2; exit 1
     fi
-    "$ROOT/scripts/audio-clock" apply
+    "$ROOT/scripts/audio-clock" preflight
     sh -c "$COMPOSE up -d --force-recreate sc-audio sc-quad-mixer"
     ready=0
     for retry in $(seq 1 100); do

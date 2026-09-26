@@ -33,6 +33,7 @@ source, and Time Machine for recalled parameter snapshots or show cues.
 Automation must be explicitly enabled by the operator; a connection never
 implicitly enables it.
 
-The `master` control is the global output gain. Select quad mode with
-`routing.mode=quad`; direct mode remains the default.
+The `master` control is the global output gain. Stereo and quad are independent
+programs selected by their launch commands; there is no runtime routing mode or
+transparent direct mode in either group mixer.
 Spatial bypass is a smoothed transition to neutral centre `(0.5, 0.5)`.

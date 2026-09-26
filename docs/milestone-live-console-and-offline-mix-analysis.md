@@ -1,5 +1,13 @@
 # Milestone: deterministic live console and offline mix review
 
+> Product-direction update (2026-09-26): the long-term appliance is a
+> role-based performance realization engine, not a conventional console clone.
+> The current mixer is its low-level renderer. The accepted performance,
+> authoring, recording and clock contract is documented in
+> [performance-realization-engine.md](performance-realization-engine.md) and
+> takes precedence where this earlier milestone assumes routine live fader or
+> channel-strip operation.
+
 ## Purpose
 
 Turn the SC-ADAT appliance into a dependable live console, multitrack recorder,
@@ -26,6 +34,12 @@ sampler in one song and a modular synthesizer in another. The engine must not
 guess source roles or alter processing in response.
 
 ## Live scope
+
+The items below describe low-level DSP capability, authoring access and
+diagnostics. They do not imply that conventional channel strips or volume
+faders belong on the final performance surface. Calibration trims are set and
+locked; approved role balance is stored in song programs; normal performance
+should require no live gain riding.
 
 The initial live engine should provide:
 
@@ -89,6 +103,13 @@ and has an explicit rollback path.
 
 Record all 24 inputs dry so later processing decisions never destroy the source.
 Optionally record the instrument, drum, and vocal groups plus the stereo master.
+
+The recording must also capture MIDI Clock and transport, the available
+analogue clock/run/reset signals, and all markers and control events against the
+same absolute audio-sample timeline. The modular system is the initial clock
+master. The appliance follows and records it without automatic correction or
+silent failover. See the dedicated performance-realization decision for the
+complete clock-loss and session-bundle contract.
 
 Markers must include at least:
 

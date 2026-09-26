@@ -56,7 +56,18 @@ Use native facilities such as `TempoClock`, `SystemClock`, `Routine`, `Task`, Pa
 - Routing changes and dangerous gain changes require explicit permission.
 - All executed automation events are logged.
 
-The initial timing model is a manually started monotonic per-song clock. Musical clock, MIDI clock, MTC, Link or LTC may be added later behind the same transport abstraction.
+The initial rehearsal/performance clock source is the modular system, supplying
+both accurate MIDI Clock/transport and an analogue pulse with run/reset where
+available. `sclang` follows and timestamps the clock against the audio sample
+timeline; it does not repair the live clock or silently become master. Clock
+loss is logged and reported while audio recording continues. A manually
+started monotonic clock remains available for development without external
+hardware. MTC, Link, LTC and an explicitly selected appliance-master mode may
+be added later behind the same transport abstraction.
+
+Raw received timing and any derived tempo map are distinct artifacts. Exact
+replay may use captured sample positions; a reviewed reconstruction may use a
+derived stable tempo map. Derived timing never overwrites the raw capture.
 
 ## Deployment path
 

@@ -18,14 +18,17 @@ series of commands for the operator to type.
 
 ## Purpose
 
-Build a reliable, network-controlled SuperCollider live mixer and sound
+Build a reliable, network-controlled SuperCollider performance realization
 appliance from owned hardware. It is deliberately not a desktop DAW, an
-autonomous mixing system, or a replacement for the sound design and effects in
-the connected instruments.
+autonomous mixing system, a conventional-console clone, or a replacement for
+the sound design and effects in the connected instruments.
 
-The appliance supports a three-person live setup, deterministic per-song mixes,
-dry recording and virtual soundcheck, shared vocal effects, later offline mix
-analysis, and eventually the Studer Dyaxis II control surface.
+The appliance supports a three-person live setup, deterministic role-based song
+programs, dry audio plus clock/event recording, virtual soundcheck, shared vocal
+effects, later offline mix analysis, and eventually the Studer Dyaxis II
+control surface. The intended final performance requires no routine live fader
+riding after calibration, review and approval. See
+`docs/performance-realization-engine.md` for the current product direction.
 
 ## Verified computer and audio hardware
 

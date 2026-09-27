@@ -22,6 +22,12 @@
     {"key_template": "sourceNBalance", "label": "Balance", "value_type": "normalized", "modes": ["stereo"], "unit": "normalized", "display": "-1.00..1.00", "range": {"min": -1, "max": 1}},
     {"key_template": "sourceNWidth", "label": "Width", "value_type": "normalized", "modes": ["stereo"], "unit": "normalized", "display": "0.00..1.00", "range": {"min": 0, "max": 1}}
   ],
+  "mapping_controls": [
+    {"key_template": "inputNGroup", "label": "Assigned group", "value_type": "enum", "writable": true, "unit": "group index", "display": "group name", "range": {"values": [0, 1, 2, 3, 4, 5, 6, 7]}},
+    {"key_template": "inputNPartner", "label": "Stereo partner", "value_type": "enum", "writable": true, "unit": "physical input", "display": "MONO or input number", "range": {"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]}},
+    {"key_template": "inputNMode", "label": "Mode", "value_type": "enum", "writable": false, "unit": "mode", "display": "MONO/STEREO", "range": {"values": [0, 1]}},
+    {"key_template": "inputNOrientation", "label": "Stereo orientation", "value_type": "enum", "writable": false, "unit": "orientation", "display": "MONO/LEFT/RIGHT", "range": {"values": [0, 1, 2]}}
+  ],
   "protocol": {
     "contract_state_key": "controlContractVersion",
     "set_address": "/mixer/set",

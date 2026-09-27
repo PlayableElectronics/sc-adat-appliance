@@ -11,8 +11,8 @@ import unittest
 sys.path.insert(0, os.path.dirname(__file__))
 from contract import source_contract
 from mixerctl import (apply_smoothing, configured_sources, legacy_stereo_write_error,
-                      packet, parse_packet, read_config, source_contract_for,
-                      source_map_snapshot)
+                      mapping_state, packet, parse_packet, propose_mapping, read_config,
+                      source_contract_for, source_map_snapshot)
 from source_map import (AtomicSourceMap, SourceMapError, mono_pan_gains,
                         stereo_balance_width, validate_source_map)
 
@@ -96,6 +96,21 @@ class SourceMapTests(unittest.TestCase):
         self.assertAlmostEqual(stereo_balance_width(1.0, 0.0, -1, 1)[0], 2 ** 0.5)
         self.assertEqual(stereo_balance_width(1.0, 0.0, -1, 1)[1], 0.0)
         self.assertEqual(stereo_balance_width(1.0, 0.0, 1, 1), (0.0, 0.0))
+
+    def test_runtime_mapping_pair_group_and_unlink_are_coherent(self):
+        values, _ = read_config(os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf"))
+        paired = propose_mapping(values, 1, 2)
+        pair = next(source for source in paired if source.inputs == (1, 2))
+        self.assertEqual(pair.mode, "stereo")
+        regrouped = propose_mapping(dict(values, _sources=paired), 2, group="music_b")
+        self.assertEqual(next(source for source in regrouped if 1 in source.inputs).group, "music_b")
+        unlinked = propose_mapping(dict(values, _sources=regrouped), 1, 0)
+        self.assertTrue(all(source.mode == "mono" for source in unlinked))
+        state = dict(mapping_state(dict(values, _sources=paired)))
+        self.assertEqual(state["input0Partner"], 2)
+        self.assertEqual(state["input1Partner"], 1)
+        self.assertEqual(state["input0Orientation"], 1)
+        self.assertEqual(state["input1Orientation"], 2)
 
     def test_smoothing_targets_every_active_source_group_and_master(self):
         values, channels = read_config(os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf"))

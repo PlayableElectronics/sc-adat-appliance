@@ -27,7 +27,7 @@ def resolved_control(definition, key, label, default):
     bounds = definition.get("range", {})
     item = {"key": key, "label": label, "value_type": value_type,
             "unit": definition["unit"], "display": definition["display"],
-            "default": default}
+            "default": default, "writable": definition.get("writable", True)}
     if value_type == "amplitude":
         item["range"] = {"min": bounds["min"], "max": bounds["max"],
                          "display_min": amplitude_db(bounds["min"]),
@@ -73,10 +73,25 @@ def build_schema(config_path=CONFIG_PATH):
         snapshot = source.snapshot()
         snapshot["index"] = index
         sources.append(snapshot)
-        page = {"id": f"source.{source.id}", "label": source.name.upper(), "controls": []}
-        for definition in source_controls_for_mode(source.mode):
-            key = definition["key_template"].replace("N", str(index))
+
+    source_by_input = {physical: (index, source) for index, source in enumerate(values["_sources"])
+                       for physical in source.inputs}
+    mapping_definitions = {item["key_template"]: item for item in CONTRACT["mapping_controls"]}
+    for physical in range(1, 17):
+        source_index, source = source_by_input[physical]
+        page = {"id": f"input.{physical}", "label": f"INPUT {physical}: {source.name}",
+                "controls": [], "physical_input": physical, "source_index": source_index,
+                "source_id": source.id, "source_name": source.name, "source_mode": source.mode,
+                "source_inputs": list(source.inputs), "source_group": source.group,
+                "processing_linked": source.mode == "stereo",
+                "meters": {"left": f"input.{physical}.left", "right": f"input.{physical}.right"}}
+        for definition in mapping_definitions.values():
+            key = definition["key_template"].replace("N", str(physical - 1))
             add(page, definition, key, definition["label"])
+        if physical == source.inputs[0]:
+            for definition in source_controls_for_mode(source.mode):
+                key = definition["key_template"].replace("N", str(source_index))
+                add(page, definition, key, definition["label"])
         pages.append(page)
 
     return {"schema_version": "1", "contract_version": CONTRACT_VERSION,

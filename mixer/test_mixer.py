@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 import math, os, re, socket, statistics, subprocess, sys, tempfile, time
+import unittest
+if "discover" in sys.argv and __name__ != "__main__":
+    raise unittest.SkipTest("real scsynth integration script; run through scripts/test-mixer")
 sys.path.insert(0, os.path.dirname(__file__))
 from mixerctl import BUS_RANGES, GROUPS, controls, dbamp, packet, parse_packet, read_config
 from mixerctl import group_controls
 
 ROOT=os.path.dirname(os.path.dirname(__file__))
-config = "/workspace/payload/config/mixer.conf"
+config = os.path.join(ROOT, "payload/config/mixer.conf")
 values, channels = read_config(config)
 assert list(BUS_RANGES.values()) == [(26,52),(52,68),(76,108),(0,26)]
 assert len({tuple(x) for x in BUS_RANGES.values()}) == 4

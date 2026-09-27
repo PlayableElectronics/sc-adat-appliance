@@ -329,6 +329,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -344,6 +345,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -359,6 +361,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -374,6 +377,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -389,6 +393,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -404,6 +409,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -419,6 +425,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -434,6 +441,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -449,6 +457,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0,
         "max": 2.0,
@@ -458,12 +467,95 @@
       "step": 0.5
     },
     {
+      "key": "input0Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input0Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input0Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input0Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    {
       "key": "source0Trim",
       "label": "Trim",
       "value_type": "amplitude",
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -479,6 +571,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -493,6 +586,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -507,6 +601,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -521,6 +616,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -534,11 +630,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input1Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 1,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input1Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input1Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input1Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source1Trim",
@@ -547,6 +726,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -562,6 +742,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -576,6 +757,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -590,6 +772,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -604,6 +787,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -617,11 +801,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input2Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 1,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input2Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input2Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input2Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source2Trim",
@@ -630,6 +897,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -645,6 +913,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -659,6 +928,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -673,6 +943,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -687,6 +958,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -700,11 +972,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input3Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 1,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input3Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input3Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input3Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source3Trim",
@@ -713,6 +1068,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -728,6 +1084,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -742,6 +1099,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -756,6 +1114,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -770,6 +1129,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -783,11 +1143,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input4Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 2,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input4Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input4Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input4Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source4Trim",
@@ -796,6 +1239,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -811,6 +1255,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -825,6 +1270,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -839,6 +1285,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -853,6 +1300,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 50.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -866,11 +1314,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input5Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 3,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input5Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input5Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input5Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source5Trim",
@@ -879,6 +1410,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -894,6 +1426,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -908,6 +1441,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -922,6 +1456,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -936,6 +1471,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -949,11 +1485,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input6Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 3,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input6Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input6Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input6Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source6Trim",
@@ -962,6 +1581,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -977,6 +1597,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -991,6 +1612,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1005,6 +1627,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1019,6 +1642,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1032,11 +1656,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input7Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 3,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input7Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input7Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input7Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source7Trim",
@@ -1045,6 +1752,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1060,6 +1768,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1074,6 +1783,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1088,6 +1798,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1102,6 +1813,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1115,11 +1827,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input8Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 3,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input8Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input8Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input8Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source8Trim",
@@ -1128,6 +1923,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1143,6 +1939,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1157,6 +1954,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1171,6 +1969,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1185,6 +1984,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1198,11 +1998,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input9Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 5,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input9Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input9Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input9Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source9Trim",
@@ -1211,6 +2094,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1226,6 +2110,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1240,6 +2125,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1254,6 +2140,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1268,6 +2155,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1281,11 +2169,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input10Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 5,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input10Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input10Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input10Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source10Trim",
@@ -1294,6 +2265,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1309,6 +2281,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1323,6 +2296,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1337,6 +2311,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1351,6 +2326,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1364,11 +2340,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input11Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 5,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input11Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input11Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input11Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source11Trim",
@@ -1377,6 +2436,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1392,6 +2452,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1406,6 +2467,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1420,6 +2482,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1434,6 +2497,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1447,11 +2511,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input12Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 6,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input12Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input12Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input12Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source12Trim",
@@ -1460,6 +2607,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1475,6 +2623,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1489,6 +2638,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1503,6 +2653,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1517,6 +2668,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1530,11 +2682,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input13Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 6,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input13Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input13Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input13Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source13Trim",
@@ -1543,6 +2778,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1558,6 +2794,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1572,6 +2809,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1586,6 +2824,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1600,6 +2839,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1613,11 +2853,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input14Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 7,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input14Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input14Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input14Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source14Trim",
@@ -1626,6 +2949,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1641,6 +2965,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1655,6 +2980,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1669,6 +2995,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1683,6 +3010,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1696,11 +3024,94 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
       },
       "step": 0.01
+    },
+    {
+      "key": "input15Group",
+      "label": "Assigned group",
+      "value_type": "enum",
+      "unit": "group index",
+      "display": "group name",
+      "default": 7,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "key": "input15Partner",
+      "label": "Stereo partner",
+      "value_type": "enum",
+      "unit": "physical input",
+      "display": "MONO or input number",
+      "default": 0,
+      "writable": true,
+      "range": {
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    },
+    {
+      "key": "input15Mode",
+      "label": "Mode",
+      "value_type": "enum",
+      "unit": "mode",
+      "display": "MONO/STEREO",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "input15Orientation",
+      "label": "Stereo orientation",
+      "value_type": "enum",
+      "unit": "orientation",
+      "display": "MONO/LEFT/RIGHT",
+      "default": 0,
+      "writable": false,
+      "range": {
+        "values": [
+          0,
+          1,
+          2
+        ]
+      }
     },
     {
       "key": "source15Trim",
@@ -1709,6 +3120,7 @@
       "unit": "dB",
       "display": "dB",
       "default": 1.0,
+      "writable": true,
       "range": {
         "min": 0.0001,
         "max": 4.0,
@@ -1724,6 +3136,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1738,6 +3151,7 @@
       "unit": "polarity",
       "display": "NORMAL/INVERTED",
       "default": 1,
+      "writable": true,
       "range": {
         "values": [
           -1,
@@ -1752,6 +3166,7 @@
       "unit": "boolean",
       "display": "ON/OFF",
       "default": 0,
+      "writable": true,
       "range": {
         "values": [
           0,
@@ -1766,6 +3181,7 @@
       "unit": "Hz",
       "display": "Hz",
       "default": 80.0,
+      "writable": true,
       "range": {
         "min": 20,
         "max": 20000
@@ -1779,6 +3195,7 @@
       "unit": "normalized",
       "display": "-1.00..1.00",
       "default": 0.0,
+      "writable": true,
       "range": {
         "min": -1,
         "max": 1
@@ -1851,196 +3268,484 @@
       ]
     },
     {
-      "id": "source.drums_1",
-      "label": "DRUMS_1",
+      "id": "input.1",
+      "label": "INPUT 1: drums_1",
       "controls": [
+        "input0Group",
+        "input0Partner",
+        "input0Mode",
+        "input0Orientation",
         "source0Trim",
         "source0Mute",
         "source0Polarity",
         "source0HPF",
         "source0HPFHz",
         "source0Pan"
-      ]
+      ],
+      "physical_input": 1,
+      "source_index": 0,
+      "source_id": "drums_1",
+      "source_name": "drums_1",
+      "source_mode": "mono",
+      "source_inputs": [
+        1
+      ],
+      "source_group": "kick",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.1.left",
+        "right": "input.1.right"
+      }
     },
     {
-      "id": "source.drums_2",
-      "label": "DRUMS_2",
+      "id": "input.2",
+      "label": "INPUT 2: drums_2",
       "controls": [
+        "input1Group",
+        "input1Partner",
+        "input1Mode",
+        "input1Orientation",
         "source1Trim",
         "source1Mute",
         "source1Polarity",
         "source1HPF",
         "source1HPFHz",
         "source1Pan"
-      ]
+      ],
+      "physical_input": 2,
+      "source_index": 1,
+      "source_id": "drums_2",
+      "source_name": "drums_2",
+      "source_mode": "mono",
+      "source_inputs": [
+        2
+      ],
+      "source_group": "drums",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.2.left",
+        "right": "input.2.right"
+      }
     },
     {
-      "id": "source.drums_3",
-      "label": "DRUMS_3",
+      "id": "input.3",
+      "label": "INPUT 3: drums_3",
       "controls": [
+        "input2Group",
+        "input2Partner",
+        "input2Mode",
+        "input2Orientation",
         "source2Trim",
         "source2Mute",
         "source2Polarity",
         "source2HPF",
         "source2HPFHz",
         "source2Pan"
-      ]
+      ],
+      "physical_input": 3,
+      "source_index": 2,
+      "source_id": "drums_3",
+      "source_name": "drums_3",
+      "source_mode": "mono",
+      "source_inputs": [
+        3
+      ],
+      "source_group": "drums",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.3.left",
+        "right": "input.3.right"
+      }
     },
     {
-      "id": "source.drums_4",
-      "label": "DRUMS_4",
+      "id": "input.4",
+      "label": "INPUT 4: drums_4",
       "controls": [
+        "input3Group",
+        "input3Partner",
+        "input3Mode",
+        "input3Orientation",
         "source3Trim",
         "source3Mute",
         "source3Polarity",
         "source3HPF",
         "source3HPFHz",
         "source3Pan"
-      ]
+      ],
+      "physical_input": 4,
+      "source_index": 3,
+      "source_id": "drums_4",
+      "source_name": "drums_4",
+      "source_mode": "mono",
+      "source_inputs": [
+        4
+      ],
+      "source_group": "drums",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.4.left",
+        "right": "input.4.right"
+      }
     },
     {
-      "id": "source.bass",
-      "label": "BASS",
+      "id": "input.5",
+      "label": "INPUT 5: bass",
       "controls": [
+        "input4Group",
+        "input4Partner",
+        "input4Mode",
+        "input4Orientation",
         "source4Trim",
         "source4Mute",
         "source4Polarity",
         "source4HPF",
         "source4HPFHz",
         "source4Pan"
-      ]
+      ],
+      "physical_input": 5,
+      "source_index": 4,
+      "source_id": "bass",
+      "source_name": "bass",
+      "source_mode": "mono",
+      "source_inputs": [
+        5
+      ],
+      "source_group": "bass",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.5.left",
+        "right": "input.5.right"
+      }
     },
     {
-      "id": "source.instruments_1",
-      "label": "INSTRUMENTS_1",
+      "id": "input.6",
+      "label": "INPUT 6: instruments_1",
       "controls": [
+        "input5Group",
+        "input5Partner",
+        "input5Mode",
+        "input5Orientation",
         "source5Trim",
         "source5Mute",
         "source5Polarity",
         "source5HPF",
         "source5HPFHz",
         "source5Pan"
-      ]
+      ],
+      "physical_input": 6,
+      "source_index": 5,
+      "source_id": "instruments_1",
+      "source_name": "instruments_1",
+      "source_mode": "mono",
+      "source_inputs": [
+        6
+      ],
+      "source_group": "music_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.6.left",
+        "right": "input.6.right"
+      }
     },
     {
-      "id": "source.instruments_2",
-      "label": "INSTRUMENTS_2",
+      "id": "input.7",
+      "label": "INPUT 7: instruments_2",
       "controls": [
+        "input6Group",
+        "input6Partner",
+        "input6Mode",
+        "input6Orientation",
         "source6Trim",
         "source6Mute",
         "source6Polarity",
         "source6HPF",
         "source6HPFHz",
         "source6Pan"
-      ]
+      ],
+      "physical_input": 7,
+      "source_index": 6,
+      "source_id": "instruments_2",
+      "source_name": "instruments_2",
+      "source_mode": "mono",
+      "source_inputs": [
+        7
+      ],
+      "source_group": "music_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.7.left",
+        "right": "input.7.right"
+      }
     },
     {
-      "id": "source.instruments_3",
-      "label": "INSTRUMENTS_3",
+      "id": "input.8",
+      "label": "INPUT 8: instruments_3",
       "controls": [
+        "input7Group",
+        "input7Partner",
+        "input7Mode",
+        "input7Orientation",
         "source7Trim",
         "source7Mute",
         "source7Polarity",
         "source7HPF",
         "source7HPFHz",
         "source7Pan"
-      ]
+      ],
+      "physical_input": 8,
+      "source_index": 7,
+      "source_id": "instruments_3",
+      "source_name": "instruments_3",
+      "source_mode": "mono",
+      "source_inputs": [
+        8
+      ],
+      "source_group": "music_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.8.left",
+        "right": "input.8.right"
+      }
     },
     {
-      "id": "source.instruments_4",
-      "label": "INSTRUMENTS_4",
+      "id": "input.9",
+      "label": "INPUT 9: instruments_4",
       "controls": [
+        "input8Group",
+        "input8Partner",
+        "input8Mode",
+        "input8Orientation",
         "source8Trim",
         "source8Mute",
         "source8Polarity",
         "source8HPF",
         "source8HPFHz",
         "source8Pan"
-      ]
+      ],
+      "physical_input": 9,
+      "source_index": 8,
+      "source_id": "instruments_4",
+      "source_name": "instruments_4",
+      "source_mode": "mono",
+      "source_inputs": [
+        9
+      ],
+      "source_group": "music_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.9.left",
+        "right": "input.9.right"
+      }
     },
     {
-      "id": "source.vocals_1",
-      "label": "VOCALS_1",
+      "id": "input.10",
+      "label": "INPUT 10: vocals_1",
       "controls": [
+        "input9Group",
+        "input9Partner",
+        "input9Mode",
+        "input9Orientation",
         "source9Trim",
         "source9Mute",
         "source9Polarity",
         "source9HPF",
         "source9HPFHz",
         "source9Pan"
-      ]
+      ],
+      "physical_input": 10,
+      "source_index": 9,
+      "source_id": "vocals_1",
+      "source_name": "vocals_1",
+      "source_mode": "mono",
+      "source_inputs": [
+        10
+      ],
+      "source_group": "vocals",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.10.left",
+        "right": "input.10.right"
+      }
     },
     {
-      "id": "source.vocals_2",
-      "label": "VOCALS_2",
+      "id": "input.11",
+      "label": "INPUT 11: vocals_2",
       "controls": [
+        "input10Group",
+        "input10Partner",
+        "input10Mode",
+        "input10Orientation",
         "source10Trim",
         "source10Mute",
         "source10Polarity",
         "source10HPF",
         "source10HPFHz",
         "source10Pan"
-      ]
+      ],
+      "physical_input": 11,
+      "source_index": 10,
+      "source_id": "vocals_2",
+      "source_name": "vocals_2",
+      "source_mode": "mono",
+      "source_inputs": [
+        11
+      ],
+      "source_group": "vocals",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.11.left",
+        "right": "input.11.right"
+      }
     },
     {
-      "id": "source.vocals_3",
-      "label": "VOCALS_3",
+      "id": "input.12",
+      "label": "INPUT 12: vocals_3",
       "controls": [
+        "input11Group",
+        "input11Partner",
+        "input11Mode",
+        "input11Orientation",
         "source11Trim",
         "source11Mute",
         "source11Polarity",
         "source11HPF",
         "source11HPFHz",
         "source11Pan"
-      ]
+      ],
+      "physical_input": 12,
+      "source_index": 11,
+      "source_id": "vocals_3",
+      "source_name": "vocals_3",
+      "source_mode": "mono",
+      "source_inputs": [
+        12
+      ],
+      "source_group": "vocals",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.12.left",
+        "right": "input.12.right"
+      }
     },
     {
-      "id": "source.fx_return_1",
-      "label": "FX_RETURN_1",
+      "id": "input.13",
+      "label": "INPUT 13: fx_return_1",
       "controls": [
+        "input12Group",
+        "input12Partner",
+        "input12Mode",
+        "input12Orientation",
         "source12Trim",
         "source12Mute",
         "source12Polarity",
         "source12HPF",
         "source12HPFHz",
         "source12Pan"
-      ]
+      ],
+      "physical_input": 13,
+      "source_index": 12,
+      "source_id": "fx_return_1",
+      "source_name": "fx_return_1",
+      "source_mode": "mono",
+      "source_inputs": [
+        13
+      ],
+      "source_group": "fx_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.13.left",
+        "right": "input.13.right"
+      }
     },
     {
-      "id": "source.fx_return_2",
-      "label": "FX_RETURN_2",
+      "id": "input.14",
+      "label": "INPUT 14: fx_return_2",
       "controls": [
+        "input13Group",
+        "input13Partner",
+        "input13Mode",
+        "input13Orientation",
         "source13Trim",
         "source13Mute",
         "source13Polarity",
         "source13HPF",
         "source13HPFHz",
         "source13Pan"
-      ]
+      ],
+      "physical_input": 14,
+      "source_index": 13,
+      "source_id": "fx_return_2",
+      "source_name": "fx_return_2",
+      "source_mode": "mono",
+      "source_inputs": [
+        14
+      ],
+      "source_group": "fx_a",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.14.left",
+        "right": "input.14.right"
+      }
     },
     {
-      "id": "source.fx_return_3",
-      "label": "FX_RETURN_3",
+      "id": "input.15",
+      "label": "INPUT 15: fx_return_3",
       "controls": [
+        "input14Group",
+        "input14Partner",
+        "input14Mode",
+        "input14Orientation",
         "source14Trim",
         "source14Mute",
         "source14Polarity",
         "source14HPF",
         "source14HPFHz",
         "source14Pan"
-      ]
+      ],
+      "physical_input": 15,
+      "source_index": 14,
+      "source_id": "fx_return_3",
+      "source_name": "fx_return_3",
+      "source_mode": "mono",
+      "source_inputs": [
+        15
+      ],
+      "source_group": "fx_b",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.15.left",
+        "right": "input.15.right"
+      }
     },
     {
-      "id": "source.fx_return_4",
-      "label": "FX_RETURN_4",
+      "id": "input.16",
+      "label": "INPUT 16: fx_return_4",
       "controls": [
+        "input15Group",
+        "input15Partner",
+        "input15Mode",
+        "input15Orientation",
         "source15Trim",
         "source15Mute",
         "source15Polarity",
         "source15HPF",
         "source15HPFHz",
         "source15Pan"
-      ]
+      ],
+      "physical_input": 16,
+      "source_index": 15,
+      "source_id": "fx_return_4",
+      "source_name": "fx_return_4",
+      "source_mode": "mono",
+      "source_inputs": [
+        16
+      ],
+      "source_group": "fx_b",
+      "processing_linked": false,
+      "meters": {
+        "left": "input.16.left",
+        "right": "input.16.right"
+      }
     }
   ]
 }

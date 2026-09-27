@@ -154,6 +154,30 @@ def validate_parameter(key, numeric, values=None):
             if suffix == "HPFHz": return bounded(numeric, 20, 20000, key)
             if suffix == "Pan" or suffix == "Balance": return bounded(numeric, -1, 1, key)
             if suffix == "Width": return bounded(numeric, 0, 1, key)
+    if values is not None:
+        import re
+        match = re.fullmatch(r"input(\d+)(Group|Partner|Mode|Orientation)", key)
+        if match:
+            index, suffix = int(match.group(1)), match.group(2)
+            if not 0 <= index < 16:
+                raise ValueError("invalid physical input index")
+            if suffix in ("Mode", "Orientation"):
+                raise ValueError(f"{key} is read-only; use inputNPartner")
+            if suffix == "Group":
+                number = finite(numeric, key)
+                if number not in range(len(GROUPS)):
+                    raise ValueError(f"{key} has an invalid group")
+                physical = index + 1
+                current = next(source for source in values["_sources"] if physical in source.inputs)
+                partner = current.inputs[1] if current.mode == "stereo" and physical == current.inputs[0] else current.inputs[0] if current.mode == "stereo" else 0
+                propose_mapping(values, physical, partner=partner, group=GROUPS[int(number)])
+                return int(number)
+            number = finite(numeric, key)
+            if number not in range(17):
+                raise ValueError(f"{key} has an invalid stereo partner")
+            physical = index + 1
+            propose_mapping(values, physical, int(number))
+            return int(number)
     if "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
     if key.startswith(("mute", "hpf")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
@@ -292,6 +316,7 @@ def controls(values, channels):
                        (f"source{index}Mode", source.mode), (f"source{index}Inputs", ",".join(map(str, source.inputs))),
                        (f"source{index}Group", source.group), (f"source{index}MeterL", f"input.{source.inputs[0]}.left"),
                        (f"source{index}MeterR", f"input.{source.inputs[-1]}.right")])
+    result.extend(mapping_state(values))
     return result
 
 
@@ -322,6 +347,65 @@ def source_contract_for(values):
 def source_map_snapshot(values):
     return {"source_map_version": values.get("source_map_version", "1"),
             "sources": [source.snapshot() for source in values["_sources"]]}
+
+
+def mapping_state(values):
+    """Return normalized, per-physical-input mapping state for clients."""
+    result = []
+    for physical in range(1, 17):
+        source = next(source for source in values["_sources"] if physical in source.inputs)
+        stereo = source.mode == "stereo"
+        result.extend([
+            (f"input{physical - 1}Group", GROUPS.index(source.group)),
+            (f"input{physical - 1}Partner", (source.inputs[1] if stereo and physical == source.inputs[0]
+                                               else source.inputs[0] if stereo else 0)),
+            (f"input{physical - 1}Mode", 1 if stereo else 0),
+            (f"input{physical - 1}Orientation", 1 if stereo and physical == source.inputs[0]
+                                                  else 2 if stereo else 0),
+        ])
+    return result
+
+
+def _runtime_source_entries(values, physical, partner=0, group=None):
+    """Build a complete proposed map for one atomic mapping edit."""
+    if not 1 <= physical <= 16:
+        raise ValueError("physical input must be 1..16")
+    if partner == physical:
+        raise ValueError("an input cannot be its own stereo partner")
+    if not 0 <= partner <= 16:
+        raise ValueError("stereo partner must be 0..16")
+    current = {number: source for source in values["_sources"] for number in source.inputs}
+    if partner and current[partner].mode == "stereo" and physical not in current[partner].inputs:
+        raise ValueError("stereo partner is already paired")
+    affected = {physical} | ({partner} if partner else set())
+    entries = []
+    for source in values["_sources"]:
+        remaining = [number for number in source.inputs if number not in affected]
+        for number in remaining:
+            split_id = f"{source.id}_{number}" if source.mode == "stereo" else current[number].id
+            split_name = f"{source.name} {'L' if number == source.inputs[0] else 'R'}" if source.mode == "stereo" else current[number].name
+            entries.append({"id": split_id, "name": split_name,
+                            "mode": "mono", "inputs": [number], "group": current[number].group})
+    if partner:
+        left, right = current[physical], current[partner]
+        selected_group = group if group is not None else left.group
+        entries.append({"id": left.id, "name": f"{left.name} / {right.name}",
+                        "mode": "stereo", "inputs": [physical, partner], "group": selected_group})
+    else:
+        source = current[physical]
+        selected_group = group if group is not None else source.group
+        entries.append({"id": source.id, "name": source.name, "mode": "mono",
+                        "inputs": [physical], "group": selected_group})
+    return sorted(entries, key=lambda entry: entry["inputs"][0])
+
+
+def propose_mapping(values, physical, partner=None, group=None):
+    """Validate and return a complete replacement map without mutating values."""
+    current = next(source for source in values["_sources"] if physical in source.inputs)
+    if partner is None:
+        partner = current.inputs[1] if current.mode == "stereo" and physical == current.inputs[0] else current.inputs[0] if current.mode == "stereo" else 0
+    entries = _runtime_source_entries(values, physical, partner, group)
+    return validate_source_map(entries, GROUPS, values.get("source_map_version", "1"))
 
 
 def active_source_nodes(values):
@@ -405,6 +489,33 @@ def source_node_controls(values, channels, index):
             ("sourceBalance", state.get(f"source{index}Balance", 0.0)),
             ("sourceWidth", state.get(f"source{index}Width", 1.0)),
             ("smoothing", float(values.get("quad.smoothing_ms", 30)) / 1000.0)]
+
+
+def apply_runtime_mapping(sock, sc_port, values, channels, state, proposed):
+    """Commit a validated map and refresh all dependent state atomically."""
+    old_sources = values["_sources"]
+    old_by_id = {source.id: index for index, source in enumerate(old_sources)}
+    old_state = dict(state)
+    values["_sources"] = tuple(proposed)
+    refreshed = dict(controls(values, channels))
+    for index, source in enumerate(values["_sources"]):
+        old_index = old_by_id.get(source.id)
+        if old_index is None:
+            continue
+        for suffix in ("Trim", "Mute", "Polarity", "HPF", "HPFHz", "Pan", "Balance", "Width"):
+            old_key = f"source{old_index}{suffix}"
+            new_key = f"source{index}{suffix}"
+            if old_key in old_state and new_key in refreshed:
+                refreshed[new_key] = old_state[old_key]
+    # Rebuild the reusable source slots from the proposed complete map.  No
+    # state is published until validation and the full replacement are ready.
+    for node in range(ROUTER_NODE, ROUTER_NODE + 16):
+        send(sock, sc_port, packet("/n_free", ",i", [node]))
+    for index in range(len(values["_sources"])):
+        send_snew(sock, sc_port, "sc_adat_router", ROUTER_NODE + index, NODE_ROUTING,
+                  source_node_controls(values, channels, index), action=1)
+    state.clear()
+    state.update(refreshed)
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
 
@@ -607,6 +718,22 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             try: numeric=validate_parameter(key, numeric, values)
             except ValueError as exc:
                 send_to(sock, destination, packet("/mixer/error", ",s", [str(exc)])); continue
+            import re
+            mapping_match = re.fullmatch(r"input(\d+)(Group|Partner)", key)
+            if mapping_match:
+                physical = int(mapping_match.group(1)) + 1
+                try:
+                    if mapping_match.group(2) == "Partner":
+                        proposed = propose_mapping(values, physical, int(numeric))
+                    else:
+                        proposed = propose_mapping(values, physical, group=GROUPS[int(numeric)])
+                    apply_runtime_mapping(sock, sc_port, values, channels, state, proposed)
+                except (ValueError, SourceMapError) as exc:
+                    send_to(sock, destination, packet("/mixer/error", ",s", [str(exc)])); continue
+                for normalized_key, normalized_value in mapping_state(values):
+                    send_to(sock, destination, packet("/mixer/state", ",sf", [normalized_key, normalized_value]))
+                send_to(sock, destination, packet("/mixer/ok", ",s", [key]))
+                continue
             state[key]=numeric
             if key == "quadSmoothingMs":
                 apply_smoothing(sock, sc_port, values, numeric / 1000.0)

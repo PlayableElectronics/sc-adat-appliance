@@ -89,7 +89,16 @@ local function add_parameter(definition)
   elseif definition.kind == "enum" then
     local labels = {}
     for _, value in ipairs(definition.values) do
-      if value == 1 then table.insert(labels, "NORMAL")
+      if string.match(definition.key, "Group$") then
+        local groups = {"KICK", "DRUMS", "BASS", "MUSIC A", "MUSIC B", "VOCALS", "FX A", "FX B"}
+        table.insert(labels, groups[value + 1] or tostring(value))
+      elseif string.match(definition.key, "Partner$") then
+        table.insert(labels, value == 0 and "MONO" or ("INPUT " .. tostring(value)))
+      elseif string.match(definition.key, "Mode$") then
+        table.insert(labels, value == 0 and "MONO" or "STEREO")
+      elseif string.match(definition.key, "Orientation$") then
+        table.insert(labels, ({[0] = "MONO", [1] = "LEFT", [2] = "RIGHT"})[value] or tostring(value))
+      elseif value == 1 then table.insert(labels, "NORMAL")
       elseif value == -1 then table.insert(labels, "INVERTED")
       else table.insert(labels, tostring(value)) end
     end
@@ -113,7 +122,9 @@ local function add_parameter(definition)
       controlspec.new(definition.min, definition.max, "lin", definition.step, 0)
     )
   end
-  params:set_action(id, function(value) send_set(definition, value) end)
+  if definition.writable ~= false then
+    params:set_action(id, function(value) send_set(definition, value) end)
+  end
 end
 
 local function mark_received(key)

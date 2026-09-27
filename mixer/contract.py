@@ -46,7 +46,21 @@ def source_contract(sources):
         result.append({"index": index, **source.snapshot(), "controls": controls,
                        "meters": {"left": {"id": f"input.{left}.left", "physical_input": left, "peak_index": left - 1, "rms_index": 16 + left - 1},
                                   "right": {"id": f"input.{right}.right", "physical_input": right, "peak_index": right - 1, "rms_index": 16 + right - 1}}})
-    return {"contract_version": CONTRACT_VERSION, "source_map_version": CONTRACT["source_map"]["version"], "sources": result}
+    inputs = []
+    for physical in range(1, 17):
+        source = next(item for item in sources if physical in item.inputs)
+        stereo = source.mode == "stereo"
+        inputs.append({"physical_input": physical, "source_id": source.id,
+                       "source_name": source.name, "mode": source.mode,
+                       "partner": source.inputs[1] if stereo and physical == source.inputs[0]
+                                  else source.inputs[0] if stereo else 0,
+                       "orientation": "left" if stereo and physical == source.inputs[0]
+                                      else "right" if stereo else "mono",
+                       "group": source.group,
+                       "controls": [item["key_template"] for item in source_controls_for_mode(source.mode)]})
+    return {"contract_version": CONTRACT_VERSION, "source_map_version": CONTRACT["source_map"]["version"],
+            "sources": result, "inputs": inputs,
+            "mapping_controls": CONTRACT.get("mapping_controls", ())}
 
 
 def control_for_key(key):

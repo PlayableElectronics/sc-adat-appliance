@@ -8,12 +8,16 @@ import subprocess
 import sys
 import tempfile
 import time
+import unittest
+
+if "discover" in sys.argv and __name__ != "__main__":
+    raise unittest.SkipTest("real scsynth integration script; run through scripts/test-mixer")
 
 sys.path.insert(0, os.path.dirname(__file__))
 from mixerctl import packet, parse_packet, read_config
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
-base_path = "/workspace/payload/config/mixer.conf"
+base_path = os.path.join(ROOT, "payload/config/mixer.conf")
 base = open(base_path, encoding="utf-8").read()
 canonical_values, _ = read_config(base_path)
 canonical_sources = canonical_values["_sources"]

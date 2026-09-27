@@ -17,7 +17,8 @@ def lua(value):
 
 def norns_control(item):
     value_type, bounds = item["value_type"], item["range"]
-    result = {"key": item["key"], "label": item["label"], "kind": value_type}
+    result = {"key": item["key"], "label": item["label"], "kind": value_type,
+              "writable": item.get("writable", True)}
     if value_type == "amplitude":
         result.update({"kind": "db", "min": bounds["display_min"], "max": bounds["display_max"], "step": item["step"]})
     elif "values" in bounds:
@@ -54,4 +55,4 @@ if __name__ == "__main__":
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     count = generate(check=args.check)
-    print(f"{'verified' if args.check else 'generated'} {OUTPUT_PATH.relative_to(ROOT)} ({count} writable controls)")
+    print(f"{'verified' if args.check else 'generated'} {OUTPUT_PATH.relative_to(ROOT)} ({count} controls)")

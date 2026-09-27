@@ -1,0 +1,2046 @@
+{
+  "schema_version": "1",
+  "contract_version": "1.1.0",
+  "generated_from": {
+    "runtime_config": "payload/config/mixer.conf",
+    "control_contract": "control/mixer-control-contract.json"
+  },
+  "groups": [
+    {
+      "index": 0,
+      "id": "kick",
+      "name": "kick",
+      "limits": {
+        "x": [
+          0.5,
+          0.5
+        ],
+        "y": [
+          1.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "id": "drums",
+      "name": "drums",
+      "limits": {
+        "x": [
+          0.25,
+          0.75
+        ],
+        "y": [
+          0.5,
+          1.0
+        ],
+        "width": [
+          0.0,
+          0.75
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "id": "bass",
+      "name": "bass",
+      "limits": {
+        "x": [
+          0.5,
+          0.5
+        ],
+        "y": [
+          1.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "id": "music_a",
+      "name": "music_a",
+      "limits": {
+        "x": [
+          0.0,
+          1.0
+        ],
+        "y": [
+          0.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "id": "music_b",
+      "name": "music_b",
+      "limits": {
+        "x": [
+          0.0,
+          1.0
+        ],
+        "y": [
+          0.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "id": "vocals",
+      "name": "vocals",
+      "limits": {
+        "x": [
+          0.25,
+          0.75
+        ],
+        "y": [
+          0.5,
+          1.0
+        ],
+        "width": [
+          0.0,
+          0.5
+        ]
+      }
+    },
+    {
+      "index": 6,
+      "id": "fx_a",
+      "name": "fx_a",
+      "limits": {
+        "x": [
+          0.0,
+          1.0
+        ],
+        "y": [
+          0.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "index": 7,
+      "id": "fx_b",
+      "name": "fx_b",
+      "limits": {
+        "x": [
+          0.0,
+          1.0
+        ],
+        "y": [
+          0.0,
+          1.0
+        ],
+        "width": [
+          0.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "drums_1",
+      "name": "drums_1",
+      "mode": "mono",
+      "inputs": [
+        1
+      ],
+      "group": "kick",
+      "index": 0
+    },
+    {
+      "id": "drums_2",
+      "name": "drums_2",
+      "mode": "mono",
+      "inputs": [
+        2
+      ],
+      "group": "drums",
+      "index": 1
+    },
+    {
+      "id": "drums_3",
+      "name": "drums_3",
+      "mode": "mono",
+      "inputs": [
+        3
+      ],
+      "group": "drums",
+      "index": 2
+    },
+    {
+      "id": "drums_4",
+      "name": "drums_4",
+      "mode": "mono",
+      "inputs": [
+        4
+      ],
+      "group": "drums",
+      "index": 3
+    },
+    {
+      "id": "bass",
+      "name": "bass",
+      "mode": "mono",
+      "inputs": [
+        5
+      ],
+      "group": "bass",
+      "index": 4
+    },
+    {
+      "id": "instruments_1",
+      "name": "instruments_1",
+      "mode": "mono",
+      "inputs": [
+        6
+      ],
+      "group": "music_a",
+      "index": 5
+    },
+    {
+      "id": "instruments_2",
+      "name": "instruments_2",
+      "mode": "mono",
+      "inputs": [
+        7
+      ],
+      "group": "music_a",
+      "index": 6
+    },
+    {
+      "id": "instruments_3",
+      "name": "instruments_3",
+      "mode": "mono",
+      "inputs": [
+        8
+      ],
+      "group": "music_a",
+      "index": 7
+    },
+    {
+      "id": "instruments_4",
+      "name": "instruments_4",
+      "mode": "mono",
+      "inputs": [
+        9
+      ],
+      "group": "music_a",
+      "index": 8
+    },
+    {
+      "id": "vocals_1",
+      "name": "vocals_1",
+      "mode": "mono",
+      "inputs": [
+        10
+      ],
+      "group": "vocals",
+      "index": 9
+    },
+    {
+      "id": "vocals_2",
+      "name": "vocals_2",
+      "mode": "mono",
+      "inputs": [
+        11
+      ],
+      "group": "vocals",
+      "index": 10
+    },
+    {
+      "id": "vocals_3",
+      "name": "vocals_3",
+      "mode": "mono",
+      "inputs": [
+        12
+      ],
+      "group": "vocals",
+      "index": 11
+    },
+    {
+      "id": "fx_return_1",
+      "name": "fx_return_1",
+      "mode": "mono",
+      "inputs": [
+        13
+      ],
+      "group": "fx_a",
+      "index": 12
+    },
+    {
+      "id": "fx_return_2",
+      "name": "fx_return_2",
+      "mode": "mono",
+      "inputs": [
+        14
+      ],
+      "group": "fx_a",
+      "index": 13
+    },
+    {
+      "id": "fx_return_3",
+      "name": "fx_return_3",
+      "mode": "mono",
+      "inputs": [
+        15
+      ],
+      "group": "fx_b",
+      "index": 14
+    },
+    {
+      "id": "fx_return_4",
+      "name": "fx_return_4",
+      "mode": "mono",
+      "inputs": [
+        16
+      ],
+      "group": "fx_b",
+      "index": 15
+    }
+  ],
+  "controls": [
+    {
+      "key": "master",
+      "label": "Master level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel0",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel1",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel2",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel3",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel4",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel5",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel6",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "groupLevel7",
+      "label": "Level",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0,
+        "max": 2.0,
+        "display_min": -120.0,
+        "display_max": 6.020599913279624
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source0Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source0Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source0Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source0HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source0HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source0Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source1Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source1Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source1Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source1HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source1HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source1Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source2Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source2Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source2Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source2HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source2HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source2Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source3Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source3Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source3Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source3HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source3HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source3Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source4Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source4Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source4Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source4HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source4HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 50.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source4Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source5Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source5Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source5Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source5HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source5HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source5Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source6Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source6Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source6Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source6HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source6HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source6Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source7Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source7Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source7Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source7HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source7HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source7Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source8Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source8Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source8Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source8HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source8HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source8Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source9Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source9Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source9Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source9HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source9HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source9Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source10Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source10Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source10Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source10HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source10HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source10Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source11Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source11Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source11Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source11HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source11HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source11Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source12Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source12Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source12Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source12HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source12HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source12Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source13Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source13Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source13Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source13HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source13HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source13Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source14Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source14Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source14Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source14HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source14HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source14Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    },
+    {
+      "key": "source15Trim",
+      "label": "Trim",
+      "value_type": "amplitude",
+      "unit": "dB",
+      "display": "dB",
+      "default": 1.0,
+      "range": {
+        "min": 0.0001,
+        "max": 4.0,
+        "display_min": -80.0,
+        "display_max": 12.041199826559248
+      },
+      "step": 0.5
+    },
+    {
+      "key": "source15Mute",
+      "label": "Mute",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source15Polarity",
+      "label": "Polarity",
+      "value_type": "enum",
+      "unit": "polarity",
+      "display": "NORMAL/INVERTED",
+      "default": 1,
+      "range": {
+        "values": [
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source15HPF",
+      "label": "HPF",
+      "value_type": "boolean",
+      "unit": "boolean",
+      "display": "ON/OFF",
+      "default": 0,
+      "range": {
+        "values": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "key": "source15HPFHz",
+      "label": "HPF cutoff",
+      "value_type": "frequency",
+      "unit": "Hz",
+      "display": "Hz",
+      "default": 80.0,
+      "range": {
+        "min": 20,
+        "max": 20000
+      },
+      "step": 1
+    },
+    {
+      "key": "source15Pan",
+      "label": "Pan",
+      "value_type": "normalized",
+      "unit": "normalized",
+      "display": "-1.00..1.00",
+      "default": 0.0,
+      "range": {
+        "min": -1,
+        "max": 1
+      },
+      "step": 0.01
+    }
+  ],
+  "pages": [
+    {
+      "id": "master",
+      "label": "MASTER",
+      "controls": [
+        "master"
+      ]
+    },
+    {
+      "id": "group.kick",
+      "label": "KICK",
+      "controls": [
+        "groupLevel0"
+      ]
+    },
+    {
+      "id": "group.drums",
+      "label": "DRUMS",
+      "controls": [
+        "groupLevel1"
+      ]
+    },
+    {
+      "id": "group.bass",
+      "label": "BASS",
+      "controls": [
+        "groupLevel2"
+      ]
+    },
+    {
+      "id": "group.music_a",
+      "label": "MUSIC_A",
+      "controls": [
+        "groupLevel3"
+      ]
+    },
+    {
+      "id": "group.music_b",
+      "label": "MUSIC_B",
+      "controls": [
+        "groupLevel4"
+      ]
+    },
+    {
+      "id": "group.vocals",
+      "label": "VOCALS",
+      "controls": [
+        "groupLevel5"
+      ]
+    },
+    {
+      "id": "group.fx_a",
+      "label": "FX_A",
+      "controls": [
+        "groupLevel6"
+      ]
+    },
+    {
+      "id": "group.fx_b",
+      "label": "FX_B",
+      "controls": [
+        "groupLevel7"
+      ]
+    },
+    {
+      "id": "source.drums_1",
+      "label": "DRUMS_1",
+      "controls": [
+        "source0Trim",
+        "source0Mute",
+        "source0Polarity",
+        "source0HPF",
+        "source0HPFHz",
+        "source0Pan"
+      ]
+    },
+    {
+      "id": "source.drums_2",
+      "label": "DRUMS_2",
+      "controls": [
+        "source1Trim",
+        "source1Mute",
+        "source1Polarity",
+        "source1HPF",
+        "source1HPFHz",
+        "source1Pan"
+      ]
+    },
+    {
+      "id": "source.drums_3",
+      "label": "DRUMS_3",
+      "controls": [
+        "source2Trim",
+        "source2Mute",
+        "source2Polarity",
+        "source2HPF",
+        "source2HPFHz",
+        "source2Pan"
+      ]
+    },
+    {
+      "id": "source.drums_4",
+      "label": "DRUMS_4",
+      "controls": [
+        "source3Trim",
+        "source3Mute",
+        "source3Polarity",
+        "source3HPF",
+        "source3HPFHz",
+        "source3Pan"
+      ]
+    },
+    {
+      "id": "source.bass",
+      "label": "BASS",
+      "controls": [
+        "source4Trim",
+        "source4Mute",
+        "source4Polarity",
+        "source4HPF",
+        "source4HPFHz",
+        "source4Pan"
+      ]
+    },
+    {
+      "id": "source.instruments_1",
+      "label": "INSTRUMENTS_1",
+      "controls": [
+        "source5Trim",
+        "source5Mute",
+        "source5Polarity",
+        "source5HPF",
+        "source5HPFHz",
+        "source5Pan"
+      ]
+    },
+    {
+      "id": "source.instruments_2",
+      "label": "INSTRUMENTS_2",
+      "controls": [
+        "source6Trim",
+        "source6Mute",
+        "source6Polarity",
+        "source6HPF",
+        "source6HPFHz",
+        "source6Pan"
+      ]
+    },
+    {
+      "id": "source.instruments_3",
+      "label": "INSTRUMENTS_3",
+      "controls": [
+        "source7Trim",
+        "source7Mute",
+        "source7Polarity",
+        "source7HPF",
+        "source7HPFHz",
+        "source7Pan"
+      ]
+    },
+    {
+      "id": "source.instruments_4",
+      "label": "INSTRUMENTS_4",
+      "controls": [
+        "source8Trim",
+        "source8Mute",
+        "source8Polarity",
+        "source8HPF",
+        "source8HPFHz",
+        "source8Pan"
+      ]
+    },
+    {
+      "id": "source.vocals_1",
+      "label": "VOCALS_1",
+      "controls": [
+        "source9Trim",
+        "source9Mute",
+        "source9Polarity",
+        "source9HPF",
+        "source9HPFHz",
+        "source9Pan"
+      ]
+    },
+    {
+      "id": "source.vocals_2",
+      "label": "VOCALS_2",
+      "controls": [
+        "source10Trim",
+        "source10Mute",
+        "source10Polarity",
+        "source10HPF",
+        "source10HPFHz",
+        "source10Pan"
+      ]
+    },
+    {
+      "id": "source.vocals_3",
+      "label": "VOCALS_3",
+      "controls": [
+        "source11Trim",
+        "source11Mute",
+        "source11Polarity",
+        "source11HPF",
+        "source11HPFHz",
+        "source11Pan"
+      ]
+    },
+    {
+      "id": "source.fx_return_1",
+      "label": "FX_RETURN_1",
+      "controls": [
+        "source12Trim",
+        "source12Mute",
+        "source12Polarity",
+        "source12HPF",
+        "source12HPFHz",
+        "source12Pan"
+      ]
+    },
+    {
+      "id": "source.fx_return_2",
+      "label": "FX_RETURN_2",
+      "controls": [
+        "source13Trim",
+        "source13Mute",
+        "source13Polarity",
+        "source13HPF",
+        "source13HPFHz",
+        "source13Pan"
+      ]
+    },
+    {
+      "id": "source.fx_return_3",
+      "label": "FX_RETURN_3",
+      "controls": [
+        "source14Trim",
+        "source14Mute",
+        "source14Polarity",
+        "source14HPF",
+        "source14HPFHz",
+        "source14Pan"
+      ]
+    },
+    {
+      "id": "source.fx_return_4",
+      "label": "FX_RETURN_4",
+      "controls": [
+        "source15Trim",
+        "source15Mute",
+        "source15Polarity",
+        "source15HPF",
+        "source15HPFHz",
+        "source15Pan"
+      ]
+    }
+  ]
+}

@@ -2,3 +2,6 @@
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PYTHONPATH="$ROOT/mixer${PYTHONPATH:+:$PYTHONPATH}" python3 "$ROOT/mixer/validate_contract.py"
+"$ROOT/scripts/control-generate" norns --check
+python3 -m unittest "$ROOT/control/tools/test_generate_mixer_schema.py"
+python3 -m unittest "$ROOT/control/norns/test_generator.py"

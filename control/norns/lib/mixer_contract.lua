@@ -1,4 +1,4 @@
--- Generated from control/mixer-control-contract.json; do not edit.
+-- Generated from control/generated/mixer-schema.json; do not edit.
 return {
   version = "1.1.0",
   controls = {

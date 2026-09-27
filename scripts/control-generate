@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ "${1:-}" != "norns" ] || [ "$#" -gt 2 ] || { [ "$#" -eq 2 ] && [ "$2" != "--check" ]; }; then
+  echo "Usage: ./lab control generate norns [--check]" >&2
+  exit 2
+fi
+CHECK=${2:-}
+python3 "$ROOT/control/tools/generate_mixer_schema.py" $CHECK
+python3 "$ROOT/control/norns/tools/generate_norns_contract.py" $CHECK

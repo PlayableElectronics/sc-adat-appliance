@@ -1,15 +1,24 @@
 # SC-ADAT norns controller
 
 This is a deliberately small external OSC controller. It does not run audio on
-norns and does not know scsynth node IDs. The generated Lua table comes from
-`control/mixer-control-contract.json`.
+norns and does not know scsynth node IDs. Its Lua table is mechanically rendered
+from `control/generated/mixer-schema.json`. That schema is exported from the
+same validated runtime configuration and control contract used by the mixer.
 
 ## Generate
 
 From the repository root:
 
 ```sh
-python3 control/norns/tools/generate_norns_contract.py
+./lab control generate norns
+```
+
+Run this after changing the mixer configuration or control contract. It updates
+the controller schema and Norns table together. To verify that committed output
+is current without rewriting anything:
+
+```sh
+./lab control generate norns --check
 ```
 
 Copy the resulting directory to norns as `~/dust/code/sc_adat` and rename or
@@ -39,8 +48,8 @@ overview. It reads and changes the same `params` entries described below; it
 does not maintain a second set of mixer controls.
 
 All detailed controls live in the normal norns PARAMETERS menu, grouped as
-MASTER, eight named groups, and the logical sources declared in
-`payload/config/mixer.conf`. Mono sources expose linked trim/mute/polarity/HPF
+MASTER, eight named groups, and the logical sources exported by the mixer
+schema. Mono sources expose linked trim/mute/polarity/HPF
 controls plus pan. Stereo sources expose the same linked controls plus balance
 and width instead of duplicated physical-channel controls. That menu supplies
 editing, MIDI mapping and PSET save/recall without a parallel custom

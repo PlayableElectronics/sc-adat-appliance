@@ -140,7 +140,7 @@ class ConsoleTests(unittest.TestCase):
         self.mock.drop_first_chunks = {1}
         self.model.start()
         self.assertEqual(self.mock.request_count, 2)
-        self.assertEqual(self.model.state["controlContractVersion"], "1.0.0")
+        self.assertEqual(self.model.state["controlContractVersion"], "1.1.0")
 
     def test_bulk_state_dropped_completion_fails_after_bounded_retries(self):
         self.mock.drop_done = True

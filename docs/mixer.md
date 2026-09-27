@@ -1,4 +1,52 @@
-# Stereo and quad group mixers
+# Authoritative sources and stereo/quad group mixers
+
+Every physical input belongs to exactly one mono source or one ordered stereo
+source. Every source feeds exactly one stereo group. UI structure, linked
+controls, routing labels, metering labels and future recording metadata are
+derived from this authoritative source map.
+
+The canonical map is in `payload/config/mixer.conf`, under
+`source_map_version`, `source.count`, and `source.N.*`. Its schema and
+validation rules are implemented in `mixer/source_map.py`; configuration
+loading validates the complete map before graph creation. A proposed map is
+rejected as a whole, so the previous validated map remains unchanged.
+
+The shipped backward-compatible map is all mono and preserves the existing
+physical routing: inputs 1–4 feed `kick`/`drums`, input 5 feeds `bass`, inputs
+6–9 feed `music_a`, inputs 10–12 feed `vocals`, inputs 13–14 feed `fx_a`, and
+inputs 15–16 feed `fx_b`.
+
+All-mono example:
+
+```text
+source.1.id=kick
+source.1.name=Kick
+source.1.mode=mono
+source.1.inputs=1
+source.1.group=kick
+```
+
+Mixed example (the ordered pair is explicit):
+
+```text
+source.1.id=polysynth
+source.1.name=Polysynth
+source.1.mode=stereo
+source.1.inputs=2,3
+source.1.group=music_a
+source.2.id=kick
+source.2.name=Kick
+source.2.mode=mono
+source.2.inputs=1
+source.2.group=kick
+```
+
+The validator requires unique non-empty IDs and names, known `mono`/`stereo`
+mode only, one input for mono, two ordered inputs for stereo, known groups, and
+exactly one occurrence of every input 1–16. The same snapshot is serializable
+for future recording manifests, filenames, meter labels and Norns parameter
+generation. Norns is a later consumer of the generated source contract and the
+versioned control contract; it is not implemented here.
 
 The Debian/Docker group mixers run at 48 kHz and 128 frames. Sixteen hardware
 inputs are processed and assigned to eight canonical groups. The default
@@ -29,11 +77,13 @@ Spatial controls and calibration are smoothed over the 30 ms default.
 Spatial bypass means a smoothed transition to neutral centre `(0.5, 0.5)`.
 Output calibration and delay are deferred.
 
-The existing scene has group membership but no authoritative stereo-pair
-metadata. Quad mode uses the smallest deterministic fallback: each group's
-existing mono sum is duplicated into two correlated components around the group
-position, separated by width and power-normalized. It cannot recover
-independent stereo information absent from the current topology.
+The existing scene had group membership but no authoritative stereo-pair
+metadata, so the default map deliberately declares every input mono. Stereo
+sources use one reusable router slot and preserve the ordered left/right pair;
+trim, mute, HPF and cutoff are linked, with balance and width controls. Polarity
+is linked in the public source control while the DSP retains separate left/right
+controls for technical correction. Mono sources use equal-power pan. Quad mode
+spatializes the resulting stereo group signal without reversing its orientation.
 
 Controls are smoothed over 30 ms. Gains are bounded, audio is clipped before a
 short hard limiter, and invalid control values are rejected. The default scene
@@ -85,7 +135,7 @@ does not own mixer state; SuperCollider remains authoritative and Chataigne
 remains the optional creative/quad automation environment. The console reads
 all channels, groups, meters, master, clock and JACK status, and exposes only
 the existing runtime controls. All control keys, ranges, modes, units, steps and confirmation rules are defined
-in `control/mixer-control-contract.json` (version `1.0.0`); `N` is the existing
+in `control/mixer-control-contract.json` (version `1.1.0`); `N` is the existing
 zero-based OSC index. Stereo Y is displayed as quad-only/inactive; width remains
 active in the existing stereo panner. Runtime edits are temporary,
 never saved to `payload/config/mixer.conf`, and changed keys are printed on exit.
@@ -102,16 +152,17 @@ checked against the same contract. Runtime edits remain temporary.
 The runtime node graph is deterministic:
 
 ```text
-In.ar(26,16) -> sc_adat_router (3900)
+In.ar(26,16) -> sc_adat_router source nodes (3900..3915)
                  -> eight sc_adat_group instances (4000..4007)
                  -> selected fixed master (4100) -> outputs 1–2 or 1–4
 ```
 
 The controller owns these transient IDs; clients address only logical group
 IDs. The router preserves the 16 raw pre-processing inputs and produces eight
-group-stem buses. Every group uses the same reusable `sc_adat_group` SynthDef.
-The master meters all 16 raw inputs, eight group stems, and the actual 16
-post-protection output channels at 10 Hz. Startup/restart frees the owned graph,
+stereo group-stem buses (16 private channels). Every group uses the same
+reusable `sc_adat_group` SynthDef. The master meters all 16 raw inputs, eight
+summed group stems, and the actual 16 post-protection output channels at 10 Hz.
+Startup/restart frees the owned graph,
 recreates it under one node group, and synchronizes SynthDef loading first.
 
 Spatial envelopes are mixer-enforced: kick and bass are front-centre; drums
@@ -136,7 +187,7 @@ payload compilation, load/sync checks, and Docker dummy-JACK integration.
 
 Deliberately deferred: recording, song markers, scenes per song, EQ,
 compression, sends, offline analysis, virtual soundcheck, and Dyaxis control.
-Private buses are disjoint: hardware inputs `26..51`, group stems `52..59`,
+Private buses are disjoint: hardware inputs `26..51`, stereo group stems `52..67`,
 and reusable-group quad outputs `76..107`; physical outputs use `0..25`. The
 master transposes the group-major 8×4 layout: speaker
 `s` is `sum(group[s + 4*g] for g=0..7)`. The canonical speaker vector is

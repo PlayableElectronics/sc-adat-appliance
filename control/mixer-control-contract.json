@@ -1,5 +1,27 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
+  "source_map": {
+    "version": "1",
+    "description": "Every physical input belongs to exactly one mono source or one ordered stereo source. Every source feeds exactly one stereo group.",
+    "fields": {
+      "id": {"type": "string", "stable": true},
+      "name": {"type": "string", "non_empty": true},
+      "mode": {"type": "enum", "values": ["mono", "stereo"]},
+      "inputs": {"type": "integer[]", "range": {"min": 1, "max": 16}, "ordered": true},
+      "group": {"type": "group-id"}
+    },
+    "coverage": {"physical_inputs": 16, "exactly_once": true}
+  },
+  "source_controls": [
+    {"key_template": "sourceNTrim", "label": "Trim", "value_type": "amplitude", "modes": ["mono", "stereo"], "unit": "dB", "display": "dB", "range": {"min": 0.0001, "max": 4.0, "unit": "amplitude"}},
+    {"key_template": "sourceNMute", "label": "Mute", "value_type": "boolean", "modes": ["mono", "stereo"], "unit": "boolean", "display": "ON/OFF", "range": {"values": [0, 1]}},
+    {"key_template": "sourceNPolarity", "label": "Polarity", "value_type": "enum", "modes": ["mono", "stereo"], "unit": "polarity", "display": "NORMAL/INVERTED", "range": {"values": [-1, 1]}},
+    {"key_template": "sourceNHPF", "label": "HPF", "value_type": "boolean", "modes": ["mono", "stereo"], "unit": "boolean", "display": "ON/OFF", "range": {"values": [0, 1]}},
+    {"key_template": "sourceNHPFHz", "label": "HPF cutoff", "value_type": "frequency", "modes": ["mono", "stereo"], "unit": "Hz", "display": "Hz", "range": {"min": 20, "max": 20000, "unit": "Hz"}},
+    {"key_template": "sourceNPan", "label": "Pan", "value_type": "normalized", "modes": ["mono"], "unit": "normalized", "display": "-1.00..1.00", "range": {"min": -1, "max": 1}},
+    {"key_template": "sourceNBalance", "label": "Balance", "value_type": "normalized", "modes": ["stereo"], "unit": "normalized", "display": "-1.00..1.00", "range": {"min": -1, "max": 1}},
+    {"key_template": "sourceNWidth", "label": "Width", "value_type": "normalized", "modes": ["stereo"], "unit": "normalized", "display": "0.00..1.00", "range": {"min": 0, "max": 1}}
+  ],
   "protocol": {
     "contract_state_key": "controlContractVersion",
     "set_address": "/mixer/set",
@@ -32,6 +54,6 @@
     {"key_template": "groupNSpatialBypass", "scope": "group", "label": "Spatial bypass", "value_type": "boolean", "readable": true, "writable": true, "live_changeable": true, "modes": ["stereo", "quad"], "unit": "boolean", "display": "ON/OFF", "range": {"values": [0, 1]}, "increments": null, "default_source": "group.<name>.spatial_bypass", "confirmation": "none", "dsp_mapping": {"node": "group", "control": "spatialBypass"}, "presentation_order": 50, "shortcut": "b"},
     {"key_template": "master", "scope": "master", "label": "Master", "value_type": "amplitude", "readable": true, "writable": true, "live_changeable": true, "modes": ["stereo", "quad"], "unit": "dB", "display": "dB", "range": {"min": 0.0, "max": 2.0, "unit": "amplitude"}, "increments": {"fine": 0.5, "coarse": 3.0, "unit": "dB"}, "default_source": "master.level_db", "confirmation": "increase", "dsp_mapping": {"node": "master", "control": "master"}, "presentation_order": 10, "shortcut": null},
     {"key_template": "channelNGroup", "scope": "channel", "label": "Assigned group", "value_type": "enum", "readable": true, "writable": false, "live_changeable": false, "modes": ["stereo", "quad"], "unit": "group", "display": "group name", "range": {"values": ["kick", "drums", "bass", "music_a", "music_b", "vocals", "fx_a", "fx_b"]}, "increments": null, "default_source": "channel.N.group", "confirmation": "none", "dsp_mapping": {"node": "router", "control_template": "groupSelectN"}, "presentation_order": 5, "shortcut": null},
-    {"key_template": "controlContractVersion", "scope": "status", "label": "Control contract", "value_type": "string", "readable": true, "writable": false, "live_changeable": true, "modes": ["stereo", "quad"], "unit": "version", "display": "semantic version", "range": {"values": ["1.0.0"]}, "increments": null, "default_source": "controller.contract_version", "confirmation": "none", "dsp_mapping": null, "presentation_order": 1, "shortcut": null}
+    {"key_template": "controlContractVersion", "scope": "status", "label": "Control contract", "value_type": "string", "readable": true, "writable": false, "live_changeable": true, "modes": ["stereo", "quad"], "unit": "version", "display": "semantic version", "range": {"values": ["1.1.0"]}, "increments": null, "default_source": "controller.contract_version", "confirmation": "none", "dsp_mapping": null, "presentation_order": 1, "shortcut": null}
   ]
 }

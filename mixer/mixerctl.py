@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Small deterministic OSC/config controller for the SC group mixers."""
-import argparse, math, os, signal, socket, struct, sys, time
+import argparse, json, math, os, signal, socket, struct, sys, time
 
-from contract import CONTRACT_VERSION, GROUPS, control_definitions, control_for_key
+from contract import (CONTRACT_VERSION, GROUPS, control_definitions, control_for_key,
+                      source_contract, source_control_definitions, source_controls_for_mode)
+from source_map import AtomicSourceMap, Source, SourceMapError, validate_source_map
 MAX_GROUPS = 8
 SPATIAL_LIMITS = {
     "kick": (0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0),
@@ -18,7 +20,7 @@ BUS_GROUP_STEMS = 52
 BUS_QUAD_GROUPS = 76
 BUS_PHYSICAL_OUT = 0
 BUS_INPUTS = 26
-BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP_STEMS, BUS_GROUP_STEMS + 8), "quad_group": (BUS_QUAD_GROUPS, BUS_QUAD_GROUPS + 32), "physical_outputs": (BUS_PHYSICAL_OUT, 26)}
+BUS_RANGES = {"inputs": (BUS_INPUTS, BUS_INPUTS + 26), "group_stems": (BUS_GROUP_STEMS, BUS_GROUP_STEMS + 16), "quad_group": (BUS_QUAD_GROUPS, BUS_QUAD_GROUPS + 32), "physical_outputs": (BUS_PHYSICAL_OUT, 26)}
 assert all(a[1] <= b[0] or b[1] <= a[0] for i,a in enumerate(BUS_RANGES.values()) for j,b in enumerate(BUS_RANGES.values()) if i < j)
 FIELDS = ("name", "input", "output", "group", "trim_db", "mute", "polarity", "hpf", "hpf_hz")
 METER_WIDTH = 16 + 16 + 8 + 8 + 16 + 16
@@ -61,6 +63,57 @@ def bounded(value, low, high, label):
 def group_limits(values, name):
     defaults=SPATIAL_LIMITS[name]
     return tuple(float(values.get(f"group.{name}.{key}", defaults[i])) for i,key in enumerate(("x_min","x_max","y_min","y_max","width_min","width_max"))) + defaults[6:]
+
+
+def _legacy_source_entries(values, channels=16):
+    entries = []
+    for ch in range(1, channels + 1):
+        prefix = f"channel.{ch}."
+        entries.append({"id": values[f"{prefix}name"], "name": values[f"{prefix}name"],
+                        "mode": "mono", "inputs": [int(values[f"{prefix}input"])],
+                        "group": values[f"{prefix}group"]})
+    return entries
+
+
+def _configured_source_entries(values, channels=16):
+    """Read the one canonical source map, with a legacy-config fallback."""
+    if "source.count" not in values:
+        return _legacy_source_entries(values, channels)
+    if values.get("source_map_version") != "1":
+        raise ValueError("source_map_version must be 1")
+    try:
+        count = int(values["source.count"])
+    except (KeyError, ValueError):
+        raise ValueError("source.count must be an integer")
+    if count < 1 or count > 16:
+        raise ValueError("source.count must be 1..16")
+    entries = []
+    for index in range(1, count + 1):
+        prefix = f"source.{index}."
+        required = ("id", "name", "mode", "inputs", "group")
+        missing = [field for field in required if f"{prefix}{field}" not in values]
+        if missing:
+            raise ValueError(f"source {index} missing fields: {missing}")
+        raw_inputs = values[f"{prefix}inputs"].split(",")
+        try:
+            inputs = [int(item.strip()) for item in raw_inputs]
+        except ValueError:
+            raise ValueError(f"source {index}.inputs must be comma-separated integers")
+        entries.append({"id": values[f"{prefix}id"], "name": values[f"{prefix}name"],
+                        "mode": values[f"{prefix}mode"], "inputs": inputs,
+                        "group": values[f"{prefix}group"]})
+    known = {"source_map_version", "source.count"}
+    for key in values:
+        if key.startswith("source.") and key not in known and not any(key == f"source.{i}.{field}" for i in range(1, count + 1) for field in ("id", "name", "mode", "inputs", "group")):
+            raise ValueError(f"unknown source mapping field: {key}")
+    return entries
+
+
+def configured_sources(values, channels=16):
+    try:
+        return validate_source_map(_configured_source_entries(values, channels), GROUPS, values.get("source_map_version", "1"))
+    except SourceMapError as exc:
+        raise ValueError(str(exc)) from exc
 def validate_parameter(key, numeric, values=None):
     definition, index = control_for_key(key)
     if definition is not None:
@@ -82,6 +135,25 @@ def validate_parameter(key, numeric, values=None):
             return bounded(numeric, low, high, key)
         bounds = definition["range"]
         return bounded(numeric, bounds["min"], bounds["max"], key)
+    if values is not None and key.startswith("source"):
+        import re
+        match = re.fullmatch(r"source(\d+)(Trim|Mute|Polarity|HPF|HPFHz|Pan|Balance|Width)", key)
+        if match:
+            index, suffix = int(match.group(1)), match.group(2)
+            sources = values.get("_sources", ())
+            if index >= len(sources): raise ValueError(f"invalid source index: {index}")
+            mode = sources[index].mode
+            if suffix in ("Pan",) and mode != "mono": raise ValueError("pan applies only to mono sources")
+            if suffix in ("Balance", "Width") and mode != "stereo": raise ValueError(f"{suffix.lower()} applies only to stereo sources")
+            if suffix == "Trim": return bounded(numeric, 0.0001, 4, key)
+            if suffix in ("Mute", "HPF"): return strict_bool(numeric, key)
+            if suffix == "Polarity":
+                number = finite(numeric, key)
+                if number not in (-1, 1): raise ValueError(f"{key} must be -1 or 1")
+                return number
+            if suffix == "HPFHz": return bounded(numeric, 20, 20000, key)
+            if suffix == "Pan" or suffix == "Balance": return bounded(numeric, -1, 1, key)
+            if suffix == "Width": return bounded(numeric, 0, 1, key)
     if "Neutral" in key: raise ValueError(f"{key} is configuration-only; restart to change it")
     if key.startswith("trim"): return bounded(numeric, 0.0001, 4, key)
     if key.startswith(("mute", "hpf")) or key.endswith(("Mute", "SpatialBypass")): return strict_bool(numeric, key)
@@ -117,6 +189,7 @@ def read_config(path):
     configured_groups=tuple(values.get("group.names", ",".join(GROUPS)).split(","))
     if not 1 <= group_count <= MAX_GROUPS or len(configured_groups) != group_count: raise ValueError("group.count must be 1..8 and match group.names")
     if configured_groups != GROUPS: raise ValueError("production scene must use canonical eight groups")
+    sources = configured_sources(values, channels)
     for name in configured_groups:
         finite(values[f"group.{name}.level_db"], f"group.{name}.level_db")
         limits=group_limits(values, name)
@@ -133,8 +206,27 @@ def read_config(path):
         prefix=f"channel.{ch}."; row={}
         for field in FIELDS:
             key=prefix+field
-            if key not in values: raise ValueError(f"missing {key}")
-            row[field]=values[key]
+            if field in ("name", "input", "output", "group") and key not in values:
+                continue
+            if key in values: row[field]=values[key]
+        source = next((item for item in sources if ch in item.inputs), None)
+        if source is None:
+            raise ValueError("legacy channel controls must identify one row per logical source")
+        if "input" in row and int(row["input"]) != ch:
+            raise ValueError(f"legacy channel.{ch}.input disagrees with source map")
+        if "output" in row and int(row["output"]) != ch:
+            raise ValueError(f"legacy channel.{ch}.output disagrees with source map")
+        if "group" in row and row["group"] != source.group:
+            raise ValueError(f"legacy channel.{ch}.group disagrees with source map")
+        if source.mode != "mono":
+            # The legacy channel index is retained only as a compatibility
+            # view.  Stereo source controls are represented once by source.
+            row["name"] = source.name; row["input"] = str(source.inputs[0]); row["output"] = str(source.inputs[0]); row["group"] = source.group
+        else:
+            row.setdefault("name", source.name); row.setdefault("input", str(source.inputs[0])); row.setdefault("output", str(source.inputs[0])); row.setdefault("group", source.group)
+        if source.mode == "stereo":
+            row["name"] = source.name + (" L" if ch == source.inputs[0] else " R")
+            row["input"] = str(ch); row["output"] = str(ch); row["group"] = source.group
         inp=int(row["input"]); out=int(row["output"])
         if not 1 <= inp <= 16 or not 1 <= out <= 16: raise ValueError("physical mixer mapping must stay in channels 1..16")
         if inp in seen_inputs or out in seen_outputs: raise ValueError("input/output mapping must be one-to-one")
@@ -148,6 +240,7 @@ def read_config(path):
         if int(row["polarity"]) not in (-1, 1): raise ValueError("polarity must be -1 or 1")
         channels_out.append(row)
     if seen_inputs != set(range(1,17)) or seen_outputs != set(range(1,17)): raise ValueError("mapping must cover all 16 channels")
+    values["_sources"] = sources
     return values, channels_out
 def _contract_default(definition, index, values, channels):
     template = definition["key_template"]
@@ -192,7 +285,43 @@ def controls(values, channels):
         limits=group_limits(values, name)
         result += [(f"group{g}NeutralX", float(values.get(f"group.{name}.neutral_x", limits[6]))), (f"group{g}NeutralY", float(values.get(f"group.{name}.neutral_y", limits[7]))), (f"group{g}NeutralWidth", float(values.get(f"group.{name}.neutral_width", limits[8])))]
     result.append(("quadSmoothingMs", float(values.get("quad.smoothing_ms", 30))))
+    result.extend(source_controls(values, channels))
+    result.append(("sourceMapVersion", str(values.get("source_map_version", "1"))))
+    for index, source in enumerate(values["_sources"]):
+        result.extend([(f"source{index}Id", source.id), (f"source{index}Name", source.name),
+                       (f"source{index}Mode", source.mode), (f"source{index}Inputs", ",".join(map(str, source.inputs))),
+                       (f"source{index}Group", source.group), (f"source{index}MeterL", f"input.{source.inputs[0]}.left"),
+                       (f"source{index}MeterR", f"input.{source.inputs[-1]}.right")])
     return result
+
+
+def _source_channel(sources, channels, source):
+    return channels[next(i for i, row in enumerate(channels) if int(row["input"]) == source.inputs[0])]
+
+
+def source_controls(values, channels):
+    sources = values["_sources"]
+    result = []
+    for index, source in enumerate(sources):
+        row = _source_channel(sources, channels, source)
+        defaults = {
+            "Trim": dbamp(row["trim_db"]), "Mute": as_bool(row["mute"]),
+            "Polarity": int(row["polarity"]), "HPF": as_bool(row["hpf"]),
+            "HPFHz": float(row["hpf_hz"]), "Pan": 0.0, "Balance": 0.0, "Width": 1.0,
+        }
+        for definition in source_controls_for_mode(source.mode):
+            suffix = definition["key_template"].replace("sourceN", "").replace("N", "")
+            result.append((f"source{index}{suffix}", defaults[suffix]))
+    return result
+
+
+def source_contract_for(values):
+    return source_contract(values["_sources"])
+
+
+def source_map_snapshot(values):
+    return {"source_map_version": values.get("source_map_version", "1"),
+            "sources": [source.snapshot() for source in values["_sources"]]}
 def dsp_controls(values, channels):
     result=[]
     for name,value in controls(values, channels):
@@ -203,6 +332,46 @@ def dsp_controls(values, channels):
         else: result.append((name, value))
     for i,row in enumerate(channels): result.append((f"groupSelect{i}", GROUPS.index(row["group"])))
     return result
+
+
+def source_router_controls(values, channels):
+    """Translate the canonical map to bounded controls for reusable router slots."""
+    state = dict(source_controls(values, channels))
+    result = []
+    for index, source in enumerate(values["_sources"]):
+        result.extend([(f"sourceMode{index}", 0 if source.mode == "mono" else 1),
+                       (f"sourceInputL{index}", source.inputs[0] - 1),
+                       (f"sourceInputR{index}", (source.inputs[-1] if source.mode == "stereo" else source.inputs[0]) - 1),
+                       (f"sourceGroup{index}", GROUPS.index(source.group)),
+                       (f"sourceTrim{index}", state[f"source{index}Trim"]),
+                       (f"sourceMute{index}", state[f"source{index}Mute"]),
+                       (f"sourcePolarityL{index}", state[f"source{index}Polarity"]),
+                       (f"sourcePolarityR{index}", state[f"source{index}Polarity"]),
+                       (f"sourceHPF{index}", state[f"source{index}HPF"]),
+                       (f"sourceHPFHz{index}", state[f"source{index}HPFHz"]),
+                       (f"sourcePan{index}", state.get(f"source{index}Pan", 0.0)),
+                       (f"sourceBalance{index}", state.get(f"source{index}Balance", 0.0)),
+                       (f"sourceWidth{index}", state.get(f"source{index}Width", 1.0))])
+    return result
+
+
+def source_node_controls(values, channels, index):
+    source = values["_sources"][index]
+    state = dict(source_controls(values, channels))
+    return [("sourceMode", 0 if source.mode == "mono" else 1),
+            ("sourceInputL", source.inputs[0] - 1),
+            ("sourceInputR", (source.inputs[-1] if source.mode == "stereo" else source.inputs[0]) - 1),
+            ("sourceGroup", GROUPS.index(source.group)),
+            ("sourceTrim", state[f"source{index}Trim"]),
+            ("sourceMute", state[f"source{index}Mute"]),
+            ("sourcePolarityL", state[f"source{index}Polarity"]),
+            ("sourcePolarityR", state[f"source{index}Polarity"]),
+            ("sourceHPF", state[f"source{index}HPF"]),
+            ("sourceHPFHz", state[f"source{index}HPFHz"]),
+            ("sourcePan", state.get(f"source{index}Pan", 0.0)),
+            ("sourceBalance", state.get(f"source{index}Balance", 0.0)),
+            ("sourceWidth", state.get(f"source{index}Width", 1.0)),
+            ("smoothing", float(values.get("quad.smoothing_ms", 30)) / 1000.0)]
 def send(sock, port, data): sock.sendto(data, ("127.0.0.1", port))
 def send_to(sock, address, data): sock.sendto(data, address)
 
@@ -274,7 +443,7 @@ def start_graph(sock, port, values, channels):
     else: raise RuntimeError("scsynth synchronization failed before graph creation")
     for _ in range(20):
         send(sock, port, packet("/notify", ",i", [1]));
-        for node in (ROUTER_NODE, MASTER_NODE, NODE_ROUTING, NODE_SPATIAL, NODE_MASTER):
+        for node in tuple(ROUTER_NODE + i for i in range(16)) + (MASTER_NODE, NODE_ROUTING, NODE_SPATIAL, NODE_MASTER):
             send(sock, port, packet("/n_free", ",i", [node]))
         # Build an explicit feed-forward chain.  /g_new action 0 inserts at
         # the head, while action 3 inserts after the target.  The latter is
@@ -283,7 +452,8 @@ def start_graph(sock, port, values, channels):
         send(sock, port, packet("/g_new", ",iii", [NODE_ROUTING, 0, 0]))
         send(sock, port, packet("/g_new", ",iii", [NODE_SPATIAL, 3, NODE_ROUTING]))
         send(sock, port, packet("/g_new", ",iii", [NODE_MASTER, 3, NODE_SPATIAL]))
-        send_snew(sock, port, "sc_adat_router", ROUTER_NODE, NODE_ROUTING, router_controls(values, channels))
+        for index in range(len(values["_sources"])):
+            send_snew(sock, port, "sc_adat_router", ROUTER_NODE + index, NODE_ROUTING, source_node_controls(values, channels, index), action=1)
         # Add siblings at the tail so the queried tree is 4000..4007.  Their
         # order is not relied on for signal flow, but it is part of the
         # deterministic ownership contract and makes diagnostics unambiguous.
@@ -293,10 +463,13 @@ def start_graph(sock, port, values, channels):
         send_snew(sock, port, master_name, master_node, NODE_MASTER, master_controls(values))
         send(sock, port, packet("/sync", ",i", [2])); synced=False; deadline=time.time()+2.0
         while time.time() < deadline and not synced:
-            try: path, _, _ = parse_packet(sock.recv(65535))
+            try: path, fail_types, fail_values = parse_packet(sock.recv(65535))
             except (socket.timeout, ValueError, IndexError): break
             if path == "/synced": synced=True
-            if path == "/fail": break
+            if path == "/fail":
+                if fail_values and fail_values[0] == "/n_free":
+                    continue
+                raise RuntimeError(f"scsynth rejected mixer graph: {fail_values}")
         if synced:
             # Reassert bus controls after node creation.  This is deliberately
             # synchronized: it distinguishes a control-assignment problem
@@ -314,18 +487,31 @@ def start_graph(sock, port, values, channels):
     sock.settimeout(None)
     raise RuntimeError("scsynth did not acknowledge mixer node")
 def router_controls(values, channels):
-    result=[(n,v) for n,v in dsp_controls(values, channels) if not (n.startswith("group") and "_" in n) and not n.startswith("quadOutput") and not n.startswith("groupLevel") and n != "quadSmoothing"]
-    result += [(f"groupSelect{i}", GROUPS.index(row["group"])) for i,row in enumerate(channels)]
-    result.append(("smoothing", float(values.get("quad.smoothing_ms",30))/1000.0))
-    return result
+    return source_node_controls(values, channels, 0)
 def group_controls(values, g):
     name=GROUPS[g]; limits=group_limits(values, name)
     y = 1.0 if values.get("_mode", "stereo") == "stereo" else float(values.get(f"group.{name}.pos_y", limits[7])) * 2 - 1
-    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",y),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
+    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g*2),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",y),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
 def master_controls(values):
     result=[("master",dbamp(values["master.level_db"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
     return result
-def node_update(key, value, mode="stereo"):
+def node_update(key, value, mode="stereo", values=None):
+    if key.startswith("source"):
+        import re
+        match = re.fullmatch(r"source(\d+)(Trim|Mute|Polarity|HPF|HPFHz|Pan|Balance|Width)", key)
+        if match:
+            index, suffix = match.groups()
+            dsp_suffix = {"Trim": "Trim", "Mute": "Mute", "Polarity": "PolarityL", "HPF": "HPF", "HPFHz": "HPFHz", "Pan": "Pan", "Balance": "Balance", "Width": "Width"}[suffix]
+            return ROUTER_NODE + int(index), f"source{dsp_suffix}", value
+    import re
+    legacy = re.fullmatch(r"(hpfHz|trim|mute|polarity|hpf)(\d+)", key)
+    if legacy and values is not None:
+        field, physical_index = legacy.groups()
+        physical = int(physical_index) + 1
+        for index, source in enumerate(values.get("_sources", ())):
+            if physical in source.inputs:
+                suffix = {"trim": "Trim", "mute": "Mute", "polarity": "PolarityL", "hpfHz": "HPFHz", "hpf": "HPF"}[field]
+                return ROUTER_NODE + index, f"source{suffix}", value
     if key.startswith("group") and key[5:6].isdigit():
         g=int(key[5:key.index("Pos") if "Pos" in key else key.index("Width") if "Width" in key else key.index("Spatial")])
         node=GROUP_NODE_BASE+g
@@ -353,7 +539,7 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
     def shutdown(_signum, _frame):
         try:
             send(sock, sc_port, packet("/n_set", ",isf", [MASTER_NODE, "master", 0.0])); time.sleep(0.06)
-            for node in (NODE_ROUTING, NODE_SPATIAL, NODE_MASTER): send(sock, sc_port, packet("/n_free", ",i", [node]))
+            for node in tuple(ROUTER_NODE + i for i in range(16)) + (NODE_ROUTING, NODE_SPATIAL, NODE_MASTER): send(sock, sc_port, packet("/n_free", ",i", [node]))
         finally:
             raise SystemExit(0)
     signal.signal(signal.SIGTERM, shutdown); signal.signal(signal.SIGINT, shutdown)
@@ -388,10 +574,13 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             if key == "quadSmoothingMs":
                 for target in [ROUTER_NODE, MASTER_NODE] + [GROUP_NODE_BASE + g for g in range(8)]: send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", numeric / 1000.0]))
             else:
-                update=node_update(key, numeric, values.get("_mode", "stereo"))
+                update=node_update(key, numeric, values.get("_mode", "stereo"), values)
                 if update is not None:
                     target,dsp_key,dsp_value=update
                     send(sock, sc_port, packet("/n_set", ",isf", [target, dsp_key, dsp_value]))
+                    if key.startswith("source") and key.endswith("Polarity"):
+                        index = int(key[len("source"):key.index("Polarity")])
+                        send(sock, sc_port, packet("/n_set", ",isf", [ROUTER_NODE + index, "sourcePolarityR", dsp_value]))
             send_to(sock, destination, packet("/mixer/ok", ",s", [key]))
         elif path == "/mixer/set":
             send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/set ,sf key value [reply_port]"]))
@@ -410,6 +599,11 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             snapshot_id += 1
             chunks, completion, legacy_completion = state_chunk_packets(state, snapshot_id)
             for chunk in chunks: send_to(sock, address, chunk)
+            # Preserve the pre-chunk compatibility stream for established
+            # listeners; source metadata is deliberately represented by small
+            # individual keys so every packet stays bounded.
+            for key, value in sorted(state.items()):
+                send_to(sock, address, packet("/mixer/state", ",ss", [key, value]) if isinstance(value, str) else packet("/mixer/state", ",sf", [key, value]))
             send_to(sock, address, completion)
             send_to(sock, address, legacy_completion)
 def get_meters(port=57120):

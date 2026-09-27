@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import math, os, socket, statistics, subprocess, sys, tempfile, time
+import math, os, re, socket, statistics, subprocess, sys, tempfile, time
 from mixerctl import GROUPS, packet, parse_packet, read_config
 
 ROOT=os.path.dirname(os.path.dirname(__file__))
 source="/workspace/payload/config/mixer.conf"
 scene=open(source, encoding="utf-8").read()
-scene=scene.replace("channel.9.group=music_a", "channel.9.group=music_b")
+scene=re.sub(r"(?m)^master\.level_db=.*$", "master.level_db=0", scene)
+scene=scene.replace("source.9.group=music_a", "source.9.group=music_b").replace("channel.9.group=music_a", "channel.9.group=music_b")
 for group in GROUPS:
     for axis,lo,hi in (("x", "0", "1"),):
         scene=scene.replace(f"group.{group}.{axis}_min=", f"group.{group}.{axis}_min=")

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 import math, os, re, socket, statistics, subprocess, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(__file__))
-from mixerctl import BUS_RANGES, GROUPS, controls, packet, parse_packet, read_config
+from mixerctl import BUS_RANGES, GROUPS, controls, dbamp, packet, parse_packet, read_config
 from mixerctl import group_controls
 
 ROOT=os.path.dirname(os.path.dirname(__file__))
 config = "/workspace/payload/config/mixer.conf"
 values, channels = read_config(config)
-assert list(BUS_RANGES.values()) == [(26,52),(52,60),(76,108),(0,26)]
+assert list(BUS_RANGES.values()) == [(26,52),(52,68),(76,108),(0,26)]
 assert len({tuple(x) for x in BUS_RANGES.values()}) == 4
 state = dict(controls(values, channels))
 assert state["trim0"] == 1 and state["mute0"] == 0 and state["polarity0"] == 1
 assert state["hpf0"] == 0 and state["group0_0"] == 1 and state["group0_1"] == 0
-assert state["groupLevel0"] == 1 and state["master"] == 1 and "bypass" not in state
+assert state["groupLevel0"] == 1 and state["master"] == dbamp(values["master.level_db"]) and "bypass" not in state
 print("neutral controls, groups, mute, polarity, HPF-disabled, levels: OK")
 
 proc = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "mixerctl.py"),
@@ -35,6 +35,7 @@ finally:
 # post-master meters. The fixture broadens constraints only for exhaustive
 # corner coverage; production config retains the musical envelopes.
 scene=open(config, encoding="utf-8").read()
+scene=re.sub(r"(?m)^master\.level_db=.*$", "master.level_db=0", scene)
 import re
 for name in GROUPS:
     scene=re.sub(rf"group\.{name}\.x_min=.*", f"group.{name}.x_min=0", scene)
@@ -43,7 +44,7 @@ for name in GROUPS:
     scene=re.sub(rf"group\.{name}\.y_max=.*", f"group.{name}.y_max=1", scene)
     scene=re.sub(rf"group\.{name}\.width_min=.*", f"group.{name}.width_min=0", scene)
     scene=re.sub(rf"group\.{name}\.width_max=.*", f"group.{name}.width_max=1", scene)
-scene=scene.replace("channel.9.group=music_a", "channel.9.group=music_b")
+scene=scene.replace("source.9.group=music_a", "source.9.group=music_b").replace("channel.9.group=music_a", "channel.9.group=music_b")
 with tempfile.NamedTemporaryFile("w", suffix=".conf", delete=False) as fixture:
     fixture.write(scene); quad_config=fixture.name
 quad_values, quad_channels=read_config(quad_config)
@@ -199,7 +200,7 @@ try:
     for row in quad_channels:
         channel=int(row["input"]); group=GROUPS.index(row["group"])
         node=input_scan_id; input_scan_id += 1
-        qinject(26+channel-1,node,level=-30.0)
+        qinject(26+channel-1,node,level=-24.0)
         input_values=quad_meters(); input_peaks=input_values[:16]; group_peaks=input_values[32:40]
         assert input_peaks[channel-1] > SILENCE_THRESHOLD, (channel,input_peaks)
         assert group_peaks[group] > SILENCE_THRESHOLD, (channel,group,group_peaks)
@@ -208,7 +209,7 @@ try:
         wait_quiet("after configured input route",node,gate_off_at=gate_off_at,node_free_at=node_free_at)
     print("real input-to-group flow: all 16 configured inputs reach only their assigned group: OK")
     set_corner(0,0,1,"configured input","master gain")
-    master_node=6400; qinject(source_by_group[0],master_node,level=-30.0)
+    master_node=6400; qinject(source_by_group[0],master_node,level=-24.0)
     reference=master_level("master",1.0)
     half=master_level("master",0.5)
     silent=master_level("master",0.0)

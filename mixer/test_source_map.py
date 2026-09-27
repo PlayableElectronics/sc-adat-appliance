@@ -2,12 +2,17 @@
 import copy
 import json
 import os
+import socket
+import subprocess
 import sys
+import time
 import unittest
 
 sys.path.insert(0, os.path.dirname(__file__))
 from contract import source_contract
-from mixerctl import configured_sources, read_config, source_contract_for, source_map_snapshot
+from mixerctl import (apply_smoothing, configured_sources, legacy_stereo_write_error,
+                      packet, parse_packet, read_config, source_contract_for,
+                      source_map_snapshot)
 from source_map import (AtomicSourceMap, SourceMapError, mono_pan_gains,
                         stereo_balance_width, validate_source_map)
 
@@ -69,6 +74,8 @@ class SourceMapTests(unittest.TestCase):
         self.assertTrue(all(source.mode == "mono" for source in sources))
         self.assertEqual([source.inputs[0] for source in sources], list(range(1, 17)))
         self.assertEqual([source.group for source in sources], [row["group"] for row in channels])
+        self.assertEqual([source.id for source in sources], [row["name"] for row in channels])
+        self.assertEqual([source.name for source in sources], [row["name"] for row in channels])
 
     def test_contract_and_serializable_snapshot(self):
         values, channels = read_config(os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf"))
@@ -89,6 +96,53 @@ class SourceMapTests(unittest.TestCase):
         self.assertAlmostEqual(stereo_balance_width(1.0, 0.0, -1, 1)[0], 2 ** 0.5)
         self.assertEqual(stereo_balance_width(1.0, 0.0, -1, 1)[1], 0.0)
         self.assertEqual(stereo_balance_width(1.0, 0.0, 1, 1), (0.0, 0.0))
+
+    def test_smoothing_targets_every_active_source_group_and_master(self):
+        values, channels = read_config(os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf"))
+        sent = []
+        class MockController:
+            def sendto(self, data, address):
+                path, _, packet_values = __import__("mixerctl").parse_packet(data)
+                sent.append((path, packet_values, address))
+        apply_smoothing(MockController(), 57110, values, 0.125)
+        self.assertEqual([packet_values[0] for _, packet_values, _ in sent], list(range(3900, 3916)) + list(range(4000, 4008)) + [4100])
+        self.assertTrue(all(path == "/n_set" and packet_values[1] == "smoothing" and packet_values[2] == 0.125 for path, packet_values, _ in sent))
+
+    def test_legacy_stereo_write_is_rejected_without_state_or_dsp_change(self):
+        values = {"_sources": (type("Stereo", (), {"mode": "stereo", "inputs": (1, 2)})(),)}
+        before = {"polarity0": 1, "source0Polarity": 1}
+        error = legacy_stereo_write_error("polarity0", values)
+        self.assertIn("source-level", error)
+        self.assertEqual(before, {"polarity0": 1, "source0Polarity": 1})
+
+    def test_runtime_source_control_get_and_bulk_state_are_coherent(self):
+        config = os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf")
+        reserve = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        reserve.bind(("127.0.0.1", 0))
+        listen = reserve.getsockname()[1]
+        reserve.close()
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        probe.settimeout(1)
+        process = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "mixerctl.py"), "serve", config, "--listen", str(listen), "--no-node"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            time.sleep(0.1)
+            probe.sendto(packet("/mixer/set", ",sf", ["source0Trim", 0.5]), ("127.0.0.1", listen))
+            self.assertEqual(parse_packet(probe.recv(65535))[0], "/mixer/ok")
+            probe.sendto(packet("/mixer/get", ",s", ["source0Trim"]), ("127.0.0.1", listen))
+            self.assertAlmostEqual(parse_packet(probe.recv(65535))[2][1], 0.5, places=6)
+            probe.sendto(packet("/mixer/get-all", ","), ("127.0.0.1", listen))
+            seen = {}
+            while True:
+                path, _, values = parse_packet(probe.recv(65535))
+                if path == "/mixer/state-chunk":
+                    seen.update(dict(zip(values[3::2], values[4::2])))
+                if path == "/mixer/state-complete":
+                    break
+            self.assertAlmostEqual(float(seen["source0Trim"]), 0.5, places=6)
+        finally:
+            process.terminate()
+            process.wait(timeout=2)
+            probe.close()
 
 
 if __name__ == "__main__":

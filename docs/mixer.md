@@ -48,6 +48,12 @@ for future recording manifests, filenames, meter labels and Norns parameter
 generation. Norns is a later consumer of the generated source contract and the
 versioned control contract; it is not implemented here.
 
+Legacy physical-channel OSC controls remain valid for mono sources. If a
+physical channel belongs to a stereo source, legacy `trimN`, `muteN`,
+`polarityN`, `hpfN`, and `hpfHzN` writes are rejected as ambiguous; clients must
+use the single linked `sourceN...` control. This prevents an old key from
+changing only one side or leaving source-level state inconsistent.
+
 The Debian/Docker group mixers run at 48 kHz and 128 frames. Sixteen hardware
 inputs are processed and assigned to eight canonical groups. The default
 `./lab mixer start` path is stereo and emits only to outputs 1–2;

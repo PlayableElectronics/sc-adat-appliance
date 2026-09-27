@@ -6,6 +6,7 @@ import socket
 import subprocess
 import sys
 import time
+import unittest
 
 from mixerctl import packet, parse_packet
 
@@ -126,3 +127,10 @@ finally:
     explicit.close()
     server.terminate()
     server.wait(timeout=2)
+
+
+class ReplyPortDiscoveryTest(unittest.TestCase):
+    """The module performs its socket assertions at import time."""
+
+    def test_socket_script_completed(self):
+        self.assertTrue(True)

@@ -13,10 +13,12 @@ from console import (CHANNEL_FIELDS, GROUP_FIELDS, ConsoleModel, METER_PERIOD, M
                      resolve_rme_proc_path)
 from mixerctl import METER_WIDTH, controls, packet, parse_packet, read_config, state_chunk_packets
 
+CONFIG = Path(__file__).resolve().parents[1] / "payload/config/mixer.conf"
+
 
 class MockMixer:
     def __init__(self, complete=True):
-        values, channels = read_config("../payload/config/mixer.conf")
+        values, channels = read_config(str(CONFIG))
         self.state = dict(controls(values, channels))
         self.requests = []
         self.reject = False

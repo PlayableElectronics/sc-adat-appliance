@@ -322,6 +322,39 @@ def source_contract_for(values):
 def source_map_snapshot(values):
     return {"source_map_version": values.get("source_map_version", "1"),
             "sources": [source.snapshot() for source in values["_sources"]]}
+
+
+def active_source_nodes(values):
+    return tuple(ROUTER_NODE + index for index in range(len(values["_sources"])))
+
+
+def smoothing_targets(values):
+    """All live nodes whose controls use the shared smoothing time."""
+    return active_source_nodes(values) + tuple(GROUP_NODE_BASE + g for g in range(8)) + (MASTER_NODE,)
+
+
+def legacy_source_for_key(key, values):
+    """Return the logical source for a legacy physical-channel control."""
+    import re
+    match = re.fullmatch(r"(?:hpfHz|trim|mute|polarity|hpf)(\d+)", key)
+    if not match:
+        return None
+    physical = int(match.group(1)) + 1
+    return next((source for source in values.get("_sources", ()) if physical in source.inputs), None)
+
+
+def legacy_stereo_write_error(key, values):
+    source = legacy_source_for_key(key, values)
+    if source is not None and source.mode == "stereo":
+        return "legacy channel control is ambiguous for stereo source; use source-level controls"
+    return None
+
+
+def apply_smoothing(sock, sc_port, values, seconds):
+    for target in smoothing_targets(values):
+        send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", seconds]))
+
+
 def dsp_controls(values, channels):
     result=[]
     for name,value in controls(values, channels):
@@ -564,6 +597,10 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             key, value=vals[:2]; allowed={name for name,_ in controls(values, channels)}
             if key not in allowed:
                 send_to(sock, destination, packet("/mixer/error", ",s", ["invalid parameter"])); continue
+            legacy_error = legacy_stereo_write_error(key, values)
+            if legacy_error is not None:
+                send_to(sock, destination, packet("/mixer/error", ",s", [legacy_error]))
+                continue
             try: numeric=float(value)
             except (TypeError, ValueError): send_to(sock, destination, packet("/mixer/error", ",s", ["value is not numeric"])); continue
             if not math.isfinite(numeric): send_to(sock, destination, packet("/mixer/error", ",s", ["value must be finite"])); continue
@@ -572,7 +609,7 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
                 send_to(sock, destination, packet("/mixer/error", ",s", [str(exc)])); continue
             state[key]=numeric
             if key == "quadSmoothingMs":
-                for target in [ROUTER_NODE, MASTER_NODE] + [GROUP_NODE_BASE + g for g in range(8)]: send(sock, sc_port, packet("/n_set", ",isf", [target, "smoothing", numeric / 1000.0]))
+                apply_smoothing(sock, sc_port, values, numeric / 1000.0)
             else:
                 update=node_update(key, numeric, values.get("_mode", "stereo"), values)
                 if update is not None:

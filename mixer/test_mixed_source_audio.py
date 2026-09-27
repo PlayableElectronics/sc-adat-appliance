@@ -15,16 +15,15 @@ from mixerctl import packet, parse_packet, read_config
 ROOT = os.path.dirname(os.path.dirname(__file__))
 base_path = "/workspace/payload/config/mixer.conf"
 base = open(base_path, encoding="utf-8").read()
-source_rows = {}
-for match in re.finditer(r"(?m)^source\.(\d+)\.(id|name|group)=(.*)$", base):
-    source_rows.setdefault(int(match.group(1)), {})[match.group(2)] = match.group(3)
+canonical_values, _ = read_config(base_path)
+canonical_sources = canonical_values["_sources"]
+assert len(canonical_sources) == 16 and all(source.mode == "mono" for source in canonical_sources)
 lines = [line for line in base.splitlines() if not re.match(r"^(source_map_version|source\.count|source\.\d+\.)", line)]
 lines += ["source_map_version=1", "source.count=15"]
 lines += ["source.1.id=stereo_pair", "source.1.name=Stereo Pair", "source.1.mode=stereo", "source.1.inputs=1,2", "source.1.group=music_a"]
-for physical in range(3, 17):
-    index = physical - 1
-    row = source_rows[physical]
-    lines += [f"source.{index}.id={row['id']}", f"source.{index}.name={row['name']}", f"source.{index}.mode=mono", f"source.{index}.inputs={physical}", f"source.{index}.group={row['group']}"]
+for index, source in enumerate(canonical_sources[2:], 2):
+    physical = source.inputs[0]
+    lines += [f"source.{index}.id={source.id}", f"source.{index}.name={source.name}", f"source.{index}.mode=mono", f"source.{index}.inputs={physical}", f"source.{index}.group={source.group}"]
 scene = "\n".join(lines) + "\n"
 scene = re.sub(r"(?m)^master\.level_db=.*$", "master.level_db=0", scene)
 scene = scene.replace("channel.1.group=kick", "channel.1.group=music_a").replace("channel.2.group=drums", "channel.2.group=music_a")

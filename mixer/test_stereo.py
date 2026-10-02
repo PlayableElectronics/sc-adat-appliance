@@ -35,6 +35,17 @@ def meters():
         if p=="/mixer/meters":
             values=[float(x) for x in v]; assert len(values)==80 and all(math.isfinite(x) for x in values)
             return values[48:64],values[64:80]
+def set_node(node,key,value):
+    sock.sendto(packet("/n_set",",isf",[node,key,float(value)]),("127.0.0.1",SC)); sync(25000+int(time.monotonic()*1000)%100000)
+def output_rms():
+    samples=[]
+    for _ in range(12):
+        _,rms=meters(); samples.append(max(rms[:2])); time.sleep(.025)
+    return statistics.median(samples)
+def output_rms_sample():
+    _,rms=meters(); return max(rms[:2])
+def start_scan(bus,node,level):
+    sock.sendto(packet("/s_new",",siiisisfsfsi",["sc_adat_scan",node,0,0,"output",bus,"freq",440.0,"level",level,"gate",1]),("127.0.0.1",SC)); sync(node+1)
 def set_group(g,x):
     sock.sendto(packet("/n_set",",isfsfsf",[4000+g,"x",x,"y",0.0,"width",0.0]),("127.0.0.1",SC)); sync(20000+g)
 def mixer_set(key,value):
@@ -87,21 +98,52 @@ try:
     time.sleep(.5)
     by_group={GROUPS.index(row["group"]):26+int(row["input"])-1 for row in channels}
     test_group=3
-    mixer_set(f"group{test_group}PosX",0.0); mixer_set(f"group{test_group}PosY",0.0); mixer_set(f"group{test_group}Width",0.0)
-    node=9400; inject(by_group[test_group],node,level=-30); y_levels=[steady_output()[0]]
-    for y in (0.5,1.0):
-        mixer_set(f"group{test_group}PosY",y); time.sleep(.2); y_levels.append(steady_output()[0])
-    cleanup(node)
-    assert max(y_levels)-min(y_levels) < 0.02, y_levels
-    mixer_set(f"group{test_group}PosY",0.5); equal_power=[]
+    # Stereo mode deliberately has no writable Y control; exercise only its
+    # supported X/width surface here.
+    mixer_set(f"group{test_group}PosX",0.0); mixer_set(f"group{test_group}Width",0.0)
+    # Measure the actual production group SynthDef before unrelated pan tests.
+    # The kick scan is injected at the raw pre-group stem; group 0 is muted so
+    # only the target group's ducked output reaches the stereo master.
+    target_node=9600; kick_node=9601
+    set_node(4000,"mute",1); set_node(4000,"duckAmountDb",0)
+    set_node(4000,"spatialBypass",1); set_node(4003,"spatialBypass",1)
+    set_node(4003,"gain",1); set_node(4003,"mute",0)
+    set_node(4003,"duckThreshold",0.1); set_node(4003,"duckAttack",0.05); set_node(4003,"duckRelease",0.2)
+    start_scan(52+test_group*2,target_node,-24); time.sleep(.35)
+    duck_zero=output_rms()
+    start_scan(52,kick_node,-6); time.sleep(.4)
+    set_node(4003,"duckAmountDb",0); time.sleep(.15); duck_zero_with_kick=output_rms()
+    set_node(4003,"duckAmountDb",6); time.sleep(.5); duck_six=output_rms()
+    set_node(4003,"duckAmountDb",12); time.sleep(.5); duck_twelve=output_rms()
+    assert duck_zero > 1e-4 and abs(duck_zero_with_kick-duck_zero) < duck_zero*.10, (duck_zero,duck_zero_with_kick)
+    assert duck_six < duck_zero*.70, (duck_zero,duck_six)
+    assert duck_twelve < duck_six*.70, (duck_six,duck_twelve)
+    assert 0 < duck_twelve < duck_six < duck_zero and all(math.isfinite(v) for v in (duck_zero,duck_zero_with_kick,duck_six,duck_twelve))
+    set_node(4003,"duckAmountDb",12); set_node(kick_node,"gate",0)
+    release_trace=[]
+    for _ in range(20):
+        release_trace.append(output_rms_sample()); time.sleep(.025)
+    assert all(math.isfinite(v) and 0 < v <= duck_zero*1.1 for v in release_trace), release_trace
+    assert release_trace[-1] > duck_twelve*2 and release_trace[-1] > release_trace[0], (duck_twelve,release_trace)
+    time.sleep(.5); start_scan(52,kick_node,-6)
+    attack_trace=[]
+    for _ in range(12):
+        attack_trace.append(output_rms_sample()); time.sleep(.05)
+    assert all(math.isfinite(v) and 0 < v <= duck_zero*1.1 for v in attack_trace), attack_trace
+    assert attack_trace[0] > attack_trace[-1] and attack_trace[-1] < duck_zero*.5, (duck_zero,attack_trace)
+    set_node(kick_node,"gate",0); time.sleep(.5)
+    print(f"real kick-duck audio flow: amount 0/6/12 dB RMS={duck_zero:.6f}/{duck_six:.6f}/{duck_twelve:.6f}; ratios={duck_six/duck_zero:.3f}/{duck_twelve/duck_zero:.3f}; attack {attack_trace[0]:.6f}->{attack_trace[-1]:.6f}; release {release_trace[0]:.6f}->{release_trace[-1]:.6f}: OK")
+    cleanup(target_node); cleanup(kick_node)
+    set_node(4000,"mute",0); set_node(4003,"duckAmountDb",0)
+    equal_power=[]
     for x in (-1.0,0.0,1.0):
         mixer_set(f"group{test_group}PosX",(x+1)/2); time.sleep(.2); node=9450+int((x+1)*10); inject(by_group[test_group],node,level=-30); peaks=steady_output()
         equal_power.append(peaks[:2]); cleanup(node)
     assert equal_power[0][0] > 0.9*equal_power[0][1] and equal_power[0][1] < threshold, equal_power
     assert abs(equal_power[1][0]-equal_power[1][1]) < 0.02, equal_power
     assert equal_power[2][1] > 0.9*equal_power[2][0] and equal_power[2][0] < threshold, equal_power
-    print(f"real stereo Y independence: Y levels={[round(v,4) for v in y_levels]}, equal-power={[[round(v,4) for v in p] for p in equal_power]}: OK")
-    mixer_set(f"group{test_group}PosX",0.0); mixer_set(f"group{test_group}PosY",0.5); mixer_set(f"group{test_group}Width",0.0)
+    print(f"real stereo equal-power: {[[round(v,4) for v in p] for p in equal_power]}: OK")
+    mixer_set(f"group{test_group}PosX",0.0); mixer_set(f"group{test_group}Width",0.0)
     master_node=9500; inject(by_group[test_group],master_node,level=-30)
     reference=master_level(1.0); half=master_level(0.5); silent=master_level(0.0); restored=master_level(1.0)
     assert reference > threshold and 0.4*reference < half < 0.6*reference, (reference,half)

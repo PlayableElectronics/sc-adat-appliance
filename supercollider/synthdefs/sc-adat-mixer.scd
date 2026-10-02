@@ -71,7 +71,7 @@ SynthDef(\sc_adat_stereo_group, { |inbus=52, outbus=76|
   // Detector taps the kick group's source stem, before its group processors.
   detector = In.ar(52, 2).sum * 0.5;
   envelope = Amplitude.kr(detector, 0.001, 0.05);
-  duckGain = 1 - (envelope > duckThreshold.clip(0.001, 1)) * (1 - (10 ** (duckAmountDb.clip(0, 18) / 20)));
+  duckGain = 1 - (envelope > duckThreshold.clip(0.001, 1)) * (1 - (10 ** (0 - duckAmountDb.clip(0, 18) / 20)));
   duckGain = LagUD.kr(duckGain, duckAttack.clip(0.001,0.5), duckRelease.clip(0.01,2));
   dry=sig;
   // Mid bands are applied serially on the equalized branch.

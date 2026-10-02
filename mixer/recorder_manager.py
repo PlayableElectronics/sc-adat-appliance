@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from recorder_policy import bytes_per_second, required_ready_bytes, segment_can_start, validate_target
+from recorder_policy import bytes_per_second, required_start_bytes, segment_can_start, validate_target
 from contract import CONTRACT_VERSION
 
 
@@ -32,6 +32,27 @@ class RecorderManager:
         self.xrun_count = 0
         self.last_mount_check = 0.0
         self.last_mount_ok = False
+
+    def _ready_capacity(self):
+        seconds = self._integer_setting("recording.ready_seconds", 7200, 1, 31536000)
+        reserve = self._integer_setting("recording.emergency_reserve_bytes", 5368709120, 1, 2**63 - 1)
+        return required_start_bytes(seconds=seconds, reserve=reserve)
+
+    def _request_disk_lost(self, reason):
+        self.state, self.error = "DISK_LOST", str(reason)
+        if self.process is not None and self.process.poll() is None:
+            import signal
+            try:
+                self.process.send_signal(signal.SIGUSR1)
+            except (AttributeError, OSError):
+                self.process.terminate()
+
+    def _session_still_on_recording_mount(self):
+        root = self.config.get("recording.mount", "/recordings")
+        try:
+            return os.path.ismount(root) and os.stat(self.session_dir).st_dev == os.stat(root).st_dev
+        except (OSError, TypeError):
+            return False
 
     def _integer_setting(self, name, default, minimum, maximum):
         try:
@@ -99,25 +120,36 @@ class RecorderManager:
             if status.is_file():
                 fields = dict(line.split("=", 1) for line in status.read_text().splitlines() if "=" in line)
                 try:
-                    self.state = fields.get("state", "FAILED")
+                    self.state = "DISK_LOST" if self.state == "DISK_LOST" else fields.get("state", "FAILED")
                     self.dropped_frames=int(fields.get("dropped_frames", "0")); self.xrun_count=int(fields.get("xrun_count","0"))
                     self._stop_midi()
-                    self.error = ("JACK capture ring overflow; audio discontinuity" if self.dropped_frames else
+                    self.error = (self.error if self.state == "DISK_LOST" and self.error else
+                                  "JACK capture ring overflow; audio discontinuity" if self.dropped_frames else
                                   "recorder I/O or capture failure" if self.state == "FAILED" else
                                   "recording disk became unavailable" if self.state == "DISK_LOST" else "")
                     metadata_path=self.session_dir / "session.json"; metadata=json.loads(metadata_path.read_text())
                     segments=sorted(item.name for item in self.session_dir.glob("segment-[0-9][0-9][0-9]"))
                     closed_cleanly=self.state in ("STOPPED", "STOPPED_FULL")
-                    metadata["segment_list"]=[{"directory":name,"status":"finalized" if closed_cleanly or i < len(segments)-1 else "possibly_incomplete"}
-                                               for i,name in enumerate(segments)]
+                    metadata["segment_list"]=[]
+                    for name in segments:
+                        try:
+                            detail=json.loads((self.session_dir/name/"segment.json").read_text())
+                            detail["directory"]=name
+                        except (OSError,ValueError):
+                            detail={"directory":name,"finalized":False}
+                        metadata["segment_list"].append(detail)
                     metadata["state"]=self.state; metadata["clean_termination"]=closed_cleanly
                     metadata["recorder_error"]=self.error; metadata["xrun_count_stop"]=self.xrun_count
                     metadata["midi"]["status"]=self.midi_status
-                    try: metadata["disk_free_bytes_stop"]=shutil.disk_usage(self.config.get("recording.mount","/recordings")).free
-                    except OSError: metadata["disk_free_bytes_stop"]=None
-                    metadata_path.write_text(json.dumps(metadata,indent=2)+"\n")
+                    if self._session_still_on_recording_mount():
+                        try: metadata["disk_free_bytes_stop"]=shutil.disk_usage(self.config.get("recording.mount","/recordings")).free
+                        except OSError: metadata["disk_free_bytes_stop"]=None
+                        metadata_path.write_text(json.dumps(metadata,indent=2)+"\n")
                 except (OSError,ValueError,KeyError) as exc:
-                    self.state="DISK_LOST"; self.error=f"finalization metadata failure: {exc}"
+                    if self.state == "DISK_LOST":
+                        self.error=f"{self.error}; session metadata update failed: {exc}"
+                    else:
+                        self.state="DISK_LOST"; self.error=f"finalization metadata failure: {exc}"
             elif self.state == "RECORDING":
                 self.state, self.error = "FAILED", f"recorder exited {self.process.returncode}"
             self.process = None
@@ -126,21 +158,20 @@ class RecorderManager:
             if now-self.last_mount_check>=5:
                 root,state=self._target(); self.last_mount_ok=state=="READY"; self.last_mount_check=now
             if not self.last_mount_ok:
-                self.state="DISK_LOST"; self.error="recording mount UUID or writability changed"
-                self.process.terminate()
+                self._request_disk_lost("recording mount UUID or writability changed")
             else:
                 root=self.config.get("recording.mount","/recordings")
                 try:
-                    if shutil.disk_usage(root).free < required_ready_bytes(seconds=int(self.config.get("recording.ready_seconds",7200))): self.state="LOW_SPACE"
+                    if shutil.disk_usage(root).free < self._ready_capacity(): self.state="LOW_SPACE"
                 except OSError:
-                    self.state="DISK_LOST"; self.error="recording mount disappeared"; self.process.terminate()
+                    self._request_disk_lost("recording mount disappeared")
         elif self.process is None and self.state in ("NO_RECORDING_DISK","IDLE","READY","LOW_SPACE"):
             now=time.monotonic()
             if now-self.last_mount_check>=5:
                 root,state=self._target(); self.last_mount_ok=state=="READY"; self.last_mount_check=now
             if self.last_mount_ok:
                 root=self.config.get("recording.mount","/recordings")
-                try: self.state="READY" if shutil.disk_usage(root).free>=required_ready_bytes(seconds=int(self.config.get("recording.ready_seconds",7200))) else "LOW_SPACE"
+                try: self.state="READY" if shutil.disk_usage(root).free>=self._ready_capacity() else "LOW_SPACE"
                 except OSError: self.state="NO_RECORDING_DISK"
             else: self.state="NO_RECORDING_DISK"
         return self.state
@@ -193,9 +224,9 @@ class RecorderManager:
         try: free = shutil.disk_usage(root).free
         except OSError:
             self.state="NO_RECORDING_DISK"; raise RuntimeError(self.state)
-        if free < required_ready_bytes(seconds=ready_seconds):
+        if free < required_start_bytes(seconds=ready_seconds, reserve=reserve):
             self.state = "LOW_SPACE"
-            raise RuntimeError("less than two hours of recording capacity")
+            raise RuntimeError("insufficient space for ready window plus emergency reserve")
         session = Path(root) / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8])
         plan = []
         manifest = []
@@ -219,7 +250,8 @@ class RecorderManager:
                     "sync": {"file": "sync.wav", "physical_input": 17},
                     "master": {"file": "master.wav", "tap": "scsynth stereo output after limiter"},
                     "sources": manifest, "segment_seconds": segment_seconds,
-                    "segment_list": [], "state": "RECORDING", "midi": {"status": "not configured", "port": self.config.get("recording.midi_port", "")},
+                    "segment_list": [], "state": "RECORDING", "clean_termination": False,
+                    "recorder_error": "", "midi": {"status": "not configured", "port": self.config.get("recording.midi_port", "")},
                     "xrun_count_start": 0, "xrun_count_stop": None,
                     "mixer_config": str(self.config.get("recording.mixer_config", "payload/config/mixer.conf")),
                     "mixer_config_snapshot": self.mixer_snapshot,
@@ -278,9 +310,13 @@ class RecorderManager:
         self._stop_midi()
         if self.process is None:
             return self.status()
+        if self.state == "DISK_LOST":
+            self._request_disk_lost(self.error or "recording disk became unavailable")
+            return self.state
         self.process.terminate()
         self.state = "FINAL_SEGMENT"
         return self.state
 
     def remaining_seconds(self, free_bytes):
-        return max(0, int(free_bytes / bytes_per_second()))
+        reserve = self._integer_setting("recording.emergency_reserve_bytes", 5368709120, 1, 2**63 - 1)
+        return max(0, int(max(0, free_bytes - reserve) / bytes_per_second()))

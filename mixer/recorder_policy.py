@@ -14,6 +14,11 @@ def required_ready_bytes(sample_rate=48000, channels=CHANNELS, bits=24, seconds=
     return bytes_per_second(sample_rate, channels, bits) * seconds
 
 
+def required_start_bytes(sample_rate=48000, channels=CHANNELS, bits=24,
+                         seconds=TWO_HOURS, reserve=EMERGENCY_RESERVE):
+    return required_ready_bytes(sample_rate, channels, bits, seconds) + reserve
+
+
 def segment_can_start(free_bytes, segment_seconds=900, sample_rate=48000,
                       channels=CHANNELS, bits=24, reserve=EMERGENCY_RESERVE):
     return free_bytes >= bytes_per_second(sample_rate, channels, bits) * segment_seconds + reserve

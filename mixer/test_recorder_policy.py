@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import tempfile
@@ -9,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).parent))
 from recorder_manager import RecorderManager
 from recorder_policy import (EMERGENCY_RESERVE, RecorderState, bytes_per_second,
-                             required_ready_bytes, segment_can_start, validate_target)
+                             required_ready_bytes, required_start_bytes, segment_can_start, validate_target)
 from mixerctl import read_config
 from mixerctl import controls, group_controls, master_controls, node_update, validate_parameter
 from contract import GROUPS
@@ -22,6 +23,16 @@ class RecorderPolicyTests(unittest.TestCase):
         self.assertEqual(required_ready_bytes(), 2 * 3600 * 48_000 * 19 * 3)
         self.assertTrue(segment_can_start(EMERGENCY_RESERVE + bytes_per_second() * 900))
         self.assertFalse(segment_can_start(EMERGENCY_RESERVE + bytes_per_second() * 899))
+
+    def test_start_capacity_includes_reserve_and_remaining_excludes_it(self):
+        audio = required_ready_bytes(seconds=7200)
+        reserve = EMERGENCY_RESERVE
+        self.assertEqual(required_start_bytes(seconds=7200, reserve=reserve), audio + reserve)
+        values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")
+        manager = RecorderManager({"recording.emergency_reserve_bytes": str(reserve)}, values["_sources"], channels, launch=False)
+        self.assertEqual(manager.remaining_seconds(audio + reserve), 7200)
+        self.assertEqual(manager.remaining_seconds(reserve), 0)
+        self.assertEqual(manager.remaining_seconds(reserve - 1), 0)
 
     def test_mount_uuid_and_readonly_are_refused(self):
         self.assertEqual(validate_target("/tmp", "abc", "abc", True), "NO_RECORDING_DISK")
@@ -119,10 +130,19 @@ class RecorderPolicyTests(unittest.TestCase):
         with mock.patch("recorder_manager.os.path.ismount", return_value=True), \
              mock.patch("recorder_manager.subprocess.check_output", return_value="ext4"), \
              mock.patch("recorder_manager.validate_target", return_value="READY"), \
-             mock.patch("recorder_manager.shutil.disk_usage", return_value=SimpleNamespace(free=required_ready_bytes()-1)):
-            with self.assertRaisesRegex(RuntimeError, "capacity"):
+             mock.patch("recorder_manager.shutil.disk_usage", return_value=SimpleNamespace(free=required_start_bytes()-1)):
+            with self.assertRaisesRegex(RuntimeError, "space|capacity"):
                 manager.start()
             self.assertIsNone(manager.session_dir)
+
+        with tempfile.TemporaryDirectory() as root:
+            manager = RecorderManager({"recording.mount": root, "recording.uuid": "expected",
+                                      "recording.ready_seconds": "1",
+                                      "recording.emergency_reserve_bytes": "100"}, values["_sources"], channels,
+                                     launch=False, uuid_probe=lambda _path: "expected")
+            manager._target = lambda: (root, "READY")
+            with mock.patch("recorder_manager.shutil.disk_usage", return_value=SimpleNamespace(free=bytes_per_second()+100)):
+                self.assertEqual(manager.start().parent, Path(root))
 
     def test_manager_construction_does_not_start_recording_automatically(self):
         values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")
@@ -139,6 +159,33 @@ class RecorderPolicyTests(unittest.TestCase):
         self.assertEqual(state["recorderState"], "NO_RECORDING_DISK")
         self.assertEqual(state["recorderDiskFreeBytes"], 0)
         self.assertEqual(state["recorderRemainingSeconds"], 0)
+
+    def test_disk_loss_uses_priority_signal_and_preserves_unclean_metadata(self):
+        values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")
+        with tempfile.TemporaryDirectory() as root:
+            manager = RecorderManager({"recording.mount": root}, values["_sources"], channels, launch=False)
+            class RunningProcess:
+                returncode = None
+                signals = []
+                def poll(self): return self.returncode
+                def send_signal(self, signal): self.signals.append(signal)
+            process = RunningProcess(); manager.process = process
+            manager.session_dir = Path(root)/"session"; manager.session_dir.mkdir()
+            (manager.session_dir/"session.json").write_text(json.dumps({"midi": {}, "clean_termination": True}))
+            manager.last_mount_check = 0
+            manager._target = lambda: (root, "NO_RECORDING_DISK")
+            self.assertEqual(manager.status(), "DISK_LOST")
+            import signal
+            self.assertEqual(process.signals, [signal.SIGUSR1])
+            self.assertEqual(manager.stop(), "DISK_LOST")
+            self.assertEqual(process.signals, [signal.SIGUSR1, signal.SIGUSR1])
+            process.returncode = 4
+            (manager.session_dir/"recorder.status").write_text("state=DISK_LOST\ndropped_frames=0\nxrun_count=0\n")
+            with mock.patch.object(manager, "_session_still_on_recording_mount", return_value=True):
+                self.assertEqual(manager.status(), "DISK_LOST")
+            metadata=json.loads((manager.session_dir/"session.json").read_text())
+            self.assertFalse(metadata["clean_termination"])
+            self.assertIn("UUID or writability", metadata["recorder_error"])
 
     def test_invalid_or_colliding_session_configuration_creates_no_directory(self):
         values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")

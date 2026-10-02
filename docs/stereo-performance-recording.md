@@ -26,19 +26,30 @@ sequencer capture writes a standard MIDI file `events.mid` when
 does not stop audio recording.
 
 Every recording start creates a UTC timestamp plus random-ID directory with
-`session.json`, `tracks.tsv`, and `segment-NNN/`. Segments default to 900 s.
-The writer finalizes the current segment before opening another. It opens a
-next segment only with enough space for the full 19-channel segment plus the
-configured 5 GiB reserve. It stops cleanly at the reserve threshold. No session
-is appended to or deleted automatically.
+`session.json`, `tracks.tsv`, and `segment-NNN/`. Segments default to 900 s and
+rotate at exactly `segment_seconds * JACK sample_rate` frames. The writer
+splits a captured block at the exact boundary, keeps one continuous JACK
+stream/ring, and pre-opens the following segment on the non-RT writer thread.
+Each segment has `segment.json` with index, absolute start frame, frame count,
+sample rate and finalized status. A native integration fixture feeds
+deterministic 19-channel data across boundaries inside writer blocks and
+reassembles all PCM-24 tracks byte-for-byte against continuous reference WAVs.
+This proves the writer's boundary split/quantization path, not long-duration
+storage performance. The recorder refuses JACK rates other than 48 kHz.
+No session is appended to or deleted automatically.
 
 Production safety requires `/recordings` to be a writable ext4 mount with the
 configured filesystem UUID. Empty UUID, missing/wrong mount, read-only mount,
-or less than two hours of capacity prevents start; there is no fallback path.
-The expected consumption is 2,736,000 bytes/s (19 channels × 48,000 × 3),
-about 9.85 GB/hour before filesystem overhead. Configure the dedicated SSD UUID
-in `/etc/sc-adat/recording.conf`; the checked-in empty value intentionally
-leaves recording unavailable until configured.
+or capacity below two hours of audio **plus** the configured 5 GiB emergency
+reserve prevents start; there is no fallback path. Remaining time is computed
+from `max(0, free_bytes - reserve_bytes) / bytes_per_second`. The expected
+consumption is 2,736,000 bytes/s (19 channels × 48,000 × 3), about 9.85 GB/hour
+before filesystem overhead. Configure the dedicated SSD UUID in
+`/etc/sc-adat/recording.conf`; the checked-in empty value intentionally leaves
+recording unavailable until configured. Mount loss requests the recorder's
+dedicated disk-loss stop path, preserves `DISK_LOST`/unclean metadata when the
+volume remains writable, and guards session-path writes against falling
+through to the underlying root filesystem.
 
 OSC `recordStart=1` and `recordStop=1` extend the existing authoritative
 `/mixer/set ,sf` control contract. Read-only `recorder*` values report state,
@@ -73,10 +84,12 @@ by hand. Norns remains the primary mixer UI. Chataigne integration is on hold
 and was not expanded as part of this work.
 
 Local reproducible checks are `./scripts/test-control-contract`,
-`python3 -m unittest mixer.test_recorder_policy mixer.test_stereo_dsp_contract`,
-and `cc -std=c11 -Wall -Wextra -Werror $(pkg-config --cflags jack sndfile)
-package/sc-adat-recorder/sc-adat-recorder.c $(pkg-config --libs jack sndfile)
--pthread`. The full `./scripts/test-mixer` additionally compiles SuperCollider
+`python3 -m unittest discover -s mixer -p 'test_*.py'`,
+`python3 -m unittest mixer.test_recorder_segments` (native deterministic
+segment fixture), and `cc -std=c11 -Wall -Wextra -Werror $(pkg-config --cflags
+jack sndfile) package/sc-adat-recorder/sc-adat-recorder.c $(pkg-config --libs
+jack sndfile) -pthread`. The real kick-duck test is in the scsynth audio-flow
+integration script. The full `./scripts/test-mixer` additionally compiles SuperCollider
 SynthDefs and runs dummy-JACK/scsynth integration in Docker; it requires the
 project image and a working Docker daemon.
 

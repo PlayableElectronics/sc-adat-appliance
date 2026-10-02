@@ -260,9 +260,9 @@ try:
     source_text=open(os.path.join(ROOT,"supercollider/synthdefs/sc-adat-mixer.scd"),encoding="utf-8").read()
     assert source_text.count("SynthDef(\\sc_adat_group") == 1
     lane_expr=re.findall(r"Out\.ar\(76 \+ \(g \* 4\), quadSignal \* InRange\.kr\(groupIndex, g - 0\.01, g \+ 0\.01\)\)",source_text)
-    assert len(lane_expr)==1 and "groupIndex" in source_text
+    assert len(lane_expr)==2 and "groupIndex" in source_text
     assert "physical = quad * master" in source_text
-    assert "out0c" not in source_text and source_text.count("quadSignal = [") == 1
+    assert "out0c" not in source_text and source_text.count("quadSignal = [") == 2
     assert "Limiter.ar(x.clip2(4), 0.99, 0.01)" in source_text
     assert [int(group_controls(quad_values,g)[0][1]) for g in range(8)] == list(range(8))
     lane_windows=[(g - 0.01, g + 0.01) for g in range(8)]

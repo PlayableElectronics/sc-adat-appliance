@@ -102,8 +102,9 @@ try:
     # supported X/width surface here.
     mixer_set(f"group{test_group}PosX",0.0); mixer_set(f"group{test_group}Width",0.0)
     # Measure the actual production group SynthDef before unrelated pan tests.
-    # The kick scan is injected at the raw pre-group stem; group 0 is muted so
-    # only the target group's ducked output reaches the stereo master.
+    # The established stereo fixture injects directly at the production group
+    # stems. Group 0 is muted so only the target group's ducked output reaches
+    # the stereo master.
     target_node=9600; kick_node=9601
     set_node(4000,"mute",1); set_node(4000,"duckAmountDb",0)
     set_node(4000,"spatialBypass",1); set_node(4003,"spatialBypass",1)
@@ -111,7 +112,7 @@ try:
     set_node(4003,"duckThreshold",0.1); set_node(4003,"duckAttack",0.05); set_node(4003,"duckRelease",0.2)
     start_scan(52+test_group*2,target_node,-24); time.sleep(.35)
     duck_zero=output_rms()
-    start_scan(52,kick_node,-6); time.sleep(.4)
+    start_scan(52,kick_node,0); time.sleep(.4)
     set_node(4003,"duckAmountDb",0); time.sleep(.15); duck_zero_with_kick=output_rms()
     set_node(4003,"duckAmountDb",6); time.sleep(.5); duck_six=output_rms()
     set_node(4003,"duckAmountDb",12); time.sleep(.5); duck_twelve=output_rms()
@@ -125,7 +126,7 @@ try:
         release_trace.append(output_rms_sample()); time.sleep(.025)
     assert all(math.isfinite(v) and 0 < v <= duck_zero*1.1 for v in release_trace), release_trace
     assert release_trace[-1] > duck_twelve*2 and release_trace[-1] > release_trace[0], (duck_twelve,release_trace)
-    time.sleep(.5); start_scan(52,kick_node,-6)
+    time.sleep(.5); start_scan(52,kick_node,0)
     attack_trace=[]
     for _ in range(12):
         attack_trace.append(output_rms_sample()); time.sleep(.05)
@@ -134,7 +135,7 @@ try:
     set_node(kick_node,"gate",0); time.sleep(.5)
     print(f"real kick-duck audio flow: amount 0/6/12 dB RMS={duck_zero:.6f}/{duck_six:.6f}/{duck_twelve:.6f}; ratios={duck_six/duck_zero:.3f}/{duck_twelve/duck_zero:.3f}; attack {attack_trace[0]:.6f}->{attack_trace[-1]:.6f}; release {release_trace[0]:.6f}->{release_trace[-1]:.6f}: OK")
     cleanup(target_node); cleanup(kick_node)
-    set_node(4000,"mute",0); set_node(4003,"duckAmountDb",0)
+    set_node(4000,"mute",0); set_node(4003,"duckAmountDb",0); set_node(4003,"spatialBypass",0)
     equal_power=[]
     for x in (-1.0,0.0,1.0):
         mixer_set(f"group{test_group}PosX",(x+1)/2); time.sleep(.2); node=9450+int((x+1)*10); inject(by_group[test_group],node,level=-30); peaks=steady_output()

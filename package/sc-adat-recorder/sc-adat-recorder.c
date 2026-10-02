@@ -149,7 +149,8 @@ static int segment_open(Segment *segment, unsigned index, uint64_t start_frame, 
 static int segment_finish(Segment *segment, int finalized) {
     if (!segment->open) return 0;
     int failed = 0;
-    for (int i = 0; i < track_count; ++i) if (segment->files[i]) {
+    for (int i = 0; i < track_count; ++i) {
+        if (!segment->files[i]) { failed = 1; continue; }
         if (sf_error(segment->files[i]) != SF_ERR_NO_ERROR) failed = 1;
         sf_write_sync(segment->files[i]);
         if (sf_error(segment->files[i]) != SF_ERR_NO_ERROR) failed = 1;
@@ -174,6 +175,7 @@ static int segment_write(Segment *segment, const float *frames, size_t count) {
     float output[MAX_CALLBACK_FRAMES * 2];
     if (!segment->open || count > MAX_CALLBACK_FRAMES) return -1;
     for (int track = 0; track < track_count; ++track) {
+        if (!segment->files[track]) { atomic_store(&io_failure, 1); return -1; }
         for (size_t f = 0; f < count; ++f)
             for (int c = 0; c < plans[track].channels; ++c)
                 output[f * (size_t)plans[track].channels + c] = frames[f * INPUTS + plans[track].first + c];
@@ -282,7 +284,11 @@ static void *writer(void *unused) {
     uint64_t written = 0; time_t last_report = 0;
     while (atomic_load(&running) || jack_ringbuffer_read_space(ring) >= frame_bytes) {
         size_t available = jack_ringbuffer_read_space(ring) / frame_bytes;
-        if (!available) { usleep(2000); continue; }
+        if (!available) {
+            struct timespec wait = {.tv_sec = 0, .tv_nsec = 2000000};
+            nanosleep(&wait, NULL);
+            continue;
+        }
         if (available > MAX_CALLBACK_FRAMES) available = MAX_CALLBACK_FRAMES;
         size_t got = jack_ringbuffer_read(ring, (char *)block, available * frame_bytes) / frame_bytes;
         if (!got) continue;

@@ -49,6 +49,27 @@ int main(int argc, char **argv) {
     if (stat(session, &failure_stat)) return 11;
     session_device = failure_stat.st_dev;
     atomic_store(&io_failure, 0);
-    if (segment_open(&current_segment, 0, 0, 0) == 0 || !atomic_load(&io_failure) || recorder_exit_status() == 0) return 12;
+    if (segment_open(&current_segment, 0, 0, 0) == 0 || !atomic_load(&io_failure) || atomic_load(&dropped_frames) != 0 || recorder_exit_status() == 0) return 12;
+
+    char write_root[1200], close_root[1200];
+    snprintf(write_root, sizeof write_root, "%s/write-failure", argv[2]);
+    snprintf(close_root, sizeof close_root, "%s/close-failure", argv[2]);
+    if (mkdir(write_root, 0750) || mkdir(close_root, 0750)) return 13;
+
+    strcpy(session, write_root); if (stat(session, &failure_stat)) return 14;
+    session_device = failure_stat.st_dev; atomic_store(&io_failure, 0); atomic_store(&dropped_frames, 0);
+    if (writer_begin(session, SUPPORTED_RATE, 10, 1) < 0) return 15;
+    if (sf_close(current_segment.files[0]) != SF_ERR_NO_ERROR) return 16;
+    current_segment.files[0] = NULL;
+    float one_frame[INPUTS] = {0}; size_t consumed = 0;
+    if (writer_append(one_frame, 1, &consumed, 1) == 0 || atomic_load(&dropped_frames) != 0 || recorder_exit_status() == 0) return 17;
+    (void)writer_finish(0);
+
+    strcpy(session, close_root); if (stat(session, &failure_stat)) return 18;
+    session_device = failure_stat.st_dev; atomic_store(&io_failure, 0); atomic_store(&dropped_frames, 0);
+    if (writer_begin(session, SUPPORTED_RATE, 10, 1) < 0) return 19;
+    if (sf_close(current_segment.files[0]) != SF_ERR_NO_ERROR) return 20;
+    current_segment.files[0] = NULL;
+    if (segment_finish(&current_segment, 1) == 0 || atomic_load(&dropped_frames) != 0 || recorder_exit_status() == 0) return 21;
     return 0;
 }

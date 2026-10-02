@@ -27,7 +27,7 @@ class StereoDspContractTests(unittest.TestCase):
     def test_ducker_is_bounded_non_amplifying_and_uses_raw_kick_stem(self):
         self.assertIn("detector = In.ar(52, 2).sum * 0.5", SYNTHDEFS)
         self.assertIn("duckAmountDb.clip(0, 18)", SYNTHDEFS)
-        self.assertIn("10 ** (0 - duckAmountDb.clip(0, 18) / 20)", SYNTHDEFS)
+        self.assertIn("10 ** ((0 - duckAmountDb.clip(0, 18)) / 20)", SYNTHDEFS)
         self.assertIn("duckGain = LagUD.kr", SYNTHDEFS)
         self.assertIn("real kick-duck audio flow", (ROOT / "mixer/test_stereo.py").read_text())
 

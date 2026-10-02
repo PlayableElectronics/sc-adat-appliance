@@ -71,7 +71,9 @@ SynthDef(\sc_adat_stereo_group, { |inbus=52, outbus=76|
   // Detector taps the kick group's source stem, before its group processors.
   detector = In.ar(52, 2).sum * 0.5;
   envelope = Amplitude.kr(detector, 0.001, 0.05);
-  duckGain = 1 - (envelope > duckThreshold.clip(0.001, 1)) * (1 - (10 ** (0 - duckAmountDb.clip(0, 18) / 20)));
+  // SuperCollider 3.13 requires explicit subtraction here; this is
+  // 10 ** (-duckAmountDb / 20), never an amplification factor.
+  duckGain = Select.kr(envelope > duckThreshold.clip(0.001, 1), [1, (10 ** ((0 - duckAmountDb.clip(0, 18)) / 20))]);
   duckGain = LagUD.kr(duckGain, duckAttack.clip(0.001,0.5), duckRelease.clip(0.01,2));
   dry=sig;
   // Mid bands are applied serially on the equalized branch.
@@ -81,8 +83,7 @@ SynthDef(\sc_adat_stereo_group, { |inbus=52, outbus=76|
   compressed=eq.collect { |channel| var wet=Compander.ar(channel,linkedDetector,compThreshold,1,1/compRatio.clip(1,20),compAttack.clip(0.001,0.5),compRelease.clip(0.01,2)); SelectX.ar(compBypass.clip(0,1),[wet,channel]) };
   satDrive=satDrive.clip(1,4);
   processed=compressed.collect { |channel| var wet=tanh(channel*satDrive)/tanh(satDrive); SelectX.ar(satBypass.clip(0,1),[wet,channel]) };
-  processed=processed * duckGain;
-  baseLeft = processed[0] * gain * (1 - mute); baseRight = processed[1] * gain * (1 - mute);
+  baseLeft = processed[0] * duckGain * gain * (1 - mute); baseRight = processed[1] * duckGain * gain * (1 - mute);
   // A stereo source remains oriented at the group boundary.  Spatial
   // positioning controls the amount sent to the four internal lanes, while
   // left never becomes right and vice versa.

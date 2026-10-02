@@ -94,7 +94,6 @@ def stop(node):
 try:
     time.sleep(0.5)
     set_mixer("group3PosX", 0.5)
-    set_mixer("group3PosY", 0.5)
     set_mixer("group3Width", 0.0)
     inject(26, 9800)
     left_only = meters()

@@ -33,6 +33,10 @@ class RecorderPolicyTests(unittest.TestCase):
         self.assertEqual(manager.remaining_seconds(audio + reserve), 7200)
         self.assertEqual(manager.remaining_seconds(reserve), 0)
         self.assertEqual(manager.remaining_seconds(reserve - 1), 0)
+        self.assertEqual(manager.remaining_seconds(reserve + bytes_per_second() * 7), 7)
+        print(f"recorder capacity: start boundary below={audio + reserve - 1}, "
+              f"exact={audio + reserve}; remaining free below={reserve - 1}, "
+              f"equal={reserve}, above={reserve + bytes_per_second() * 7}: OK")
 
     def test_mount_uuid_and_readonly_are_refused(self):
         self.assertEqual(validate_target("/tmp", "abc", "abc", True), "NO_RECORDING_DISK")
@@ -143,6 +147,14 @@ class RecorderPolicyTests(unittest.TestCase):
             manager._target = lambda: (root, "READY")
             with mock.patch("recorder_manager.shutil.disk_usage", return_value=SimpleNamespace(free=bytes_per_second()+100)):
                 self.assertEqual(manager.start().parent, Path(root))
+            below = RecorderManager({"recording.mount": root, "recording.uuid": "expected",
+                                     "recording.ready_seconds": "1",
+                                     "recording.emergency_reserve_bytes": "100"}, values["_sources"], channels,
+                                    launch=False, uuid_probe=lambda _path: "expected")
+            below._target = lambda: (root, "READY")
+            with mock.patch("recorder_manager.shutil.disk_usage", return_value=SimpleNamespace(free=bytes_per_second()+99)):
+                with self.assertRaisesRegex(RuntimeError, "space|capacity"):
+                    below.start()
 
     def test_manager_construction_does_not_start_recording_automatically(self):
         values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")
@@ -186,6 +198,10 @@ class RecorderPolicyTests(unittest.TestCase):
             metadata=json.loads((manager.session_dir/"session.json").read_text())
             self.assertFalse(metadata["clean_termination"])
             self.assertIn("UUID or writability", metadata["recorder_error"])
+            self.assertNotIn(signal.SIGTERM, process.signals)
+            print("recorder disk loss: UUID/mount loss -> DISK_LOST, "
+                  "clean_termination=false, preserved UUID/writability error, "
+                  "SIGUSR1 path retained and SIGTERM not substituted: OK")
 
     def test_invalid_or_colliding_session_configuration_creates_no_directory(self):
         values, channels = read_config(Path(__file__).parents[1]/"payload/config/mixer.conf")

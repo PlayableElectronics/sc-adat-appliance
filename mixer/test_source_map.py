@@ -80,7 +80,7 @@ class SourceMapTests(unittest.TestCase):
     def test_contract_and_serializable_snapshot(self):
         values, channels = read_config(os.path.join(os.path.dirname(__file__), "..", "payload/config/mixer.conf"))
         contract = source_contract_for(values)
-        self.assertEqual(contract["contract_version"], "1.1.0")
+        self.assertEqual(contract["contract_version"], "1.2.0")
         self.assertEqual({item["mode"] for item in contract["sources"]}, {"mono"})
         self.assertIn("source0Pan", {control["key"] for control in contract["sources"][0]["controls"]})
         snapshot = source_map_snapshot(values)
@@ -137,12 +137,21 @@ class SourceMapTests(unittest.TestCase):
         listen = reserve.getsockname()[1]
         reserve.close()
         probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        probe.settimeout(1)
+        probe.settimeout(0.2)
         process = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "mixerctl.py"), "serve", config, "--listen", str(listen), "--no-node"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
-            time.sleep(0.1)
-            probe.sendto(packet("/mixer/set", ",sf", ["source0Trim", 0.5]), ("127.0.0.1", listen))
-            self.assertEqual(parse_packet(probe.recv(65535))[0], "/mixer/ok")
+            set_packet = packet("/mixer/set", ",sf", ["source0Trim", 0.5])
+            deadline = time.monotonic() + 5
+            while True:
+                probe.sendto(set_packet, ("127.0.0.1", listen))
+                try:
+                    response = parse_packet(probe.recv(65535))
+                    if response[0] == "/mixer/ok":
+                        break
+                except socket.timeout:
+                    if time.monotonic() >= deadline:
+                        raise
+            self.assertEqual(response[0], "/mixer/ok")
             probe.sendto(packet("/mixer/get", ",s", ["source0Trim"]), ("127.0.0.1", listen))
             self.assertAlmostEqual(parse_packet(probe.recv(65535))[2][1], 0.5, places=6)
             probe.sendto(packet("/mixer/get-all", ","), ("127.0.0.1", listen))

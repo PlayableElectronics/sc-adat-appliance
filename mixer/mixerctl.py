@@ -120,6 +120,9 @@ def validate_parameter(key, numeric, values=None):
         if not definition["writable"]:
             raise ValueError(f"{key} is read-only")
         value_type = definition["value_type"]
+        if definition.get("range", {}).get("values") == [1]:
+            if finite(numeric, key) != 1: raise ValueError(f"{key} accepts only the explicit trigger value 1")
+            return 1
         if value_type == "boolean":
             return strict_bool(numeric, key)
         if value_type == "enum":
@@ -267,6 +270,8 @@ def read_config(path):
     values["_sources"] = sources
     return values, channels_out
 def _contract_default(definition, index, values, channels):
+    if "default" in definition:
+        return definition["default"]
     template = definition["key_template"]
     if definition["scope"] == "channel":
         row = channels[index]
@@ -303,7 +308,7 @@ def controls(values, channels):
     for definition in control_definitions():
         if definition["scope"] == "master":
             result.append((definition["key_template"], _contract_default(definition, 0, values, channels)))
-        elif definition["scope"] == "status":
+        elif definition["scope"] in ("status", "recorder", "recorder_status", "generator"):
             result.append((definition["key_template"], _contract_default(definition, 0, values, channels)))
     for g,name in enumerate(GROUPS):
         limits=group_limits(values, name)
@@ -563,7 +568,7 @@ def state_chunk_packets(state, snapshot, entries_per_chunk=BULK_STATE_ENTRIES):
     return chunks, completion, legacy_completion
 def db(value): return -120.0 if value <= 1e-9 else 20.0 * math.log10(min(1.0, max(1e-9, value)))
 ROUTER_NODE=3900; GROUP_NODE_BASE=4000; MASTER_NODE=4100
-NODE_ROUTING=1000; NODE_SPATIAL=1001; NODE_MASTER=1002
+NODE_ROUTING=1000; NODE_SPATIAL=1001; NODE_MASTER=1002; TEST_GENERATOR_NODE=4200
 def send_snew(sock, port, name, node, target, controls_list, action=0):
     vals=[name, node, action, target]; types=",siii"
     for name,value in controls_list:
@@ -585,6 +590,20 @@ def start_graph(sock, port, values, channels):
             if parse_packet(sock.recv(65535))[0] == "/synced": break
         except (socket.timeout, ValueError, IndexError): pass
     else: raise RuntimeError("scsynth synchronization failed before graph creation")
+    group_synthdef="sc_adat_stereo_group" if values.get("_mode","stereo")=="stereo" else "sc_adat_group"
+    if group_synthdef=="sc_adat_stereo_group":
+        definitions=[("SC_ADAT_STEREO_GROUP_DEF",group_synthdef),("SC_ADAT_TEST_GENERATOR_DEF","sc_adat_test_generator")]
+        for env_name,name in definitions:
+            definition_path=os.environ.get(env_name,f"/payload-out/synthdefs/{name}.scsyndef")
+            if not os.path.isfile(definition_path): raise RuntimeError(f"missing stereo mixer SynthDef: {definition_path}")
+            send(sock,port,packet("/d_load",",s",[definition_path]))
+        send(sock,port,packet("/sync",",i",[4]))
+        deadline=time.time()+2.0
+        while time.time()<deadline:
+            try:
+                if parse_packet(sock.recv(65535))[0]=="/synced": break
+            except (socket.timeout,ValueError,IndexError): pass
+        else: raise RuntimeError("scsynth did not load the stereo processing SynthDef")
     for _ in range(20):
         send(sock, port, packet("/notify", ",i", [1]));
         for node in tuple(ROUTER_NODE + i for i in range(16)) + (MASTER_NODE, NODE_ROUTING, NODE_SPATIAL, NODE_MASTER):
@@ -601,7 +620,7 @@ def start_graph(sock, port, values, channels):
         # Add siblings at the tail so the queried tree is 4000..4007.  Their
         # order is not relied on for signal flow, but it is part of the
         # deterministic ownership contract and makes diagnostics unambiguous.
-        for g in range(8): send_snew(sock, port, "sc_adat_group", GROUP_NODE_BASE + g, NODE_SPATIAL, group_controls(values, g), action=1)
+        for g in range(8): send_snew(sock, port, group_synthdef, GROUP_NODE_BASE + g, NODE_SPATIAL, group_controls(values, g), action=1)
         master_name = "sc_adat_quad_master" if values.get("_mode", "stereo") == "quad" else "sc_adat_stereo_master"
         master_node = MASTER_NODE
         send_snew(sock, port, master_name, master_node, NODE_MASTER, master_controls(values))
@@ -635,9 +654,14 @@ def router_controls(values, channels):
 def group_controls(values, g):
     name=GROUPS[g]; limits=group_limits(values, name)
     y = 1.0 if values.get("_mode", "stereo") == "stereo" else float(values.get(f"group.{name}.pos_y", limits[7])) * 2 - 1
-    return [("groupIndex",g),("inbus",BUS_GROUP_STEMS+g*2),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",y),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
+    result=[("groupIndex",g),("inbus",BUS_GROUP_STEMS+g*2),("outbus",BUS_QUAD_GROUPS+g*4),("gain",dbamp(values[f"group.{name}.level_db"])),("mute",0),("x",float(values.get(f"group.{name}.pos_x",limits[6]))*2-1),("y",y),("width",float(values.get(f"group.{name}.width",limits[8]))),("spatialBypass",int(values.get(f"group.{name}.spatial_bypass",0))), ("xMin",limits[0]*2-1),("xMax",limits[1]*2-1),("yMin",limits[2]*2-1),("yMax",limits[3]*2-1),("widthMin",limits[4]),("widthMax",limits[5]),("neutralX",limits[6]*2-1),("neutralY",limits[7]*2-1),("neutralWidth",limits[8]),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
+    if values.get("_mode", "stereo") == "stereo":
+        result.extend([("eqBypass",1),("eqLowDb",0),("eqLowHz",100),("eqLowMidDb",0),("eqLowMidHz",400),("eqHighMidDb",0),("eqHighMidHz",2500),("eqHighDb",0),("eqHighHz",8000),("compBypass",1),("compThresholdDb",-18),("compRatio",2),("compAttack",0.01),("compRelease",0.15),("satBypass",1),("satDrive",1),("duckAmountDb",0),("duckThreshold",0.1),("duckAttack",0.01),("duckRelease",0.2)])
+    return result
 def master_controls(values):
     result=[("master",dbamp(values["master.level_db"])),("smoothing",float(values.get("quad.smoothing_ms",30))/1000.0)]
+    if values.get("_mode", "stereo") == "stereo":
+        result[1:1]=[("panicMute",0),("masterEqBypass",1),("masterEqDb",0)]
     return result
 def node_update(key, value, mode="stereo", values=None):
     if key.startswith("source"):
@@ -656,15 +680,22 @@ def node_update(key, value, mode="stereo", values=None):
             if physical in source.inputs:
                 suffix = {"trim": "Trim", "mute": "Mute", "polarity": "PolarityL", "hpfHz": "HPFHz", "hpf": "HPF"}[field]
                 return ROUTER_NODE + index, f"source{suffix}", value
-    if key.startswith("group") and key[5:6].isdigit():
-        g=int(key[5:key.index("Pos") if "Pos" in key else key.index("Width") if "Width" in key else key.index("Spatial")])
+    import re
+    group_match = re.fullmatch(r"group(\d+)(.*)", key)
+    if group_match:
+        g=int(group_match.group(1)); suffix_name=group_match.group(2)
         node=GROUP_NODE_BASE+g
-        suffix="x" if key.endswith("PosX") else "y" if key.endswith("PosY") else "width" if key.endswith("Width") else "spatialBypass" if key.endswith("SpatialBypass") else "gain" if key.startswith("groupLevel") else None
+        suffix={"PosX":"x","PosY":"y","Width":"width","SpatialBypass":"spatialBypass","Mute":"mute","EqBypass":"eqBypass","EqLowDb":"eqLowDb","EqLowHz":"eqLowHz","EqLowMidDb":"eqLowMidDb","EqLowMidHz":"eqLowMidHz","EqHighMidDb":"eqHighMidDb","EqHighMidHz":"eqHighMidHz","EqHighDb":"eqHighDb","EqHighHz":"eqHighHz","CompBypass":"compBypass","CompThresholdDb":"compThresholdDb","CompRatio":"compRatio","CompAttack":"compAttack","CompRelease":"compRelease","SatBypass":"satBypass","SatDrive":"satDrive","DuckAmountDb":"duckAmountDb","DuckThreshold":"duckThreshold","DuckAttack":"duckAttack","DuckRelease":"duckRelease"}.get(suffix_name)
+        if key.startswith("groupLevel"): suffix="gain"
         if suffix == "y" and mode == "stereo": return None
         if suffix: return node,suffix,(value*2-1 if suffix in ("x","y") else value)
     if key.startswith("groupLevel"):
         return GROUP_NODE_BASE+int(key[len("groupLevel"):]),"gain",value
     if key == "master":
+        return MASTER_NODE,key,value
+    if key == "masterPanicMute":
+        return MASTER_NODE,"panicMute",value
+    if key in ("masterEqBypass","masterEqDb"):
         return MASTER_NODE,key,value
     return ROUTER_NODE,key,value
 def apply(config, port=57110, mode=None):
@@ -679,6 +710,24 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
         if mode not in ("stereo", "quad"): raise ValueError("mode must be stereo or quad")
         values["_mode"]=mode
     sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", listen)); initial=controls(values, channels); state=dict(initial); meter_values=[0.0] * METER_WIDTH; snapshot_id=0
+    from recorder_manager import RecorderManager
+    recording_config={}
+    try:
+        with open(os.environ.get("SC_ADAT_RECORDING_CONFIG", "/etc/sc-adat/recording.conf"), encoding="utf-8") as stream:
+            for line in stream:
+                line=line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key,value=line.split("=",1); recording_config[key.strip()]=value.strip()
+    except OSError:
+        pass
+    recorder=RecorderManager(recording_config,values["_sources"],channels,
+                             executable=recording_config.get("recorder.executable","/usr/bin/sc-adat-recorder"),
+                             mixer_snapshot={"settings":{key:value for key,value in values.items() if not key.startswith("_")},
+                                             "channels":channels,
+                                             "source_map":[source.snapshot() for source in values["_sources"]]})
+    state["recorderState"]=recorder.state
+    sock.settimeout(0.25); test_generator_deadline=None; test_generator_arm_deadline=None
+    def refresh_recorder_state(): state.update(recorder.control_state())
     if start: start_graph(sock, sc_port, values, channels)
     def shutdown(_signum, _frame):
         try:
@@ -689,7 +738,15 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
     signal.signal(signal.SIGTERM, shutdown); signal.signal(signal.SIGINT, shutdown)
     meters=0
     while True:
-        data, address=sock.recvfrom(65535); path, types, vals=parse_packet(data)
+        try: data, address=sock.recvfrom(65535)
+        except socket.timeout:
+            refresh_recorder_state()
+            if test_generator_deadline is not None and time.monotonic() >= test_generator_deadline:
+                state["testGeneratorEnable"]=0; test_generator_deadline=None
+            if test_generator_arm_deadline is not None and time.monotonic() >= test_generator_arm_deadline:
+                state["testGeneratorArm"]=0; test_generator_arm_deadline=None
+            continue
+        path, types, vals=parse_packet(data)
         if path == "/mixer/meter":
             numeric=[float(x) for x in vals if isinstance(x, (int, float)) and math.isfinite(float(x))]
             if len(numeric) >= METER_WIDTH: meter_values=numeric[-METER_WIDTH:]
@@ -708,6 +765,9 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             key, value=vals[:2]; allowed={name for name,_ in controls(values, channels)}
             if key not in allowed:
                 send_to(sock, destination, packet("/mixer/error", ",s", ["invalid parameter"])); continue
+            definition,_=control_for_key(key)
+            if definition is not None and values.get("_mode","stereo") not in definition.get("modes",("stereo","quad")):
+                send_to(sock,destination,packet("/mixer/error",",s",[f"{key} is unavailable in {values.get('_mode','stereo')} mode"])); continue
             legacy_error = legacy_stereo_write_error(key, values)
             if legacy_error is not None:
                 send_to(sock, destination, packet("/mixer/error", ",s", [legacy_error]))
@@ -718,6 +778,19 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             try: numeric=validate_parameter(key, numeric, values)
             except ValueError as exc:
                 send_to(sock, destination, packet("/mixer/error", ",s", [str(exc)])); continue
+            if key in ("recordStart", "recordStop"):
+                if numeric == 0:
+                    send_to(sock,destination,packet("/mixer/ok",",s",[key])); continue
+                try:
+                    if key == "recordStart":
+                        session=recorder.start(); state["recorderSession"]=session.name
+                    else:
+                        recorder.stop()
+                    state["recorderState"]=recorder.status()
+                except (OSError, RuntimeError, ValueError) as exc:
+                    state["recorderState"]=recorder.state
+                    send_to(sock,destination,packet("/mixer/error",",s",[str(exc)])); continue
+                send_to(sock,destination,packet("/mixer/ok",",s",[key])); continue
             import re
             mapping_match = re.fullmatch(r"input(\d+)(Group|Partner)", key)
             if mapping_match:
@@ -735,7 +808,27 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
                 send_to(sock, destination, packet("/mixer/ok", ",s", [key]))
                 continue
             state[key]=numeric
-            if key == "quadSmoothingMs":
+            if key == "testGeneratorArm":
+                test_generator_arm_deadline=time.monotonic()+10 if numeric else None
+            elif key == "testGeneratorEnable":
+                if numeric:
+                    if test_generator_arm_deadline is None or time.monotonic() >= test_generator_arm_deadline:
+                        state[key]=0
+                        send_to(sock,destination,packet("/mixer/error",",s",["test generator requires a fresh explicit arm"])); continue
+                    test_generator_arm_deadline=None; state["testGeneratorArm"]=0
+                    test_generator_deadline=time.monotonic()+30
+                    send_snew(sock,sc_port,"sc_adat_test_generator",TEST_GENERATOR_NODE,NODE_ROUTING,
+                              [("kind",state.get("testGeneratorType",0)),("destination",state.get("testGeneratorDestination",0)),
+                               ("level",10**(float(state.get("testGeneratorLevelDb",-40))/20)),("timeout",30)],action=1)
+                else:
+                    test_generator_deadline=None
+                    send(sock,sc_port,packet("/n_free",",i",[TEST_GENERATOR_NODE]))
+            elif key in ("testGeneratorType","testGeneratorDestination","testGeneratorLevelDb"):
+                if state.get("testGeneratorEnable",0):
+                    sc_key={"testGeneratorType":"kind","testGeneratorDestination":"destination","testGeneratorLevelDb":"level"}[key]
+                    sc_value=10**(numeric/20) if key=="testGeneratorLevelDb" else numeric
+                    send(sock,sc_port,packet("/n_set",",isf",[TEST_GENERATOR_NODE,sc_key,sc_value]))
+            elif key == "quadSmoothingMs":
                 apply_smoothing(sock, sc_port, values, numeric / 1000.0)
             else:
                 update=node_update(key, numeric, values.get("_mode", "stereo"), values)
@@ -752,7 +845,7 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
             destination, port_error=request_destination(address, vals, 1, 2)
             if port_error is not None:
                 send_to(sock, address, packet("/mixer/error", ",s", [port_error])); continue
-            key=str(vals[0]) if vals else "master"
+            refresh_recorder_state(); key=str(vals[0]) if vals else "master"
             if key not in state: send_to(sock, destination, packet("/mixer/error", ",s", ["invalid parameter"]))
             else:
                 value=state[key]
@@ -760,6 +853,7 @@ def serve(config, listen=57120, sc_port=57110, start=True, mode=None):
         elif path == "/mixer/get":
             send_to(sock, address, packet("/mixer/error", ",s", ["expected /mixer/get ,s key [reply_port]"]))
         elif path == "/mixer/get-all" and types == ",":
+            refresh_recorder_state()
             snapshot_id += 1
             chunks, completion, legacy_completion = state_chunk_packets(state, snapshot_id)
             for chunk in chunks: send_to(sock, address, chunk)

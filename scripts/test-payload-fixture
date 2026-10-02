@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); t=$(mktemp -d); trap 'rm -rf "$t"' EXIT
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); PATH="$ROOT/scripts/test-support:$PATH"; export PATH; t=$(mktemp -d); trap 'chmod -R u+w "$t" 2>/dev/null || true; rm -rf "$t"' EXIT
 o="$t/out"; d="$t/data"; factory="$t/factory"; mkdir -p "$o/synthdefs" "$o/config" "$o/scripts" "$d/releases"
 printf 'SCgf sc_adat_tone24 changed synthdef\n' >"$o/synthdefs/sc_adat_tone24.scsyndef"; printf 'SCgf sc_adat_scan\n' >"$o/synthdefs/sc_adat_scan.scsyndef"; printf '1\n' >"$o/VERSION"; printf '{"protocol_version":1,"synthdefs":["sc_adat_tone24","sc_adat_scan"]}\n' >"$o/metadata.json"; printf 'protocol_version=1\n' >"$o/config/payload.conf"; printf '#!/bin/sh\n' >"$o/scripts/payload-consumer"; chmod 755 "$o/scripts/payload-consumer"; (cd "$o" && find synthdefs config scripts -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum VERSION metadata.json) >"$o/manifest.sha256"; touch "$o/.tests-passed"
 SC_ADAT_PAYLOAD_OUT="$o" "$ROOT/scripts/payload-promote" promote --data-root "$d"; test "$(cat "$d/current/VERSION")" = 1

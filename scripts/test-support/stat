@@ -1,0 +1,12 @@
+#!/bin/sh
+# Translate the GNU stat formats used by target-side scripts for macOS tests.
+if test "$1" = "-c" && test "$#" -eq 3; then
+  case "$2" in
+    %a) format=%Lp ;;
+    %u) format=%u ;;
+    %u:%a) format=%u:%Lp ;;
+    *) exec /usr/bin/stat "$@" ;;
+  esac
+  exec /usr/bin/stat -f "$format" "$3"
+fi
+exec /usr/bin/stat "$@"

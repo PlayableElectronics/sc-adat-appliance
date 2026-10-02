@@ -1,0 +1,6 @@
+config BR2_PACKAGE_SC_ADAT_RECORDER
+	bool "sc-adat independent JACK recorder"
+	depends on BR2_PACKAGE_JACK2 && BR2_PACKAGE_LIBSNDFILE && BR2_PACKAGE_PYTHON3 && BR2_PACKAGE_ALSA_UTILS && BR2_PACKAGE_UTIL_LINUX
+	help
+	  Independent JACK capture client plus mixer control-plane recorder manager,
+	  status policy, config and shared OSC controller modules.

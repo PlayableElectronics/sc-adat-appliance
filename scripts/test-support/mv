@@ -1,0 +1,15 @@
+#!/bin/sh
+# macOS sandboxed filesystems may require the source directory itself to be
+# writable for rename. Keep promoted fixtures immutable after the rename.
+if test "$#" -eq 3 && test "$1" = "-Tf"; then
+  test ! -e "$3" && test ! -L "$3" || rm -f "$3"
+  /bin/mv -f "$2" "$3"
+  exit $?
+fi
+if test "$#" -eq 2 && test -d "$1" && test ! -w "$1" && test ! -e "$2"; then
+  chmod u+w "$1" || exit
+  /bin/mv "$1" "$2" || exit
+  chmod u-w "$2"
+  exit $?
+fi
+exec /bin/mv "$@"

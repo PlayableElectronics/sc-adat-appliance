@@ -142,7 +142,7 @@ class ConsoleTests(unittest.TestCase):
         self.mock.drop_first_chunks = {1}
         self.model.start()
         self.assertEqual(self.mock.request_count, 2)
-        self.assertEqual(self.model.state["controlContractVersion"], "1.1.0")
+        self.assertEqual(self.model.state["controlContractVersion"], "1.2.0")
 
     def test_bulk_state_dropped_completion_fails_after_bounded_retries(self):
         self.mock.drop_done = True
@@ -268,7 +268,8 @@ class ConsoleUiTests(unittest.TestCase):
 
     def test_tab_changes_page_only_and_focus_moves_to_inspector(self):
         self.assertEqual(CHANNEL_FIELDS, ("trim", "mute", "polarity", "hpf", "hpfHz"))
-        self.assertEqual(GROUP_FIELDS, ("level", "x", "width", "bypass"))
+        self.assertEqual(len(GROUP_FIELDS), 25)
+        self.assertTrue({"level", "x", "width", "bypass", "eqbypass", "compbypass", "satbypass", "duckamountdb"}.issubset(GROUP_FIELDS))
         _next_page(self.model)
         self.assertEqual(self.model.page, 2)
         self.assertEqual(self.model.focus, "items")

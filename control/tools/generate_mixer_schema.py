@@ -55,7 +55,10 @@ def build_schema(config_path=CONFIG_PATH):
         exported_controls.append(resolved_control(definition, key, label, state[key]))
         page["controls"].append(key)
 
-    add(pages[0], definitions["master"], "master", "Master level")
+    for definition in CONTRACT["controls"]:
+        if definition["scope"] == "master":
+            key=definition["key_template"]
+            add(pages[0], definition, key, definition["label"])
 
     groups = []
     for index, name in enumerate(GROUPS):
@@ -65,8 +68,24 @@ def build_schema(config_path=CONFIG_PATH):
                                   "y": [limits[2], limits[3]],
                                   "width": [limits[4], limits[5]]}})
         page = {"id": f"group.{name}", "label": name.upper(), "controls": []}
-        add(page, definitions["groupLevelN"], f"groupLevel{index}", "Level")
+        for definition in CONTRACT["controls"]:
+            if definition["scope"] == "group":
+                key=definition["key_template"].replace("N",str(index))
+                resolved=dict(definition)
+                if definition.get("range",{}).get("source","").startswith("group_limits"):
+                    dimension=definition["range"]["source"].rsplit(".",1)[-1]
+                    resolved["range"]={"min":groups[index]["limits"][dimension][0],"max":groups[index]["limits"][dimension][1]}
+                add(page,resolved,key,definition["label"])
         pages.append(page)
+
+    for scope,page_id,label in (("recorder","recording","RECORDING"),("recorder_status","recording","RECORDING"),("generator","diagnostics","PROTECTED TEST GENERATOR")):
+        controls_for_page=[item for item in CONTRACT["controls"] if item["scope"]==scope]
+        if not controls_for_page: continue
+        page=next((item for item in pages if item["id"]==page_id),None)
+        if page is None:
+            page={"id":page_id,"label":label,"controls":[]}; pages.append(page)
+        for definition in controls_for_page:
+            add(page,definition,definition["key_template"],definition["label"])
 
     sources = []
     for index, source in enumerate(values["_sources"]):

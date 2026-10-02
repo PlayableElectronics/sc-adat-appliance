@@ -47,7 +47,9 @@ class MixerSchemaTest(unittest.TestCase):
         self.assertNotIn("source0Pan", keys)
         self.assertIn("source0Balance", keys)
         self.assertIn("source0Width", keys)
-        self.assertEqual(len(schema["pages"]), 25)
+        self.assertEqual(len(schema["pages"]), 27)
+        self.assertIn("recordStart", keys)
+        self.assertIn("testGeneratorArm", keys)
         input_pages = [page for page in schema["pages"] if page["label"].startswith("INPUT ")]
         self.assertEqual(len(input_pages), 16)
         self.assertEqual(input_pages[0]["source_inputs"], [1, 2])

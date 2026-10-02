@@ -40,6 +40,16 @@ static char session[1024];
 static unsigned segment_seconds = 900, sample_rate = SUPPORTED_RATE;
 static uint64_t reserve_bytes = DEFAULT_RESERVE_BYTES, segment_frame_limit;
 static dev_t session_device;
+typedef int (*free_space_probe_t)(const char *, uint64_t *);
+
+static int filesystem_free_bytes(const char *path, uint64_t *free_bytes) {
+    struct statvfs fs;
+    if (statvfs(path, &fs)) return -1;
+    *free_bytes = (uint64_t)fs.f_bavail * fs.f_frsize;
+    return 0;
+}
+
+static free_space_probe_t free_space_probe = filesystem_free_bytes;
 
 static int session_volume_present(void) {
     struct stat status;
@@ -188,8 +198,15 @@ static int segment_write(Segment *segment, const float *frames, size_t count) {
 }
 
 static int promote_next_segment(void) {
-    if (!next_segment.open) return 0;
     if (!session_volume_present()) { (void)set_stop_reason(4); return -1; }
+    uint64_t free_bytes;
+    uint64_t next_bytes = segment_frame_limit * INPUTS * 3;
+    if (free_space_probe(session, &free_bytes)) { (void)set_stop_reason(4); return -1; }
+    if (free_bytes < reserve_bytes || free_bytes - reserve_bytes < next_bytes) {
+        (void)set_stop_reason(2);
+        return 0;
+    }
+    if (!next_segment.open) return 0;
     if (retired_segment.open && segment_finish(&retired_segment, 1)) return -1;
     char final_path[1200], unused[1200];
     segment_paths(next_segment.index, final_path, sizeof final_path, unused, sizeof unused, 0);

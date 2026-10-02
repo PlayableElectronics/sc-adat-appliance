@@ -1,6 +1,11 @@
 #define SC_ADAT_RECORDER_NO_MAIN
 #include "../../package/sc-adat-recorder/sc-adat-recorder.c"
 
+static uint64_t fixture_free_bytes;
+static int fixture_free_space(const char *path, uint64_t *free_bytes) {
+    (void)path; *free_bytes = fixture_free_bytes; return 0;
+}
+
 int main(int argc, char **argv) {
     if (argc != 3) return 2;
     for (int i = 0; i < INPUTS; ++i) {
@@ -71,5 +76,46 @@ int main(int argc, char **argv) {
     if (sf_close(current_segment.files[0]) != SF_ERR_NO_ERROR) return 20;
     current_segment.files[0] = NULL;
     if (segment_finish(&current_segment, 1) == 0 || atomic_load(&dropped_frames) != 0 || recorder_exit_status() == 0) return 21;
+    (void)writer_finish(0);
+
+    char below_root[1200], exact_root[1200];
+    snprintf(below_root, sizeof below_root, "%s/boundary-below", argv[2]);
+    snprintf(exact_root, sizeof exact_root, "%s/boundary-exact", argv[2]);
+    if (mkdir(below_root, 0750) || mkdir(exact_root, 0750)) return 22;
+    free_space_probe = fixture_free_space; reserve_bytes = 100;
+
+    strcpy(session, below_root); if (stat(session, &failure_stat)) return 23;
+    session_device = failure_stat.st_dev; atomic_store(&io_failure, 0); atomic_store(&dropped_frames, 0); atomic_store(&stop_reason, 0);
+    if (writer_begin(session, SUPPORTED_RATE, 10, 1) < 0 || !next_segment.open) return 24;
+    snprintf(occupied, sizeof occupied, "%s/.segment-001.next", session);
+    if (stat(occupied, &failure_stat)) return 25;
+    float ten_frames[10 * INPUTS] = {0}; size_t ten_consumed = 0;
+    if (writer_append(ten_frames, 10, &ten_consumed, 1) != 0 || ten_consumed != 10) return 26;
+    fixture_free_bytes = reserve_bytes + segment_frame_limit * INPUTS * 3 - 1;
+    size_t boundary_consumed = 0;
+    if (writer_append(one_frame, 1, &boundary_consumed, 1) != 1 || boundary_consumed != 0 || atomic_load(&stop_reason) != 2) return 27;
+    if (writer_finish(1)) return 28;
+    snprintf(occupied, sizeof occupied, "%s/segment-000/segment.json", session);
+    if (stat(occupied, &failure_stat)) return 28;
+    snprintf(occupied, sizeof occupied, "%s/segment-001", session);
+    if (stat(occupied, &failure_stat) == 0) return 29;
+    printf("boundary below: free=%llu required=%llu current finalized, next not promoted, frames=0, STOPPED_FULL\n",
+           (unsigned long long)fixture_free_bytes,
+           (unsigned long long)(reserve_bytes + segment_frame_limit * INPUTS * 3));
+
+    strcpy(session, exact_root); if (stat(session, &failure_stat)) return 30;
+    session_device = failure_stat.st_dev; atomic_store(&io_failure, 0); atomic_store(&dropped_frames, 0); atomic_store(&stop_reason, 0);
+    if (writer_begin(session, SUPPORTED_RATE, 10, 1) < 0 || !next_segment.open) return 31;
+    if (writer_append(ten_frames, 10, &ten_consumed, 1) != 0 || ten_consumed != 10) return 32;
+    fixture_free_bytes = reserve_bytes + segment_frame_limit * INPUTS * 3;
+    boundary_consumed = 0;
+    if (writer_append(one_frame, 1, &boundary_consumed, 1) != 0 || boundary_consumed != 1) return 33;
+    if (writer_finish(1)) return 34;
+    snprintf(occupied, sizeof occupied, "%s/segment-001/segment.json", session);
+    if (stat(occupied, &failure_stat)) return 35;
+    printf("boundary exact: free=%llu required=%llu next promoted, frames=1\n",
+           (unsigned long long)fixture_free_bytes,
+           (unsigned long long)(reserve_bytes + segment_frame_limit * INPUTS * 3));
+    free_space_probe = filesystem_free_bytes;
     return 0;
 }

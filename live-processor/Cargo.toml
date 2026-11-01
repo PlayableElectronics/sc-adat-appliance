@@ -1,0 +1,23 @@
+[package]
+name = "adat-live-processor"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Deterministic role-aware live summing processor"
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+cpal = "0.15"
+hound = "3.5"
+rtrb = "0.3"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+[dev-dependencies]
+tempfile = "3"
+
+[[bin]]
+name = "adat-live-processor"
+path = "src/main.rs"

@@ -1,0 +1,35 @@
+version = 1
+sample_rate = 48000
+input_channels = [1, 2, 3, 4, 5, 6, 7, 8]
+output_channels = [1, 2]
+role_trims = [1.0, 1.0, 1.0, 1.0, 1.0]
+master_trim = 1.0
+buffer_frames = 128
+
+# Provisional placeholders only. Establish real windows from Yamaha AW2816
+# rehearsal recordings before assigning LOW / GOOD / HOT operating bands.
+[[meter_targets]]
+role = "kick"
+low_dbfs = -30.0
+good_dbfs = -18.0
+hot_dbfs = -6.0
+[[meter_targets]]
+role = "bass"
+low_dbfs = -30.0
+good_dbfs = -18.0
+hot_dbfs = -6.0
+[[meter_targets]]
+role = "drums"
+low_dbfs = -30.0
+good_dbfs = -18.0
+hot_dbfs = -6.0
+[[meter_targets]]
+role = "synths_music"
+low_dbfs = -30.0
+good_dbfs = -18.0
+hot_dbfs = -6.0
+[[meter_targets]]
+role = "vocal_loops_fx"
+low_dbfs = -30.0
+good_dbfs = -18.0
+hot_dbfs = -6.0

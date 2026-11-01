@@ -55,6 +55,7 @@ one-shot GRUB entry after its gates pass.
 - `package/supercollider-headless/` — Buildroot package integration
 - `configs/` — reproducible Buildroot defconfigs
 - `supercollider/` — startup code, SynthDefs, tests, and examples
+- `live-processor/` — separate native Rust 8-in/2-out role-aware live processor
 - `scripts/` — build, deployment, hardware, audio, and latency tooling
 - `docs/` — architecture, storage, routing, deployment, and measurements
 - `lab` — canonical human/agent command dispatcher

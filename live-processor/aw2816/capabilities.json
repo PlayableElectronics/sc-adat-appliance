@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": 1,
+  "device": "Yamaha AW2816",
+  "manual": {
+    "title": "AW2816 Owner's Manual",
+    "edition": "English E1",
+    "source": "https://usa.yamaha.com/files/download/other_assets/6/318576/AW2816E1.pdf",
+    "protocol_page_range": "Appendix pp. 403-412"
+  },
+  "status_vocabulary": [
+    "documented_implemented",
+    "documented_not_implemented",
+    "inferred_requires_hardware_confirmation",
+    "unknown",
+    "documented_conflict"
+  ],
+  "capabilities": [
+    {
+      "name": "program_change_scenes",
+      "status": "documented_implemented",
+      "implementation": "Program Change channel message parser/serializer and scene memory Bulk Dump/Request envelope; program-to-scene assignment table payload remains opaque.",
+      "manual_references": ["Appendix p. 403 table 3.1 and section 2.2", "Appendix pp. 404-405 sections 4.3 and 4.4", "Appendix pp. 406-407 sections 4.13.2.1-2"]
+    },
+    {
+      "name": "assignable_control_change",
+      "status": "documented_implemented",
+      "implementation": "Control Change channel messages and C assign-table Bulk Dump/Request envelope; table entries are preserved as opaque bytes.",
+      "manual_references": ["Appendix p. 403 sections 2.3 and 3.1", "Appendix p. 404 section 4.3", "Appendix p. 410 sections 4.13.2.21-22"]
+    },
+    {
+      "name": "parameter_change",
+      "status": "documented_implemented",
+      "implementation": "AW2816 Yamaha digital-mixer envelope, MIDI channel/mode/type, and the known type identifiers 00, 01, 02, 10, 40, 41 and 43. Addresses and value payloads are retained without semantic guesses.",
+      "manual_references": ["Appendix pp. 410-412 sections 4.13.3.1-9"]
+    },
+    {
+      "name": "bulk_dump_and_request",
+      "status": "documented_implemented",
+      "implementation": "LM  8C36 Yamaha universal bulk envelope; known data names M/S/R/Q/Y/E/T/H/A/P/C; selector validation; byte-count and documented two's-complement 7-bit checksum verification. Opaque data is retained.",
+      "manual_references": ["Appendix p. 406 section 4.13.2 and checksum paragraph", "Appendix pp. 406-410 sections 4.13.2.1-22"]
+    },
+    {
+      "name": "midi_remote",
+      "status": "documented_implemented",
+      "implementation": "Remote-memory R request/dump envelope and selectors for banks A-D; payload remains opaque.",
+      "manual_references": ["Appendix p. 406-407 sections 4.13.2.5-6", "Appendix p. 403 section 3.4.2"]
+    },
+    {
+      "name": "mmc",
+      "status": "documented_implemented",
+      "implementation": "Recognizes unambiguous AW2816 MMC commands 01, 02, 03, 04, 05, 06, 07, 40 and 44. The tool does not transmit MMC. Reset commands 0D and 0F are excluded and recorded separately as a manual conflict.",
+      "manual_references": ["Appendix p. 403 section 3.4.1.1", "Appendix pp. 404-406 sections 4.13.1.1-7 and 4.13.1.9-10"]
+    },
+    {
+      "name": "mmc_reset",
+      "status": "documented_conflict",
+      "implementation": "unsupported; parser emits ambiguous_mmc_command for either byte and preserves all raw bytes; no serializer or backup request can emit either command.",
+      "required_confirmation": "hardware observation or authoritative Yamaha specification",
+      "manual_references": ["Appendix p. 403 table 3.4.1.1 lists 0x0F", "Appendix pp. 405-406 section 4.13.1.8 lists 0x0D"]
+    },
+    {
+      "name": "mtc_and_song_position_pointer",
+      "status": "documented_implemented",
+      "implementation": "Parses MIDI Time Code Quarter Frame (F1) and Song Position Pointer (F2); does not generate timing or synchronize audio.",
+      "manual_references": ["Appendix pp. 403-404 sections 3.2, 4.5 and 4.6", "Owner's Manual pp. 188-191, MTC OUT connector"]
+    },
+    {
+      "name": "automix",
+      "status": "documented_implemented",
+      "implementation": "A Automix memory Bulk Dump/Request envelope and documented selector range; Automix event payload remains opaque.",
+      "manual_references": ["Appendix pp. 403, 409 sections 3.4.2 and 4.13.2.17-18"]
+    },
+    {
+      "name": "midi_clock_generation_and_sync",
+      "status": "documented_not_implemented",
+      "implementation": "No MIDI Clock generation, outgoing sync, or audio synchronization is implemented.",
+      "manual_references": ["Appendix p. 403 section 3.3"]
+    },
+    {
+      "name": "unmapped_parameter_addresses_and_payload_fields",
+      "status": "unknown",
+      "implementation": "No parameter addresses or undocumented payload field meanings are assigned. Bytes remain available verbatim in parser output and archives.",
+      "manual_references": ["Appendix pp. 410-412 sections 4.13.3.2-9 define encodings but do not supply a complete semantic map used by this foundation"]
+    },
+    {
+      "name": "host_midi_port_pairing_by_name",
+      "status": "inferred_requires_hardware_confirmation",
+      "implementation": "Backup tries an exact-name paired output port for the selected input; --output-port overrides the pairing. It does not establish physical cable topology.",
+      "manual_references": ["Not an AW2816 protocol fact; validate the adapter's port names during hardware commissioning"]
+    }
+  ]
+}

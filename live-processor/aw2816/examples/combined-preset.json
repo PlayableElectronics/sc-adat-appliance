@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "preset_id": "synthetic-validation-example",
+  "authoritative": {
+    "signature_dsp": {"preset_id": "rust-signature-preset-reference", "schema_version": 1},
+    "yamaha": {"scene_number": 12}
+  },
+  "captured_yamaha": {
+    "archive": "not-yet-captured/events.jsonl",
+    "captured_from_port": "not-yet-connected",
+    "capture_sha256": null
+  },
+  "generated_yamaha_artifact": {
+    "kind": "scene-bulk-artifact-reference-only",
+    "scene_number": 12,
+    "artifact_id": null,
+    "source_preset_id": "synthetic-validation-example"
+  },
+  "hardware_confirmation": {
+    "status": "pending",
+    "confirmed_on": "",
+    "notes": "Synthetic schema fixture only; no AW2816 capture or hardware validation is represented."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:playable-electronics:aw2816-combined-preset:v1",
+  "title": "Rust and Yamaha Combined Preset",
+  "description": "Validation-only boundary. Authoritative Rust state, captured Yamaha state and generated Yamaha artifacts are distinct records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "preset_id", "authoritative", "captured_yamaha", "generated_yamaha_artifact", "hardware_confirmation"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "preset_id": {"type": "string", "minLength": 1},
+    "authoritative": {
+      "type": "object", "additionalProperties": false,
+      "required": ["signature_dsp", "yamaha"],
+      "properties": {
+        "signature_dsp": {"type": "object", "additionalProperties": false, "required": ["preset_id", "schema_version"], "properties": {"preset_id": {"type": "string", "minLength": 1}, "schema_version": {"type": "integer", "minimum": 1}}},
+        "yamaha": {"type": "object", "additionalProperties": false, "required": ["scene_number"], "properties": {"scene_number": {"type": ["integer", "null"], "minimum": 1, "maximum": 96}}}
+      }
+    },
+    "captured_yamaha": {"type": "object", "additionalProperties": false, "required": ["archive", "captured_from_port", "capture_sha256"], "properties": {"archive": {"type": "string", "minLength": 1}, "captured_from_port": {"type": "string", "minLength": 1}, "capture_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}}},
+    "generated_yamaha_artifact": {"type": "object", "additionalProperties": false, "required": ["kind", "scene_number", "artifact_id", "source_preset_id"], "properties": {"kind": {"type": "string", "minLength": 1}, "scene_number": {"type": ["integer", "null"], "minimum": 1, "maximum": 96}, "artifact_id": {"type": ["string", "null"]}, "source_preset_id": {"type": "string", "minLength": 1}}},
+    "hardware_confirmation": {"type": "object", "additionalProperties": false, "required": ["status", "confirmed_on", "notes"], "properties": {"status": {"enum": ["pending", "confirmed", "rejected"]}, "confirmed_on": {"type": "string"}, "notes": {"type": "string"}}}
+  }
+}

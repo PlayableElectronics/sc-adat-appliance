@@ -5,6 +5,11 @@ with an original RME DIGI9652 (Project Hammerfall) PCI interface.
 
 ## Goal
 
+The optional offline-testable Yamaha AW2816 MIDI foundation and `aw2816ctl`
+tool live in [`live-processor/aw2816`](live-processor/aw2816/README.md). This
+package is isolated from the live audio callback and does not change the
+existing SuperCollider control contract.
+
 Use writable Debian as a lean development, diagnostic and recovery host. Docker
 provides reproducible toolchains; its authoritative Buildroot container builds
 the complete SuperCollider appliance OS. GRUB boots that immutable system
